@@ -481,6 +481,10 @@ pub trait DomRenderable {
 }
 
 pub trait BaseExt: DomRenderable {
+    fn module_id(&self) -> ModuleId;
+
+    fn stable_module_id(&self) -> StableModuleId;
+
     fn play(_state: Rc<Self>) {}
 
     /// Get the module assistance which is set for the current activity

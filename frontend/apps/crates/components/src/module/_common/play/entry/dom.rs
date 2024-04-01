@@ -222,7 +222,7 @@ where
                         // This will mark the activity as started in the player, but the activity itself would
                         // only start playing once it's in the Playing phase.
                         if jig_player {
-                            let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(base.get_module_config()));
+                            let msg = IframeAction::new(ModuleToJigPlayerMessage::Start(base.get_module_config(), base.stable_module_id()));
 
                             //let the player know we're starting
                             msg.try_post_message_to_player().unwrap_ji();

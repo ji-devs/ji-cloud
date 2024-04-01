@@ -7,7 +7,7 @@ use shared::domain::{
     },
     module::{
         body::{ModuleAssist, ModuleAssistType},
-        LiteModule, ModuleId,
+        LiteModule, ModuleId, StableModuleId,
     },
 };
 use std::cell::Cell;
@@ -207,7 +207,7 @@ pub enum JigToModulePlayerMessage {
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigPlayerMessage {
     AddPoints(u32),
-    Start(ModuleConfig),
+    Start(ModuleConfig, StableModuleId),
     Previous,
     AddCodeSessionInfo(JigPlaySessionModule),
     Next,

@@ -498,8 +498,12 @@ impl JigPlayer {
                 let mut points = self.points.lock_mut();
                 *points += amount;
             }
-            ModuleToJigPlayerMessage::Start(config) => {
+            ModuleToJigPlayerMessage::Start(config, stable_module_id) => {
                 self.start_player(config);
+                self.session_info
+                    .borrow_mut()
+                    .visited
+                    .insert(stable_module_id);
             }
             ModuleToJigPlayerMessage::ResetTimer(time) => {
                 self.start_timer(time);

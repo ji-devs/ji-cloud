@@ -201,6 +201,14 @@ impl Base {
 }
 
 impl BaseExt for Base {
+    fn module_id(&self) -> ModuleId {
+        self.module_id
+    }
+
+    fn stable_module_id(&self) -> StableModuleId {
+        self.stable_module_id
+    }
+
     fn play(state: Rc<Self>) {
         state.has_started.store(true, Ordering::SeqCst);
         for f in state.start_listeners.borrow_mut().iter_mut() {

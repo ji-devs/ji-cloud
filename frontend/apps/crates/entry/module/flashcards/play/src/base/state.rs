@@ -81,6 +81,14 @@ impl Base {
 }
 
 impl BaseExt for Base {
+    fn module_id(&self) -> ModuleId {
+        self.module_id
+    }
+
+    fn stable_module_id(&self) -> StableModuleId {
+        self.stable_module_id
+    }
+
     fn get_module_assist(&self) -> Option<ModuleAssist> {
         Some(self.instructions.clone())
     }

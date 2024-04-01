@@ -127,6 +127,14 @@ impl Base {
 }
 
 impl BaseExt for Base {
+    fn module_id(&self) -> ModuleId {
+        self.module_id
+    }
+
+    fn stable_module_id(&self) -> StableModuleId {
+        self.stable_module_id
+    }
+
     fn play_phase(&self) -> Mutable<ModulePlayPhase> {
         self.module_phase.clone()
     }
