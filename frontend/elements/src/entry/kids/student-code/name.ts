@@ -45,6 +45,8 @@ export class _ extends LitElement {
                     text-align: center;
                 }
                 ::slotted(input) {
+                    width: 100%;
+                    box-sizing: border-box;
                     border-radius: 14px;
                     border: solid 1px var(--main-blue);
                     background-color: var(--white);

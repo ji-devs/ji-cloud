@@ -21,9 +21,15 @@ export class _ extends LitElement {
                 }
                 .inputs {
                     display: grid;
-                    grid-template-columns: repeat(6, 80px);
-                    column-gap: 40px;
                     justify-content: center;
+                    grid-template-columns: repeat(6, 50px);
+                    column-gap: 6px;
+                }
+                @media (min-width: 1024px) {
+                    .inputs {
+                        grid-template-columns: repeat(6, 80px);
+                        column-gap: 40px;
+                    }
                 }
                 .inputs input {
                     font-size: 40px;
@@ -33,7 +39,12 @@ export class _ extends LitElement {
                     text-align: center;
                     color: var(--light-blue-5);
                     box-sizing: border-box;
-                    height: 80px;
+                    height: 50px;
+                }
+                @media (min-width: 1024px) {
+                    .inputs input {
+                        height: 80px;
+                    }
                 }
                 .inputs input:focus {
                     outline: 0;
@@ -71,6 +82,7 @@ export class _ extends LitElement {
                     display: flex;
                     align-items: center;
                     justify-content: space-evenly;
+                    background-color: var(--green-3);
                 }
                 .backspace:hover,
                 .backspace:active {
@@ -87,12 +99,14 @@ export class _ extends LitElement {
                     border-bottom: solid 3px var(--main-blue);
                     border-radius: 5px 0 5px 8px;
                     position: absolute;
+                    background-color: var(--green-3);
                 }
                 .backspace:hover::before,
                 .backspace:active::before {
                     border-color: var(--dark-blue-2);
                 }
                 .backspace .icon {
+                    z-index: 1;
                     font-size: 30px;
                 }
             `,
