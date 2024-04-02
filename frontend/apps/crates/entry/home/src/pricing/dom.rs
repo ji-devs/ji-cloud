@@ -98,7 +98,7 @@ impl Pricing {
         let screen_size = Mutable::new(get_current_screen_size());
         vec![
             html!("pricing-toggle", {
-                .prop("annual_label", "Get 2 months FREE!")
+                .prop("annual_label", "Extra Saving")
                 .prop_signal("value", state.billing_interval.signal().map(|f| -> &str {(&f).into()}))
                 .event(clone!(state => move |e: events::CustomString| {
                     let value: &str = &e.value();
@@ -214,12 +214,7 @@ impl Pricing {
 
         vec![
             html!("pricing-toggle", {
-                .prop_signal("annual_label", selected_index.signal().map(|selected_index| {
-                    match selected_index {
-                        SchoolPlan::Level1 => "Get 1 month FREE!",
-                        _ => "Get 2 months FREE!"
-                    }
-                }))
+                .prop("annual_label", "Extra Saving")
                 .prop_signal("value", state.billing_interval.signal().map(|f| -> &str {(&f).into()}))
                 .event(clone!(state => move |e: events::CustomString| {
                     let value: &str = &e.value();

@@ -115,7 +115,7 @@ impl SettingsPage {
                                 .prop("color", "blue")
                                 .text(match plan_type {
                                     Some(PlanType::SchoolLevel1Monthly) => "Get 1 month FREE by switching to annual billing",
-                                    _ => "Get 2 months FREE by switching to annual billing"
+                                    _ => "Get extra saving by switching to annual billing"
                                 })
                                 .event(clone!(state, plan_info => move|_ :events::Click| {
                                     spawn_local(clone!(state, plan_info => async move {
