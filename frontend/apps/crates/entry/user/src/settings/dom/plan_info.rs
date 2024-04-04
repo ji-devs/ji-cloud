@@ -107,6 +107,10 @@ impl SettingsPage {
             html!("div", {
                 .prop("slot", "change-to-annual")
                 .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
+                    if !plan_info.status.is_active() {
+                        return None;
+                    }
+
                     let frequency = plan_type?.billing_interval();
                     match frequency {
                         BillingInterval::Monthly => {
@@ -141,6 +145,10 @@ impl SettingsPage {
                     }
                 })))
                 .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
+                    if !plan_info.status.is_active() {
+                        return None;
+                    }
+
                     let plan_type: PlanType = plan_type?;
                     let subscription_tier = plan_type.subscription_tier();
                     if plan_type.is_individual_plan() {
