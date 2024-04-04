@@ -326,10 +326,11 @@ pub async fn jigs_with_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
                         created_at as "created_at: DateTime<Utc>",
                         expires_at as "expires_at: DateTime<Utc>"
                     from jig_code
-                    where jig_id = $1
+                    where jig_id = $1 and creator_id = $2
                     order by created_at desc
                 "#,
-                row.jig_id.0
+                row.jig_id.0,
+                user_id.0,
             )
             .fetch_all(db)
             .await?
