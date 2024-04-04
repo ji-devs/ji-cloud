@@ -9820,6 +9820,69 @@
     },
     "query": "\nupdate playlist_data_resource\nset display_name = coalesce($2, display_name)\nwhere id = $1 and $2 is distinct from display_name\n            "
   },
+  "8f8b6d8eb798ede20d917ff6b0fb3ebe1ba9ef7f0db652767fd54ee1c65bad1e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "code!: i32",
+          "ordinal": 0,
+          "type_info": "Int4"
+        },
+        {
+          "name": "jig_id: JigId",
+          "ordinal": 1,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "direction: TextDirection",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "scoring",
+          "ordinal": 3,
+          "type_info": "Bool"
+        },
+        {
+          "name": "drag_assist",
+          "ordinal": 4,
+          "type_info": "Bool"
+        },
+        {
+          "name": "name?",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at: DateTime<Utc>",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "expires_at: DateTime<Utc>",
+          "ordinal": 7,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n                    select code as \"code!: i32\",\n                        jig_id as \"jig_id: JigId\",\n                        direction as \"direction: TextDirection\",\n                        scoring,\n                        drag_assist,\n                        name as \"name?\",\n                        created_at as \"created_at: DateTime<Utc>\",\n                        expires_at as \"expires_at: DateTime<Utc>\"\n                    from jig_code\n                    where jig_id = $1 and creator_id = $2\n                    order by created_at desc\n                "
+  },
   "8ff3594259d04d0786b415f1e6577c3252ad2779bf0a9336d3ea985d54d78556": {
     "describe": {
       "columns": [
@@ -14474,68 +14537,6 @@
       }
     },
     "query": "\nselect jig_id                               as \"jig_id!: JigId\",\n       display_name,\n       language,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status!: JigCurationStatus\",\n       array(\n            select row (jcc.id, jcc.jig_id, comment, created_at, author_id)\n            from jig_curation_comment  \"jcc\"\n            where jcd.jig_id = jcc.jig_id\n            order by created_at desc\n       )                                                    as \"comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>\",\n       array(\n           select row (jr.id, jr.jig_id, report_type, reporter_id,        \n                        (\n                        select given_name || ' '::text || family_name\n                        from user_profile\n                        where user_profile.user_id = reporter_id\n                        ),\n                        (\n                            select email::text\n                            from user_email\n                            where user_email.user_id = reporter_id\n                        ),\n                        created_at                                                                         \n            )\n           from jig_report \"jr\"\n           where jcd.jig_id = jr.jig_id\n           order by created_at desc\n       )                                                    as \"reports!: Vec<(JigReport)>\"\nfrom jig_curation_data \"jcd\"\nwhere jig_id = $1\n"
-  },
-  "d2fcba755011ada06a853b17466ac23d8888cf35fbd834aef112fdfee52c6933": {
-    "describe": {
-      "columns": [
-        {
-          "name": "code!: i32",
-          "ordinal": 0,
-          "type_info": "Int4"
-        },
-        {
-          "name": "jig_id: JigId",
-          "ordinal": 1,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "direction: TextDirection",
-          "ordinal": 2,
-          "type_info": "Int2"
-        },
-        {
-          "name": "scoring",
-          "ordinal": 3,
-          "type_info": "Bool"
-        },
-        {
-          "name": "drag_assist",
-          "ordinal": 4,
-          "type_info": "Bool"
-        },
-        {
-          "name": "name?",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at: DateTime<Utc>",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "expires_at: DateTime<Utc>",
-          "ordinal": 7,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\n                    select code as \"code!: i32\",\n                        jig_id as \"jig_id: JigId\",\n                        direction as \"direction: TextDirection\",\n                        scoring,\n                        drag_assist,\n                        name as \"name?\",\n                        created_at as \"created_at: DateTime<Utc>\",\n                        expires_at as \"expires_at: DateTime<Utc>\"\n                    from jig_code\n                    where jig_id = $1\n                    order by created_at desc\n                "
   },
   "d32e3899d7c0ea60a1ea6d88446a9b182763d14c95a5c7f3084d2928aa286406": {
     "describe": {
