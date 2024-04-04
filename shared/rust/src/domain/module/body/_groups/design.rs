@@ -1,4 +1,6 @@
-use crate::domain::module::body::{Audio, Background, Image, ModuleAssist, ThemeId, Transform};
+use crate::domain::module::body::{
+    Audio, Background, HoverAnimation, Image, ModuleAssist, StickerHidden, ThemeId, Transform,
+};
 use derive_setters::Setters;
 use serde::{Deserialize, Serialize};
 
@@ -81,6 +83,12 @@ pub struct Text {
     pub value: String,
     /// The Transform
     pub transform: Transform,
+    /// Animation to run on hover
+    #[serde(default)]
+    pub hover_animation: Option<HoverAnimation>,
+    /// Hide on click
+    #[serde(default)]
+    pub hidden: Option<StickerHidden>,
 }
 
 impl Default for Text {
@@ -102,6 +110,8 @@ impl Text {
         Self {
             value,
             transform: Transform::identity(),
+            hover_animation: None,
+            hidden: None,
         }
     }
 
@@ -129,6 +139,13 @@ pub struct Sprite {
 
     /// Flip vertical
     pub flip_vertical: bool,
+
+    /// Animation to run on hover
+    #[serde(default)]
+    pub hover_animation: Option<HoverAnimation>,
+    /// Hide on click
+    #[serde(default)]
+    pub hidden: Option<StickerHidden>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]

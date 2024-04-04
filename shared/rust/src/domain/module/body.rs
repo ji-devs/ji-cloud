@@ -6,8 +6,12 @@ use crate::{
     media::MediaLibrary,
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::{collections::HashSet, fmt::Debug, hash::Hash};
-use strum_macros::{EnumIter, IntoStaticStr};
+use std::{
+    collections::HashSet,
+    fmt::{self, Debug},
+    hash::Hash,
+};
+use strum_macros::{EnumIs, EnumIter, IntoStaticStr};
 
 /// Memory Game Body.
 pub mod memory;
@@ -600,6 +604,33 @@ impl Transform {
 impl Default for Transform {
     fn default() -> Self {
         Self::identity()
+    }
+}
+
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, EnumIs)]
+pub enum HoverAnimation {
+    Grow,
+    Tilt,
+    Buzz,
+}
+
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, EnumIs)]
+pub enum StickerHidden {
+    OnClick,
+    UntilClick,
+}
+
+impl fmt::Display for HoverAnimation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                HoverAnimation::Grow => "Grow",
+                HoverAnimation::Tilt => "Tilt",
+                HoverAnimation::Buzz => "Buzz",
+            }
+        )
     }
 }
 
