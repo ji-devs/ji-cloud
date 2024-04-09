@@ -163,6 +163,7 @@ impl ShareAsset {
             // TODO: temporary until we have student-codes for playlists
             .apply_if(state.asset.is_playlist(), |dom| {
                 dom.child(html!("share-jig-option", {
+                    .prop("slot", "student")
                     .prop("kind", "students")
                     .text_signal(temp_playlist_link_copied.signal().map(clone!(state => move |copied| {
                         match copied {
