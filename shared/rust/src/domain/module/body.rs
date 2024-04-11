@@ -614,23 +614,68 @@ pub enum HoverAnimation {
     Buzz,
 }
 
-#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, EnumIs)]
-pub enum StickerHidden {
-    OnClick,
-    UntilClick,
+impl fmt::Display for HoverAnimation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let str = match self {
+            HoverAnimation::Grow => "Grow",
+            HoverAnimation::Tilt => "Tilt",
+            HoverAnimation::Buzz => "Buzz",
+        };
+        write!(f, "{str}")
+    }
 }
 
-impl fmt::Display for HoverAnimation {
+impl HoverAnimation {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            HoverAnimation::Grow => "grow",
+            HoverAnimation::Tilt => "tilt",
+            HoverAnimation::Buzz => "buzz",
+        }
+    }
+}
+
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, EnumIs)]
+pub enum StickerHidden {
+    OnClick(ShowHideAnimation),
+    UntilClick(ShowHideAnimation),
+}
+
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, PartialEq, EnumIs, EnumIter, Default)]
+pub enum ShowHideAnimation {
+    #[default]
+    Appear,
+    FadeInTop,
+    FadeInBottom,
+    FadeInLeft,
+    FadeInRight,
+}
+
+impl fmt::Display for ShowHideAnimation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
             "{}",
             match self {
-                HoverAnimation::Grow => "Grow",
-                HoverAnimation::Tilt => "Tilt",
-                HoverAnimation::Buzz => "Buzz",
+                ShowHideAnimation::Appear => "Appear",
+                ShowHideAnimation::FadeInTop => "Top",
+                ShowHideAnimation::FadeInBottom => "Bottom",
+                ShowHideAnimation::FadeInLeft => "Left",
+                ShowHideAnimation::FadeInRight => "Right",
             }
         )
+    }
+}
+
+impl ShowHideAnimation {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            ShowHideAnimation::Appear => "Appear",
+            ShowHideAnimation::FadeInTop => "fade-in-top",
+            ShowHideAnimation::FadeInBottom => "fade-in-bottom",
+            ShowHideAnimation::FadeInLeft => "fade-in-left",
+            ShowHideAnimation::FadeInRight => "fade-in-right",
+        }
     }
 }
 
