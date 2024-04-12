@@ -56,18 +56,12 @@ impl Sticker {
                 Some(clone!(stickers => move |_| {
                     stickers.call_change();
                 })),
-                Some(clone!(stickers => move || {
-                    stickers.deselect();
-                })),
             ))),
             RawSticker::Text(text) => Self::Text(Rc::new(Text::new(
                 stickers.text_editor.clone(),
                 text,
                 Some(clone!(stickers => move |_| {
                     stickers.call_change();
-                })),
-                Some(clone!(stickers => move || {
-                    stickers.deselect();
                 })),
             ))),
             RawSticker::Embed(embed) => Self::Embed(Rc::new(Embed::new(

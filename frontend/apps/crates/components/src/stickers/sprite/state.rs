@@ -3,7 +3,7 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
 };
 use shared::domain::module::body::{
-    Image, Transform,
+    HoverAnimation, Image, StickerHidden, Transform,
     _groups::design::{Sprite as RawSprite, SpriteEffect},
 };
 use std::rc::Rc;
@@ -18,17 +18,18 @@ pub struct Sprite {
     pub effects: Mutable<Vec<SpriteEffect>>,
     pub flip_horizontal: Mutable<bool>,
     pub flip_vertical: Mutable<bool>,
+    pub hover_animation: Mutable<Option<HoverAnimation>>,
+    pub hidden: Mutable<Option<StickerHidden>>,
 }
 
 impl Sprite {
     pub fn new(
         raw: &RawSprite,
         on_transform_finished: Option<impl Fn(Transform) + 'static>,
-        on_blur: Option<impl Fn() + 'static>,
     ) -> Self {
         let raw = raw.clone();
         let transform_callbacks =
-            TransformCallbacks::new(on_transform_finished, None::<fn()>, on_blur);
+            TransformCallbacks::new(on_transform_finished, None::<fn()>, None::<fn()>);
         Self {
             image: Mutable::new(raw.image),
             transform: Rc::new(TransformState::new(
@@ -41,6 +42,8 @@ impl Sprite {
             effects: Mutable::new(raw.effects),
             flip_horizontal: Mutable::new(raw.flip_horizontal),
             flip_vertical: Mutable::new(raw.flip_vertical),
+            hover_animation: Mutable::new(raw.hover_animation),
+            hidden: Mutable::new(raw.hidden),
         }
     }
 
@@ -51,6 +54,8 @@ impl Sprite {
             effects: self.effects.get_cloned(),
             flip_horizontal: self.flip_horizontal.get(),
             flip_vertical: self.flip_vertical.get(),
+            hover_animation: self.hover_animation.get(),
+            hidden: self.hidden.get_cloned(),
         }
     }
 

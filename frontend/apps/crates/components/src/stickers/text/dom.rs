@@ -11,9 +11,12 @@ use super::{
     menu::dom::render_sticker_text_menu,
     state::Text,
 };
-use crate::transform::{
-    dom::render_transform,
-    state::{ResizeLevel, TransformState},
+use crate::{
+    stickers::dom::{sticker_animation, sticker_hidden},
+    transform::{
+        dom::render_transform,
+        state::{ResizeLevel, TransformState},
+    },
 };
 use futures_signals::{
     map_ref,
@@ -264,18 +267,26 @@ pub fn render_sticker_text_raw(
                 //.style_signal("height", height_signal.map(|x| format!("{}px", x)))
                 .style_signal("left", x_signal.map(|x| format!("{}px", x)))
                 .style_signal("top", y_signal.map(|x| format!("{}px", x)))
-                .child(
-                    html!("wysiwyg-output-renderer", {
-                        .prop("valueAsString", &text.value)
-                        .prop("theme", theme_id.as_str_id())
-                        // Prevent text from being selected if a student attempts to drag
-                        // a non-interactive text sticker.
-                        .style("user-select", "none")
-                        .apply_if(mixin.is_some(), move |dom| {
-                            dom.apply(mixin.unwrap_ji())
-                        })
-                    })
-                ).into_dom()
+                .child(sticker_hidden(
+                    &text.hidden,
+                    move |dom| {
+                        dom.child(sticker_animation(
+                            text.hover_animation,
+                            move |dom| {
+                                dom.child(html!("wysiwyg-output-renderer", {
+                                    .prop("valueAsString", &text.value)
+                                    .prop("theme", theme_id.as_str_id())
+                                    // Prevent text from being selected if a student attempts to drag
+                                    // a non-interactive text sticker.
+                                    .style("user-select", "none")
+                                    .apply_if(mixin.is_some(), move |dom| {
+                                        dom.apply(mixin.unwrap_ji())
+                                    })
+                                }))
+                            }
+                        ))
+                    }
+                )).into_dom()
         )
     })
 }

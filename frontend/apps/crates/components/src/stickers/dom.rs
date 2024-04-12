@@ -17,7 +17,9 @@ use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
-use shared::domain::module::body::{Transform, _groups::design::Sticker as RawSticker};
+use shared::domain::module::body::{
+    HoverAnimation, StickerHidden, Transform, _groups::design::Sticker as RawSticker,
+};
 use std::rc::Rc;
 use utils::{keyboard::KeyEvent, prelude::*};
 use web_sys::HtmlElement;
@@ -346,4 +348,54 @@ pub fn render_sticker_raw(
             render_sticker_embed_raw(embed, opts.map(|opts| opts.into_embed_unchecked()))
         }
     }
+}
+
+pub fn sticker_animation(
+    animation: Option<HoverAnimation>,
+    slot: impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
+) -> Dom {
+    html!("animations-hover", {
+        .apply(|dom| {
+            match &animation {
+                None => dom,
+                Some(effect) => dom.class(effect.as_str()),
+            }
+
+        })
+        .apply(|dom| {
+            slot(dom)
+        })
+    })
+}
+
+pub fn sticker_hidden(
+    hidden: &Option<StickerHidden>,
+    slot: impl FnOnce(DomBuilder<HtmlElement>) -> DomBuilder<HtmlElement>,
+) -> Dom {
+    html!("animations-hide", {
+        .apply(|dom| {
+            match &hidden {
+                None => dom,
+                Some(hidden) => {
+                    let visible = Mutable::new(hidden.is_on_click());
+                    let dom = dom
+                        .prop_signal("visible", visible.signal())
+                        .event(move |_: events::Click| {
+                            visible.replace_with(|visible| !*visible);
+                        });
+                    match hidden {
+                        StickerHidden::OnClick(effect) => {
+                            dom.prop("effect", effect.as_str())
+                        },
+                        StickerHidden::UntilClick(effect) => {
+                            dom.prop("effect", effect.as_str())
+                        },
+                    }
+                },
+            }
+        })
+        .apply(|dom| {
+            slot(dom)
+        })
+    })
 }

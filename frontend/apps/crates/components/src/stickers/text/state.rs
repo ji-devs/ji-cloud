@@ -7,7 +7,9 @@ use web_sys::HtmlElement;
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::domain::module::body::{Transform, _groups::design::Text as RawText};
+use shared::domain::module::body::{
+    HoverAnimation, StickerHidden, Transform, _groups::design::Text as RawText,
+};
 
 use crate::{
     text_editor::TextEditor,
@@ -18,6 +20,8 @@ use crate::{
 pub struct Text {
     pub value: Mutable<String>,
     pub transform: Rc<TransformState>,
+    pub hidden: Mutable<Option<StickerHidden>>,
+    pub hover_animation: Mutable<Option<HoverAnimation>>,
     pub editor: Rc<TextEditor>,
     /// Optional reference to the wysiwyg-output-renderer
     pub renderer_ref: Mutable<Option<HtmlElement>>,
@@ -33,7 +37,6 @@ impl Text {
         editor: Rc<TextEditor>,
         text: &RawText,
         on_transform_finished: Option<impl Fn(Transform) + 'static>,
-        on_blur: Option<impl Fn() + 'static>,
     ) -> Self {
         let text = text.clone();
         let is_editing = Mutable::new(false);
@@ -47,13 +50,7 @@ impl Text {
                     is_editing.set_neq(true)
                 }
             })),
-            on_blur.map(clone!(is_editing => move|on_blur| {
-                move || {
-                    if !is_editing.get() {
-                        on_blur();
-                    }
-                }
-            })),
+            None::<fn()>,
         );
         Self {
             value: Mutable::new(text.value),
@@ -63,6 +60,8 @@ impl Text {
                 true,
                 transform_callbacks,
             )),
+            hover_animation: Mutable::new(text.hover_animation),
+            hidden: Mutable::new(text.hidden),
             editor,
             renderer_ref: Mutable::new(None),
             measurer_ref: Mutable::new(None),
@@ -77,6 +76,8 @@ impl Text {
         RawText {
             value: self.value.get_cloned(),
             transform: self.transform.get_inner_clone(),
+            hover_animation: self.hover_animation.get(),
+            hidden: self.hidden.get_cloned(),
         }
     }
 
@@ -88,7 +89,6 @@ impl Text {
             .map(|renderer_ref| {
                 let value =
                     Reflect::get(&renderer_ref, &JsValue::from_str("textValue")).unwrap_ji();
-
                 value.as_string()
             })
             .unwrap_or_default()

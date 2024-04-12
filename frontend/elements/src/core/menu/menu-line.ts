@@ -30,6 +30,7 @@ const STR_LABEL_LOOKUP: any = {
     delete: "Delete",
     duplicate: "Duplicate",
     edit: "Edit",
+    animations: "Animations",
     ["jig-info"]: "JIG info",
     ["jig-play"]: "Play JIG",
     ["move-down"]: "Move Down",

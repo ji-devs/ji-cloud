@@ -13,6 +13,8 @@ impl SpriteExt for Sprite {
             effects: Vec::new(),
             flip_horizontal: false,
             flip_vertical: false,
+            hover_animation: None,
+            hidden: None,
         }
     }
 }

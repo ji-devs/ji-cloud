@@ -17,7 +17,10 @@ use super::{
 };
 use futures_signals::signal::{Mutable, ReadOnlyMutable, SignalExt};
 
-use crate::transform::{dom::render_transform, state::ResizeLevel};
+use crate::{
+    stickers::dom::{sticker_animation, sticker_hidden},
+    transform::{dom::render_transform, state::ResizeLevel},
+};
 use shared::domain::module::body::_groups::design::Sprite as RawSprite;
 //For stickers, just let the transform affect it directly
 //that means it's not a child of the transform, they're independent
@@ -152,29 +155,33 @@ pub fn render_sticker_sprite_raw(sprite: &RawSprite, opts: Option<SpriteRawRende
             size.set(Some((width, height)));
             src.set(Some(url));
         }))
-        .child_signal(
-            src.signal_ref(clone!(size, flip_horizontal, flip_vertical => move |src| {
-                src.as_ref().map(|src| {
-                    html!("img", {
-                        .attr("src", src)
-                        // Prevent sprites from being selected if a student attempts to drag
-                        // a non-interactive sticker.
-                        .style("user-select", "none")
-                        .style("pointer-events", "none")
-                        .style("display", "block")
-                        .style("position", "relative")
-                        .style_signal("width", width_signal(size.signal_cloned()))
-                        .style_signal("height", height_signal(size.signal_cloned()))
-                        .style("transform", {
-                            let x = if flip_horizontal { -1 } else { 1 };
-                            let y = if flip_vertical { -1 } else { 1 };
+        .child(sticker_hidden(&sprite.hidden, move |dom| {
+            dom.child(sticker_animation(sprite.hover_animation, move |dom| {
+                dom.child_signal(src.signal_ref(
+                    clone!(size, flip_horizontal, flip_vertical => move |src| {
+                        src.as_ref().map(|src| {
+                            html!("img", {
+                                .attr("src", src)
+                                // Prevent sprites from being selected if a student attempts to drag
+                                // a non-interactive sticker.
+                                .style("user-select", "none")
+                                .style("pointer-events", "none")
+                                .style("display", "block")
+                                .style("position", "relative")
+                                .style_signal("width", width_signal(size.signal_cloned()))
+                                .style_signal("height", height_signal(size.signal_cloned()))
+                                .style("transform", {
+                                    let x = if flip_horizontal { -1 } else { 1 };
+                                    let y = if flip_vertical { -1 } else { 1 };
 
-                            format!("scaleX({}) scaleY({})", x, y)
+                                    format!("scaleX({}) scaleY({})", x, y)
+                                })
+                            })
                         })
-                    })
-                })
-            })),
-        )
+                    }),
+                ))
+            }))
+        }))
         .apply_if(mixin.is_some(), move |dom| dom.apply(mixin.unwrap_ji()))
         .into_dom()
 }
