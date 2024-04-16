@@ -62,7 +62,7 @@ impl Jigs {
                             .child(html!("div", {
                                 .class("header")
                             }))
-                            .children(codes.into_iter().take(6).map(|code| {
+                            .children(codes.into_iter().take(5).map(|code| {
                                 link!(Route::Classroom(ClassroomRoute::Codes(ClassroomCodesRoute::JigCodeSession(jig.id, code.index))), {
                                     .class("code")
                                     .children(&mut [
@@ -80,7 +80,7 @@ impl Jigs {
                         }))
                         .child(link!(Route::Classroom(ClassroomRoute::Codes(ClassroomCodesRoute::JigCodes(jig.id))), {
                             .class("more-codes")
-                            .text("See more")
+                            .text("See all")
                             .child(html!("fa-icon", {
                                 .prop("icon", "fa-solid fa-angles-right")
                             }))
