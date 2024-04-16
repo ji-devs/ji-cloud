@@ -221,7 +221,7 @@ where
 
         let url = SETTINGS.get().unwrap_ji().remote_target.spa_iframe(&route);
 
-        format!("{}?iframe_data=true", url)
+        format!("{}?iframe_data=true&draft_or_live=draft", url)
     };
 
     html!("iframe" => web_sys::HtmlIFrameElement, {
