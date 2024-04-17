@@ -97,11 +97,17 @@ export class _ extends LitElement {
                     font-size: 24px;
                     font-weight: bold;
                 }
-                ::slotted([slot=extra]) {
+                ::slotted([slot=extra-right]) {
                     display: inline-block;
                     position: absolute;
                     right: 0;
                     margin-right: 12px;
+                }
+                ::slotted([slot=extra-left]) {
+                    display: inline-block;
+                    position: absolute;
+                    left: 0;
+                    margin-left: 12px;
                 }
             `,
         ];
@@ -130,8 +136,9 @@ export class _ extends LitElement {
                     <slot name="stationery"></slot>
                 </div>
                 <div class="bottom">
+                    <slot name="extra-left"></slot>
                     ${STR_MODULE_DISPLAY_NAME[this.module]}
-                    <slot name="extra"></slot>
+                    <slot name="extra-right"></slot>
                 </div>
             </section>
             <div class="overlay">

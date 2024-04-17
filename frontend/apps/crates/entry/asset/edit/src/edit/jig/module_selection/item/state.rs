@@ -11,6 +11,7 @@ pub struct ModuleSelectionItem {
     pub kind: ModuleKind,
     pub hover: Mutable<bool>,
     pub show_autogen_tooltip: Mutable<bool>,
+    pub show_scoring_tooltip: Mutable<bool>,
     pub module_selection_state: Rc<ModuleSelection>,
 }
 
@@ -20,6 +21,7 @@ impl ModuleSelectionItem {
             kind,
             hover: Mutable::new(false),
             show_autogen_tooltip: Mutable::new(false),
+            show_scoring_tooltip: Mutable::new(false),
             module_selection_state: Rc::clone(module_selection_state),
         })
     }
