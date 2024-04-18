@@ -32,6 +32,7 @@ const STR_EMBED_COPY_CODE_LABEL: &str = "Copy code";
 const STR_EMBED_COPIED_CODE_LABEL: &str = "Embed code copied";
 const STR_CLASSROOM: &str = "Share to Google Classroom";
 const STR_MS_TEAMS: &str = "Share to Microsoft Teams";
+const STR_SHARE_STUDENTS: &str = "Share with students";
 const STR_CODE_LABEL: &str = "Share with code";
 const STR_EMBED_LABEL: &str = "Embed this ";
 const STR_SHARE_LABEL: &str = "Share on social";
@@ -167,7 +168,7 @@ impl ShareAsset {
                     .prop("kind", "students")
                     .text_signal(temp_playlist_link_copied.signal().map(clone!(state => move |copied| {
                         match copied {
-                            false => STR_CODE_LABEL.to_owned(),
+                            false => STR_SHARE_STUDENTS.to_owned(),
                             true => format!("{}{STR_COPIED_LABEL}", state.asset_type_name()),
                         }
                     })))
