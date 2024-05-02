@@ -57,6 +57,13 @@ pub fn can_play_course(is_premium: bool) -> bool {
         PlanTier::Free => !is_premium,
     }
 }
+pub fn can_share_asset() -> bool {
+    match get_plan_tier() {
+        PlanTier::Pro => true,
+        PlanTier::Basic => true,
+        PlanTier::Free => false,
+    }
+}
 pub fn can_print() -> bool {
     match get_plan_tier() {
         PlanTier::Pro => true,

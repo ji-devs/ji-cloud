@@ -118,6 +118,19 @@ impl ShareAsset {
         can_play
     }
 
+    fn can_share(self: &Rc<Self>) -> bool {
+        let can_play = paywall::can_share_asset();
+        if !can_play {
+            paywall::dialog_limit(
+                "
+                Wanting to share our content?
+                Upgrade now for UNLIMITED sharing options.
+            ",
+            );
+        }
+        can_play
+    }
+
     fn render_share_main(self: &Rc<Self>) -> Dom {
         fn share_to(base: &str, url: &str) {
             if let Some(window) = window() {
@@ -173,9 +186,10 @@ impl ShareAsset {
                         }
                     })))
                     .event(clone!(state => move |_: events::Click| {
-                        if !state.can_play() {
+                        if !state.can_share() {
                             return;
                         }
+
                         clipboard::write_text(&state.asset_link(true, false));
                         ShareAsset::set_copied_mutable(temp_playlist_link_copied.clone());
                     }))
@@ -187,7 +201,7 @@ impl ShareAsset {
                     .prop("kind", "code")
                     .text(STR_CODE_LABEL)
                     .event(clone!(state => move |_: events::Click| {
-                        if !state.can_play() {
+                        if !state.can_share() {
                             return;
                         }
                         state.active_popup.set(Some(ActivePopup::ShareCode));
@@ -199,7 +213,7 @@ impl ShareAsset {
                 .prop("kind", "google-classroom")
                 .text(STR_CLASSROOM)
                 .event(clone!(state => move |_: events::Click| {
-                    if !state.can_play() {
+                    if !state.can_share() {
                         return;
                     }
                     share_to("https://classroom.google.com/share?url=", &state.asset_link(true, false));
@@ -210,7 +224,7 @@ impl ShareAsset {
                 .prop("kind", "ms-teams")
                 .text(STR_MS_TEAMS)
                 .event(clone!(state => move |_: events::Click| {
-                    if !state.can_play() {
+                    if !state.can_share() {
                         return;
                     }
                     share_to("https://teams.microsoft.com/share?href=", &state.asset_link(true, false));
@@ -226,6 +240,9 @@ impl ShareAsset {
                     }
                 })))
                 .event(clone!(state => move|_: events::Click| {
+                    if !state.can_play() {
+                        return;
+                    }
                     clipboard::write_text(&state.asset_link(false, true));
                     ShareAsset::set_copied_mutable(state.link_copied.clone());
                 }))
@@ -236,7 +253,7 @@ impl ShareAsset {
                     .prop("kind", "embed")
                     .text(&format!("{STR_EMBED_LABEL}{}", state.asset_type_name()))
                     .event(clone!(state => move |_: events::Click| {
-                        if !state.can_play() {
+                        if !state.can_share() {
                             return;
                         }
                         state.active_popup.set(Some(ActivePopup::ShareEmbed));
