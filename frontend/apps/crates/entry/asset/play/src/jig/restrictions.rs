@@ -3,8 +3,8 @@ use utils::{
     init::user::get_plan_tier, js_object, prelude::is_user_set, storage, unwrap::UnwrapJiExt,
 };
 
-const PLAYED_WITHOUT_LOGIN_ALLOWED: u32 = 5;
-const PLAYED_FREE_ACCOUNT_ALLOWED_DAILY: u32 = 5;
+const PLAYED_WITHOUT_LOGIN_ALLOWED: u32 = 3;
+const PLAYED_FREE_ACCOUNT_ALLOWED_DAILY: u32 = 3;
 const PLAYED_WITHOUT_LOGIN_COUNT_KEY: &'static str = "PLAYED_WITHOUT_LOGIN_COUNT";
 const PLAYED_TODAY_FREE_KEY: &'static str = "PLAYED_TODAY_FREE";
 pub const FREE_ACCOUNT_LIMIT_MESSAGE: &str = const_format::formatcp!(
