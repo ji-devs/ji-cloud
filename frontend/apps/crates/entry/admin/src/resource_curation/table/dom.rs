@@ -225,6 +225,7 @@ impl ResourceTable {
                                     ResourceRating::try_from(rating as u8).unwrap_ji()
                                 });
                                 resource.rating.set(rating);
+                                state.curation_state.save_admin_data(&resource);
                             }))
                         }),
                         html!("label", {
