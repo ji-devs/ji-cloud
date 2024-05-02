@@ -117,6 +117,9 @@ impl Gallery {
                         .prop("slot", "create-asset")
                         .prop("assetName", state.asset_type_name())
                         .event(clone!(state => move |_: events::Click| {
+                            if !state.can_create() {
+                                return;
+                            }
                             state.create_asset();
                             analytics::event("Asset Gallery Create", None);
                         }))

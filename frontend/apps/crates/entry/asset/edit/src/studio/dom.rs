@@ -2,6 +2,8 @@ use components::page_header::{PageHeader, PageHeaderConfig, PageLinks};
 use dominator::{events, html, on_click_go_to_url, Dom};
 use utils::{
     asset,
+    init::user::with_user,
+    paywall,
     routes::{AssetRoute, HomeRoute, Route},
 };
 
@@ -19,6 +21,16 @@ pub fn render_studio() -> Dom {
                 .prop("kind", "filled")
                 .prop("size", "regular")
                 .event(|_: events::Click| {
+                    let jig_count = with_user(|user| user.jig_count).unwrap_or(0);
+                    if !paywall::can_create_jig(jig_count) {
+                        paywall::dialog_limit(
+                            "
+                            Wanting to create more jigs?
+                            Upgrade now to create UNLIMITED jigs.
+                        ",
+                        );
+                        return;
+                    }
                     asset::create_jig();
                 })
                 .text("Create a JIG")
@@ -43,6 +55,16 @@ pub fn render_studio() -> Dom {
                 .prop("kind", "filled")
                 .prop("size", "regular")
                 .event(|_: events::Click| {
+                    let playlist_count = with_user(|user| user.playlist_count).unwrap_or(0);
+                    if !paywall::can_create_playlist(playlist_count) {
+                        paywall::dialog_limit(
+                            "
+                            Wanting to create a playlist?
+                            Upgrade now to create UNLIMITED playlists.
+                        ",
+                        );
+                        return;
+                    }
                     asset::create_playlist();
                 })
                 .text("Create a Playlist")
@@ -67,6 +89,16 @@ pub fn render_studio() -> Dom {
                 .prop("kind", "filled")
                 .prop("size", "regular")
                 .event(|_: events::Click| {
+                    let resource_count = with_user(|user| user.resource_count).unwrap_or(0);
+                    if !paywall::can_create_resource(resource_count) {
+                        paywall::dialog_limit(
+                            "
+                            Wanting to create more resources?
+                            Upgrade now to create UNLIMITED resources.
+                        ",
+                        );
+                        return;
+                    }
                     asset::create_resource();
                 })
                 .text("Add a Resource")

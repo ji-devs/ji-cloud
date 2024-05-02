@@ -83,3 +83,7 @@ pub fn get_plan_tier() -> PlanTier {
         .map(|summary| summary.plan_tier)
         .unwrap_or_default()
 }
+
+pub fn with_user<T>(f: impl FnOnce(&UserProfile) -> T) -> Option<T> {
+    get_user_mutable().lock_ref().as_ref().map(|user| f(user))
+}

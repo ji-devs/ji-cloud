@@ -9,7 +9,7 @@ use shared::{
     },
 };
 use std::rc::Rc;
-use utils::{asset, prelude::*};
+use utils::{asset, paywall, prelude::*};
 
 mod course_actions;
 mod jig_actions;
@@ -98,6 +98,51 @@ impl Gallery {
         state.loader.load(clone!(state => async move {
             state.load_assets().await
         }));
+    }
+
+    pub fn can_create(self: &Rc<Self>) -> bool {
+        match self.asset_type {
+            AssetType::Jig => {
+                let jig_count = with_user(|user| user.jig_count).unwrap_or(0);
+                let can_create = paywall::can_create_jig(jig_count);
+                if !can_create {
+                    paywall::dialog_limit(
+                        "
+                        Wanting to create more jigs?
+                        Upgrade now to create UNLIMITED jigs.
+                    ",
+                    );
+                }
+                can_create
+            }
+            AssetType::Resource => {
+                let resource_count = with_user(|user| user.resource_count).unwrap_or(0);
+                let can_create = paywall::can_create_resource(resource_count);
+                if !can_create {
+                    paywall::dialog_limit(
+                        "
+                        Wanting to create more resources?
+                        Upgrade now to create UNLIMITED resources.
+                    ",
+                    );
+                }
+                can_create
+            }
+            AssetType::Playlist => {
+                let playlist_count = with_user(|user| user.playlist_count).unwrap_or(0);
+                let can_create = paywall::can_create_playlist(playlist_count);
+                if !can_create {
+                    paywall::dialog_limit(
+                        "
+                        Wanting to create a playlist?
+                        Upgrade now to create UNLIMITED playlists.
+                    ",
+                    );
+                }
+                can_create
+            }
+            AssetType::Course => unreachable!(),
+        }
     }
 
     pub fn create_asset(self: &Rc<Self>) {
