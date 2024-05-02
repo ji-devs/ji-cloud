@@ -4,8 +4,8 @@ use shared::domain::billing::PlanTier;
 pub fn can_create_jig(total_existing: u64) -> bool {
     match get_plan_tier() {
         PlanTier::Pro => true,
-        PlanTier::Basic => total_existing < 5,
-        PlanTier::Free => total_existing < 5,
+        PlanTier::Basic => total_existing < 3,
+        PlanTier::Free => total_existing < 3,
     }
 }
 pub fn can_create_playlist(_total_existing: u64) -> bool {
@@ -18,7 +18,7 @@ pub fn can_create_playlist(_total_existing: u64) -> bool {
 pub fn can_create_resource(total_existing: u64) -> bool {
     match get_plan_tier() {
         PlanTier::Pro => true,
-        PlanTier::Basic => total_existing < 5,
+        PlanTier::Basic => total_existing < 3,
         PlanTier::Free => false,
     }
 }
