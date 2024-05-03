@@ -219,7 +219,7 @@ impl ResourceTable {
                                     None => 0,
                                 }
                             }))
-                            .event(clone!(resource => move |e: events::CustomNumber| {
+                            .event(clone!(state, resource => move |e: events::CustomNumber| {
                                 let rating = e.number();
                                 let rating = rating.map(|rating| {
                                     ResourceRating::try_from(rating as u8).unwrap_ji()
