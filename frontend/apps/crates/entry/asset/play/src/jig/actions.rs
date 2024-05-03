@@ -285,8 +285,6 @@ impl JigPlayer {
                         self.play_login_popup_shown.set(true);
                     }
                 }
-            } else {
-                restrictions::increase_played_count();
             }
         }
 
@@ -341,6 +339,10 @@ impl JigPlayer {
                             Upgrade now for UNLIMITED JIGs and resources.
                         ");
                         return;
+                    } else {
+                        if state.quota && restrictions::play_restricted().is_none() {
+                            restrictions::increase_played_count();
+                        }
                     }
 
                     // state.active_module.set(Some(resp.jig.modules[0].clone()));

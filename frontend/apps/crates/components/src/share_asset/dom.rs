@@ -4,10 +4,7 @@ use dominator::{clone, html, with_node, Dom, EventOptions};
 use futures_signals::signal::{Mutable, SignalExt};
 use js_sys::{encode_uri_component, Function, Reflect};
 use serde::{Deserialize, Serialize};
-use shared::{
-    config::JIG_PLAYER_SESSION_VALID_DURATION_SECS,
-    domain::{asset::Asset, jig::TextDirection},
-};
+use shared::{config::JIG_PLAYER_SESSION_VALID_DURATION_SECS, domain::jig::TextDirection};
 use utils::{
     clipboard,
     component::Component,
@@ -101,12 +98,7 @@ impl ShareAsset {
     }
 
     fn can_play(self: &Rc<Self>) -> bool {
-        let can_play = match &self.asset {
-            Asset::Jig(jig) => paywall::can_play_jig(jig.admin_data.premium),
-            Asset::Playlist(playlist) => paywall::can_play_playlist(playlist.admin_data.premium),
-            Asset::Resource(resource) => paywall::can_play_resource(resource.admin_data.premium),
-            Asset::Course(course) => paywall::can_play_course(course.admin_data.premium),
-        };
+        let can_play = paywall::can_play_asset(self.asset.asset_type(), self.asset.premium());
         if !can_play {
             paywall::dialog_limit(
                 "
