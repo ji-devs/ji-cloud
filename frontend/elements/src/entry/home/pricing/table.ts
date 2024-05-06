@@ -400,7 +400,7 @@ export class _ extends LitElement {
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `,
                             individuals: html`
-                                <div class="cell">FREE content only<br>(5 JIGs per day)</div>
+                                <div class="cell">FREE content only<br>(3 JIGs per day)</div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `
@@ -452,8 +452,8 @@ export class _ extends LitElement {
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `,
                             individuals: html`
-                                <div class="cell">Limited to 5 JIGs</div>
-                                <div class="cell">Limited to 5 JIGs</div>
+                                <div class="cell">Limited to 3 JIGs</div>
+                                <div class="cell">Limited to 3 JIGs</div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `
                         })}
@@ -492,7 +492,7 @@ export class _ extends LitElement {
                             `,
                             individuals: html`
                                 <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
-                                <div class="cell">Limited to 5 resources</div>
+                                <div class="cell">Limited to 3 resources</div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `
                         })}
