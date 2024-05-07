@@ -41,9 +41,9 @@ pub fn render_sticker_sprite<T: AsSticker>(
     stickers: Rc<Stickers<T>>,
     index: ReadOnlyMutable<Option<usize>>,
     sprite: Rc<Sprite>,
-    opts: Option<SpriteRenderOptions>,
+    opts: Option<Rc<SpriteRenderOptions>>,
 ) -> Dom {
-    let _opts = opts.unwrap_or_default();
+    let opts = opts.unwrap_or_default();
 
     html!("empty-fragment", {
         .child(
@@ -89,7 +89,7 @@ pub fn render_sticker_sprite<T: AsSticker>(
                 Some(render_transform(
                     sprite.transform.clone(),
                     ResizeLevel::Full,
-                    Some(clone!(stickers, index, sprite => move || render_sticker_sprite_menu(stickers.clone(), index.clone(), sprite.clone())))
+                    Some(clone!(stickers, index, sprite, opts => move || render_sticker_sprite_menu(stickers.clone(), index.clone(), sprite.clone(), opts.clone())))
                 ))
             } else {
                 None

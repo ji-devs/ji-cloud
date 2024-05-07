@@ -42,41 +42,42 @@ pub fn mixin_sticker_button(dom: DomBuilder<HtmlElement>) -> DomBuilder<HtmlElem
         .style("-webkit-user-select", "none")
 }
 
+#[derive(Clone)]
 pub enum StickerRenderOptions {
-    Sprite(SpriteRenderOptions),
-    Text(TextRenderOptions),
-    Embed(EmbedRenderOptions),
+    Sprite(Rc<SpriteRenderOptions>),
+    Text(Rc<TextRenderOptions>),
+    Embed(Rc<EmbedRenderOptions>),
 }
 
 impl StickerRenderOptions {
     pub fn new(sticker: &Sticker, base: Option<BaseRenderOptions>) -> Self {
         match sticker {
-            Sticker::Sprite(_) => Self::Sprite(SpriteRenderOptions {
+            Sticker::Sprite(_) => Self::Sprite(Rc::new(SpriteRenderOptions {
                 base: base.unwrap_or_default(),
-            }),
-            Sticker::Text(_) => Self::Text(TextRenderOptions {
+            })),
+            Sticker::Text(_) => Self::Text(Rc::new(TextRenderOptions {
                 base: base.unwrap_or_default(),
-            }),
-            Sticker::Embed(_) => Self::Embed(EmbedRenderOptions {
+            })),
+            Sticker::Embed(_) => Self::Embed(Rc::new(EmbedRenderOptions {
                 base: base.unwrap_or_default(),
                 ..Default::default()
-            }),
+            })),
         }
     }
 
-    pub fn into_sprite_unchecked(self) -> SpriteRenderOptions {
+    pub fn into_sprite_unchecked(self) -> Rc<SpriteRenderOptions> {
         match self {
             Self::Sprite(inner) => inner,
             _ => panic!("not a sprite!"),
         }
     }
-    pub fn into_text_unchecked(self) -> TextRenderOptions {
+    pub fn into_text_unchecked(self) -> Rc<TextRenderOptions> {
         match self {
             Self::Text(inner) => inner,
             _ => panic!("not a text!"),
         }
     }
-    pub fn into_embed_unchecked(self) -> EmbedRenderOptions {
+    pub fn into_embed_unchecked(self) -> Rc<EmbedRenderOptions> {
         match self {
             Self::Embed(inner) => inner,
             _ => panic!("not an embed!"),
@@ -93,8 +94,16 @@ impl StickerRenderOptions {
 }
 
 //Just a placeholder for backwards compatibility
-#[derive(Default)]
-pub struct BaseRenderOptions {}
+#[derive(Default, Clone)]
+pub struct BaseRenderOptions {
+    pub animations: bool,
+}
+
+impl BaseRenderOptions {
+    pub fn new_animations() -> Self {
+        Self { animations: true }
+    }
+}
 
 pub enum StickerRawRenderOptions {
     Sprite(SpriteRawRenderOptions),
@@ -214,6 +223,15 @@ pub fn render_stickers<T: AsSticker>(stickers: Rc<Stickers<T>>) -> Dom {
     })
 }
 
+pub fn render_stickers_options<T: AsSticker>(
+    stickers: Rc<Stickers<T>>,
+    opts: BaseRenderOptions,
+) -> Dom {
+    html!("empty-fragment", {
+        .children_signal_vec(render_stickers_vec_options(stickers, opts))
+    })
+}
+
 pub fn render_stickers_vec<T: AsSticker>(stickers: Rc<Stickers<T>>) -> impl SignalVec<Item = Dom> {
     stickers
         .list
@@ -221,6 +239,20 @@ pub fn render_stickers_vec<T: AsSticker>(stickers: Rc<Stickers<T>>) -> impl Sign
         .enumerate()
         .map(clone!(stickers => move |(index, sticker)| {
             render_sticker(stickers.clone(), index, sticker, None)
+        }))
+}
+
+pub fn render_stickers_vec_options<T: AsSticker>(
+    stickers: Rc<Stickers<T>>,
+    opts: BaseRenderOptions,
+) -> impl SignalVec<Item = Dom> {
+    stickers
+        .list
+        .signal_vec_cloned()
+        .enumerate()
+        .map(clone!(stickers => move |(index, sticker)| {
+            let opts = StickerRenderOptions::new(sticker.as_ref(), Some(opts.clone()));
+            render_sticker(stickers.clone(), index, sticker, Some(opts))
         }))
 }
 

@@ -9,6 +9,8 @@ use futures_signals::{
     signal::{Mutable, ReadOnlyMutable, SignalExt},
 };
 
+use crate::stickers::text::dom::TextRenderOptions;
+
 use super::{
     super::super::state::{AsSticker, Stickers},
     super::state::Text,
@@ -27,6 +29,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
     stickers: Rc<Stickers<T>>,
     index: ReadOnlyMutable<Option<usize>>,
     text: Rc<Text>,
+    opts: Rc<TextRenderOptions>,
 ) -> Dom {
     let menu_phase = Mutable::new(MenuPhase::Main);
     html!("div", {
@@ -36,7 +39,7 @@ pub fn render_sticker_text_menu<T: AsSticker>(
         .style("align-items", "start")
         .children_signal_vec(menu_phase.signal().map(clone!(stickers, index, text, menu_phase => move |phase| {
             match phase {
-                MenuPhase::Main => render_main(Rc::clone(&stickers), index.clone(), Rc::clone(&text), menu_phase.clone()),
+                MenuPhase::Main => render_main(Rc::clone(&stickers), index.clone(), Rc::clone(&text), menu_phase.clone(), opts.clone()),
                 MenuPhase::Animations => render_animations(Rc::clone(&stickers), Rc::clone(&text), menu_phase.clone()),
                 MenuPhase::HoverAnimation => render_hover_animations(Rc::clone(&stickers), Rc::clone(&text), menu_phase.clone()),
                 MenuPhase::OnClick => render_hide_on_click(Rc::clone(&stickers), Rc::clone(&text), menu_phase.clone()),
@@ -81,6 +84,7 @@ fn render_main<T: AsSticker>(
     index: ReadOnlyMutable<Option<usize>>,
     text: Rc<Text>,
     menu_phase: Mutable<MenuPhase>,
+    opts: Rc<TextRenderOptions>,
 ) -> Vec<Dom> {
     vec![
         html!("menu-line", {
@@ -140,6 +144,7 @@ fn render_main<T: AsSticker>(
             }))
         }),
         html!("menu-line", {
+            .visible(opts.base.animations)
             .prop("icon", "animations")
             .event(move |_ :events::Click| {
                 menu_phase.set(MenuPhase::Animations);

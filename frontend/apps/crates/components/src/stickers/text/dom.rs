@@ -25,7 +25,7 @@ use futures_signals::{
 use shared::domain::module::body::_groups::design::Text as RawText;
 use web_sys::HtmlElement;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct TextRenderOptions {
     pub base: BaseRenderOptions,
 }
@@ -51,9 +51,9 @@ pub fn render_sticker_text<T: AsSticker>(
     stickers: Rc<Stickers<T>>,
     index: ReadOnlyMutable<Option<usize>>,
     text: Rc<Text>,
-    opts: Option<TextRenderOptions>,
+    opts: Option<Rc<TextRenderOptions>>,
 ) -> Dom {
-    let _opts = opts.unwrap_or_default();
+    let opts = opts.unwrap_or_default();
 
     let show_renderer_signal = map_ref! {
         let is_editing = text.is_editing.signal(),
@@ -159,7 +159,7 @@ pub fn render_sticker_text<T: AsSticker>(
         .child_signal(sticker_menu_signal().map(clone!(stickers, text, index => move |(should_show, is_editable)| {
             if should_show {
                 let menu = if is_editable {
-                    Some(clone!(stickers, index, text => move || render_sticker_text_menu(stickers.clone(), index.clone(), text.clone())))
+                    Some(clone!(stickers, index, text, opts => move || render_sticker_text_menu(stickers.clone(), index.clone(), text.clone(), opts.clone())))
                 } else {
                     None
                 };

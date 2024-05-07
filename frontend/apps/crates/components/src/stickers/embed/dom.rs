@@ -258,9 +258,9 @@ pub fn render_sticker_embed<T: AsSticker>(
     stickers: Rc<Stickers<T>>,
     index: ReadOnlyMutable<Option<usize>>,
     embed: Rc<Embed>,
-    opts: Option<EmbedRenderOptions>,
+    opts: Option<Rc<EmbedRenderOptions>>,
 ) -> Dom {
-    let opts = Rc::new(opts.unwrap_or_default());
+    let opts = opts.unwrap_or_default();
 
     html!("document-fragment", {
         .child_signal(embed.playing_started.signal().map(clone!(embed => move |playing_started| {

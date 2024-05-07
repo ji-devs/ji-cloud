@@ -4,6 +4,8 @@ use std::rc::Rc;
 use strum_macros::EnumIs;
 use utils::prelude::*;
 
+use crate::stickers::sprite::dom::SpriteRenderOptions;
+
 use super::{
     super::super::state::{AsSticker, Stickers},
     super::state::Sprite,
@@ -23,6 +25,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
     stickers: Rc<Stickers<T>>,
     index: ReadOnlyMutable<Option<usize>>,
     sprite: Rc<Sprite>,
+    opts: Rc<SpriteRenderOptions>,
 ) -> Dom {
     let menu_phase = Mutable::new(MenuPhase::Main);
     html!("div", {
@@ -32,7 +35,7 @@ pub fn render_sticker_sprite_menu<T: AsSticker>(
         .style("align-items", "start")
         .children_signal_vec(menu_phase.signal().map(clone!(stickers, index, sprite, menu_phase => move |phase| {
             match phase {
-                MenuPhase::Main => render_main(Rc::clone(&stickers), index.clone(), Rc::clone(&sprite), menu_phase.clone()),
+                MenuPhase::Main => render_main(Rc::clone(&stickers), index.clone(), Rc::clone(&sprite), menu_phase.clone(), opts.clone()),
                 MenuPhase::Animations => render_animations(Rc::clone(&stickers), Rc::clone(&sprite), menu_phase.clone()),
                 MenuPhase::HoverAnimation => render_hover_animations(Rc::clone(&stickers), Rc::clone(&sprite), menu_phase.clone()),
                 MenuPhase::OnClick => render_hide_on_click(Rc::clone(&stickers), Rc::clone(&sprite), menu_phase.clone()),
@@ -47,6 +50,7 @@ fn render_main<T: AsSticker>(
     index: ReadOnlyMutable<Option<usize>>,
     sprite: Rc<Sprite>,
     menu_phase: Mutable<MenuPhase>,
+    opts: Rc<SpriteRenderOptions>,
 ) -> Vec<Dom> {
     vec![
         html!("menu-line", {
@@ -127,6 +131,7 @@ fn render_main<T: AsSticker>(
             }))
         }),
         html!("menu-line", {
+            .visible(opts.base.animations)
             .prop("icon", "animations")
             .event(move |_ :events::Click| {
                 menu_phase.set(MenuPhase::Animations);
