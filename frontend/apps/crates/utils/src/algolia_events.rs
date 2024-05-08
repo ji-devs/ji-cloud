@@ -39,7 +39,9 @@ pub fn viewed_jig(jig_id: JigId) {
         "objectIDs": [jig_id.to_string()],
     });
     if let Some(user_id) = get_user_id() {
-        data.as_object_mut().unwrap().insert("userToken".into(), user_id.to_string().into());
+        data.as_object_mut()
+            .unwrap()
+            .insert("userToken".into(), user_id.to_string().into());
     }
     send_event(data);
 }
@@ -54,7 +56,9 @@ pub fn finished_jig(jig_id: JigId) {
         "objectIDs": [jig_id.to_string()],
     });
     if let Some(user_id) = get_user_id() {
-        data.as_object_mut().unwrap().insert("userToken".into(), user_id.to_string().into());
+        data.as_object_mut()
+            .unwrap()
+            .insert("userToken".into(), user_id.to_string().into());
     }
     send_event(data);
 }
