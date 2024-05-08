@@ -2,9 +2,8 @@ use dominator::{html, Dom};
 
 use super::state::*;
 use components::{
-    backgrounds::dom::render_backgrounds,
-    module::_common::edit::prelude::*,
-    stickers::dom::{render_stickers_options, BaseRenderOptions},
+    backgrounds::dom::render_backgrounds, module::_common::edit::prelude::*,
+    stickers::dom::render_stickers,
 };
 use std::rc::Rc;
 
@@ -24,9 +23,8 @@ impl DomRenderable for Main {
                 .style("height", "100%")
                 .style("width", "100%")
             }))
-            .child(render_stickers_options(
+            .child(render_stickers(
                 state.base.stickers.clone(),
-                BaseRenderOptions::new_animations(),
             ))
         })
     }
