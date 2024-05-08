@@ -33,7 +33,7 @@ use shared::{
     },
 };
 use utils::{
-    bail_on_err,
+    algolia_events, bail_on_err,
     iframe::{
         AssetPlayerToPlayerPopup, IframeAction, IframeMessageExt, JigToModulePlayerMessage,
         ModuleToJigPlayerMessage,
@@ -130,6 +130,7 @@ impl JigPlayer {
     pub fn finish(self: &Rc<Self>) {
         let state = self;
         state.done.set(true);
+        algolia_events::finished_jig(self.jig_id);
         if let Some(token) = state.play_token.clone() {
             spawn_local(clone!(state => async move {
                 let req = PlayerSessionInstanceCompleteRequest {
@@ -294,6 +295,8 @@ impl JigPlayer {
             state.load_jig_playlists().await;
             state.load_jig().await;
         }));
+
+        algolia_events::viewed_jig(self.jig_id);
     }
 
     async fn load_jig(self: &Rc<Self>) {

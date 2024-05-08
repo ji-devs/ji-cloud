@@ -1,6 +1,7 @@
 //see: https://github.com/rust-lang/cargo/issues/8010
 
 pub mod ages;
+pub mod algolia_events;
 pub mod api_helpers;
 pub mod asset;
 pub mod block_context_menu;
