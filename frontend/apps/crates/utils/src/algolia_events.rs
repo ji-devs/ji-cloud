@@ -30,12 +30,10 @@ fn send_event(data: impl Serialize + 'static) {
 }
 
 pub fn viewed_jig(jig_id: JigId) {
-    let user_id = get_user_id().unwrap();
     let mut data = serde_json::json!({
         "eventType": "click",
         "eventName": "JIG opened",
         "index": JIG_INDEX,
-        "userToken": user_id.to_string(),
         "objectIDs": [jig_id.to_string()],
     });
     if let Some(user_id) = get_user_id() {
@@ -50,12 +48,10 @@ pub fn viewed_jig(jig_id: JigId) {
 }
 
 pub fn finished_jig(jig_id: JigId) {
-    let user_id = get_user_id().unwrap();
     let mut data = serde_json::json!({
         "eventType": "convertedObjectIDs",
         "eventName": "JIG played",
         "index": JIG_INDEX,
-        "userToken": user_id.to_string(),
         "objectIDs": [jig_id.to_string()],
     });
     if let Some(user_id) = get_user_id() {
