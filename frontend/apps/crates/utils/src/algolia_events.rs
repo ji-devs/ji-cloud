@@ -46,7 +46,7 @@ impl UserToken {
     fn get_unauthenticated_id() -> String {
         let storage = get_session_storage().unwrap_ji();
         storage.get(UNAUTHENTICATED).unwrap_ji().unwrap_or_else(|| {
-            let token = js_sys::Math::random().to_string();
+            let token = js_sys::Math::random().to_string().replace(".", "");
             storage.set(UNAUTHENTICATED, &token).unwrap_ji();
             token
         })
