@@ -49,8 +49,8 @@ pub fn viewed_jig(jig_id: JigId) {
 
 pub fn finished_jig(jig_id: JigId) {
     let mut data = serde_json::json!({
-        "eventType": "convertedObjectIDs",
-        "eventName": "JIG played",
+        "eventType": "conversion",
+        "eventName": "JIG finished",
         "index": JIG_INDEX,
         "objectIDs": [jig_id.to_string()],
     });
