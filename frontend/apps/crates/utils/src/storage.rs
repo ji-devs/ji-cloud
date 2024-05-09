@@ -35,3 +35,10 @@ pub fn get_local_storage() -> Result<Storage, JsValue> {
         .local_storage()?
         .ok_or_else(|| JsValue::from_str("could not get local storage!"))
 }
+
+pub fn get_session_storage() -> Result<Storage, JsValue> {
+    window()
+        .unwrap_ji()
+        .session_storage()?
+        .ok_or_else(|| JsValue::from_str("could not get session storage!"))
+}
