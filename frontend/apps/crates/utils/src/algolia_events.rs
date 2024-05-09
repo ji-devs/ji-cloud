@@ -70,12 +70,12 @@ pub fn viewed_jig(jig_id: JigId) {
             data.as_object_mut()
                 .unwrap()
                 .insert("authenticatedUserToken".into(), user_id.to_string().into());
-        },
+        }
         UserToken::Unauthenticated(user_id) => {
             data.as_object_mut()
                 .unwrap()
                 .insert("userToken".into(), user_id.to_string().into());
-        },
+        }
     }
     let data = serde_json::json!({
         "events": [data],
@@ -95,12 +95,12 @@ pub fn finished_jig(jig_id: JigId) {
             data.as_object_mut()
                 .unwrap()
                 .insert("authenticatedUserToken".into(), user_id.to_string().into());
-        },
+        }
         UserToken::Unauthenticated(user_id) => {
             data.as_object_mut()
                 .unwrap()
                 .insert("userToken".into(), user_id.to_string().into());
-        },
+        }
     }
     let data = serde_json::json!({
         "events": [data],
