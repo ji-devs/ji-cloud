@@ -30,7 +30,7 @@ pub const PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT: i64 = 20;
 /// Individual plan trial period in days
 pub const INDIVIDUAL_TRIAL_PERIOD: i64 = 7;
 /// Schools plan trial period in days
-pub const SCHOOL_TRIAL_PERIOD: i64 = 30;
+pub const SCHOOL_TRIAL_PERIOD: i64 = 14;
 
 /// Plan price monthly-basic
 pub const PLAN_PRICE_MONTHLY_BASIC: u32 = 17_99;
