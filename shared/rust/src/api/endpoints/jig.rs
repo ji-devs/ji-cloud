@@ -2,7 +2,14 @@ use crate::{
     api::Method,
     domain::{
         jig::{
-            GetJigPlaylistsPath, GetJigPlaylistsResponse, JigAdminDataUpdatePath, JigAdminTransferRequest, JigBrowsePath, JigBrowseQuery, JigBrowseResponse, JigClonePath, JigCountPath, JigCountResponse, JigCoverPath, JigCreatePath, JigCreateRequest, JigDeleteAllPath, JigDeletePath, JigGetDraftPath, JigGetLivePath, JigId, JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath, JigPublishPath, JigResponse, JigSearchPath, JigSearchQuery, JigSearchResponse, JigTransferAdminPath, JigTrendingPath, JigTrendingResponse, JigUnlikePath, JigUpdateAdminDataRequest, JigUpdateDraftDataPath, JigUpdateDraftDataRequest
+            GetJigPlaylistsPath, GetJigPlaylistsResponse, JigAdminDataUpdatePath,
+            JigAdminTransferRequest, JigBrowsePath, JigBrowseQuery, JigBrowseResponse,
+            JigClonePath, JigCountPath, JigCountResponse, JigCoverPath, JigCreatePath,
+            JigCreateRequest, JigDeleteAllPath, JigDeletePath, JigGetDraftPath, JigGetLivePath,
+            JigId, JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath, JigPublishPath,
+            JigResponse, JigSearchPath, JigSearchQuery, JigSearchResponse, JigTransferAdminPath,
+            JigTrendingPath, JigTrendingResponse, JigUnlikePath, JigUpdateAdminDataRequest,
+            JigUpdateDraftDataPath, JigUpdateDraftDataRequest,
         },
         CreateResponse,
     },
