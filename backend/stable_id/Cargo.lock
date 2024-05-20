@@ -1905,6 +1905,7 @@ dependencies = [
  "macros",
  "mime",
  "mp3-metadata",
+ "once_cell",
  "openssl",
  "paseto",
  "percent-encoding",

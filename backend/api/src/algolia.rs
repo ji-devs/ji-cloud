@@ -1868,6 +1868,8 @@ fn media_filter(kind: MediaGroupKind, invert: bool) -> CommonFilter<FacetFilter>
 #[derive(Clone)]
 pub struct Client {
     inner: Inner,
+    application_id: String,
+    search_key: String,
     media_index: String,
     jig_index: String,
     resource_index: String,
@@ -1881,10 +1883,11 @@ pub struct Client {
 impl Client {
     pub fn new(settings: Option<AlgoliaSettings>) -> anyhow::Result<Option<Self>> {
         if let Some(settings) = settings {
-            let app_id = algolia::AppId::new(settings.application_id);
+            let app_id = algolia::AppId::new(settings.application_id.clone());
 
             let (
                 inner,
+                search_key,
                 media_index,
                 jig_index,
                 resource_index,
@@ -1905,7 +1908,7 @@ impl Client {
                 settings.course_index,
             ) {
                 (
-                    Some(key),
+                    Some(search_key),
                     Some(media_index),
                     Some(jig_index),
                     Some(resource_index),
@@ -1915,7 +1918,8 @@ impl Client {
                     Some(user_index),
                     Some(course_index),
                 ) => (
-                    Inner::new(app_id, ApiKey(key))?,
+                    Inner::new(app_id.clone(), ApiKey(search_key.clone()))?,
+                    search_key,
                     media_index,
                     jig_index,
                     resource_index,
@@ -1929,6 +1933,8 @@ impl Client {
             };
 
             Ok(Some(Self {
+                search_key,
+                application_id: settings.application_id,
                 inner,
                 media_index,
                 jig_index,
@@ -2048,7 +2054,7 @@ impl Client {
         page_limit: u32,
         blocked: Option<bool>,
         is_rated: Option<bool>,
-    ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
+    ) -> anyhow::Result<Option<(Vec<JigId>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
         if let Some(author_id) = author_id {
@@ -2751,5 +2757,17 @@ impl Client {
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(Some((results, pages, total_hits)))
+    }
+
+    pub fn application_id(&self) -> &str {
+        &self.application_id
+    }
+
+    pub fn jig_index(&self) -> &str {
+        &self.jig_index
+    }
+
+    pub fn search_key(&self) -> &str {
+        &self.search_key
     }
 }

@@ -4,7 +4,7 @@ use actix_web::{
 };
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
-use shared::domain::user::UserScope;
+use shared::domain::{jig::JigTrendingResponse, user::UserScope};
 use shared::{
     api::{endpoints::jig, ApiEndpoint, PathParts},
     domain::{
@@ -24,9 +24,10 @@ use uuid::Uuid;
 
 use crate::{
     db::{self, jig::CreateJigError},
-    error::{self},
+    error,
     extractor::{get_user_id, ScopeAdmin, TokenUser, TokenUserWithScope},
     service::ServiceData,
+    trending,
 };
 
 mod codes;
@@ -337,6 +338,23 @@ async fn search(
     }))
 }
 
+/// Trending jigs.
+#[instrument(skip_all)]
+async fn trending(
+    db: Data<PgPool>,
+    claims: Option<TokenUser>,
+    algolia: ServiceData<crate::algolia::Client>,
+) -> Result<Json<<jig::Trending as ApiEndpoint>::Res>, ServiceError> {
+    let user_id = claims.map(|c| c.user_id());
+    let ids = trending::get_trending(algolia).await?;
+
+    let jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, user_id)
+        .await
+        .into_anyhow()?;
+
+    Ok(Json(JigTrendingResponse { jigs }))
+}
+
 /// Update a JIG's admin data.
 async fn update_admin_data(
     db: Data<PgPool>,
@@ -548,6 +566,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <jig::Search as ApiEndpoint>::Path::PATH,
         jig::Search::METHOD.route().to(search),
+    )
+    .route(
+        <jig::Trending as ApiEndpoint>::Path::PATH,
+        jig::Trending::METHOD.route().to(trending),
     )
     .route(
         <jig::UpdateDraftData as ApiEndpoint>::Path::PATH,

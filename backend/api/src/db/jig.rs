@@ -336,7 +336,7 @@ from jig_data
 #[instrument(skip(db))]
 pub async fn get_by_ids(
     db: &PgPool,
-    ids: &[Uuid],
+    ids: &[JigId],
     draft_or_live: DraftOrLive,
     user_id: Option<UserId>,
 ) -> sqlx::Result<Vec<JigResponse>> {
@@ -372,7 +372,7 @@ from jig
     inner join jig_admin_data "admin" on admin.jig_id = jig.id
     order by ord asc
     "#,
-        ids,
+        &ids.iter().map(|i| i.0).collect::<Vec<Uuid>>(),
         user_id.map(|x| x.0)
     )
     .fetch_all(&mut txn)

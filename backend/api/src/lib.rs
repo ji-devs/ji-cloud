@@ -46,6 +46,7 @@ pub mod service;
 pub mod stripe;
 pub mod token;
 pub mod translate;
+pub mod trending;
 
 // // todo: make this configurable?
 // const ARGON2_DEFAULT_PARAMS: argon2::Params = argon2::Params {

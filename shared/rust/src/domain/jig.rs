@@ -751,6 +751,16 @@ pub struct JigSearchResponse {
     pub total_jig_count: u64,
 }
 
+make_path_parts!(JigTrendingPath => "/v1/jig/trending");
+
+/// Response for request for trending.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JigTrendingResponse {
+    /// the jigs returned.
+    pub jigs: Vec<JigResponse>,
+}
+
 /// Response for successfully finding the draft of a jig.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
