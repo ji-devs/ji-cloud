@@ -4,6 +4,7 @@ use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
 use components::{
+    asset_card::{render_asset_card, AssetCardConfig},
     page_footer,
     page_header::{PageHeader, PageHeaderConfig, PageLinks},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
@@ -29,6 +30,32 @@ impl Home {
             }))
             .children(&mut [
                 search_section::render(state.clone(), auto_search),
+                html!("div", {
+                    .style("display", "grid")
+                    .child(html!("div", {
+                        .style("overflow-x", "auto")
+                        .style("padding", "32px")
+                        .style("display", "grid")
+                        .style("grid-auto-flow", "column")
+                        .style("justify-content", "start")
+                        .style("gap", "24px")
+                        .style("scrollbar-color", "var(--light-gray-2) transparent")
+                        .style("scrollbar-width", "thin")
+                        .children_signal_vec(state.trending.signal_cloned().map(|trending| {
+                            match trending {
+                                None => vec![html!("progress")],
+                                Some(trending) => {
+                                    trending.into_iter().map(|jig| {
+                                        render_asset_card(&jig.into(), AssetCardConfig {
+                                            dense: true,
+                                            ..Default::default()
+                                        })
+                                    }).collect()
+                                },
+                            }
+                        }).to_signal_vec())
+                    }))
+                }),
                 html!("empty-fragment", {
                     .child_signal(state.mode.signal_cloned().map(move |mode| {
                         match mode {
