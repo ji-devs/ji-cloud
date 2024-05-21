@@ -144,6 +144,6 @@ video-youtube-player {
     background-color: var(--light-gray-3);
 }
 * {
-    scrollbar-color: var(--light-gray-2) var(--light-gray-2);
+    scrollbar-color: var(--light-gray-2) transparent;
     scrollbar-width: thin;
 }
