@@ -7,8 +7,8 @@ use super::super::{
     state::Home,
 };
 
-pub fn render(state: Rc<Home>, auto_search: bool) -> Dom {
-    fetch_data(state.clone(), auto_search);
+pub fn render(state: Rc<Home>, is_search: bool) -> Dom {
+    fetch_data(state.clone(), is_search);
 
     html!("home-search-section", {
         .prop_signal("mode", state.mode.signal_cloned().map(|mode| mode.to_string()))

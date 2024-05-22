@@ -1,6 +1,7 @@
 use dominator::{clone, html, Dom};
-use futures_signals::signal::SignalExt;
-use utils::events;
+use futures_signals::signal::{Signal, SignalExt};
+use shared::domain::jig::JigResponse;
+use utils::{events, init::user::is_user_set};
 
 use std::rc::Rc;
 
@@ -19,7 +20,7 @@ mod search_section;
 use iframe::Iframe;
 
 impl Home {
-    pub fn render(self: Rc<Self>, auto_search: bool) -> Dom {
+    pub fn render(self: Rc<Self>, is_search: bool) -> Dom {
         let state = self;
         html!("home-full", {
             .child_signal(state.mode.signal_ref(|mode| {
@@ -29,60 +30,20 @@ impl Home {
                     ..Default::default()
                 }).render())
             }))
-            .child(search_section::render(state.clone(), auto_search))
-            .child_signal(state.mode.signal_ref(clone!(state => move |mode| {
+            .child(search_section::render(state.clone(), is_search))
+            .children_signal_vec(state.mode.signal_cloned().map(clone!(state => move |mode| {
                 match mode {
-                    HomePageMode::Search(_) => None,
+                    HomePageMode::Search(_) => vec![],
                     HomePageMode::Home => {
-                        Some(html!("div", {
-                            .style("display", "grid")
-                            .child(html!("h3", {
-                                .style("color", "#fd7076")
-                                .style("font-weight", "600")
-                                .style("font-size", "24px")
-                                .style("margin", "0")
-                                .style("padding", "24px")
-                                .style("padding-bottom", "0")
-                                .text("Trending JIGs")
-                            }))
-                            .child(html!("div", {
-                                .style("overflow-x", "auto")
-                                .style("padding", "24px")
-                                .style("display", "grid")
-                                .style("grid-auto-flow", "column")
-                                .style("justify-content", "start")
-                                .style("gap", "24px")
-                                .style("scrollbar-color", "var(--light-gray-2) transparent")
-                                .style("scrollbar-width", "thin")
-                                .children_signal_vec(state.trending.signal_cloned().map(clone!(state => move |trending| {
-                                    match trending {
-                                        None => vec![html!("progress")],
-                                        Some(trending) => {
-                                            trending.into_iter().map(|jig| {
-                                                let jig_id = jig.id;
-                                                html!("div", {
-                                                    .style("cursor", "pointer")
-                                                    .child(render_asset_card(
-                                                        &jig.into(),
-                                                        AssetCardConfig {
-                                                            bottom_indicator: AssetCardBottomIndicator::Author,
-                                                            dense: true,
-                                                            ..Default::default()
-                                                        }
-                                                    ))
-                                                    .event(clone!(state => move |_: events::Click| {
-                                                        state.play_asset.set(Some(jig_id.into()));
-                                                    }))
-                                                })
-                                            }).collect()
-                                        },
-                                    }
-                                })).to_signal_vec())
-                            }))
-                        }))
+                        let mut divs = vec![];
+                        divs.push(state.render_strip("Trending JIGs", state.trending.signal_cloned()));
+                        if is_user_set() {
+                            divs.push(state.render_strip("Recently liked", state.liked.signal_cloned()));
+                        }
+                        divs
                     }
                 }
-            })))
+            })).to_signal_vec())
             .child(html!("empty-fragment", {
                 .child_signal(state.mode.signal_cloned().map(move |mode| {
                     match mode {
@@ -108,6 +69,60 @@ impl Home {
                     ).render(None)
                 })
             })))
+        })
+    }
+
+    pub fn render_strip(
+        self: &Rc<Self>,
+        heading: &str,
+        jigs_signal: impl Signal<Item = Option<Vec<JigResponse>>> + 'static,
+    ) -> Dom {
+        let state = self;
+        html!("div", {
+            .style("display", "grid")
+            .child(html!("h3", {
+                .style("color", "#fd7076")
+                .style("font-weight", "600")
+                .style("font-size", "24px")
+                .style("margin", "0")
+                .style("padding", "24px")
+                .style("padding-bottom", "0")
+                .text(heading)
+            }))
+            .child(html!("div", {
+                .style("overflow-x", "auto")
+                .style("padding", "24px")
+                .style("display", "grid")
+                .style("grid-auto-flow", "column")
+                .style("justify-content", "start")
+                .style("gap", "24px")
+                .style("scrollbar-color", "var(--light-gray-2) transparent")
+                .style("scrollbar-width", "thin")
+                .children_signal_vec(jigs_signal.map(clone!(state => move |trending| {
+                    match trending {
+                        None => vec![html!("progress")],
+                        Some(trending) => {
+                            trending.into_iter().map(|jig| {
+                                let jig_id = jig.id;
+                                html!("div", {
+                                    .style("cursor", "pointer")
+                                    .child(render_asset_card(
+                                        &jig.into(),
+                                        AssetCardConfig {
+                                            bottom_indicator: AssetCardBottomIndicator::Author,
+                                            dense: true,
+                                            ..Default::default()
+                                        }
+                                    ))
+                                    .event(clone!(state => move |_: events::Click| {
+                                        state.play_asset.set(Some(jig_id.into()));
+                                    }))
+                                })
+                            }).collect()
+                        },
+                    }
+                })).to_signal_vec())
+            }))
         })
     }
 }
