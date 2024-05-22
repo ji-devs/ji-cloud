@@ -9,7 +9,8 @@ use crate::{
             JigId, JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath, JigPublishPath,
             JigResponse, JigSearchPath, JigSearchQuery, JigSearchResponse, JigTransferAdminPath,
             JigTrendingPath, JigTrendingResponse, JigUnlikePath, JigUpdateAdminDataRequest,
-            JigUpdateDraftDataPath, JigUpdateDraftDataRequest,
+            JigUpdateDraftDataPath, JigUpdateDraftDataRequest, ListLikedPath, ListLikedRequest,
+            ListLikedResponse,
         },
         CreateResponse,
     },
@@ -149,6 +150,16 @@ impl ApiEndpoint for Trending {
     type Req = ();
     type Res = JigTrendingResponse;
     type Path = JigTrendingPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+
+/// List user's liked JIGs.
+pub struct ListLiked;
+impl ApiEndpoint for ListLiked {
+    type Req = ListLikedRequest;
+    type Res = ListLikedResponse;
+    type Path = ListLikedPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }

@@ -4,7 +4,10 @@ use actix_web::{
 };
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
-use shared::domain::{jig::JigTrendingResponse, user::UserScope};
+use shared::domain::{
+    jig::{JigTrendingResponse, ListLikedResponse},
+    user::UserScope,
+};
 use shared::{
     api::{endpoints::jig, ApiEndpoint, PathParts},
     domain::{
@@ -431,6 +434,26 @@ async fn unlike(
     Ok(HttpResponse::NoContent().finish())
 }
 
+/// Get users liked jigs
+async fn list_liked(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    query: Option<Query<<jig::Browse as ApiEndpoint>::Req>>,
+) -> Result<Json<<jig::ListLiked as ApiEndpoint>::Res>, error::Server> {
+    let user_id = claims.user_id();
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let page_limit = page_limit(query.page_limit).await?;
+
+    let ids = db::jig::list_liked(&*db, user_id, query.page.unwrap_or(0), page_limit).await?;
+
+    let jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, Some(user_id))
+        .await
+        .into_anyhow()?;
+
+    Ok(Json(ListLikedResponse { jigs }))
+}
+
 /// Add a play to a jig
 async fn play(db: Data<PgPool>, path: web::Path<JigId>) -> Result<HttpResponse, error::NotFound> {
     db::jig::jig_play(&*db, path.into_inner()).await?;
@@ -462,7 +485,9 @@ pub(crate) async fn page_limit(page_limit: Option<u32>) -> anyhow::Result<u32> {
     if let Some(limit) = page_limit {
         match limit > 0 && limit <= MAX_PAGE_LIMIT {
             true => Ok(limit),
-            false => Err(anyhow::anyhow!("Page limit should be within 1-100")),
+            false => Err(anyhow::anyhow!(
+                "Page limit should be within 1-{MAX_PAGE_LIMIT}"
+            )),
         }
     } else {
         Ok(DEFAULT_PAGE_LIMIT)
@@ -570,6 +595,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <jig::Trending as ApiEndpoint>::Path::PATH,
         jig::Trending::METHOD.route().to(trending),
+    )
+    .route(
+        <jig::ListLiked as ApiEndpoint>::Path::PATH,
+        jig::ListLiked::METHOD.route().to(list_liked),
     )
     .route(
         <jig::UpdateDraftData as ApiEndpoint>::Path::PATH,

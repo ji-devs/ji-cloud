@@ -15409,6 +15409,28 @@
     },
     "query": "\n        with cte as (\n            select (array_agg(course.id))[1]\n            from course_data \"cd\"\n                  inner join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join course_admin_data \"admin\" on admin.course_id = course.id\n                  left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (blocked = $5 or $5 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n"
   },
+  "e9c111c270b73f07f798be13ab0bd94518ee730997e60f7781cc81601aa5af72": {
+    "describe": {
+      "columns": [
+        {
+          "name": "jig_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n        select jig_id\n        from jig_like\n        where user_id = $1\n        order by created_at desc\n        offset $2\n        limit $3\n        \n    "
+  },
   "e9f633a72fa4fad7e52f4dd94aa9c6d1c2fd6b3f256fd21248297f254a5fbb79": {
     "describe": {
       "columns": [],
