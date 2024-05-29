@@ -38,9 +38,11 @@ pub fn fetch_data(state: Rc<Home>, is_search: bool) {
                     fetch_total_jigs_count(Rc::clone(&state)),
                     fetch_profile(Rc::clone(&state)),
                     fetch_trending(Rc::clone(&state)),
-                    fetch_liked(Rc::clone(&state)),
                     fetch_featured(Rc::clone(&state)),
                 );
+                if is_user_set() {
+                    fetch_liked(Rc::clone(&state)).await;
+                }
             },
         };
     }));
