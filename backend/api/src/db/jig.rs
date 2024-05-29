@@ -1707,6 +1707,51 @@ pub async fn list_liked(
     Ok(rows.into_iter().map(|row| JigId(row.jig_id)).collect())
 }
 
+pub async fn featured(db: &PgPool) -> sqlx::Result<Vec<JigId>> {
+    let rows = sqlx::query!(
+        r#"
+        select jig_id
+        from featured_jigs
+        order by index
+    "#
+    )
+    .fetch_all(db)
+    .await?;
+
+    Ok(rows.into_iter().map(|row| JigId(row.jig_id)).collect())
+}
+
+pub async fn update_featured(db: &PgPool, jigs: Vec<JigId>) -> sqlx::Result<()> {
+    let mut txn = db.begin().await?;
+
+    sqlx::query!(
+        r#"
+        truncate table featured_jigs
+    "#
+    )
+    .execute(&mut txn)
+    .await?;
+
+    for (i, jig) in jigs.into_iter().enumerate() {
+        sqlx::query!(
+            r#"
+            insert into featured_jigs
+                (jig_id, index)
+            values
+                ($1, $2)
+        "#,
+            jig.0,
+            i as i32
+        )
+        .execute(&mut txn)
+        .await?;
+    }
+
+    txn.commit().await?;
+
+    Ok(())
+}
+
 #[instrument(skip(db))]
 pub async fn get_jig_playlists(
     db: &sqlx::Pool<sqlx::Postgres>,

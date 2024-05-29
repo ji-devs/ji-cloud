@@ -5,9 +5,10 @@ use crate::{
             GetJigPlaylistsPath, GetJigPlaylistsResponse, JigAdminDataUpdatePath,
             JigAdminTransferRequest, JigBrowsePath, JigBrowseQuery, JigBrowseResponse,
             JigClonePath, JigCountPath, JigCountResponse, JigCoverPath, JigCreatePath,
-            JigCreateRequest, JigDeleteAllPath, JigDeletePath, JigGetDraftPath, JigGetLivePath,
-            JigId, JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath, JigPublishPath,
-            JigResponse, JigSearchPath, JigSearchQuery, JigSearchResponse, JigTransferAdminPath,
+            JigCreateRequest, JigDeleteAllPath, JigDeletePath, JigFeaturedPath,
+            JigFeaturedResponse, JigFeaturedUpdateRequest, JigGetDraftPath, JigGetLivePath, JigId,
+            JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath, JigPublishPath, JigResponse,
+            JigSearchPath, JigSearchQuery, JigSearchResponse, JigTransferAdminPath,
             JigTrendingPath, JigTrendingResponse, JigUnlikePath, JigUpdateAdminDataRequest,
             JigUpdateDraftDataPath, JigUpdateDraftDataRequest, ListLikedPath, ListLikedRequest,
             ListLikedResponse,
@@ -162,6 +163,26 @@ impl ApiEndpoint for ListLiked {
     type Path = ListLikedPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
+}
+
+/// Featured JIGs.
+pub struct Featured;
+impl ApiEndpoint for Featured {
+    type Req = ();
+    type Res = JigFeaturedResponse;
+    type Path = JigFeaturedPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+
+/// Update featured JIGs.
+pub struct FeaturedUpdate;
+impl ApiEndpoint for FeaturedUpdate {
+    type Req = JigFeaturedUpdateRequest;
+    type Res = ();
+    type Path = JigFeaturedPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Put;
 }
 
 /// Clone a JIG. This clones both the draft and live.

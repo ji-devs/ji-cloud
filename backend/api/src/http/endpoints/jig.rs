@@ -5,7 +5,7 @@ use actix_web::{
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
 use shared::domain::{
-    jig::{JigTrendingResponse, ListLikedResponse},
+    jig::{JigFeaturedResponse, JigTrendingResponse, ListLikedResponse},
     user::UserScope,
 };
 use shared::{
@@ -358,6 +358,36 @@ async fn trending(
     Ok(Json(JigTrendingResponse { jigs }))
 }
 
+/// Featured jigs.
+async fn featured(
+    db: Data<PgPool>,
+    claims: Option<TokenUser>,
+) -> Result<Json<<jig::Featured as ApiEndpoint>::Res>, error::Server> {
+    let user_id = claims.map(|c| c.user_id());
+    let ids = db::jig::featured(&*db).await?;
+
+    let jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, user_id)
+        .await
+        .into_anyhow()?;
+
+    Ok(Json(JigFeaturedResponse { jigs }))
+}
+
+/// Update featured jigs.
+async fn update_featured(
+    db: Data<PgPool>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    req: Json<<jig::FeaturedUpdate as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, error::NotFound> {
+    let req = req.into_inner();
+
+    db::jig::update_featured(&*db, req.jigs)
+        .await
+        .map_err(|_| error::NotFound::ResourceNotFound)?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 /// Update a JIG's admin data.
 async fn update_admin_data(
     db: Data<PgPool>,
@@ -599,6 +629,14 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <jig::ListLiked as ApiEndpoint>::Path::PATH,
         jig::ListLiked::METHOD.route().to(list_liked),
+    )
+    .route(
+        <jig::Featured as ApiEndpoint>::Path::PATH,
+        jig::Featured::METHOD.route().to(featured),
+    )
+    .route(
+        <jig::FeaturedUpdate as ApiEndpoint>::Path::PATH,
+        jig::FeaturedUpdate::METHOD.route().to(update_featured),
     )
     .route(
         <jig::UpdateDraftData as ApiEndpoint>::Path::PATH,

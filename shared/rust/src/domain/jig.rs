@@ -777,6 +777,25 @@ pub struct ListLikedRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
 }
+
+make_path_parts!(JigFeaturedPath => "/v1/jig/featured");
+
+/// Response for request for featured.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JigFeaturedResponse {
+    /// the jigs returned.
+    pub jigs: Vec<JigResponse>,
+}
+
+/// Request for request for featured.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JigFeaturedUpdateRequest {
+    /// the jigs to feature.
+    pub jigs: Vec<JigId>,
+}
+
 /// Response for request for list of liked jigs.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
