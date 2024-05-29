@@ -15,7 +15,7 @@ lazy_static! {
 }
 
 thread_local! {
-    static TOASTS: MutableVec<(i64, Toast)> = Default::default();
+    static TOASTS: MutableVec<(String, Toast)> = Default::default();
 }
 
 pub fn success(s: &'static str) {
@@ -78,9 +78,9 @@ impl Toast {
         if !*INITIALIZED.lock().unwrap_ji() {
             init();
         }
-        let id = js_sys::Math::random() as i64;
+        let id = js_sys::Math::random().to_string();
         TOASTS.with(|toasts| {
-            toasts.lock_mut().push_cloned((id, self));
+            toasts.lock_mut().push_cloned((id.clone(), self));
         });
         Timeout::new(6_000, move || {
             TOASTS.with(|toasts| {

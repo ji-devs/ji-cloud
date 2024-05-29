@@ -14,6 +14,7 @@ export type ID =
     | "schools"
     | "category"
     | "image-tags"
+    | "featured-jigs"
     | "export";
 
 const STR_LABEL_LOOKUP: { [key in ID]: string } = {
@@ -29,6 +30,7 @@ const STR_LABEL_LOOKUP: { [key in ID]: string } = {
     "schools": "Schools",
     "category": "Edit categories",
     "locale": "Localization",
+    "featured-jigs": "Featured jigs",
     "export": "Export",
 };
 

@@ -26,6 +26,7 @@ impl Sidebar {
             .signal_ref(move |profile| match profile {
                 None => Vec::new(),
                 Some(profile) => vec![
+                    SidebarItem::new(AdminRoute::FeaturedJigs, profile, &curr_route),
                     SidebarItem::new(AdminRoute::Images, profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageAdd, profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageSearch(None), profile, &curr_route),
@@ -83,6 +84,7 @@ impl SidebarItem {
         curr_route: &AdminRoute,
     ) -> Rc<Self> {
         let id = match target_route {
+            AdminRoute::FeaturedJigs => "featured-jigs",
             AdminRoute::Categories => "category",
             AdminRoute::Locale => "locale",
             AdminRoute::ImageAdd => "image-add",

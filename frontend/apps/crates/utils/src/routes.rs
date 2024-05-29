@@ -193,6 +193,7 @@ pub enum ClassroomCodesRoute {
 #[derive(Debug, Clone)]
 pub enum AdminRoute {
     Landing,
+    FeaturedJigs,
     Categories,
     Locale,
     JigCuration(AdminJigCurationRoute),
@@ -259,6 +260,7 @@ impl AdminRoute {
 
         match self {
             Self::Landing => true,
+            Self::FeaturedJigs => scopes.contains(&UserScope::Admin),
             Self::Categories => scopes.contains(&UserScope::ManageCategory),
             Self::Locale => false,
             Self::JigCuration(_) => scopes.contains(&UserScope::AdminAsset),
@@ -563,6 +565,7 @@ impl Route {
                 Self::User(UserRoute::Subscribe2(plan_type, params, promo))
             }
             ["user", "welcome"] => Self::User(UserRoute::Welcome),
+            ["admin", "features-jigs"] => Self::Admin(AdminRoute::FeaturedJigs),
             ["admin", "jig-curation"] => {
                 Self::Admin(AdminRoute::JigCuration(AdminJigCurationRoute::Table))
             }
@@ -963,6 +966,7 @@ impl From<&Route> for String {
             },
             Route::Admin(route) => match route {
                 AdminRoute::Landing => "/admin".to_string(),
+                AdminRoute::FeaturedJigs => "/admin/features-jigs".to_string(),
                 AdminRoute::JigCuration(curation_route) => match curation_route {
                     AdminJigCurationRoute::Table => "/admin/jig-curation".to_string(),
                     AdminJigCurationRoute::Jig(jig_id) => {

@@ -16,7 +16,6 @@ use futures_signals::{
     signal::{Mutable, SignalExt},
 };
 
-use crate::course_curation::CourseCuration;
 use crate::playlist_curation::PlaylistCuration;
 use crate::{
     categories::dom::CategoriesPage,
@@ -33,6 +32,7 @@ use crate::{
     sidebar::Sidebar,
     users::Users,
 };
+use crate::{course_curation::CourseCuration, featured_jigs::FeaturedJigs};
 use std::cell::RefCell;
 
 pub struct Router {
@@ -106,6 +106,7 @@ impl Router {
                                         } else {
                                             match route.clone() {
                                                 AdminRoute::Landing => Some(state.with_child(route, html!("empty-fragment"))),
+                                                AdminRoute::FeaturedJigs => Some(state.with_child(route, FeaturedJigs::new().render())),
                                                 AdminRoute::Categories=> Some(state.with_child(route, CategoriesPage::render())),
                                                 AdminRoute::Locale => {
                                                     let app_state = Rc::new(LocaleLoaderState::new());
