@@ -37,8 +37,9 @@ impl Home {
                     HomePageMode::Home => {
                         let mut divs = vec![];
                         divs.push(state.render_strip("Trending JIGs", state.trending.signal_cloned()));
+                        divs.push(state.render_strip("Featured JIGs", state.featured.signal_cloned()));
                         if is_user_set() {
-                            divs.push(state.render_strip("Recently liked", state.liked.signal_cloned()));
+                            divs.push(state.render_strip("My likes", state.liked.signal_cloned()));
                         }
                         divs
                     }

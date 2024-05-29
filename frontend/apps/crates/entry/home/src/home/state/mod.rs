@@ -25,6 +25,7 @@ pub struct Home {
     pub total_assets_count: Mutable<u64>,
     pub play_asset: Mutable<Option<AssetId>>,
     pub trending: Mutable<Option<Vec<JigResponse>>>,
+    pub featured: Mutable<Option<Vec<JigResponse>>>,
     pub liked: Mutable<Option<Vec<JigResponse>>>,
 }
 
@@ -52,6 +53,7 @@ impl Home {
             total_assets_count: Mutable::new(0),
             play_asset: Mutable::new(None),
             trending: Mutable::new(None),
+            featured: Mutable::new(None),
             liked: Mutable::new(None),
         }
     }

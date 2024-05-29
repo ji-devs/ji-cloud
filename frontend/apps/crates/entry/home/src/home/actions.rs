@@ -6,7 +6,7 @@ use futures::join;
 
 use shared::{
     api::endpoints,
-    domain::jig::{JigSearchPath, JigTrendingPath, ListLikedPath},
+    domain::jig::{JigFeaturedPath, JigSearchPath, JigTrendingPath, ListLikedPath},
 };
 use std::{collections::HashMap, rc::Rc};
 use utils::{bail_on_err, init::analytics, metadata::get_age_ranges, prelude::*};
@@ -39,6 +39,7 @@ pub fn fetch_data(state: Rc<Home>, is_search: bool) {
                     fetch_profile(Rc::clone(&state)),
                     fetch_trending(Rc::clone(&state)),
                     fetch_liked(Rc::clone(&state)),
+                    fetch_featured(Rc::clone(&state)),
                 );
             },
         };
@@ -72,6 +73,14 @@ async fn fetch_trending(state: Rc<Home>) {
         .toast_on_err();
     let res = bail_on_err!(res);
     state.trending.set(Some(res.jigs));
+}
+
+async fn fetch_featured(state: Rc<Home>) {
+    let res = endpoints::jig::Featured::api_with_auth(JigFeaturedPath(), None)
+        .await
+        .toast_on_err();
+    let res = bail_on_err!(res);
+    state.featured.set(Some(res.jigs));
 }
 
 async fn fetch_liked(state: Rc<Home>) {
