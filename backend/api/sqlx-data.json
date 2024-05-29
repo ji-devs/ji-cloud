@@ -1763,6 +1763,19 @@
     },
     "query": "\n        update user_asset_data\n        set course_count = course_count + 1,\n        total_asset_count = total_asset_count + 1\n        from course\n        where author_id = user_id and\n              published_at is null and\n              id = $1"
   },
+  "2263a0934b2b656876e7d2a48faa97cb4d64cdd0b740e3de00fd8810f776f188": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int4"
+        ]
+      }
+    },
+    "query": "\n            insert into featured_jigs\n                (jig_id, index)\n            values\n                ($1, $2)\n        "
+  },
   "2295a177e44e56e84159bf565b08cba996720374985a467cd52f8e1f0669bfe2": {
     "describe": {
       "columns": [
@@ -10467,6 +10480,16 @@
     },
     "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\""
   },
+  "9bfa117ce2cdc10f4f38b76d9b471e89ef7376a85ccc8c9e3cc6350705d29387": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        truncate table featured_jigs\n    "
+  },
   "9c218b9d4f2aece13ee546d440b47c2cfea61bcbaf89a725c4aaf1ae45494103": {
     "describe": {
       "columns": [],
@@ -16405,6 +16428,24 @@
       }
     },
     "query": "\nselect cdm.id          as \"id!: ModuleId\",\n       stable_id   as \"stable_id!: StableModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom playlist_data_module \"cdm\"\ninner join playlist on playlist.draft_id = cdm.playlist_data_id\nwhere cdm.id is not distinct from $1\n"
+  },
+  "f7b5a610be2fd7795e3dd854087338f708e0610f58aeada55bf68ae4162f5bea": {
+    "describe": {
+      "columns": [
+        {
+          "name": "jig_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n        select jig_id\n        from featured_jigs\n        order by index\n    "
   },
   "f86660cf9313cc91d286566bc5f1f07182388bfe2e9efb52ba540e0e952597de": {
     "describe": {
