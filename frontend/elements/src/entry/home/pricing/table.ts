@@ -394,7 +394,7 @@ export class _ extends LitElement {
                         })}
                     </div>
                     <div class="row white">
-                        <div class="cell cell-header">Unlimited access to JIGs, playlists, & resources</div>
+                        <div class="cell cell-header">Unlimited access to JIGs (Jewish Interactive Games), playlists, & resources</div>
                         ${cells(this.kind, {
                             schools: html`
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
