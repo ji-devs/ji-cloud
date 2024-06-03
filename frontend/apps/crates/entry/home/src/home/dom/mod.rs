@@ -1,12 +1,11 @@
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::jig::JigResponse;
-use utils::{events, init::user::is_user_set};
+use utils::init::user::{get_user_id, is_user_set};
 
 use std::rc::Rc;
 
 use components::{
-    asset_card::{render_asset_card, AssetCardBottomIndicator, AssetCardConfig},
     page_footer,
     page_header::{PageHeader, PageHeaderConfig, PageLinks},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
@@ -14,10 +13,13 @@ use components::{
 
 use super::state::{Home, HomePageMode};
 
+mod flippable_asset_card;
 mod home_sections;
 mod iframe;
 mod search_section;
 use iframe::Iframe;
+
+pub use flippable_asset_card::render_flippable_asset_card;
 
 impl Home {
     pub fn render(self: Rc<Self>, is_search: bool) -> Dom {
@@ -79,6 +81,7 @@ impl Home {
         jigs_signal: impl Signal<Item = Option<Vec<JigResponse>>> + 'static,
     ) -> Dom {
         let state = self;
+        let user_id = get_user_id();
         html!("div", {
             .style("display", "grid")
             .child(html!("h3", {
@@ -105,20 +108,9 @@ impl Home {
                         Some(trending) => {
                             trending.into_iter().map(|jig| {
                                 let jig_id = jig.id;
-                                html!("div", {
-                                    .style("cursor", "pointer")
-                                    .child(render_asset_card(
-                                        &jig.into(),
-                                        AssetCardConfig {
-                                            bottom_indicator: AssetCardBottomIndicator::Author,
-                                            dense: true,
-                                            ..Default::default()
-                                        }
-                                    ))
-                                    .event(clone!(state => move |_: events::Click| {
-                                        state.play_asset.set(Some(jig_id.into()));
-                                    }))
-                                })
+                                render_flippable_asset_card(Rc::new(jig.into()), user_id, Box::new(clone!(state => move || {
+                                    state.play_asset.set(Some(jig_id.into()));
+                                })))
                             }).collect()
                         },
                     }
