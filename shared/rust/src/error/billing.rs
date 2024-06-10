@@ -37,6 +37,8 @@ pub enum BillingError {
     InvalidSetupIntentId,
     #[error("No active subscription for user")]
     NoActiveSubscription,
+    #[error("The current subscription is not paused")]
+    SubscriptionNotPaused,
     #[error("No canceled subscription for user")]
     NoCanceledSubscription,
     #[error("Account has an existing subscription")]

@@ -236,6 +236,38 @@ impl SettingsPage {
                         }
                     }
                 })))
+                .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
+                    if let Some(plan_type) = plan_type {
+                        if let BillingInterval::Annually = plan_type.billing_interval() {
+                            return None;
+                        }
+                    }
+                    if !plan_info.status.is_active() && !plan_info.status.is_paused() {
+                        return None;
+                    }
+
+                    Some(html!("button-rect", {
+                        .prop("type", "filled")
+                        .prop("color", "blue")
+                        .text(match plan_info.status.is_paused() {
+                            true => "Resume subscription",
+                            false => "Pause subscription"
+                        })
+                        .event(clone!(state, plan_info => move|_ :events::Click| {
+                            spawn_local(clone!(state, plan_info => async move {
+                                let confirmed = confirm::Confirm {
+                                    title: "Pause subscription".to_string(),
+                                    message: "Are you sure you want to pause your subscription?".to_string(),
+                                    confirm_text: if plan_info.status.is_paused() { "Resume".to_string() } else { "Pause".to_string() },
+                                    cancel_text: "Cancel".to_string()
+                                }.confirm().await;
+                                if confirmed {
+                                    state.set_paused(!plan_info.status.is_paused())
+                                }
+                            }));
+                        }))
+                    }))
+                })))
             }),
         ]
     }

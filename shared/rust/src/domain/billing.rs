@@ -351,6 +351,8 @@ pub enum SubscriptionStatus {
     Canceled = 2,
     /// The subscription is expired.
     Expired = 3,
+    /// The subscription has been paused.
+    Paused = 4,
 }
 
 impl SubscriptionStatus {
@@ -371,6 +373,12 @@ impl SubscriptionStatus {
     #[must_use]
     pub const fn is_canceled(&self) -> bool {
         matches!(self, Self::Canceled)
+    }
+
+    /// Whether the subscription is paused.
+    #[must_use]
+    pub const fn is_paused(&self) -> bool {
+        matches!(self, Self::Paused)
     }
 }
 
@@ -611,6 +619,9 @@ impl TryFrom<stripe::Subscription> for UpdateSubscriptionRecord {
                 SubscriptionStatus::Expired
             } else if value.canceled_at.is_some() {
                 SubscriptionStatus::Canceled
+            } else if value.pause_collection.is_some() {
+                // If we're not receiving payments or issuing invoices, then this subscription is paused
+                SubscriptionStatus::Paused
             } else {
                 SubscriptionStatus::from(value.status)
             }),
@@ -1725,6 +1736,15 @@ pub struct SubscriptionCancellationStatusRequest {
 }
 
 make_path_parts!(UpdateSubscriptionCancellationPath => "/v1/billing/subscription/cancel");
+
+/// Whether a subscription is paused
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SubscriptionPauseRequest {
+    /// Set the cancellation status of a subscription
+    pub paused: bool,
+}
+
+make_path_parts!(UpdateSubscriptionPausedPath => "/v1/billing/subscription/pause");
 
 /// Request to upgrade a subscription plan
 #[derive(Debug, Serialize, Deserialize, Clone)]

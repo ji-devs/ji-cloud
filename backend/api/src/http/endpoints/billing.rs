@@ -7,7 +7,7 @@ use chrono::{TimeZone, Utc};
 use ji_core::settings::RuntimeSettings;
 use shared::api::endpoints::billing::{
     AdminUpgradeSubscriptionPlan, CreateCustomerPortalLink, CreateSetupIntent,
-    UpdateSubscriptionCancellation, UpgradeSubscriptionPlan,
+    UpdateSubscriptionCancellation, UpdateSubscriptionPaused, UpgradeSubscriptionPlan,
 };
 use shared::domain::billing::{
     Account, AccountType, AmountInCents, CancellationStatus, CreateSubscriptionRecord, PlanType,
@@ -34,7 +34,8 @@ use stripe::{
     generated::billing::subscription::SubscriptionProrationBehavior, Client, CreateCustomer,
     CreateSubscription as CreateStripeSubscription, CreateSubscriptionItems, Customer,
     CustomerInvoiceSettings, EventObject, EventType, List, ListPromotionCodes, PromotionCode,
-    PromotionCodeId, SetupIntent, SetupIntentId, UpdateCustomer, UpdateSubscription, Webhook,
+    PromotionCodeId, SetupIntent, SetupIntentId, UpdateCustomer, UpdateSubscription,
+    UpdateSubscriptionPauseCollection, UpdateSubscriptionPauseCollectionBehavior, Webhook,
     WebhookError,
 };
 use tracing::instrument;
@@ -292,6 +293,82 @@ async fn update_subscription_cancel_status(
 
             UpdateSubscription {
                 cancel_at_period_end: Some(false),
+                ..Default::default()
+            }
+        }
+    };
+
+    let updated_subscription =
+        stripe::Subscription::update(&client, &stripe_id, update_subscription).await?;
+
+    db::billing::save_subscription(
+        db.as_ref(),
+        UpdateSubscriptionRecord::try_from(updated_subscription)?,
+    )
+    .await
+    .into_anyhow()?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+#[instrument(skip_all)]
+async fn update_subscription_paused(
+    auth: TokenUser,
+    db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
+    req: Json<<UpdateSubscriptionPaused as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, <UpdateSubscriptionPaused as ApiEndpoint>::Err> {
+    let user_id = auth.user_id();
+    let account = db::account::get_account_by_user_id(db.as_ref(), &user_id)
+        .await?
+        .ok_or_else(|| BillingError::NotFound("User does not have an account".into()))?;
+
+    user_authorization(db.as_ref(), &user_id, &account.account_id)
+        .await
+        .map_err(Into::<BillingError>::into)?
+        .test_authorized(true)?;
+
+    let subscription =
+        db::billing::get_latest_subscription_by_account_id(db.as_ref(), account.account_id)
+            .await
+            .into_anyhow()?
+            .ok_or_else(|| {
+                BillingError::NotFound("User does not have an existing subscription".into())
+            })?;
+
+    let client = create_stripe_client(&settings)?;
+
+    let stripe_id: Result<stripe::SubscriptionId, anyhow::Error> =
+        subscription.stripe_subscription_id.try_into();
+
+    let stripe_id: stripe::SubscriptionId = stripe_id?;
+
+    let update_subscription = match &req.paused {
+        true => {
+            if !subscription.status.is_active() {
+                return Err(BillingError::NoActiveSubscription);
+            }
+
+            UpdateSubscription {
+                pause_collection: Some(UpdateSubscriptionPauseCollection {
+                    behavior: UpdateSubscriptionPauseCollectionBehavior::Void,
+                    resumes_at: None,
+                }),
+                ..Default::default()
+            }
+        }
+        false => {
+            if !subscription.status.is_paused() {
+                return Err(BillingError::NoActiveSubscription);
+            }
+
+            UpdateSubscription {
+                pause_collection: Some(UpdateSubscriptionPauseCollection {
+                    behavior: UpdateSubscriptionPauseCollectionBehavior::Void,
+                    // Resume right now. There is no way to remove the pause_collection using this crate,
+                    // so instead we just set the resumes_at time to right now.
+                    resumes_at: Some(chrono::Utc::now().timestamp()),
+                }),
                 ..Default::default()
             }
         }
@@ -748,6 +825,12 @@ pub fn configure(cfg: &mut ServiceConfig) {
         UpdateSubscriptionCancellation::METHOD
             .route()
             .to(update_subscription_cancel_status),
+    )
+    .route(
+        <UpdateSubscriptionPaused as ApiEndpoint>::Path::PATH,
+        UpdateSubscriptionPaused::METHOD
+            .route()
+            .to(update_subscription_paused),
     )
     .route(
         <UpgradeSubscriptionPlan as ApiEndpoint>::Path::PATH,
