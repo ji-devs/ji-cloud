@@ -2,8 +2,9 @@ use super::ApiEndpoint;
 use crate::domain::billing::{
     AdminUpgradeSubscriptionPlanPath, AdminUpgradeSubscriptionPlanRequest,
     CreateCustomerPortalLinkPath, CreateSetupIntentPath, CreateSetupIntentRequest,
-    SubscriptionCancellationStatusRequest, UpdateSubscriptionCancellationPath,
-    UpgradeSubscriptionPlanPath, UpgradeSubscriptionPlanRequest,
+    SubscriptionCancellationStatusRequest, SubscriptionPauseRequest,
+    UpdateSubscriptionCancellationPath, UpdateSubscriptionPausedPath, UpgradeSubscriptionPlanPath,
+    UpgradeSubscriptionPlanRequest,
 };
 use crate::error::BillingError;
 use crate::{
@@ -28,6 +29,16 @@ pub struct UpdateSubscriptionCancellation;
 impl ApiEndpoint for UpdateSubscriptionCancellation {
     type Path = UpdateSubscriptionCancellationPath;
     type Req = SubscriptionCancellationStatusRequest;
+    type Res = ();
+    type Err = BillingError;
+    const METHOD: Method = Method::Patch;
+}
+
+/// Set whether the subscription is paused or not
+pub struct UpdateSubscriptionPaused;
+impl ApiEndpoint for UpdateSubscriptionPaused {
+    type Path = UpdateSubscriptionPausedPath;
+    type Req = SubscriptionPauseRequest;
     type Res = ();
     type Err = BillingError;
     const METHOD: Method = Method::Patch;

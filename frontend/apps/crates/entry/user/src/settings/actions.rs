@@ -4,7 +4,10 @@ use dominator::clone;
 use futures::join;
 use futures_signals::signal::Mutable;
 use gloo_timers::future::TimeoutFuture;
-use shared::domain::billing::{CreateCustomerPortalLinkPath, PlanType};
+use shared::domain::billing::{
+    CreateCustomerPortalLinkPath, PlanType, SubscriptionPauseRequest, SubscriptionStatus,
+    UpdateSubscriptionPausedPath,
+};
 use shared::{
     api::endpoints::{self, meta, user},
     domain::{
@@ -140,6 +143,36 @@ impl SettingsPage {
                 "Auto-renewal enabled"
             } else {
                 "Auto-renewal disabled"
+            })
+        }));
+    }
+
+    pub fn set_paused(self: &Rc<Self>, paused: bool) {
+        let state = self;
+        state.loader.load(clone!(state => async move {
+            state.plan_info.replace_with(|plan_info| {
+                if let Some(section_info) = plan_info {
+                    let mut section_info = (**section_info).clone();
+                    section_info.status = if paused {
+                        SubscriptionStatus::Paused
+                    } else {
+                        SubscriptionStatus::Active
+                    };
+
+                    Some(Rc::new(section_info))
+                } else {
+                    plan_info.clone()
+                }
+            });
+
+            let req = SubscriptionPauseRequest { paused };
+
+            let _ = endpoints::billing::UpdateSubscriptionPaused::api_with_auth(UpdateSubscriptionPausedPath(), Some(req)).await.toast_on_err();
+
+            toasts::notice(if paused {
+                "Subscription paused"
+            } else {
+                "Subscription resumed"
             })
         }));
     }
