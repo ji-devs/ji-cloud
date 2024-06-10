@@ -1,4 +1,4 @@
-use dominator::{clone, html, Dom};
+use dominator::{class, clone, html, pseudo, Dom};
 use futures_signals::signal::{Signal, SignalExt};
 use shared::domain::jig::JigResponse;
 use utils::init::user::{get_user_id, is_user_set};
@@ -100,8 +100,13 @@ impl Home {
                 .style("grid-auto-flow", "column")
                 .style("justify-content", "start")
                 .style("gap", "24px")
-                .style("scrollbar-color", "var(--light-gray-2) transparent")
                 .style("scrollbar-width", "thin")
+                .class(class! {
+                    .style("scrollbar-color", "transparent transparent")
+                    .pseudo!(":hover", {
+                        .style("scrollbar-color", "var(--light-gray-1) transparent")
+                    })
+                })
                 .children_signal_vec(jigs_signal.map(clone!(state => move |trending| {
                     match trending {
                         None => vec![html!("progress")],
