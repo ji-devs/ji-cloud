@@ -255,10 +255,23 @@ impl SettingsPage {
                         })
                         .event(clone!(state, plan_info => move|_ :events::Click| {
                             spawn_local(clone!(state, plan_info => async move {
+                                let (title, message, confirm_text) = if plan_info.status.is_paused() {
+                                    (
+                                        "Resume subscription".to_string(),
+                                        "Are you sure you want to resume your subscription?".to_string(),
+                                        "Resume".to_string(),
+                                    )
+                                } else {
+                                    (
+                                        "Pause subscription".to_string(),
+                                        "Are you sure you want to pause your subscription?".to_string(),
+                                        "Pause".to_string(),
+                                    )
+                                };
                                 let confirmed = confirm::Confirm {
-                                    title: "Pause subscription".to_string(),
-                                    message: "Are you sure you want to pause your subscription?".to_string(),
-                                    confirm_text: if plan_info.status.is_paused() { "Resume".to_string() } else { "Pause".to_string() },
+                                    title,
+                                    message,
+                                    confirm_text,
                                     cancel_text: "Cancel".to_string()
                                 }.confirm().await;
                                 if confirmed {
