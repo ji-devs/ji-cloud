@@ -80,7 +80,10 @@ pub fn get_plan_tier() -> PlanTier {
         .lock_ref()
         .as_ref()
         .and_then(|user| user.account_summary.as_ref())
-        .map(|summary| summary.plan_tier)
+        .map(|summary| match summary.subscription_status {
+            Some(subscription_status) if subscription_status.is_paused() => PlanTier::Free,
+            _ => summary.plan_tier,
+        })
         .unwrap_or_default()
 }
 
