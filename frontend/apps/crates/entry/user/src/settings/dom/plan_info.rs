@@ -43,13 +43,29 @@ impl SettingsPage {
                     })
                 }))
             }),
-            html!("p", {
+            html!("div", {
                 .prop("slot", "plan-type")
-                .text_signal(plan_type_signal().map(|plan| {
-                    plan.map(|plan| {
-                        plan.display_name()
-                    }).unwrap_or_default()
+                .style("display", "flex")
+                .child(html!("p", {
+                    .text_signal(plan_type_signal().map(|plan| {
+                        plan.map(|plan| {
+                            plan.display_name()
+                        }).unwrap_or_default()
+                    }))
                 }))
+                .child_signal(plan_type_signal().map(clone!(plan_info => move |_| {
+                    if plan_info.status.is_paused() {
+                        Some(html!("span", {
+                            .style("align-self", "center")
+                            .style("margin-left", "10rem")
+                            .child(html!("pill-close", {
+                                .prop("label", "Paused")
+                            }))
+                        }))
+                    } else {
+                        None
+                    }
+                })))
             }),
             html!("p", {
                 .prop("slot", "plan-price")
@@ -166,8 +182,12 @@ impl SettingsPage {
                                                 BillingInterval::Monthly => "month",
                                                 BillingInterval::Annually => "year",
                                             };
+                                            let renewal_message = match billing_interval {
+                                                BillingInterval::Annually =>  "A renewal reminder will be sent 30 days before the end of your subscription.",
+                                                BillingInterval::Monthly => " You can pause your subscription or cancel at any time.",
+                                            };
                                             let new_price = discounted_price(new_plan_type, &plan_info);
-                                            let message = format!("You will be charged {new_price} per {charge_interval}. A renewal reminder will be sent 30 days before the end of your subscription.");
+                                            let message = format!("You will be charged {new_price} per {charge_interval}.{renewal_message}");
 
                                             let confirmed = confirm::Confirm {
                                                 title: "Switch to the Pro plan".to_string(),
@@ -207,8 +227,14 @@ impl SettingsPage {
                                                     BillingInterval::Monthly => "month",
                                                     BillingInterval::Annually => "year",
                                                 };
+
+                                                let renewal_message = match billing_interval {
+                                                    BillingInterval::Annually =>  "A renewal reminder will be sent 30 days before the end of your subscription.",
+                                                    BillingInterval::Monthly => " You can pause your subscription or cancel at any time.",
+                                                };
                                                 let new_price = discounted_price(p, &plan_info);
-                                                let message = format!("You will be charged {new_price} per {charge_interval}. A renewal reminder will be sent 30 days before the end of your subscription.");
+
+                                                let message = format!("You will be charged {new_price} per {charge_interval}.{renewal_message}");
 
                                                 let confirmed = confirm::Confirm {
                                                     title: format!("Upgrade to {}", p.user_display_name()),
