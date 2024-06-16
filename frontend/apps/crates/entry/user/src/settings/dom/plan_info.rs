@@ -183,7 +183,7 @@ impl SettingsPage {
                                                 BillingInterval::Annually => "year",
                                             };
                                             let renewal_message = match billing_interval {
-                                                BillingInterval::Annually =>  "A renewal reminder will be sent 30 days before the end of your subscription.",
+                                                BillingInterval::Annually =>  " A renewal reminder will be sent 30 days before the end of your subscription.",
                                                 BillingInterval::Monthly => " You can pause your subscription or cancel at any time.",
                                             };
                                             let new_price = discounted_price(new_plan_type, &plan_info);
@@ -229,7 +229,7 @@ impl SettingsPage {
                                                 };
 
                                                 let renewal_message = match billing_interval {
-                                                    BillingInterval::Annually =>  "A renewal reminder will be sent 30 days before the end of your subscription.",
+                                                    BillingInterval::Annually =>  " A renewal reminder will be sent 30 days before the end of your subscription.",
                                                     BillingInterval::Monthly => " You can pause your subscription or cancel at any time.",
                                                 };
                                                 let new_price = discounted_price(p, &plan_info);
