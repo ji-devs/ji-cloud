@@ -5,7 +5,7 @@ use actix_web::{
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
 use shared::domain::{
-    jig::{JigFeaturedResponse, JigTrendingResponse, ListLikedResponse},
+    jig::{JigFeaturedResponse, JigTrendingResponse, ListLikedResponse, ListPlayedResponse},
     user::UserScope,
 };
 use shared::{
@@ -468,7 +468,7 @@ async fn unlike(
 async fn list_liked(
     db: Data<PgPool>,
     claims: TokenUser,
-    query: Option<Query<<jig::Browse as ApiEndpoint>::Req>>,
+    query: Option<Query<<jig::ListLiked as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::ListLiked as ApiEndpoint>::Res>, error::Server> {
     let user_id = claims.user_id();
     let query = query.map_or_else(Default::default, Query::into_inner);
@@ -482,6 +482,26 @@ async fn list_liked(
         .into_anyhow()?;
 
     Ok(Json(ListLikedResponse { jigs }))
+}
+
+/// Get users played jigs
+async fn list_played(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    query: Option<Query<<jig::ListPlayed as ApiEndpoint>::Req>>,
+) -> Result<Json<<jig::ListPlayed as ApiEndpoint>::Res>, error::Server> {
+    let user_id = claims.user_id();
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let page_limit = page_limit(query.page_limit).await?;
+
+    let ids = db::jig::list_played(&*db, user_id, query.page.unwrap_or(0), page_limit).await?;
+
+    let jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, Some(user_id))
+        .await
+        .into_anyhow()?;
+
+    Ok(Json(ListPlayedResponse { jigs }))
 }
 
 /// Add a play to a jig
@@ -634,6 +654,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <jig::ListLiked as ApiEndpoint>::Path::PATH,
         jig::ListLiked::METHOD.route().to(list_liked),
+    )
+    .route(
+        <jig::ListPlayed as ApiEndpoint>::Path::PATH,
+        jig::ListPlayed::METHOD.route().to(list_played),
     )
     .route(
         <jig::Featured as ApiEndpoint>::Path::PATH,

@@ -764,7 +764,7 @@ pub struct JigTrendingResponse {
 make_path_parts!(ListLikedPath => "/v1/jig/likes");
 
 /// Response for request for list of liked jigs.
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct ListLikedRequest {
     /// The page number of the jigs to get.
@@ -776,6 +776,31 @@ pub struct ListLikedRequest {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
+}
+
+make_path_parts!(ListPlayedPath => "/v1/jig/likes");
+
+/// Response for request for list of played jigs.
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ListPlayedRequest {
+    /// The page number of the jigs to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_limit: Option<u32>,
+}
+
+/// Response for request for list of played jigs.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ListPlayedResponse {
+    /// the jigs returned.
+    pub jigs: Vec<JigResponse>,
 }
 
 make_path_parts!(JigFeaturedPath => "/v1/jig/featured");

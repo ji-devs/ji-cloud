@@ -11,7 +11,7 @@ use crate::{
             JigSearchPath, JigSearchQuery, JigSearchResponse, JigTransferAdminPath,
             JigTrendingPath, JigTrendingResponse, JigUnlikePath, JigUpdateAdminDataRequest,
             JigUpdateDraftDataPath, JigUpdateDraftDataRequest, ListLikedPath, ListLikedRequest,
-            ListLikedResponse,
+            ListLikedResponse, ListPlayedPath, ListPlayedRequest, ListPlayedResponse,
         },
         CreateResponse,
     },
@@ -161,6 +161,16 @@ impl ApiEndpoint for ListLiked {
     type Req = ListLikedRequest;
     type Res = ListLikedResponse;
     type Path = ListLikedPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+
+/// List user's played JIGs.
+pub struct ListPlayed;
+impl ApiEndpoint for ListPlayed {
+    type Req = ListPlayedRequest;
+    type Res = ListPlayedResponse;
+    type Path = ListPlayedPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }

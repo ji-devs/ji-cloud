@@ -1724,6 +1724,32 @@ pub async fn list_liked(
     Ok(rows.into_iter().map(|row| JigId(row.jig_id)).collect())
 }
 
+pub async fn list_played(
+    db: &PgPool,
+    user_id: UserId,
+    page: u32,
+    page_limit: u32,
+) -> sqlx::Result<Vec<JigId>> {
+    let rows = sqlx::query!(
+        r#"
+        select jig_id
+        from jig_play
+        where user_id = $1
+        order by at desc
+        offset $2
+        limit $3
+        
+    "#,
+        user_id.0,
+        (page * page_limit) as i32,
+        page_limit as i32,
+    )
+    .fetch_all(db)
+    .await?;
+
+    Ok(rows.into_iter().map(|row| JigId(row.jig_id)).collect())
+}
+
 pub async fn featured(db: &PgPool) -> sqlx::Result<Vec<JigId>> {
     let rows = sqlx::query!(
         r#"
