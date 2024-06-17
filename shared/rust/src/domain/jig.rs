@@ -778,7 +778,7 @@ pub struct ListLikedRequest {
     pub page_limit: Option<u32>,
 }
 
-make_path_parts!(ListPlayedPath => "/v1/jig/likes");
+make_path_parts!(ListPlayedPath => "/v1/jig/played");
 
 /// Response for request for list of played jigs.
 #[derive(Serialize, Deserialize, Clone, Debug, Default)]
