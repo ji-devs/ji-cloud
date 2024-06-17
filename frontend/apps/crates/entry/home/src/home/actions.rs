@@ -6,7 +6,7 @@ use futures::join;
 
 use shared::{
     api::endpoints,
-    domain::jig::{JigFeaturedPath, JigSearchPath, JigTrendingPath, ListLikedPath},
+    domain::jig::{JigFeaturedPath, JigSearchPath, JigTrendingPath, ListLikedPath, ListPlayedPath},
 };
 use std::{collections::HashMap, rc::Rc};
 use utils::{bail_on_err, init::analytics, metadata::get_age_ranges, prelude::*};
@@ -42,6 +42,7 @@ pub fn fetch_data(state: Rc<Home>, is_search: bool) {
                 );
                 if is_user_set() {
                     fetch_liked(Rc::clone(&state)).await;
+                    fetch_played(Rc::clone(&state)).await;
                 }
             },
         };
@@ -91,6 +92,14 @@ async fn fetch_liked(state: Rc<Home>) {
         .toast_on_err();
     let res = bail_on_err!(res);
     state.liked.set(Some(res.jigs));
+}
+
+async fn fetch_played(state: Rc<Home>) {
+    let res = endpoints::jig::ListPlayed::api_with_auth(ListPlayedPath(), None)
+        .await
+        .toast_on_err();
+    let res = bail_on_err!(res);
+    state.played.set(Some(res.jigs));
 }
 
 async fn search_async(state: Rc<Home>) {

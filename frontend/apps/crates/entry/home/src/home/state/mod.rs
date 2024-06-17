@@ -27,6 +27,7 @@ pub struct Home {
     pub trending: Mutable<Option<Vec<JigResponse>>>,
     pub featured: Mutable<Option<Vec<JigResponse>>>,
     pub liked: Mutable<Option<Vec<JigResponse>>>,
+    pub played: Mutable<Option<Vec<JigResponse>>>,
 }
 
 impl Home {
@@ -55,6 +56,7 @@ impl Home {
             trending: Mutable::new(None),
             featured: Mutable::new(None),
             liked: Mutable::new(None),
+            played: Mutable::new(None),
         }
     }
 
