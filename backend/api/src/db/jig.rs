@@ -1393,7 +1393,7 @@ values ($1, 0)
     Ok(new_jig.id)
 }
 
-pub async fn jig_play(db: &PgPool, id: JigId) -> anyhow::Result<()> {
+pub async fn jig_play(db: &PgPool, jig_id: JigId, user_id: Option<UserId>) -> anyhow::Result<()> {
     let mut txn = db.begin().await?;
 
     let jig = sqlx::query!(
@@ -1403,7 +1403,7 @@ select published_at  as "published_at?"
 from jig
 where id = $1
     "#,
-        id.0
+        jig_id.0
     )
     .fetch_one(&mut txn)
     .await?;
@@ -1421,10 +1421,27 @@ update jig_play_count
 set play_count = play_count + 1
 where jig_id = $1;
             "#,
-        id.0,
+        jig_id.0,
     )
-    .execute(db)
+    .execute(&mut txn)
     .await?;
+
+    if let Some(user_id) = user_id {
+        //update Jig play records
+        sqlx::query!(
+            // language=SQL
+            r#"
+    insert into jig_play(jig_id, user_id)
+    values ($1, $2)
+    ON CONFLICT (jig_id, user_id) DO UPDATE
+    SET at = now()
+                "#,
+            jig_id.0,
+            user_id.0
+        )
+        .execute(&mut txn)
+        .await?;
+    }
 
     txn.commit().await?;
 
