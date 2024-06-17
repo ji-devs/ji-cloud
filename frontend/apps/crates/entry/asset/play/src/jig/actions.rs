@@ -104,7 +104,7 @@ impl JigPlayer {
                     state.loader.load(clone!(state => async move {
                         // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
                         // success of this call. The failure should be noted in the server logs.
-                        let _ = jig::Play::api_no_auth(
+                        let _ = jig::Play::api_with_auth(
                             JigPlayPath(state.jig_id),
                             None,
                         ).await;
