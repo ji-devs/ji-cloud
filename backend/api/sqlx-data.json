@@ -1233,6 +1233,19 @@
     },
     "query": "\nselect\n    id as \"id\",\n    bundle_id,\n    section,\n    item_kind_id,\n    english,\n    hebrew,\n    status as \"status: EntryStatus\",\n    zeplin_reference,\n    comments,\n    in_app, \n    in_element, \n    in_mock\nfrom locale_entry\nwhere id = $1\n"
   },
+  "176d0cc638b9bc9291fd6b7d59e8cdcc20bb3baa3259e37604434a84f58fb6b3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n    insert into jig_play(jig_id, user_id)\n    values ($1, $2)\n    ON CONFLICT (jig_id, user_id) DO UPDATE\n    SET at = now()\n                "
+  },
   "177c7395ea47c83da0df908560908656dd874684a4f64eb216435e81f4742af6": {
     "describe": {
       "columns": [],
