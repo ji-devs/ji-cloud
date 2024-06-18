@@ -263,6 +263,10 @@ impl SettingsPage {
                     }
                 })))
                 .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
+                    if plan_info.is_trial {
+                        return None;
+                    }
+
                     if let Some(plan_type) = plan_type {
                         if let BillingInterval::Annually = plan_type.billing_interval() {
                             return None;
