@@ -1,5 +1,5 @@
 use dominator::{class, clone, html, pseudo, Dom};
-use futures_signals::signal::{Signal, SignalExt};
+use futures_signals::signal::{ReadOnlyMutable, SignalExt};
 use shared::domain::jig::JigResponse;
 use utils::init::user::{get_user_id, is_user_set};
 
@@ -38,11 +38,11 @@ impl Home {
                     HomePageMode::Search(_) => vec![],
                     HomePageMode::Home => {
                         let mut divs = vec![];
-                        divs.push(state.render_strip("Trending JIGs", state.trending.signal_cloned()));
-                        divs.push(state.render_strip("Highlighted JIGs", state.featured.signal_cloned()));
+                        divs.push(state.render_strip("Trending JIGs", "trending", state.trending.read_only()));
+                        divs.push(state.render_strip("Top picks", "featured", state.featured.read_only()));
                         if is_user_set() {
-                            divs.push(state.render_strip("My likes", state.liked.signal_cloned()));
-                            divs.push(state.render_strip("My Played", state.played.signal_cloned()));
+                            divs.push(state.render_strip("My likes", "liked", state.liked.read_only()));
+                            divs.push(state.render_strip("Recently played", "played", state.played.read_only()));
                         }
                         divs
                     }
@@ -79,19 +79,35 @@ impl Home {
     pub fn render_strip(
         self: &Rc<Self>,
         heading: &str,
-        jigs_signal: impl Signal<Item = Option<Vec<JigResponse>>> + 'static,
+        icon: &str,
+        jigs: ReadOnlyMutable<Option<Vec<JigResponse>>>,
     ) -> Dom {
         let state = self;
         let user_id = get_user_id();
         html!("div", {
+            .visible_signal(jigs.signal_ref(|trending| {
+                match trending {
+                    Some(jigs) if jigs.is_empty() => false,
+                    _ => true,
+                }
+            }))
             .style("display", "grid")
             .child(html!("h3", {
-                .style("color", "#fd7076")
+                .style("color", "var(--dark-blue-4)")
                 .style("font-weight", "600")
                 .style("font-size", "24px")
                 .style("margin", "0")
                 .style("padding", "24px")
                 .style("padding-bottom", "0")
+                .style("display", "flex")
+                .style("gap", "10px")
+                .style("align-items", "end")
+                .child(html!("img-ui", {
+                    .style("height", "52px")
+                    .prop("path", {
+                        &format!("entry/home/jigs/{}.svg", icon)
+                    })
+                }))
                 .text(heading)
             }))
             .child(html!("div", {
@@ -108,7 +124,7 @@ impl Home {
                         .style("scrollbar-color", "var(--light-gray-1) transparent")
                     })
                 })
-                .children_signal_vec(jigs_signal.map(clone!(state => move |trending| {
+                .children_signal_vec(jigs.signal_cloned().map(clone!(state => move |trending| {
                     match trending {
                         None => vec![html!("progress")],
                         Some(trending) => {
