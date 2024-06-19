@@ -36,7 +36,7 @@ impl Home {
             .child(html!("iframe", {
                 .prop("src", "https://corinne4371.wixstudio.io/basic/blank")
                 .style("width", "100%")
-                .style("height", "272px")
+                .style("height", "153px")
                 .style("border", "0")
             }))
             .children_signal_vec(state.mode.signal_cloned().map(clone!(state => move |mode| {
