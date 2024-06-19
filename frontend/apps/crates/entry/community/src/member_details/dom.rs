@@ -301,7 +301,7 @@ impl MemberDetails {
                             .class("items-container")
                             .class("jigs")
                             .child(html!("h4", {
-                                .text("Jigs")
+                                .text("JIGs")
                                 .text_signal(state.jigs_count.signal().map(|count| {
                                     count.map(|count| format!(" ({})", count.to_string())).unwrap_or_default()
                                 }))

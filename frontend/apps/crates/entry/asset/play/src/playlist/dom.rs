@@ -58,7 +58,7 @@ impl PlaylistPlayer {
             .prop("language", language)
             .prop("author", &playlist.author_name.to_owned().unwrap_or_default())
             .prop("itemsCount", playlist.playlist_data.items.len())
-            .prop("itemType", "Jigs")
+            .prop("itemType", "JIGs")
             .prop("hasAdditionalResources", !playlist.playlist_data.additional_resources.is_empty())
             .child(
                 ModuleThumbnail::new_hight_res(
