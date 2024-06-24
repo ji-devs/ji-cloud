@@ -33,11 +33,22 @@ impl Home {
                 }).render())
             }))
             .child(search_section::render(state.clone(), is_search))
-            .child(html!("iframe", {
-                .prop("src", "https://corinne4371.wixstudio.io/basic/blank")
-                .style("width", "100%")
-                .style("height", "200px")
-                .style("border", "0")
+            .child(html!("empty-fragment", {
+                .child_signal(state.mode.signal_cloned().map(move |mode| {
+                    match mode {
+                        HomePageMode::Home => {
+                            Some(html!("iframe", {
+                                .prop("src", "https://corinne4371.wixstudio.io/basic/blank")
+                                .style("width", "100%")
+                                .style("height", "200px")
+                                .style("border", "0")
+                            }))
+                        },
+                        HomePageMode::Search(_) => {
+                            None
+                        },
+                    }
+                }))
             }))
             .children_signal_vec(state.mode.signal_cloned().map(clone!(state => move |mode| {
                 match mode {
