@@ -104,6 +104,7 @@ impl SearchSelected {
             page: Some(0),
             language: self.language.get_cloned(),
             // is_rated: self.is_rated.get().then(|| true),
+            author_id: self.user_id.get_cloned().map(|u| u.into()),
             ..Default::default()
         }
     }
@@ -117,6 +118,7 @@ impl SearchSelected {
             page: Some(0),
             language: self.language.get_cloned(),
             // is_rated: self.is_rated.get().then(|| true),
+            author_id: self.user_id.get_cloned().map(|u| u.into()),
             ..Default::default()
         }
     }
