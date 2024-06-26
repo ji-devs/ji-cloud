@@ -276,7 +276,7 @@ from playlist_data
 
 pub async fn get_by_ids(
     db: &PgPool,
-    ids: &[Uuid],
+    ids: &[PlaylistId],
     draft_or_live: DraftOrLive,
     user_id: Option<UserId>,
 ) -> sqlx::Result<Vec<PlaylistResponse>> {
@@ -308,7 +308,7 @@ inner join unnest($1::uuid[])
 inner join playlist_admin_data "admin" on admin.playlist_id = playlist.id
 order by ord asc
     "#,
-        ids,
+        &ids.iter().map(|i| i.0).collect::<Vec<Uuid>>(),
         user_id.map(|x| x.0)
     )
     .fetch_all(&mut txn)
@@ -1168,6 +1168,50 @@ select exists (
     .exists;
 
     Ok(exists)
+}
+
+pub async fn list_liked(
+    db: &PgPool,
+    user_id: UserId,
+    page: u32,
+    page_limit: u32,
+) -> sqlx::Result<Vec<PlaylistId>> {
+    let rows = sqlx::query!(
+        r#"
+        select playlist_id
+        from playlist_like
+        where user_id = $1
+        order by created_at desc
+        offset $2
+        limit $3
+        
+    "#,
+        user_id.0,
+        (page * page_limit) as i32,
+        page_limit as i32,
+    )
+    .fetch_all(db)
+    .await?;
+
+    Ok(rows
+        .into_iter()
+        .map(|row| PlaylistId(row.playlist_id))
+        .collect())
+}
+
+pub async fn liked_count(db: &PgPool, user_id: UserId) -> sqlx::Result<u64> {
+    let res = sqlx::query!(
+        r#"
+            select count(playlist_id) as "count!: i64"
+            from playlist_like
+            where user_id = $1
+        "#,
+        user_id.0,
+    )
+    .fetch_one(db)
+    .await?;
+
+    Ok(res.count as u64)
 }
 
 pub async fn playlist_like(db: &PgPool, user_id: UserId, id: PlaylistId) -> anyhow::Result<()> {

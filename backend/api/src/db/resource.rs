@@ -278,7 +278,7 @@ from resource_data
 #[instrument(skip(db))]
 pub async fn get_by_ids(
     db: &PgPool,
-    ids: &[Uuid],
+    ids: &[ResourceId],
     draft_or_live: DraftOrLive,
     user_id: Option<UserId>,
 ) -> sqlx::Result<Vec<ResourceResponse>> {
@@ -310,7 +310,7 @@ inner join unnest($1::uuid[])
 inner join resource_admin_data "admin" on admin.resource_id = resource.id
 order by ord asc
     "#,
-        ids,
+        &ids.iter().map(|i| i.0).collect::<Vec<Uuid>>(),
         user_id.map(|x| x.0)
     )
     .fetch_all(&mut txn)
@@ -1238,6 +1238,50 @@ select exists (
     .exists;
 
     Ok(exists)
+}
+
+pub async fn list_liked(
+    db: &PgPool,
+    user_id: UserId,
+    page: u32,
+    page_limit: u32,
+) -> sqlx::Result<Vec<ResourceId>> {
+    let rows = sqlx::query!(
+        r#"
+        select resource_id
+        from resource_like
+        where user_id = $1
+        order by created_at desc
+        offset $2
+        limit $3
+        
+    "#,
+        user_id.0,
+        (page * page_limit) as i32,
+        page_limit as i32,
+    )
+    .fetch_all(db)
+    .await?;
+
+    Ok(rows
+        .into_iter()
+        .map(|row| ResourceId(row.resource_id))
+        .collect())
+}
+
+pub async fn liked_count(db: &PgPool, user_id: UserId) -> sqlx::Result<u64> {
+    let res = sqlx::query!(
+        r#"
+            select count(resource_id) as "count!: i64"
+            from resource_like
+            where user_id = $1
+        "#,
+        user_id.0,
+    )
+    .fetch_one(db)
+    .await?;
+
+    Ok(res.count as u64)
 }
 
 pub async fn authz(

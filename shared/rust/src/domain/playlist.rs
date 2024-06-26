@@ -469,6 +469,33 @@ make_path_parts!(PlaylistUnlikePath => "/v1/playlist/{}/unlike" => PlaylistId);
 
 make_path_parts!(PlaylistLikedPath => "/v1/playlist/{}/like" => PlaylistId);
 
+make_path_parts!(ListLikedPath => "/v1/playlist/likes");
+
+/// Response for request for list of liked playlists.
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ListLikedRequest {
+    /// The page number of the playlists to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_limit: Option<u32>,
+}
+/// Response for request for list of liked playlists.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ListLikedResponse {
+    /// the playlists returned.
+    pub playlists: Vec<PlaylistResponse>,
+
+    /// The total number of playlists liked
+    pub total_playlist_count: u64,
+}
+
 make_path_parts!(PlaylistViewPath => "/v1/playlist/{}/view" => PlaylistId);
 
 make_path_parts!(PlaylistAdminDataUpdatePath => "/v1/playlist/{}/admin" => PlaylistId);

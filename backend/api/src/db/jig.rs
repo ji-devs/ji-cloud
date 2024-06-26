@@ -1724,6 +1724,21 @@ pub async fn list_liked(
     Ok(rows.into_iter().map(|row| JigId(row.jig_id)).collect())
 }
 
+pub async fn liked_count(db: &PgPool, user_id: UserId) -> sqlx::Result<u64> {
+    let res = sqlx::query!(
+        r#"
+            select count(jig_id) as "count!: i64"
+            from jig_like
+            where user_id = $1
+        "#,
+        user_id.0,
+    )
+    .fetch_one(db)
+    .await?;
+
+    Ok(res.count as u64)
+}
+
 pub async fn list_played(
     db: &PgPool,
     user_id: UserId,

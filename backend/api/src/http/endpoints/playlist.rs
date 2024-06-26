@@ -4,7 +4,7 @@ use actix_web::{
 };
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
-use shared::domain::user::UserScope;
+use shared::domain::{playlist::ListLikedResponse, user::UserScope};
 use shared::{
     api::{endpoints::playlist, ApiEndpoint, PathParts},
     domain::{
@@ -441,6 +441,31 @@ async fn unlike(
     Ok(HttpResponse::NoContent().finish())
 }
 
+/// Get users liked playlist
+async fn list_liked(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    query: Option<Query<<playlist::ListLiked as ApiEndpoint>::Req>>,
+) -> Result<Json<<playlist::ListLiked as ApiEndpoint>::Res>, error::Server> {
+    let user_id = claims.user_id();
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let page_limit = page_limit(query.page_limit).await?;
+
+    let ids = db::playlist::list_liked(&*db, user_id, query.page.unwrap_or(0), page_limit).await?;
+
+    let playlists = db::playlist::get_by_ids(&db, &ids, DraftOrLive::Live, Some(user_id))
+        .await
+        .into_anyhow()?;
+
+    let total_playlist_count = db::playlist::liked_count(&*db, user_id).await?;
+
+    Ok(Json(ListLikedResponse {
+        playlists,
+        total_playlist_count,
+    }))
+}
+
 /// Add a play to a playlist
 async fn view(
     db: Data<PgPool>,
@@ -521,6 +546,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <playlist::Unlike as ApiEndpoint>::Path::PATH,
         playlist::Unlike::METHOD.route().to(unlike),
+    )
+    .route(
+        <playlist::ListLiked as ApiEndpoint>::Path::PATH,
+        playlist::ListLiked::METHOD.route().to(list_liked),
     )
     .route(
         <playlist::PlaylistAdminDataUpdate as ApiEndpoint>::Path::PATH,

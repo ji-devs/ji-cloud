@@ -1,14 +1,15 @@
-use crate::domain::playlist::{PlaylistAdminDataUpdatePath, PlaylistUpdateAdminDataRequest};
 use crate::{
     api::Method,
     domain::{
         playlist::{
+            ListLikedPath, ListLikedRequest, ListLikedResponse, PlaylistAdminDataUpdatePath,
             PlaylistBrowsePath, PlaylistBrowseQuery, PlaylistBrowseResponse, PlaylistClonePath,
             PlaylistCreatePath, PlaylistCreateRequest, PlaylistDeletePath, PlaylistGetDraftPath,
             PlaylistGetLivePath, PlaylistId, PlaylistLikePath, PlaylistLikedPath,
             PlaylistLikedResponse, PlaylistPublishPath, PlaylistResponse, PlaylistSearchPath,
             PlaylistSearchQuery, PlaylistSearchResponse, PlaylistUnlikePath,
-            PlaylistUpdateDraftDataPath, PlaylistUpdateDraftDataRequest, PlaylistViewPath,
+            PlaylistUpdateAdminDataRequest, PlaylistUpdateDraftDataPath,
+            PlaylistUpdateDraftDataRequest, PlaylistViewPath,
         },
         CreateResponse,
     },
@@ -193,6 +194,16 @@ impl ApiEndpoint for Unlike {
     type Res = ();
     type Err = EmptyError;
     const METHOD: Method = Method::Delete;
+}
+
+/// List user's liked Playlists.
+pub struct ListLiked;
+impl ApiEndpoint for ListLiked {
+    type Req = ListLikedRequest;
+    type Res = ListLikedResponse;
+    type Path = ListLikedPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
 }
 
 /// Is a Playlist liked by a user

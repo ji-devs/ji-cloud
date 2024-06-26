@@ -3266,6 +3266,26 @@
     },
     "query": "\n    update resource_curation_data\n    set affiliations = $2\n    where resource_id = $1 and $2 is distinct from affiliations\n                "
   },
+  "354551f41670236438723df78615a1dc227c51567c58da594d5c5b1d9d479d35": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!: i64",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            select count(playlist_id) as \"count!: i64\"\n            from playlist_like\n            where user_id = $1\n        "
+  },
   "354efe9ea705cda595830f09d4640485ba06d16430389192a75f3b153f39d7f5": {
     "describe": {
       "columns": [],
@@ -3636,6 +3656,26 @@
       }
     },
     "query": "\nupdate course_data_module\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere course_data_id = $1 and index between $3 and $2\n"
+  },
+  "3a007a80e7e68375ba5214665427f07766a63456a087416a1ea3d31df9ee3f4e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!: i64",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            select count(resource_id) as \"count!: i64\"\n            from resource_like\n            where user_id = $1\n        "
   },
   "3a4bccd79e5f29fff7f31c82be3d3cb1f6f7a068503bd0b3104182f8f47ef0a9": {
     "describe": {
@@ -6707,6 +6747,28 @@
     },
     "query": "\n    insert into jig_report(jig_id, report_type)\n    values ($1, $2)\n    returning id as \"id!: ReportId\"\n            "
   },
+  "686590f948fdbdb9c46f9bfb96684d7473fff17d578d42227c4ec372b51a017e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "resource_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n        select resource_id\n        from resource_like\n        where user_id = $1\n        order by created_at desc\n        offset $2\n        limit $3\n        \n    "
+  },
   "688ca554263ad9bee35f1fe5d4c99682f7d47c847249d304422858b265bce880": {
     "describe": {
       "columns": [
@@ -8165,6 +8227,28 @@
       }
     },
     "query": "delete from user_account where account_id = $1"
+  },
+  "783a8e17a4d48a5920ebc70ecd59004eeba69f873654561edb6c9721d1a70dac": {
+    "describe": {
+      "columns": [
+        {
+          "name": "playlist_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n        select playlist_id\n        from playlist_like\n        where user_id = $1\n        order by created_at desc\n        offset $2\n        limit $3\n        \n    "
   },
   "78b48e52d416cf94b8daaf7ce4b6dcbb7bae4ba6c5f85bc4121c626f37c4df4e": {
     "describe": {
@@ -14447,6 +14531,26 @@
       }
     },
     "query": "\nselect published_at as \"published_at?\"\nfrom course\nwhere id = $1\n    "
+  },
+  "d07feb752f409708df595d2507f3fbcd52d8e96649fa0dc0174f57300d2fac08": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!: i64",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            select count(jig_id) as \"count!: i64\"\n            from jig_like\n            where user_id = $1\n        "
   },
   "d1095b2f79187d6c7b251d3f39a7470e5e97b69c4424b638aec44fcb0f1d3deb": {
     "describe": {

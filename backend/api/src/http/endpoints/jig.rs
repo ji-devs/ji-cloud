@@ -481,7 +481,12 @@ async fn list_liked(
         .await
         .into_anyhow()?;
 
-    Ok(Json(ListLikedResponse { jigs }))
+    let total_jig_count = db::jig::liked_count(&*db, user_id).await?;
+
+    Ok(Json(ListLikedResponse {
+        jigs,
+        total_jig_count,
+    }))
 }
 
 /// Get users played jigs

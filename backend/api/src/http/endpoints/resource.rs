@@ -4,7 +4,7 @@ use actix_web::{
 };
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
-use shared::domain::user::UserScope;
+use shared::domain::{resource::ListLikedResponse, user::UserScope};
 use shared::error::{ServiceError, ServiceKindError};
 use shared::{
     api::{endpoints::resource, ApiEndpoint, PathParts},
@@ -430,6 +430,31 @@ async fn unlike(
     Ok(HttpResponse::NoContent().finish())
 }
 
+/// Get users liked resources
+async fn list_liked(
+    db: Data<PgPool>,
+    claims: TokenUser,
+    query: Option<Query<<resource::ListLiked as ApiEndpoint>::Req>>,
+) -> Result<Json<<resource::ListLiked as ApiEndpoint>::Res>, error::Server> {
+    let user_id = claims.user_id();
+    let query = query.map_or_else(Default::default, Query::into_inner);
+
+    let page_limit = page_limit(query.page_limit).await?;
+
+    let ids = db::resource::list_liked(&*db, user_id, query.page.unwrap_or(0), page_limit).await?;
+
+    let resources = db::resource::get_by_ids(&db, &ids, DraftOrLive::Live, Some(user_id))
+        .await
+        .into_anyhow()?;
+
+    let total_resource_count = db::resource::liked_count(&*db, user_id).await?;
+
+    Ok(Json(ListLikedResponse {
+        resources,
+        total_resource_count,
+    }))
+}
+
 /// Add a play to a resource
 async fn view(
     db: Data<PgPool>,
@@ -586,5 +611,9 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <resource::Unlike as ApiEndpoint>::Path::PATH,
         resource::Unlike::METHOD.route().to(unlike),
+    )
+    .route(
+        <resource::ListLiked as ApiEndpoint>::Path::PATH,
+        resource::ListLiked::METHOD.route().to(list_liked),
     );
 }

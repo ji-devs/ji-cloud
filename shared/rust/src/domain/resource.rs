@@ -517,6 +517,33 @@ make_path_parts!(ResourceUnlikePath => "/v1/resource/{}/unlike" => ResourceId);
 
 make_path_parts!(ResourceLikedPath => "/v1/resource/{}/like" => ResourceId);
 
+make_path_parts!(ListLikedPath => "/v1/resource/likes");
+
+/// Response for request for list of liked resources.
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ListLikedRequest {
+    /// The page number of the resources to get.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page: Option<u32>,
+
+    /// The hits per page to be returned
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub page_limit: Option<u32>,
+}
+/// Response for request for list of liked resources.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ListLikedResponse {
+    /// the resources returned.
+    pub resources: Vec<ResourceResponse>,
+
+    /// The total number of resources liked
+    pub total_resource_count: u64,
+}
+
 make_path_parts!(ResourceViewPath => "/v1/resource/{}/view" => ResourceId);
 
 make_path_parts!(ResourceAdminDataUpdatePath => "/v1/resource/{}/admin" => ResourceId);

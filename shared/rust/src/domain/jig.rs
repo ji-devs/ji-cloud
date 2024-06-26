@@ -827,6 +827,9 @@ pub struct JigFeaturedUpdateRequest {
 pub struct ListLikedResponse {
     /// the jigs returned.
     pub jigs: Vec<JigResponse>,
+
+    /// The total number of jigs liked
+    pub total_jig_count: u64,
 }
 
 /// Response for successfully finding the draft of a jig.

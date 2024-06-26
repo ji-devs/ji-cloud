@@ -2,13 +2,14 @@ use crate::{
     api::Method,
     domain::{
         resource::{
-            ResourceAdminDataUpdatePath, ResourceBrowsePath, ResourceBrowseQuery,
-            ResourceBrowseResponse, ResourceClonePath, ResourceCountPath, ResourceCountResponse,
-            ResourceCoverPath, ResourceCreatePath, ResourceCreateRequest, ResourceDeleteAllPath,
-            ResourceDeletePath, ResourceGetDraftPath, ResourceGetLivePath, ResourceId,
-            ResourceLikePath, ResourceLikedPath, ResourceLikedResponse, ResourcePublishPath,
-            ResourceResponse, ResourceSearchPath, ResourceSearchQuery, ResourceSearchResponse,
-            ResourceUnlikePath, ResourceUpdateAdminDataRequest, ResourceUpdateDraftDataPath,
+            ListLikedPath, ListLikedRequest, ListLikedResponse, ResourceAdminDataUpdatePath,
+            ResourceBrowsePath, ResourceBrowseQuery, ResourceBrowseResponse, ResourceClonePath,
+            ResourceCountPath, ResourceCountResponse, ResourceCoverPath, ResourceCreatePath,
+            ResourceCreateRequest, ResourceDeleteAllPath, ResourceDeletePath, ResourceGetDraftPath,
+            ResourceGetLivePath, ResourceId, ResourceLikePath, ResourceLikedPath,
+            ResourceLikedResponse, ResourcePublishPath, ResourceResponse, ResourceSearchPath,
+            ResourceSearchQuery, ResourceSearchResponse, ResourceUnlikePath,
+            ResourceUpdateAdminDataRequest, ResourceUpdateDraftDataPath,
             ResourceUpdateDraftDataRequest, ResourceViewPath,
         },
         CreateResponse,
@@ -245,6 +246,16 @@ impl ApiEndpoint for Liked {
     type Path = ResourceLikedPath;
     type Req = ();
     type Res = ResourceLikedResponse;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+
+/// List user's liked resources.
+pub struct ListLiked;
+impl ApiEndpoint for ListLiked {
+    type Req = ListLikedRequest;
+    type Res = ListLikedResponse;
+    type Path = ListLikedPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
 }

@@ -2191,7 +2191,7 @@ impl Client {
         page_limit: u32,
         blocked: Option<bool>,
         is_rated: Option<bool>,
-    ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
+    ) -> anyhow::Result<Option<(Vec<ResourceId>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
         if let Some(author_id) = author_id {
@@ -2327,7 +2327,7 @@ impl Client {
         translated_keywords: Option<String>,
         privacy_level: &[PrivacyLevel],
         page_limit: u32,
-    ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
+    ) -> anyhow::Result<Option<(Vec<PlaylistId>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
         if let Some(author_id) = author_id {
