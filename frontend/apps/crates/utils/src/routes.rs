@@ -126,6 +126,7 @@ type PromotionCode = String;
 pub enum UserRoute {
     NoAuth,
     Settings,
+    Likes,
     RegisterOauth(OauthData),
     LoginOauth(OauthData),
     Login(LoginQuery),
@@ -497,6 +498,7 @@ impl Route {
             }
             ["community", "courses"] => Self::Community(CommunityRoute::Courses),
             ["user", "settings"] => Self::User(UserRoute::Settings),
+            ["user", "likes"] => Self::User(UserRoute::Likes),
             ["user", "login"] => {
                 let query = serde_qs::from_str(&params_string).unwrap_ji();
                 Self::User(UserRoute::Login(query))
@@ -920,6 +922,7 @@ impl From<&Route> for String {
             },
             Route::User(route) => match route {
                 UserRoute::Settings => "/user/settings".to_string(),
+                UserRoute::Likes => "/user/likes".to_string(),
                 UserRoute::ContinueRegistration(oauth_profile) => match oauth_profile {
                     None => "/user/continue-registration".to_string(),
                     Some(oauth_profile) => {

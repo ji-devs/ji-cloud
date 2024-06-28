@@ -2,8 +2,8 @@ use components::overlay::container::OverlayContainer;
 use utils::{component::Component, routes::*};
 
 use crate::{
-    email::confirmation::SendEmailConfirmationPage,
-    email::verify::VerifyEmailPage,
+    email::{confirmation::SendEmailConfirmationPage, verify::VerifyEmailPage},
+    likes::Likes,
     login::LoginPage,
     oauth::dom::OauthPage,
     register::{dom::RegisterPage, state::Step},
@@ -41,6 +41,7 @@ impl Router {
                 UserRoute::LoginOauth(data) => Some(OauthPage::render(data, OAuthUrlKind::Login)),
                 UserRoute::Login(query) => Some(LoginPage::new(query).render()),
                 UserRoute::Settings => Some(SettingsPage::new().render()),
+                UserRoute::Likes => Some(Likes::new().render()),
                 UserRoute::ContinueRegistration(oauth_profile) => Some(RegisterPage::render(
                     Some(Step::One(oauth_profile)),
                     Default::default(),

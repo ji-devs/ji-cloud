@@ -33,6 +33,7 @@ const STR_MY_PLAYLISTS: &str = "My playlists";
 // const STR_MY_COURSES: &str = "My courses";
 const STR_MY_RESOURCES: &str = "My resources";
 const STR_CLASSES: &str = "My classes";
+const STR_LIKES: &str = "My likes";
 
 impl PageHeader {
     pub fn render(self: Rc<PageHeader>) -> Dom {
@@ -208,6 +209,15 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
                     ");
                 }
             })
+        }))
+        .child(html!("a", {
+            .prop("slot", "user-links")
+            .prop("href", Route::User(UserRoute::Likes).to_string())
+            .prop("target", "_top")
+            .child(html!("img-ui", {
+                .prop("path", "core/page-header/nav-icon-classes.svg")
+            }))
+            .text(STR_LIKES)
         }))
         .child(html!("a", {
             .prop("slot", "setting-links")
