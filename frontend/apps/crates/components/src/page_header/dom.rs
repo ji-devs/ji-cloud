@@ -215,7 +215,7 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
             .prop("href", Route::User(UserRoute::Likes).to_string())
             .prop("target", "_top")
             .child(html!("img-ui", {
-                .prop("path", "core/page-header/nav-icon-classes.svg")
+                .prop("path", "core/page-header/nav-icon-likes.svg")
             }))
             .text(STR_LIKES)
         }))
