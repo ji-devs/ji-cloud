@@ -1,8 +1,9 @@
 use components::asset_card::{render_asset_card, AssetCardConfig};
 use dominator::{clone, html, Dom};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
+use shared::domain::asset::{Asset, AssetId};
 use std::rc::Rc;
-use utils::events;
+use utils::{asset::ResourceContentExt, events};
 
 use super::state::LikedSection;
 
@@ -18,23 +19,45 @@ impl LikedSection {
             .prop_signal("resultsCount", state.total.signal())
             .children_signal_vec(state.list.signal_vec_cloned().map(clone!(state => move |asset| {
                 let asset_id = asset.id();
-                render_asset_card(&asset, AssetCardConfig {
-                    slot: Some("results"),
-                    dense: true,
-                    menu: Some(Rc::new(clone!(state => move || {
-                        html!("menu-kebab", {
-                            .prop("slot", "menu")
-                            .children(&mut [
-                                html!("menu-line", {
-                                    .prop("icon", "jig-play")
-                                    .event(clone!(state => move |_: events::Click| {
-                                        state.unlike(asset_id);
-                                    }))
-                                })
-                            ])
-                        })
-                    }))),
-                    ..Default::default()
+                html!("a", {
+                    .prop("slot", "results")
+                    .style("cursor", "pointer")
+                    .apply(|mut dom| {
+                        if let Asset::Resource(resource) = asset.as_ref() {
+                            if let Some(resource) = resource.resource_data.additional_resources.get(0) {
+                                dom = dom
+                                    .style("text-decoration", "none")
+                                    .prop("target", "_blank")
+                                    .prop("href", resource.resource_content.get_link());
+                            }
+                        }
+                        dom
+                    })
+                    .child(render_asset_card(&asset, AssetCardConfig {
+                        dense: true,
+                        menu: Some(Rc::new(clone!(state => move || {
+                            html!("menu-kebab", {
+                                .prop("slot", "menu")
+                                .children(&mut [
+                                    html!("menu-line", {
+                                        .prop("icon", "jig-play")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.unlike(asset_id);
+                                        }))
+                                    })
+                                ])
+                            })
+                        }))),
+                        ..Default::default()
+                    }))
+                    .event(clone!(state => move |_: events::Click| {
+                        match asset_id {
+                            AssetId::JigId(_) | AssetId::PlaylistId(_) | AssetId::CourseId(_) => {
+                                state.play_asset.set(Some(asset_id));
+                            },
+                            AssetId::ResourceId(_) => {},
+                        }
+                    }))
                 })
             })))
             .child_signal(state.all_loaded_signal().map(clone!(state => move |all_loaded| {

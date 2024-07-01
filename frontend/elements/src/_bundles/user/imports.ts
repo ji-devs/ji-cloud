@@ -15,6 +15,7 @@ import "@elements/entry/user/profile/options-popup";
 import "@elements/entry/home/home/search-results/search-results-section";
 import "@elements/_bundles/_sub-bundles/all";
 import "@elements/core/asset/asset-card";
+import "@elements/core/player-popup/player-popup";
 import "@elements/core/buttons/rectangle";
 import "@elements/core/buttons/rectangle-icon";
 import "@elements/core/buttons/fa-button";

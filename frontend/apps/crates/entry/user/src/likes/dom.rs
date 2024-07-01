@@ -1,13 +1,19 @@
 use std::rc::Rc;
 
-use components::page_header::PageHeader;
-use dominator::{html, Dom};
+use components::{
+    page_header::PageHeader,
+    player_popup::{PlayerPopup, PreviewPopupCallbacks},
+};
+use dominator::{clone, html, Dom};
+use futures_signals::signal::SignalExt;
 
 use super::state::Likes;
 
 impl Likes {
     pub fn render(self: Rc<Self>) -> Dom {
-        self.load_data();
+        let state = self;
+
+        state.load_data();
 
         html!("div", {
             .child(PageHeader::new(Default::default()).render())
@@ -19,9 +25,20 @@ impl Likes {
                 .style("padding-block", "20px")
                 .text("Likes")
             }))
-            .child(self.jigs.render())
-            .child(self.playlists.render())
-            .child(self.resources.render())
+            .child(state.jigs.render())
+            .child(state.playlists.render())
+            .child(state.resources.render())
+            .child_signal(state.play_asset.signal_cloned().map(clone!(state => move |play_asset| {
+                play_asset.map(|asset_id| {
+                    let close = clone!(state => move || {
+                        state.play_asset.set(None);
+                    });
+                    PlayerPopup::new_default_player_options(
+                        asset_id,
+                        PreviewPopupCallbacks::new(close)
+                    ).render(None)
+                })
+            })))
         })
     }
 }
