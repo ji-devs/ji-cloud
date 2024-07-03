@@ -55,10 +55,10 @@ impl PlaylistPlayer {
         match playlist {
             Ok(playlist) => {
                 if !paywall::can_play_jig(playlist.admin_data.premium) {
-                    paywall::dialog_play(
+                    paywall::dialog_premium(
                         "
-                        Looking to access our premium content?
-                        Upgrade now for UNLIMITED playlists.
+                        Looking to access all our content? A crown indicates premium content.
+                        Upgrade now for UNLIMITED JIGs and resources.
                     ",
                     );
                     return;

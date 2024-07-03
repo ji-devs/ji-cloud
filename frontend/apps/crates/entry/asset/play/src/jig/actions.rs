@@ -337,8 +337,8 @@ impl JigPlayer {
             match jig {
                 Ok(jig) => {
                     if !state.is_student && !paywall::can_play_jig(jig.admin_data.premium) {
-                        paywall::dialog_play("
-                            Looking to access our premium content?
+                        paywall::dialog_premium("
+                            Looking to access all our content? A crown indicates premium content.
                             Upgrade now for UNLIMITED JIGs and resources.
                         ");
                         return;

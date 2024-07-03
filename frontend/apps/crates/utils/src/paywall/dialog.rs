@@ -13,6 +13,10 @@ pub fn dialog_play(msg: &str) {
     show_dialog(msg, "paywall-popups/illustration-play.webp", false)
 }
 
+pub fn dialog_premium(msg: &str) {
+    show_dialog(msg, "paywall-popups/illustration-premium.webp", false)
+}
+
 pub fn dialog_limit(msg: &str) {
     show_dialog(msg, "paywall-popups/illustration-limit.webp", true)
 }
