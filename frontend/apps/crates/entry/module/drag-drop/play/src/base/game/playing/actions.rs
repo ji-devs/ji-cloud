@@ -218,7 +218,8 @@ impl InteractiveItem {
     pub fn try_play_user_audio(&self) {
         if let Some(audio) = self.audio.as_ref() {
             AUDIO_MIXER.with(|mixer| {
-                mixer.play_oneshot(audio.into());
+                let handle = mixer.play(audio.into(), false);
+                *self.audio_handle.borrow_mut() = Some(handle);
             });
         }
     }

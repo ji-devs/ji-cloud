@@ -1,12 +1,14 @@
 use crate::base::state::*;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
+use components::audio::mixer::AudioHandle;
 use futures_signals::signal::Mutable;
 use shared::domain::module::body::drag_drop::*;
 
 pub struct Game {
     pub base: Rc<Base>,
     pub phase: Mutable<Phase>,
+    pub interactive_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
 }
 
 impl Game {
@@ -16,7 +18,11 @@ impl Game {
             Hint::None => Phase::Playing,
         });
 
-        Rc::new(Self { base, phase })
+        Rc::new(Self {
+            base,
+            phase,
+            interactive_audio_handle: Default::default(),
+        })
     }
 }
 

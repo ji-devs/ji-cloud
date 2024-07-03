@@ -12,7 +12,10 @@ use shared::domain::module::body::{
 use std::{cell::RefCell, rc::Rc};
 use utils::drag::Drag;
 
-use components::collision::stickers_traces::pixels::{StickerBoundsKind, StickerHitSource};
+use components::{
+    audio::mixer::AudioHandle,
+    collision::stickers_traces::pixels::{StickerBoundsKind, StickerHitSource},
+};
 use std::borrow::Cow;
 pub struct PlayState {
     pub game: Rc<Game>,
@@ -30,9 +33,11 @@ impl PlayState {
 
                 match item.kind {
                     ItemKind::Static => PlayItem::Static(item.sticker),
-                    ItemKind::Interactive(data) => {
-                        PlayItem::Interactive(InteractiveItem::new(item.sticker, data))
-                    }
+                    ItemKind::Interactive(data) => PlayItem::Interactive(InteractiveItem::new(
+                        item.sticker,
+                        data,
+                        &game.interactive_audio_handle,
+                    )),
                 }
             })
             .collect();
@@ -72,6 +77,7 @@ pub struct InteractiveItem {
     pub drag: Mutable<Option<Rc<Drag<()>>>>,
     pub size: Mutable<Option<(f64, f64)>>,
     pub target_index: RefCell<Option<usize>>,
+    pub audio_handle: Rc<RefCell<Option<AudioHandle>>>,
 }
 
 pub enum SourceTransformOverride {
@@ -80,7 +86,11 @@ pub enum SourceTransformOverride {
 }
 
 impl InteractiveItem {
-    pub fn new(sticker: Sticker, data: Interactive) -> Rc<Self> {
+    pub fn new(
+        sticker: Sticker,
+        data: Interactive,
+        audio_handle: &Rc<RefCell<Option<AudioHandle>>>,
+    ) -> Rc<Self> {
         let transform = sticker.transform().clone();
         Rc::new(Self {
             sticker,
@@ -93,6 +103,7 @@ impl InteractiveItem {
             drag: Mutable::new(None),
             size: Mutable::new(None),
             target_index: RefCell::new(None),
+            audio_handle: Rc::clone(&audio_handle),
         })
     }
 
