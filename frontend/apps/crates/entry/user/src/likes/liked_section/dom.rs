@@ -1,5 +1,5 @@
 use components::asset_card::{render_asset_card, AssetCardConfig};
-use dominator::{clone, html, Dom};
+use dominator::{clone, html, Dom, EventOptions};
 use futures_signals::{signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::asset::{Asset, AssetId};
 use std::rc::Rc;
@@ -40,7 +40,7 @@ impl LikedSection {
                                 .prop("slot", "menu")
                                 .children(&mut [
                                     html!("menu-line", {
-                                        .prop("icon", "jig-play")
+                                        .prop("icon", "unlike")
                                         .event(clone!(state => move |_: events::Click| {
                                             state.unlike(asset_id);
                                         }))
@@ -50,7 +50,7 @@ impl LikedSection {
                         }))),
                         ..Default::default()
                     }))
-                    .event(clone!(state => move |_: events::Click| {
+                    .event_with_options(&EventOptions::bubbles(), clone!(state => move |_: events::Click| {
                         match asset_id {
                             AssetId::JigId(_) | AssetId::PlaylistId(_) | AssetId::CourseId(_) => {
                                 state.play_asset.set(Some(asset_id));

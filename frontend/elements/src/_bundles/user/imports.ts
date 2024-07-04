@@ -38,3 +38,5 @@ import "@elements/core/images/ui";
 import "@elements/core/images/composed/module-screenshot";
 import "@elements/core/loaders/window-loader-block";
 import "@elements/core/popups/popup-body";
+import "@elements/core/menu/kebab";
+import "@elements/core/menu/menu-line";

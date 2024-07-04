@@ -22,6 +22,7 @@ type IconKind =
     | "jig-play"
     | "view"
     | "share"
+    | "unlike"
 ;
 
 const STR_LABEL_LOOKUP: any = {
@@ -63,6 +64,7 @@ const STR_LABEL_LOOKUP: any = {
     ["set-jig-theme"]: "Set JIG theme",
     ["text"]: "Edit text",
     ["share"]: "Share",
+    ["unlike"]: "Unlike",
 };
 
 // possible fa icons
