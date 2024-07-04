@@ -406,7 +406,7 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <div class="row end-row white">
+                    <div class="row white">
                         <div class="cell cell-header">Create a playlist of Jigzi content</div>
                         ${cells(this.kind, {
                             schools: html`
@@ -419,8 +419,21 @@ export class _ extends LitElement {
                             `
                         })}
                     </div>
-                    <div class="row end-row white">
+                    <div class="row white">
                         <div class="cell cell-header">Share content with students/children </div>
+                        ${cells(this.kind, {
+                            schools: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `,
+                            individuals: html`
+                                <div class="cell"><fa-icon icon="fa-solid fa-dash"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                                <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
+                            `
+                        })}
+                    </div>
+                    <div class="row white end-row">
+                        <div class="cell cell-header">Scoring & Assessment - track progress with performance and reporting features</div>
                         ${cells(this.kind, {
                             schools: html`
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
