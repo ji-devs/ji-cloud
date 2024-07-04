@@ -42,6 +42,7 @@ impl LikedSection {
                 AssetId::CourseId(_) => todo!(),
             };
             list.lock_mut().retain(|asset| asset.id() != asset_id);
+            *state.total.lock_mut() -= 1;
         }))
     }
 }
