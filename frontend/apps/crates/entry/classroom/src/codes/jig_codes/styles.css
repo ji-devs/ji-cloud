@@ -1,8 +1,13 @@
 :host {
-    padding: 100px;
     display: grid;
     gap: 40px;
     justify-items: center;
+    padding: 30px;
+}
+@media (min-width: 1024px) {
+    :host {
+        padding: 100px;
+    }
 }
 .code:not(:first-child) .cell,
 .header:not(:first-child) .cell {
@@ -20,6 +25,8 @@
     border-radius: 8px;
     overflow: hidden;
     background-color: #fff;
+    max-width: 90vw;
+    overflow: auto;
 
     .header {
         display: contents;
