@@ -34,7 +34,7 @@ impl LikedSection {
                         dom
                     })
                     .child(render_asset_card(&asset, AssetCardConfig {
-                        dense: true,
+                        dense: false,
                         menu: Some(Rc::new(clone!(state => move || {
                             html!("menu-kebab", {
                                 .prop("slot", "menu")

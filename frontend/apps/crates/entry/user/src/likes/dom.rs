@@ -23,7 +23,7 @@ impl Likes {
                 .style("background-color", "var(--light-red-alert)")
                 .style("margin", "0")
                 .style("padding-block", "20px")
-                .text("Likes")
+                .text("My likes")
             }))
             .child(state.jigs.render())
             .child(state.playlists.render())
