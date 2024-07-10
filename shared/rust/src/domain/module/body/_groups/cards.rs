@@ -318,9 +318,9 @@ impl ModeExt for Mode {
         vec![
             Self::Duplicate,
             Self::WordsAndImages,
+            Self::Lettering,
             Self::Images,
             Self::BeginsWith,
-            Self::Lettering,
             Self::Riddles,
             Self::Opposites,
             Self::Synonyms,
@@ -346,7 +346,7 @@ impl ModeExt for Mode {
         const STR_DUPLICATE: &'static str = "Duplicate";
         const STR_WORDS_IMAGES: &'static str = "Words & Images";
         const STR_BEGINS_WITH: &'static str = "Begins with...";
-        const STR_LETTERING: &'static str = "Lettering";
+        const STR_LETTERING: &'static str = "Script & Print";
         const STR_RIDDLES: &'static str = "Riddles";
         const STR_OPPOSITES: &'static str = "Opposites";
         const STR_SYNONYMS: &'static str = "Synonyms";
