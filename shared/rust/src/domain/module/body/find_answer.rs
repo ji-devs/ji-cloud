@@ -246,12 +246,12 @@ impl Default for Mode {
 impl ModeExt for Mode {
     fn get_list() -> Vec<Self> {
         vec![
-            Self::MultipleChoice,
             Self::Scene,
-            Self::Family,
-            Self::Map,
+            Self::MultipleChoice,
             Self::Text,
             Self::Differences,
+            Self::Map,
+            Self::Family,
         ]
     }
 
@@ -267,12 +267,12 @@ impl ModeExt for Mode {
     }
 
     fn label(&self) -> &'static str {
-        const STR_FAMILY_LABEL: &'static str = "Family tree";
-        const STR_MAP_LABEL: &'static str = "Where on the map?";
-        const STR_MULTIPLE_CHOICE_LABEL: &'static str = "Multiple Choice";
-        const STR_SCENE_LABEL: &'static str = "Find the answers";
-        const STR_TEXT_LABEL: &'static str = "Find the text";
-        const STR_DIFFERENCES_LABEL: &'static str = "Find the differences";
+        const STR_FAMILY_LABEL: &'static str = "Family Tree";
+        const STR_MAP_LABEL: &'static str = "Where on the Map?";
+        const STR_MULTIPLE_CHOICE_LABEL: &'static str = "Find the Answers";
+        const STR_SCENE_LABEL: &'static str = "Spot It";
+        const STR_TEXT_LABEL: &'static str = "Find the Text";
+        const STR_DIFFERENCES_LABEL: &'static str = "Find the Differences";
 
         match self {
             Self::Family => STR_FAMILY_LABEL,
