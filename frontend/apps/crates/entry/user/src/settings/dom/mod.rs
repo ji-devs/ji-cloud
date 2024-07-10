@@ -29,8 +29,9 @@ mod options_popup;
 mod plan_info;
 
 const STR_EDIT: &str = " Edit";
+const STR_RESET: &str = "Reset";
 
-const STR_RESET_PASSWORD_SENT: &str = "We just sent you a reset password email!";
+const STR_RESET_PASSWORD_SENT: &str = "Email sent to ";
 
 const STR_AFFILIATION_HEADER: &str = "Affiliation";
 const STR_AFFILIATION_SUBHEADER: &str = "What type of content do you want to access?";
@@ -254,7 +255,7 @@ impl SettingsPage {
                                 .prop("size", "regular")
                                 .prop("slot", "relevant-subjects-edit")
                                 .prop("disabled", status == ResetPasswordStatus::Loading)
-                                .text(STR_EDIT)
+                                .text(STR_RESET)
                                 .event(clone!(state => move |_: events::Click| {
                                     state.send_reset_password();
                                 }))
@@ -265,6 +266,7 @@ impl SettingsPage {
                         html!("p", {
                             .prop("slot", "reset-password")
                             .text(STR_RESET_PASSWORD_SENT)
+                            .text(&state.user.email.get_cloned())
                         })
                     },
                 })

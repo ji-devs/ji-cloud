@@ -8,20 +8,21 @@ import {
 } from "lit-element";
 import { nothing } from "lit-html";
 
-const STR_MY_SETTINGS = "My Settings";
+const STR_ACCOUNT = "Account";
 const STR_BASIC_INFO = "Basic info";
-const STR_JIGZI_FILTERS = "Jigzi filters";
+const STR_JIGZI_FILTERS = "Jigzi content filters";
 
 const STR_EMAIL = "Email";
 const STR_PASSWORD = "Password";
 const STR_FIRST_NAME = "First name";
-const STR_FAMILY_NAME = "Family name";
+const STR_FAMILY_NAME = "Last name";
 const STR_USER_NAME = "Username";
-const STR_PREFERRED_LANGUAGE = "Preferred language of communication";
-const STR_RELEVANT_AGE_GROUPS = "Relevant age groups";
-const STR_RELEVANT_SUBJECTS = "Relevant subjects";
+const STR_PREFERRED_LANGUAGE = "Jigzi emails you in";
+const STR_RELEVANT_AGE_GROUPS = "Age groups";
+const STR_RELEVANT_SUBJECTS = "Subjects";
 const STR_AFFILIATION = "Affiliation";
-const STR_FILTER_MESSAGE = "A note about our filters: Ji believes in making Jewish education accessible to ALL Jews, of all ages and affiliations. If you would like to see only what Jigzi tags as relevant to you, use these filters to fine-tune your search results. If you would like to see ALL our images, resources and JIGs leave these blank.";
+const STR_FILTER_MESSAGE = "A note about our filters: Ji believes in making Jewish education accessible to ALL Jews, of all ages and affiliations. If you would like to see only what Jigzi tags as relevant to you, use these filters to fine-tune your search results.";
+const STR_FILTER_MESSAGE_BOLD = "If you would like to see ALL our images, resources and JIGs leave these blank.";
 const STR_PLAN = "Plan";
 const STR_PRICE = "Price";
 const STR_AUTO_RENEWS = "Auto renew";
@@ -358,7 +359,7 @@ export class _ extends LitElement {
             </aside>
             <main @scroll="${this.recalculateActive}">
                 <div class="main-width-holder">
-                    <h1>${STR_MY_SETTINGS}</h1>
+                    <h1>${STR_ACCOUNT}</h1>
                     <section id="basic-info">
                         <h2>${STR_BASIC_INFO}</h2>
                         <label>
@@ -391,7 +392,10 @@ export class _ extends LitElement {
                     </section>
                     <section id="jigzi-filters">
                         <h2>${STR_JIGZI_FILTERS}</h2>
-                        <p class="filter-message">${STR_FILTER_MESSAGE}</p>
+                        <p class="filter-message">
+                            ${STR_FILTER_MESSAGE}
+                            <strong>${STR_FILTER_MESSAGE_BOLD}</strong>
+                        </p>
                         <label class="tags-label">
                             <span class="key">${STR_RELEVANT_AGE_GROUPS}</span>
                             <div class="value tags-wrapper">
