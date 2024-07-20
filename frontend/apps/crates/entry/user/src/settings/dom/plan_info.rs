@@ -38,7 +38,7 @@ impl SettingsPage {
                         html!("button-rect", {
                             .prop("href", link)
                             .prop("target", "_blank")
-                            .text("Customer portal")
+                            .text("Manage my plan")
                         })
                     })
                 }))

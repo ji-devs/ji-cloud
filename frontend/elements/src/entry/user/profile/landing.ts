@@ -234,7 +234,7 @@ export class _ extends LitElement {
                     row-gap: 16px;
                 }
                 #plan h2 {
-                    margin-bottom: 8px;
+                    margin-bottom: 0;
                 }
                 ::slotted([slot=plan-type]),
                 ::slotted([slot=plan-price]),
@@ -338,7 +338,7 @@ export class _ extends LitElement {
             <slot name="page-header"></slot>
             <aside>
                 <div slot="profile-image">
-                        <slot name="profile-image"><slot name="edit-profile-image"></slot></slot>
+                    <slot name="profile-image"><slot name="edit-profile-image"></slot></slot>
                 </div>
 
                 <div class="name">${this.name}</div>
@@ -423,6 +423,11 @@ export class _ extends LitElement {
                             <h2>${this.planSectionTitle}</h2>
                             <slot name="portal-link"></slot>
                             <label class="tags-label">
+                                <span style="grid-column: 1/3;">
+                                    Use the 'Manage my plan' button to update credit card details, view your invoice history, or make changes to your plan.
+                                </span>
+                            </label>
+                            <label class="tags-label">
                                 <span class="key">${STR_PLAN}</span>
                                 <div class="value">
                                     <slot name="plan-type"></slot>
@@ -442,12 +447,14 @@ export class _ extends LitElement {
                                     <slot name="plan-renews-on"></slot>
                                 </div>
                             </label>
+                            <!--
                             <label class="tags-label">
                                 <span class="key">${STR_AUTO_RENEWS}</span>
                                 <div class="value">
                                     <slot name="plan-auto-renew"></slot>
                                 </div>
                             </label>
+                            -->
                             <label class="tags-label">
                                 <span class="key">${STR_PAYMENT_METHOD}</span>
                                 <div class="value">
