@@ -85,6 +85,8 @@ pub fn render_main_cards<RawData: RawDataExt, E: ExtraExt>(
         .style("grid-column", "1")
         .style("grid-row", "1")
         .style("align-self", "start")
+        // z-index so that cards are over the background
+        .style("z-index", "1")
         .children_signal_vec({
             base.pairs
                 .signal_vec_cloned()
