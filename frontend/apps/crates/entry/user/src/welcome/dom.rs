@@ -3,7 +3,6 @@ use std::rc::Rc;
 use super::Welcome;
 use dominator::{html, Dom};
 use shared::domain::billing::PlanType;
-use utils::prelude::HomePricingRoute;
 use utils::routes::UserRoute;
 use utils::{
     prelude::{get_plan_type, get_school_id, get_user_email, get_user_mutable},
