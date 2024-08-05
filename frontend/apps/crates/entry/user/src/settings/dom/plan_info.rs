@@ -37,6 +37,7 @@ impl SettingsPage {
                     link.as_ref().map(|link| {
                         html!("button-rect", {
                             .prop("href", link)
+                            .prop("style", "width: 196px")
                             .prop("target", "_blank")
                             .text("Manage my plan")
                         })
@@ -131,12 +132,10 @@ impl SettingsPage {
                     match frequency {
                         BillingInterval::Monthly => {
                             Some(html!("button-rect", {
+                                .prop("style", "width: 196px")
                                 .prop("type", "filled")
                                 .prop("color", "blue")
-                                .text(match plan_type {
-                                    Some(PlanType::SchoolLevel1Monthly) => "Get 1 month FREE by switching to annual billing",
-                                    _ => "Get extra saving by switching to annual billing"
-                                })
+                                .text("Switch to Annual Billing")
                                 .event(clone!(state, plan_info => move|_ :events::Click| {
                                     spawn_local(clone!(state, plan_info => async move {
                                         let plan_type: PlanType = plan_type.unwrap_ji();
@@ -173,6 +172,7 @@ impl SettingsPage {
                                 let new_plan_type = plan_type.basic_to_pro();
                                 let billing_interval = plan_type.billing_interval();
                                 Some(html!("button-rect", {
+                                    .prop("style", "width: 196px")
                                     .prop("type", "filled")
                                     .prop("color", "blue")
                                     .text(&format!("Switch to Pro {billing_interval}"))
@@ -277,6 +277,7 @@ impl SettingsPage {
                     }
 
                     Some(html!("button-rect", {
+                        .prop("style", "width: 196px")
                         .prop("type", "filled")
                         .prop("color", "blue")
                         .text(match plan_info.status.is_paused() {
@@ -294,7 +295,7 @@ impl SettingsPage {
                                 } else {
                                     (
                                         "Pause subscription".to_string(),
-                                        "Are you sure you want to pause your subscription?".to_string(),
+                                        "Are you sure you want to pause your subscription? No further payment will be taken until you choose to unpause your plan and have full access again.".to_string(),
                                         "Pause".to_string(),
                                     )
                                 };

@@ -1,15 +1,15 @@
 use std::rc::Rc;
 
+use super::Welcome;
 use dominator::{html, Dom};
 use shared::domain::billing::PlanType;
 use utils::prelude::HomePricingRoute;
+use utils::routes::UserRoute;
 use utils::{
     prelude::{get_plan_type, get_school_id, get_user_email, get_user_mutable},
     routes::{AssetRoute, HomeRoute, Route},
     unwrap::UnwrapJiExt,
 };
-
-use super::Welcome;
 
 fn get_add_teacher_form_link() -> String {
     let user = get_user_mutable();
@@ -122,7 +122,7 @@ impl Welcome {
                     .prop("slot", "actions")
                     .prop("color", "blue")
                     .prop("kind", "filled")
-                    .prop("href", Route::Home(HomeRoute::Pricing(HomePricingRoute::default())).to_string())
+                    .prop("href", format!("{}#plan", Route::User(UserRoute::Settings).to_string()))
                     .text("Upgrade account")
                 }))
             })

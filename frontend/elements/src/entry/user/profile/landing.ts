@@ -267,7 +267,7 @@ export class _ extends LitElement {
                 }
                 @media (min-width: 1024px) {
                     ::slotted([slot=change-to-annual]) {
-                        flex-direction: row;
+                        flex-direction: column;
                     }
                 }
                 ::slotted(dialog-overlay) {
@@ -421,12 +421,6 @@ export class _ extends LitElement {
                     ${ this.showPlan ? html`
                         <section id="plan">
                             <h2>${this.planSectionTitle}</h2>
-                            <slot name="portal-link"></slot>
-                            <label class="tags-label">
-                                <span style="grid-column: 1/3;">
-                                    Use the 'Manage my plan' button to update credit card details, view your invoice history, or make changes to your plan.
-                                </span>
-                            </label>
                             <label class="tags-label">
                                 <span class="key">${STR_PLAN}</span>
                                 <div class="value">
@@ -460,6 +454,12 @@ export class _ extends LitElement {
                                 <div class="value">
                                     <slot name="plan-payment-method"></slot>
                                 </div>
+                            </label>
+                            <slot name="portal-link"></slot>
+                            <label class="tags-label">
+                                <span style="grid-column: 1/3;">
+                                    Use the 'Manage my plan' button to update credit card details, view your invoice history, or cancel your plan. To make changes to your plan, use the buttons below.
+                                </span>
                             </label>
                             <slot name="change-to-annual"></slot>
                         </section>
