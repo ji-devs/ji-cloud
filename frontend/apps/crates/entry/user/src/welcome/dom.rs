@@ -97,9 +97,9 @@ impl Welcome {
             })
             .apply_if(!is_school, |dom| {
                 let route = if is_free_tier {
-                    format!("{}#plan", Route::User(UserRoute::Settings))
-                } else {
                     format!("{}", Route::Home(HomeRoute::Pricing(HomePricingRoute::default())))
+                } else {
+                    format!("{}#plan", Route::User(UserRoute::Settings))
                 };
 
                 dom.child(html!("h2", {
