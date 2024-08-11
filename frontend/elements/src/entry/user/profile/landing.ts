@@ -267,7 +267,7 @@ export class _ extends LitElement {
                 }
                 @media (min-width: 1024px) {
                     ::slotted([slot=change-to-annual]) {
-                        flex-direction: column;
+                        flex-direction: row;
                     }
                 }
                 ::slotted(dialog-overlay) {
