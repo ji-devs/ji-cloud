@@ -5,7 +5,7 @@ use dominator::{html, Dom};
 use shared::domain::billing::PlanType;
 use utils::routes::{HomePricingRoute, UserRoute};
 use utils::{
-    prelude::{get_plan_tier, get_plan_type, get_school_id, get_user_email, get_user_mutable},
+    prelude::{get_plan_type, get_school_id, get_user_email, get_user_mutable},
     routes::{AssetRoute, HomeRoute, Route},
     unwrap::UnwrapJiExt,
 };
@@ -47,7 +47,6 @@ impl Welcome {
     }
     pub fn render(self: &Rc<Self>) -> Dom {
         let plan = get_plan_type();
-        let is_free_tier = get_plan_tier().is_free();
         let email = get_user_email().unwrap_or_default();
         let title = self.page_title(plan);
 
@@ -96,10 +95,10 @@ impl Welcome {
                 }))
             })
             .apply_if(!is_school, |dom| {
-                let route = if is_free_tier {
-                    format!("{}", Route::Home(HomeRoute::Pricing(HomePricingRoute::default())))
-                } else {
+                let route = if self.subscribed {
                     format!("{}#plan", Route::User(UserRoute::Settings))
+                } else {
+                    format!("{}", Route::Home(HomeRoute::Pricing(HomePricingRoute::default())))
                 };
 
                 dom.child(html!("h2", {

@@ -65,7 +65,7 @@ impl Router {
                 UserRoute::Subscribe2(plan_type, params, promo) => {
                     Some(Subscribe2::new(plan_type, params, promo).render())
                 }
-                UserRoute::Welcome => Some(Welcome::new().render()),
+                UserRoute::Welcome(params) => Some(Welcome::new(params).render()),
             },
             _ => None,
         })

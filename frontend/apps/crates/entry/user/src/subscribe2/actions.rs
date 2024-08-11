@@ -16,6 +16,7 @@ use wasm_bindgen_futures::spawn_local;
 
 use super::state::*;
 use std::rc::Rc;
+use utils::routes::WelcomeParams;
 
 impl Subscribe2 {
     pub fn subscribe(self: &Rc<Self>) {
@@ -44,7 +45,7 @@ impl Subscribe2 {
 fn get_next_page_url() -> String {
     match get_school_id() {
         Some(_) => Route::User(UserRoute::SchoolEnd),
-        None => Route::User(UserRoute::Welcome),
+        None => Route::User(UserRoute::Welcome(WelcomeParams { subscribed: true })),
     }
     .to_string()
 }

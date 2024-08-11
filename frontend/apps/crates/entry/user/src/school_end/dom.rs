@@ -105,7 +105,7 @@ impl Component<SchoolEnd> for Rc<SchoolEnd> {
                         .prop("kind", "text")
                         .prop_signal("disabled", state.loader.is_loading())
                         .event(move |_: events::Click| {
-                            dominator::routing::go_to_url(&Route::User(UserRoute::Welcome).to_string());
+                            dominator::routing::go_to_url(&Route::User(UserRoute::Welcome(Default::default())).to_string());
                         })
                     }))
                     .child(html!("button-rect", {

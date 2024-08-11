@@ -102,6 +102,13 @@ pub struct SearchQueryParams {
     pub categories: Vec<CategoryId>,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct WelcomeParams {
+    #[serde(default)]
+    pub subscribed: bool,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct StripeRedirectParams {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -143,7 +150,7 @@ pub enum UserRoute {
         Option<StripeRedirectParams>,
         Option<PromotionCode>,
     ),
-    Welcome,
+    Welcome(WelcomeParams),
 }
 
 #[derive(Debug, Clone)]
@@ -566,7 +573,10 @@ impl Route {
 
                 Self::User(UserRoute::Subscribe2(plan_type, params, promo))
             }
-            ["user", "welcome"] => Self::User(UserRoute::Welcome),
+            ["user", "welcome"] => {
+                let query = serde_qs::from_str(&params_string).unwrap_ji();
+                Self::User(UserRoute::Welcome(query))
+            }
             ["admin", "features-jigs"] => Self::Admin(AdminRoute::FeaturedJigs),
             ["admin", "jig-curation"] => {
                 Self::Admin(AdminRoute::JigCuration(AdminJigCurationRoute::Table))
@@ -945,7 +955,10 @@ impl From<&Route> for String {
                 }
                 UserRoute::VerifyEmail(token) => format!("/user/verify-email/{}", token),
                 UserRoute::PasswordReset(token) => format!("/user/password-reset/{}", token),
-                UserRoute::Welcome => "/user/welcome".to_string(),
+                UserRoute::Welcome(params) => {
+                    let query = serde_qs::to_string(&params).unwrap_ji();
+                    format!("/user/welcome?{query}")
+                }
                 UserRoute::NoAuth => "/user/no-auth".to_string(),
                 UserRoute::SchoolStart(plan_type, promo) => match promo {
                     Some(promo) => {
