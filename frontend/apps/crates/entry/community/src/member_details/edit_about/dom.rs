@@ -8,12 +8,11 @@ use utils::{
     component::Component,
     events,
     languages::{Language, JIG_LANGUAGES},
-    unwrap::UnwrapJiExt,
 };
 use web_sys::{HtmlInputElement, ShadowRoot};
 
 pub const STR_HEADING: &str = "Edit your details";
-pub const STR_LOCATION: &str = "Where I live";
+// pub const STR_LOCATION: &str = "Where I live";
 pub const STR_ORGANIZATION: &str = "Where I work";
 pub const STR_PERSONA: &str = "What I do";
 pub const STR_LANGUAGE: &str = "Language";
@@ -53,36 +52,37 @@ impl Component<EditAbout> for Rc<EditAbout> {
                 .prop("slot", "body")
                 .class("field-grid")
                 .children(&mut [
-                    html!("fa-icon", {
-                        .prop("icon", "fa-solid fa-location-dot")
-                    }),
-                    html!("input-wrapper", {
-                        .prop("slot", "location")
-                        .prop("label", STR_LOCATION)
-                        .child(html!("input-location", {
-                            .prop_signal("locationAsString", state.location.signal_cloned().map(|location| {
-                                location.unwrap_or_default()
-                                    .as_str()
-                                    .unwrap_or_default()
-                                    .to_owned()
-                            }))
-                            .event(clone!(state => move |evt: events::GoogleLocation| {
-                                let raw = serde_json::to_value(evt.raw_json()).unwrap_ji();
-                                state.location.set(Some(raw));
-                            }))
-                        }))
-                        .child(html!("img-ui", {
-                            .prop("slot", "icon")
-                            .prop("path", "core/inputs/pencil-blue-darker.svg")
-                        }))
-                    }),
-                    html!("community-private-public-switch", {
-                        .prop("type", "checkbox")
-                        .prop_signal("isPublic", state.location_public.signal())
-                        .event(clone!(state => move |evt: events::CustomToggle| {
-                            state.location_public.set_neq(evt.value());
-                        }))
-                    }),
+                    // TODO: Temporary disabled location to prevent usage of Places API
+                    // html!("fa-icon", {
+                    //     .prop("icon", "fa-solid fa-location-dot")
+                    // }),
+                    // html!("input-wrapper", {
+                    //     .prop("slot", "location")
+                    //     .prop("label", STR_LOCATION)
+                    //     .child(html!("input-location", {
+                    //         .prop_signal("locationAsString", state.location.signal_cloned().map(|location| {
+                    //             location.unwrap_or_default()
+                    //                 .as_str()
+                    //                 .unwrap_or_default()
+                    //                 .to_owned()
+                    //         }))
+                    //         .event(clone!(state => move |evt: events::GoogleLocation| {
+                    //             let raw = serde_json::to_value(evt.raw_json()).unwrap_ji();
+                    //             state.location.set(Some(raw));
+                    //         }))
+                    //     }))
+                    //     .child(html!("img-ui", {
+                    //         .prop("slot", "icon")
+                    //         .prop("path", "core/inputs/pencil-blue-darker.svg")
+                    //     }))
+                    // }),
+                    // html!("community-private-public-switch", {
+                    //     .prop("type", "checkbox")
+                    //     .prop_signal("isPublic", state.location_public.signal())
+                    //     .event(clone!(state => move |evt: events::CustomToggle| {
+                    //         state.location_public.set_neq(evt.value());
+                    //     }))
+                    // }),
                     html!("fa-icon", {
                         .prop("icon", "fa-solid fa-briefcase")
                     }),
