@@ -1,7 +1,6 @@
 use super::state::SchoolStart;
 use const_format::formatcp;
 use dominator::{clone, html, with_node, DomBuilder};
-use futures_signals::signal::SignalExt;
 use shared::domain::billing::SCHOOL_TRIAL_PERIOD;
 use std::rc::Rc;
 use utils::{component::Component, events};
