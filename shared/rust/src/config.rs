@@ -213,8 +213,8 @@ impl RemoteTarget {
         match self {
             // these are _apparently_ public?
             Self::Local
-            | Self::Sandbox => "https://maps.googleapis.com/maps/api/js?key=AIzaSyCtU4taX_GG36bXfZr98HSwZTBNYo9HS1I&libraries=places",
-            Self::Release => "https://maps.googleapis.com/maps/api/js?key=AIzaSyCU1HygSZgK4L3qPdRmrV-dTnS1GBBiqyE&libraries=places"
+            | Self::Sandbox => "https://maps.googleapis.com/maps/api/js?key=AIzaSyA_2bOsRAkYy6M5W-FgC66sSMs6xasYsRs&libraries=places",
+            Self::Release => "https://maps.googleapis.com/maps/api/js?key=AIzaSyACFIbFhygrinifRdlsg8Ig_ztm5LphlkY&libraries=places"
         }
     }
 

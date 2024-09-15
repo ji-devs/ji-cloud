@@ -28,17 +28,17 @@ impl Step2Page {
 
         html!("page-register-step2", {
             .children(&mut [
-                // html!("input-wrapper", {
-                //     .prop("slot", "location")
-                //     .prop("label", STR_LOCATION_LABEL)
-                //     .prop_signal("error", state.location_error.signal())
-                //     .child(html!("input-location", {
-                //         .prop("placeholder", STR_LOCATION_PLACEHOLDER)
-                //         .event(clone!(state => move |evt:events::GoogleLocation| {
-                //             *state.location_json.borrow_mut() = evt.raw_json();
-                //         }))
-                //     }))
-                // }),
+                html!("input-wrapper", {
+                    .prop("slot", "location")
+                    .prop("label", STR_LOCATION_LABEL)
+                    .prop_signal("error", state.location_error.signal())
+                    .child(html!("input-location", {
+                        .prop("placeholder", STR_LOCATION_PLACEHOLDER)
+                        .event(clone!(state => move |evt:events::GoogleLocation| {
+                            *state.location_json.borrow_mut() = evt.raw_json();
+                        }))
+                    }))
+                }),
                 SimpleSelect::render_mixin(
                     SimpleSelect::new(
                         Some(STR_LANGUAGE_LABEL),

@@ -1,9 +1,10 @@
 use super::state::SchoolStart;
 use const_format::formatcp;
 use dominator::{clone, html, with_node, DomBuilder};
+use futures_signals::signal::SignalExt;
 use shared::domain::billing::SCHOOL_TRIAL_PERIOD;
 use std::rc::Rc;
-use utils::{component::Component, events};
+use utils::{component::Component, events, unwrap::UnwrapJiExt};
 use web_sys::{HtmlInputElement, ShadowRoot};
 
 impl Component<SchoolStart> for Rc<SchoolStart> {
@@ -33,7 +34,6 @@ impl Component<SchoolStart> for Rc<SchoolStart> {
                 .child(html!("div", {
                     .class("inputs")
                     .child(html!("input-wrapper", {
-                        .style("grid-column", "span 2") // TODO Remove when enabling Places API again
                         .prop("label", "School/Organization*")
                         .child(html!("input" => HtmlInputElement, {
                             .with_node!(elem => {
@@ -45,21 +45,21 @@ impl Component<SchoolStart> for Rc<SchoolStart> {
                             })
                         }))
                     }))
-                    // .child(html!("input-wrapper", {
-                    //     .prop("label", "Location")
-                    //     .child(html!("input-location", {
-                    //         .prop_signal("locationAsString", state.location.signal_cloned().map(|location| {
-                    //             location.unwrap_or_default()
-                    //                 .as_str()
-                    //                 .unwrap_or_default()
-                    //                 .to_owned()
-                    //         }))
-                    //         .event(clone!(state => move |evt: events::GoogleLocation| {
-                    //             let raw = serde_json::to_value(evt.raw_json()).unwrap_ji();
-                    //             state.location.set(Some(raw));
-                    //         }))
-                    //     }))
-                    // }))
+                    .child(html!("input-wrapper", {
+                        .prop("label", "Location")
+                        .child(html!("input-location", {
+                            .prop_signal("locationAsString", state.location.signal_cloned().map(|location| {
+                                location.unwrap_or_default()
+                                    .as_str()
+                                    .unwrap_or_default()
+                                    .to_owned()
+                            }))
+                            .event(clone!(state => move |evt: events::GoogleLocation| {
+                                let raw = serde_json::to_value(evt.raw_json()).unwrap_ji();
+                                state.location.set(Some(raw));
+                            }))
+                        }))
+                    }))
                 }))
                 .child(html!("button-rect", {
                     .text("Continue")

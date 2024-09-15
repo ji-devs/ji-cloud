@@ -21,10 +21,7 @@ pub fn submit(state: Rc<State>) {
     };
     state.location_error.set_neq(location_error);
 
-    // TODO: Temporary disabled location_error check to prevent usage of Places API
-    if !terms_error && !language_error && !persona_error
-    /* && !location_error */
-    {
+    if !terms_error && !language_error && !persona_error && !location_error {
         next_step(state);
     }
 }
