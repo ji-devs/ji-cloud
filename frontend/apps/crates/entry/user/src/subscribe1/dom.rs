@@ -1,12 +1,15 @@
 use super::{check_popup::CheckPopup, stripe::Stripe};
 
 use super::state::Subscribe1;
+use components::confirm;
 use dominator::{clone, html, with_node, DomBuilder};
 use futures_signals::signal::SignalExt;
 use shared::domain::billing::{INDIVIDUAL_TRIAL_PERIOD, SCHOOL_TRIAL_PERIOD};
 use std::rc::Rc;
+use utils::prelude::get_user_cloned;
 use utils::routes::{Route, UserRoute};
 use utils::{component::Component, dialog, events, gap, icon};
+use wasm_bindgen_futures::spawn_local;
 use web_sys::{HtmlElement, HtmlInputElement, ShadowRoot};
 
 impl Component<Subscribe1> for Rc<Subscribe1> {
@@ -121,7 +124,27 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                                     .prop("size", "large")
                                     .text("Start free trial")
                                     .event(clone!(state => move |_: events::Click| {
-                                        state.submit();
+                                        spawn_local(clone!(state => async move {
+                                            let has_previous_subscription = get_user_cloned()
+                                                .and_then(|user| user.account_summary)
+                                                .and_then(|summary| summary.subscription_status)
+                                                .is_some();
+
+                                            if !has_previous_subscription {
+                                                state.submit();
+                                            } else {
+                                                let confirmed = confirm::Confirm {
+                                                    title: "Welcome back to Jigzi!".to_string(),
+                                                    message: "The free trial offer has already been redeemed for this account. By clicking 'Confirm' your subscription will begin and payment will be taken immediately.".to_string(),
+                                                    confirm_text: "Confirm".to_string(),
+                                                    cancel_text: "Cancel".to_string()
+                                                }.confirm().await;
+                                                if confirmed {
+                                                    state.submit();
+                                                }
+                                            }
+
+                                        }));
                                     }))
                                 }))
                             })

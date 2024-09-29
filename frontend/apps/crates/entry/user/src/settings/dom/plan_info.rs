@@ -1,3 +1,4 @@
+use crate::settings::state::{PlanSectionInfo, SettingsPage};
 use components::confirm;
 use dominator::{clone, html, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
@@ -11,8 +12,6 @@ use utils::{events, js_object, prelude::plan_type_signal, unwrap::UnwrapJiExt};
 use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 
-use crate::settings::state::{PlanSectionInfo, SettingsPage};
-
 const STR_EXPIRED_ON: &str = "Expired on";
 const STR_TRIAL_ENDS_ON: &str = "Trial ends on";
 const STR_RENEWS_ON: &str = "Renews on";
@@ -24,296 +23,302 @@ impl SettingsPage {
     pub(super) fn render_plan_section(
         self: &Rc<Self>,
         plan_info: &Rc<PlanSectionInfo>,
+        show_expanded_details: bool,
     ) -> Vec<Dom> {
         let state = self;
         let auto_renew = plan_info.auto_renew.read_only();
 
         self.load_portal_link();
 
-        vec![
-            html!("div", {
-                .prop("slot", "portal-link")
-                .child_signal(self.portal_link.signal_cloned().map(|link| {
-                    link.as_ref().map(|link| {
-                        html!("button-rect", {
-                            .prop("href", link)
-                            .prop("style", "width: 210px")
-                            .prop("target", "_blank")
-                            .text("Manage my plan")
-                        })
-                    })
-                }))
-            }),
-            html!("div", {
-                .prop("slot", "plan-type")
-                .style("display", "flex")
-                .child(html!("p", {
-                    .text_signal(plan_type_signal().map(|plan| {
-                        plan.map(|plan| {
-                            plan.display_name()
-                        }).unwrap_or_default()
-                    }))
-                }))
-                .child_signal(plan_type_signal().map(clone!(plan_info => move |_| {
-                    if plan_info.status.is_paused() {
-                        Some(html!("span", {
-                            .style("align-self", "center")
-                            .style("margin-left", "10rem")
-                            .child(html!("pill-close", {
-                                .prop("label", "Paused")
-                            }))
-                        }))
-                    } else {
-                        None
-                    }
-                })))
-            }),
-            html!("p", {
-                .prop("slot", "plan-price")
-                .text_signal(plan_type_signal().map(clone!(plan_info => move |plan_type| {
-                    plan_type.map(|plan_type| {
-                        let frequency = plan_type.billing_interval();
-                        price_string(&plan_info.price, &plan_info.coupon, frequency)
+        let mut plan_items = vec![html!("div", {
+            .prop("slot", "plan-type")
+            .style("display", "flex")
+            .child(html!("p", {
+                .text_signal(plan_type_signal().map(|plan| {
+                    plan.map(|plan| {
+                        plan.display_name()
                     }).unwrap_or_default()
-                })))
-            }),
-            html!("p", {
-                .prop("slot", "plan-renews-on")
-                .text(&plan_info.current_period_end.format(DATE_FORMAT).to_string())
-            }),
-            html!("p", {
-                .prop("slot", "plan-renewal-label")
-                .text_signal(auto_renew.signal().map(clone!(plan_info => move |auto_renew| {
-                    if plan_info.is_trial {
-                        STR_TRIAL_ENDS_ON
-                    } else if !plan_info.status.is_valid() {
-                        STR_EXPIRED_ON
-                    } else {
-                        match auto_renew {
-                            true => STR_RENEWS_ON,
-                            false => STR_EXPIRES_ON,
-                        }
-                    }
-                })))
-            }),
-            html!("div", {
-                .prop("slot", "plan-auto-renew")
-                .child(html!("input-switch", {
-                    .prop("disabled", !plan_info.status.is_valid())
-                    .prop_signal("enabled", auto_renew.signal().map(clone!(plan_info => move |auto_renew| {
-                        if !plan_info.status.is_valid() {
-                            false
+                }))
+            }))
+            .child_signal(plan_type_signal().map(clone!(plan_info => move |_| {
+                if plan_info.status.is_paused() {
+                    Some(html!("span", {
+                        .style("align-self", "center")
+                        .style("margin-left", "10rem")
+                        .child(html!("pill-close", {
+                            .prop("label", "Paused")
+                        }))
+                    }))
+                } else {
+                    None
+                }
+            })))
+        })];
+
+        if show_expanded_details {
+            plan_items.append(&mut vec![
+                html!("div", {
+                    .prop("slot", "portal-link")
+                    .child_signal(self.portal_link.signal_cloned().map(|link| {
+                        link.as_ref().map(|link| {
+                            html!("button-rect", {
+                                .prop("href", link)
+                                .prop("style", "width: 210px")
+                                .prop("target", "_blank")
+                                .text("Manage my plan")
+                            })
+                        })
+                    }))
+                }),
+                html!("p", {
+                    .prop("slot", "plan-price")
+                    .text_signal(plan_type_signal().map(clone!(plan_info => move |plan_type| {
+                        plan_type.map(|plan_type| {
+                            let frequency = plan_type.billing_interval();
+                            price_string(&plan_info.price, &plan_info.coupon, frequency)
+                        }).unwrap_or_default()
+                    })))
+                }),
+                html!("p", {
+                    .prop("slot", "plan-renews-on")
+                    .text(&plan_info.current_period_end.format(DATE_FORMAT).to_string())
+                }),
+                html!("p", {
+                    .prop("slot", "plan-renewal-label")
+                    .text_signal(auto_renew.signal().map(clone!(plan_info => move |auto_renew| {
+                        if plan_info.is_trial {
+                            STR_TRIAL_ENDS_ON
+                        } else if !plan_info.status.is_valid() {
+                            STR_EXPIRED_ON
                         } else {
-                            auto_renew
+                            match auto_renew {
+                                true => STR_RENEWS_ON,
+                                false => STR_EXPIRES_ON,
+                            }
                         }
                     })))
-                    .event(clone!(state, plan_info, auto_renew => move|_ :events::CustomToggle| {
-                        if plan_info.status.is_valid() {
-                            state.set_auto_renew(!auto_renew.get());
+                }),
+                html!("div", {
+                    .prop("slot", "plan-auto-renew")
+                    .child(html!("input-switch", {
+                        .prop("disabled", !plan_info.status.is_valid())
+                        .prop_signal("enabled", auto_renew.signal().map(clone!(plan_info => move |auto_renew| {
+                            if !plan_info.status.is_valid() {
+                                false
+                            } else {
+                                auto_renew
+                            }
+                        })))
+                        .event(clone!(state, plan_info, auto_renew => move|_ :events::CustomToggle| {
+                            if plan_info.status.is_valid() {
+                                state.set_auto_renew(!auto_renew.get());
+                            }
+                        }))
+                    }))
+                    .child(html!("span", {
+                        .text_signal(auto_renew.signal().map(|auto_renew| match auto_renew {
+                            true => "On",
+                            false => "Off",
+                        }))
+                    }))
+                }),
+                state.render_payment_method(&plan_info.payment_method_type),
+                html!("div", {
+                    .prop("slot", "change-to-annual")
+                    .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
+                        if !plan_info.status.is_active() {
+                            return None;
                         }
-                    }))
-                }))
-                .child(html!("span", {
-                    .text_signal(auto_renew.signal().map(|auto_renew| match auto_renew {
-                        true => "On",
-                        false => "Off",
-                    }))
-                }))
-            }),
-            state.render_payment_method(&plan_info.payment_method_type),
-            html!("div", {
-                .prop("slot", "change-to-annual")
-                .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
-                    if !plan_info.status.is_active() {
-                        return None;
-                    }
 
-                    let frequency = plan_type?.billing_interval();
-                    match frequency {
-                        BillingInterval::Monthly => {
-                            Some(html!("button-rect", {
-                                .prop("style", "width: 210px")
-                                .prop("type", "filled")
-                                .prop("color", "blue")
-                                .text("Switch to Annual Billing")
-                                .event(clone!(state, plan_info => move|_ :events::Click| {
-                                    spawn_local(clone!(state, plan_info => async move {
-                                        let plan_type: PlanType = plan_type.unwrap_ji();
-                                        let new_plan_type = plan_type.monthly_to_annual();
-                                        let new_price = discounted_price(new_plan_type, &plan_info);
-                                        let message = format!("You will be charged {new_price} per year. A renewal reminder will be sent 30 days before the end of your subscription.");
-
-                                        let confirmed = confirm::Confirm {
-                                            title: "Switch to Annual Billing".to_string(),
-                                            message,
-                                            confirm_text: "Confirm".to_string(),
-                                            cancel_text: "Cancel".to_string()
-                                        }.confirm().await;
-                                        if confirmed {
-                                            state.change_to(new_plan_type)
-                                        }
-                                    }));
-                                }))
-                            }))
-                        },
-                        BillingInterval::Annually => None,
-                    }
-                })))
-                .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
-                    if !plan_info.status.is_active() {
-                        return None;
-                    }
-
-                    let plan_type: PlanType = plan_type?;
-                    let subscription_tier = plan_type.subscription_tier();
-                    if plan_type.is_individual_plan() {
-                        match subscription_tier {
-                            SubscriptionTier::Basic => {
-                                let new_plan_type = plan_type.basic_to_pro();
-                                let billing_interval = plan_type.billing_interval();
+                        let frequency = plan_type?.billing_interval();
+                        match frequency {
+                            BillingInterval::Monthly => {
                                 Some(html!("button-rect", {
                                     .prop("style", "width: 210px")
                                     .prop("type", "filled")
                                     .prop("color", "blue")
-                                    .text(&format!("Switch to Pro {billing_interval}"))
+                                    .text("Switch to Annual Billing")
                                     .event(clone!(state, plan_info => move|_ :events::Click| {
                                         spawn_local(clone!(state, plan_info => async move {
-                                            let charge_interval = match billing_interval {
-                                                BillingInterval::Monthly => "month",
-                                                BillingInterval::Annually => "year",
-                                            };
-                                            let renewal_message = match billing_interval {
-                                                BillingInterval::Annually =>  " A renewal reminder will be sent 30 days before the end of your subscription.",
-                                                BillingInterval::Monthly => " You can pause your subscription or cancel at any time.",
-                                            };
+                                            let plan_type: PlanType = plan_type.unwrap_ji();
+                                            let new_plan_type = plan_type.monthly_to_annual();
                                             let new_price = discounted_price(new_plan_type, &plan_info);
-                                            let message = format!("You will be charged {new_price} per {charge_interval}.{renewal_message}");
+                                            let message = format!("You will be charged {new_price} per year. A renewal reminder will be sent 30 days before the end of your subscription.");
 
                                             let confirmed = confirm::Confirm {
-                                                title: "Switch to the Pro plan".to_string(),
+                                                title: "Switch to Annual Billing".to_string(),
                                                 message,
                                                 confirm_text: "Confirm".to_string(),
                                                 cancel_text: "Cancel".to_string()
                                             }.confirm().await;
                                             if confirmed {
-                                                state.change_to(new_plan_type);
+                                                state.change_to(new_plan_type)
                                             }
                                         }));
                                     }))
                                 }))
                             },
-                            SubscriptionTier::Pro => None,
+                            BillingInterval::Annually => None,
                         }
-                    } else {
-                        match plan_type {
-                            PlanType::SchoolUnlimitedMonthly | PlanType::SchoolUnlimitedAnnually => None,
-                            _ => {
-                                let plan_type_signal = Mutable::new(None::<PlanType>);
-                                let plan_types = PlanType::iter().filter(|p| {
-                                    p.can_upgrade_from_same_interval(&plan_type)
-                                }).map(|p| html!("input-select-option", {
-                                    .text(p.user_display_name())
-                                    .prop("value", p.as_str())
-                                    .prop_signal("selected", plan_type_signal.signal_cloned().map(move |current| match current {
-                                        None => false,
-                                        Some(current) => current == p,
-                                    }))
-                                    .event(clone!(state, plan_info, plan_type_signal => move |e: events::CustomSelectedChange| {
-                                        if e.selected() {
-                                            plan_type_signal.set(Some(p));
-                                            spawn_local(clone!(state, plan_info, plan_type_signal => async move {
-                                                let billing_interval = plan_type.billing_interval();
+                    })))
+                    .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
+                        if !plan_info.status.is_active() {
+                            return None;
+                        }
+
+                        let plan_type: PlanType = plan_type?;
+                        let subscription_tier = plan_type.subscription_tier();
+                        if plan_type.is_individual_plan() {
+                            match subscription_tier {
+                                SubscriptionTier::Basic => {
+                                    let new_plan_type = plan_type.basic_to_pro();
+                                    let billing_interval = plan_type.billing_interval();
+                                    Some(html!("button-rect", {
+                                        .prop("style", "width: 210px")
+                                        .prop("type", "filled")
+                                        .prop("color", "blue")
+                                        .text(&format!("Switch to Pro {billing_interval}"))
+                                        .event(clone!(state, plan_info => move|_ :events::Click| {
+                                            spawn_local(clone!(state, plan_info => async move {
                                                 let charge_interval = match billing_interval {
                                                     BillingInterval::Monthly => "month",
                                                     BillingInterval::Annually => "year",
                                                 };
-
                                                 let renewal_message = match billing_interval {
                                                     BillingInterval::Annually =>  " A renewal reminder will be sent 30 days before the end of your subscription.",
                                                     BillingInterval::Monthly => " You can pause your subscription or cancel at any time.",
                                                 };
-                                                let new_price = discounted_price(p, &plan_info);
-
+                                                let new_price = discounted_price(new_plan_type, &plan_info);
                                                 let message = format!("You will be charged {new_price} per {charge_interval}.{renewal_message}");
 
                                                 let confirmed = confirm::Confirm {
-                                                    title: format!("Upgrade to {}", p.user_display_name()),
+                                                    title: "Switch to the Pro plan".to_string(),
                                                     message,
                                                     confirm_text: "Confirm".to_string(),
                                                     cancel_text: "Cancel".to_string()
                                                 }.confirm().await;
                                                 if confirmed {
-                                                    state.change_to(p);
-                                                } else {
-                                                    plan_type_signal.set(None);
+                                                    state.change_to(new_plan_type);
                                                 }
                                             }));
-                                        }
+                                        }))
                                     }))
-                                })).collect::<Vec<_>>();
-                                Some(html!("input-select", {
-                                    .style("min-width", "200rem")
-                                    .prop("label", "Upgrade to")
-                                    .prop("multiple", false)
-                                    .prop_signal("value", plan_type_signal.signal_cloned().map(|p| p.map_or("", |p| p.user_display_name())))
-                                    .children(plan_types)
-                                }))
+                                },
+                                SubscriptionTier::Pro => None,
+                            }
+                        } else {
+                            match plan_type {
+                                PlanType::SchoolUnlimitedMonthly | PlanType::SchoolUnlimitedAnnually => None,
+                                _ => {
+                                    let plan_type_signal = Mutable::new(None::<PlanType>);
+                                    let plan_types = PlanType::iter().filter(|p| {
+                                        p.can_upgrade_from_same_interval(&plan_type)
+                                    }).map(|p| html!("input-select-option", {
+                                        .text(p.user_display_name())
+                                        .prop("value", p.as_str())
+                                        .prop_signal("selected", plan_type_signal.signal_cloned().map(move |current| match current {
+                                            None => false,
+                                            Some(current) => current == p,
+                                        }))
+                                        .event(clone!(state, plan_info, plan_type_signal => move |e: events::CustomSelectedChange| {
+                                            if e.selected() {
+                                                plan_type_signal.set(Some(p));
+                                                spawn_local(clone!(state, plan_info, plan_type_signal => async move {
+                                                    let billing_interval = plan_type.billing_interval();
+                                                    let charge_interval = match billing_interval {
+                                                        BillingInterval::Monthly => "month",
+                                                        BillingInterval::Annually => "year",
+                                                    };
+
+                                                    let renewal_message = match billing_interval {
+                                                        BillingInterval::Annually =>  " A renewal reminder will be sent 30 days before the end of your subscription.",
+                                                        BillingInterval::Monthly => " You can pause your subscription or cancel at any time.",
+                                                    };
+                                                    let new_price = discounted_price(p, &plan_info);
+
+                                                    let message = format!("You will be charged {new_price} per {charge_interval}.{renewal_message}");
+
+                                                    let confirmed = confirm::Confirm {
+                                                        title: format!("Upgrade to {}", p.user_display_name()),
+                                                        message,
+                                                        confirm_text: "Confirm".to_string(),
+                                                        cancel_text: "Cancel".to_string()
+                                                    }.confirm().await;
+                                                    if confirmed {
+                                                        state.change_to(p);
+                                                    } else {
+                                                        plan_type_signal.set(None);
+                                                    }
+                                                }));
+                                            }
+                                        }))
+                                    })).collect::<Vec<_>>();
+                                    Some(html!("input-select", {
+                                        .style("min-width", "200rem")
+                                        .prop("label", "Upgrade to")
+                                        .prop("multiple", false)
+                                        .prop_signal("value", plan_type_signal.signal_cloned().map(|p| p.map_or("", |p| p.user_display_name())))
+                                        .children(plan_types)
+                                    }))
+                                }
                             }
                         }
-                    }
-                })))
-                .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
-                    if plan_info.is_trial {
-                        return None;
-                    }
-
-                    if let Some(plan_type) = plan_type {
-                        if let BillingInterval::Annually = plan_type.billing_interval() {
+                    })))
+                    .child_signal(plan_type_signal().map(clone!(state, plan_info => move |plan_type| {
+                        if plan_info.is_trial {
                             return None;
                         }
-                    }
-                    if !plan_info.status.is_active() && !plan_info.status.is_paused() {
-                        return None;
-                    }
 
-                    Some(html!("button-rect", {
-                        .prop("style", "width: 210px")
-                        .prop("type", "filled")
-                        .prop("color", "blue")
-                        .text(match plan_info.status.is_paused() {
-                            true => "Resume subscription",
-                            false => "Pause subscription"
-                        })
-                        .event(clone!(state, plan_info => move|_ :events::Click| {
-                            spawn_local(clone!(state, plan_info => async move {
-                                let (title, message, confirm_text) = if plan_info.status.is_paused() {
-                                    (
-                                        "Resume subscription".to_string(),
-                                        "Are you sure you want to resume your subscription?".to_string(),
-                                        "Resume".to_string(),
-                                    )
-                                } else {
-                                    (
-                                        "Pause subscription".to_string(),
-                                        "Are you sure you want to pause your subscription? No further payment will be taken until you choose to unpause your plan and have full access again.".to_string(),
-                                        "Pause".to_string(),
-                                    )
-                                };
-                                let confirmed = confirm::Confirm {
-                                    title,
-                                    message,
-                                    confirm_text,
-                                    cancel_text: "Cancel".to_string()
-                                }.confirm().await;
-                                if confirmed {
-                                    state.set_paused(!plan_info.status.is_paused())
-                                }
-                            }));
+                        if let Some(plan_type) = plan_type {
+                            if let BillingInterval::Annually = plan_type.billing_interval() {
+                                return None;
+                            }
+                        }
+                        if !plan_info.status.is_active() && !plan_info.status.is_paused() {
+                            return None;
+                        }
+
+                        Some(html!("button-rect", {
+                            .prop("style", "width: 210px")
+                            .prop("type", "filled")
+                            .prop("color", "blue")
+                            .text(match plan_info.status.is_paused() {
+                                true => "Resume subscription",
+                                false => "Pause subscription"
+                            })
+                            .event(clone!(state, plan_info => move|_ :events::Click| {
+                                spawn_local(clone!(state, plan_info => async move {
+                                    let (title, message, confirm_text) = if plan_info.status.is_paused() {
+                                        (
+                                            "Resume subscription".to_string(),
+                                            "Are you sure you want to resume your subscription?".to_string(),
+                                            "Resume".to_string(),
+                                        )
+                                    } else {
+                                        (
+                                            "Pause subscription".to_string(),
+                                            "Are you sure you want to pause your subscription? No further payment will be taken until you choose to unpause your plan and have full access again.".to_string(),
+                                            "Pause".to_string(),
+                                        )
+                                    };
+                                    let confirmed = confirm::Confirm {
+                                        title,
+                                        message,
+                                        confirm_text,
+                                        cancel_text: "Cancel".to_string()
+                                    }.confirm().await;
+                                    if confirmed {
+                                        state.set_paused(!plan_info.status.is_paused())
+                                    }
+                                }));
+                            }))
                         }))
-                    }))
-                })))
-            }),
-        ]
+                    })))
+                }),
+            ]);
+        }
+
+        plan_items
     }
 
     fn render_payment_method(

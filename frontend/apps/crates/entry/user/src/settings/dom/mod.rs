@@ -1,3 +1,7 @@
+use crate::settings::{
+    dom::options_popup::PopupCallbacks,
+    state::{ActivePopup, IndividualOrSchool, ResetPasswordStatus},
+};
 use components::{
     editable_profile_image::{EditableProfileImage, EditableProfileImageConfig},
     page_header::{PageHeader, PageHeaderConfig},
@@ -10,6 +14,7 @@ use futures_signals::{
 };
 use shared::domain::meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Subject, SubjectId};
 use std::rc::Rc;
+use utils::prelude::get_user_cloned;
 use utils::{
     component::Component,
     events,
@@ -17,11 +22,6 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 use web_sys::{HtmlElement, HtmlInputElement};
-
-use crate::settings::{
-    dom::options_popup::PopupCallbacks,
-    state::{ActivePopup, IndividualOrSchool, ResetPasswordStatus},
-};
 
 use super::state::SettingsPage;
 
@@ -48,6 +48,19 @@ impl SettingsPage {
 
         state.load_initial_data();
 
+        let is_admin = get_user_cloned()
+            .unwrap()
+            .account_summary
+            .and_then(|summary| Some(summary.is_admin));
+        let show_expanded_details = state
+            .plan_info
+            .get_cloned()
+            .map(|info| {
+                matches!(info.individual_or_school, IndividualOrSchool::Individual)
+                    || matches!(is_admin, Some(true))
+            })
+            .unwrap_or_default();
+
         html!("user-profile", {
             .child(EditableProfileImage::new(
                 state.user.profile_image.read_only(),
@@ -64,6 +77,7 @@ impl SettingsPage {
                 slot: Some("page-header"),
                 ..Default::default()
             }).render())
+            .prop("showExpandedDetails", show_expanded_details)
             .prop_signal("email", state.user.email.signal_cloned())
             .prop_signal("name", state.full_name_signal())
             .children(&mut [
@@ -284,8 +298,9 @@ impl SettingsPage {
                 })
             }))
             .children_signal_vec(state.plan_info.signal_ref(clone!(state => move |plan_info| {
+                log::info!("{:#?}", plan_info.is_some());
                 match plan_info {
-                    Some(plan_info) => state.render_plan_section(plan_info),
+                    Some(plan_info) => state.render_plan_section(plan_info, show_expanded_details),
                     None => vec![],
                 }
             })).to_signal_vec())

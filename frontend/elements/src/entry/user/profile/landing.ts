@@ -286,6 +286,9 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     showPlan: boolean = false;
 
+    @property({ type: Boolean })
+    showExpandedDetails: boolean = true;
+
     @property()
     planSectionTitle: string = "";
 
@@ -427,40 +430,42 @@ export class _ extends LitElement {
                                     <slot name="plan-type"></slot>
                                 </div>
                             </label>
-                            <label class="tags-label">
-                                <span class="key">${STR_PRICE}</span>
-                                <div class="value">
-                                    <slot name="plan-price"></slot>
-                                </div>
-                            </label>
-                            <label class="tags-label">
-                                <span class="key">
-                                    <slot name="plan-renewal-label"></slot>
-                                </span>
-                                <div class="value">
-                                    <slot name="plan-renews-on"></slot>
-                                </div>
-                            </label>
-                            <!--
-                            <label class="tags-label">
-                                <span class="key">${STR_AUTO_RENEWS}</span>
-                                <div class="value">
-                                    <slot name="plan-auto-renew"></slot>
-                                </div>
-                            </label>
-                            -->
-                            <label class="tags-label">
-                                <span class="key">${STR_PAYMENT_METHOD}</span>
-                                <div class="value">
-                                    <slot name="plan-payment-method"></slot>
-                                </div>
-                            </label>
-                            <slot name="portal-link"></slot>
-                            <label class="tags-label">
-                                <span style="grid-column: 1/3;">
-                                    Use the 'Manage my plan' button to update credit card details, view your invoice history, or cancel your plan. To make changes to your plan, use the buttons below.
-                                </span>
-                            </label>
+                            ${ this.showExpandedDetails ? html`
+                                <label class="tags-label">
+                                    <span class="key">${STR_PRICE}</span>
+                                    <div class="value">
+                                        <slot name="plan-price"></slot>
+                                    </div>
+                                </label>
+                                <label class="tags-label">
+                                    <span class="key">
+                                        <slot name="plan-renewal-label"></slot>
+                                    </span>
+                                    <div class="value">
+                                        <slot name="plan-renews-on"></slot>
+                                    </div>
+                                </label>
+                                <!--
+                                <label class="tags-label">
+                                    <span class="key">${STR_AUTO_RENEWS}</span>
+                                    <div class="value">
+                                        <slot name="plan-auto-renew"></slot>
+                                    </div>
+                                </label>
+                                -->
+                                <label class="tags-label">
+                                    <span class="key">${STR_PAYMENT_METHOD}</span>
+                                    <div class="value">
+                                        <slot name="plan-payment-method"></slot>
+                                    </div>
+                                </label>
+                                <slot name="portal-link"></slot>
+                                <label class="tags-label">
+                                    <span style="grid-column: 1/3;">
+                                        Use the 'Manage my plan' button to update credit card details, view your invoice history, or cancel your plan. To make changes to your plan, use the buttons below.
+                                    </span>
+                                </label>
+                            ` : nothing }
                             <slot name="change-to-annual"></slot>
                         </section>
                     ` : nothing }

@@ -250,13 +250,7 @@ fn account_type_to_fetch() -> Option<IndividualOrSchool> {
     };
 
     match account_summary.school_id {
-        Some(school_id) => {
-            if account_summary.is_admin {
-                Some(IndividualOrSchool::School(school_id))
-            } else {
-                None
-            }
-        }
+        Some(school_id) => Some(IndividualOrSchool::School(school_id)),
         None => Some(IndividualOrSchool::Individual),
     }
 }
