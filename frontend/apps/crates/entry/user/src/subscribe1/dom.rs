@@ -38,6 +38,12 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let state = self;
 
+        let has_previous_subscription = get_user_cloned()
+            .and_then(|user| user.account_summary)
+            .and_then(|summary| summary.subscription_status)
+            .is_some();
+
+        log::info!("has {has_previous_subscription:?}");
         state.start_intent();
 
         dom.child(html!("auth-page", {
@@ -68,6 +74,16 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                     .child(icon!("fa-solid fa-check"))
                     .text("Get a reminder 24 hours before your trial ends.")
                 }))
+                .apply_if(has_previous_subscription, |dom| {
+                    log::info!("has prev");
+                    dom.child(html!("p", {
+                        .class("list-item")
+                        .child(icon!("fa-solid fa-circle", {
+                        .prop("style", "font-size: 9px; margin-top: 4px")
+                    }))
+                        .text("If you have already redeemed the Free Trial offer this form will enable you to (re)subscribe and start your plan immediately.")
+                    }))
+                })
                 .child(gap!(30))
                 .child(html!("h2", {
                     .text("Payment method")
@@ -125,11 +141,6 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                                     .text("Start free trial")
                                     .event(clone!(state => move |_: events::Click| {
                                         spawn_local(clone!(state => async move {
-                                            let has_previous_subscription = get_user_cloned()
-                                                .and_then(|user| user.account_summary)
-                                                .and_then(|summary| summary.subscription_status)
-                                                .is_some();
-
                                             if !has_previous_subscription {
                                                 state.submit();
                                             } else {

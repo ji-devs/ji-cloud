@@ -48,18 +48,16 @@ impl SettingsPage {
 
         state.load_initial_data();
 
-        let is_admin = get_user_cloned()
-            .unwrap()
-            .account_summary
+        let account_summary = get_user_cloned().unwrap().account_summary;
+
+        let is_admin = account_summary
+            .clone()
             .and_then(|summary| Some(summary.is_admin));
-        let show_expanded_details = state
-            .plan_info
-            .get_cloned()
-            .map(|info| {
-                matches!(info.individual_or_school, IndividualOrSchool::Individual)
-                    || matches!(is_admin, Some(true))
-            })
+        let show_expanded_details = account_summary
+            .and_then(|summary| summary.plan_type)
+            .map(|plan_type| plan_type.is_individual_plan() || matches!(is_admin, Some(true)))
             .unwrap_or_default();
+        log::info!("exists {}", show_expanded_details);
 
         html!("user-profile", {
             .child(EditableProfileImage::new(
