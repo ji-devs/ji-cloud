@@ -51,13 +51,14 @@ impl SettingsPage {
         let account_summary = get_user_cloned().unwrap().account_summary;
 
         let is_admin = account_summary
+            .as_ref()
             .clone()
             .and_then(|summary| Some(summary.is_admin));
         let show_expanded_details = account_summary
+            .as_ref()
             .and_then(|summary| summary.plan_type)
             .map(|plan_type| plan_type.is_individual_plan() || matches!(is_admin, Some(true)))
             .unwrap_or_default();
-        log::info!("exists {}", show_expanded_details);
 
         html!("user-profile", {
             .child(EditableProfileImage::new(
@@ -283,7 +284,9 @@ impl SettingsPage {
                     },
                 })
             })))
-            .prop_signal("showPlan", state.plan_info.signal_ref(|plan| plan.is_some()))
+            .apply_if(account_summary.is_some(), clone!(account_summary => |dom| {
+                dom.prop("showPlan", account_summary.unwrap_ji().plan_type.is_some())
+            }))
             .prop_signal("isTrial", state.plan_info.signal_ref(|plan| {
                 plan.as_ref().map_or(false, |plan| plan.is_trial)
             }))
@@ -295,11 +298,19 @@ impl SettingsPage {
                     }
                 })
             }))
+            .apply_if(!show_expanded_details, |dom| {
+                dom.children(state.render_partial_plan_section())
+            })
             .children_signal_vec(state.plan_info.signal_ref(clone!(state => move |plan_info| {
-                log::info!("{:#?}", plan_info.is_some());
-                match plan_info {
-                    Some(plan_info) => state.render_plan_section(plan_info, show_expanded_details),
-                    None => vec![],
+                if show_expanded_details {
+                    match plan_info {
+                        Some(plan_info) => {
+                            state.render_full_plan_section(plan_info)
+                        },
+                        None => vec![],
+                    }
+                } else {
+                    vec![]
                 }
             })).to_signal_vec())
             .child_signal(state.render_popups())
@@ -317,7 +328,6 @@ impl SettingsPage {
                         .prop("open", true)
                         .prop("autoClose", false)
                         .event(clone!(state => move |_: events::Close| {
-                            log::info!("Closed perm");
                             state.active_popup.set(ActivePopup::None);
                         }))
                         .apply(|dom| {
