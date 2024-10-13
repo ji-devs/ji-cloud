@@ -46,44 +46,55 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
         log::info!("has {has_previous_subscription:?}");
         state.start_intent();
 
+        let plan_title = if has_previous_subscription {
+            format!("Jigzi {}", state.plan_type.display_name())
+        } else {
+            format!(
+                "Try Jigzi {} FREE for {} days",
+                state.plan_type.display_name(),
+                &match state.plan_type.is_individual_plan() {
+                    true => INDIVIDUAL_TRIAL_PERIOD,
+                    false => SCHOOL_TRIAL_PERIOD,
+                }
+                .to_string(),
+            )
+        };
+
+        let list_item_1 = if has_previous_subscription {
+            format!("Welcome back to Jigzi!")
+        } else {
+            format!(
+                "Get a {} day trial, cancel any time.",
+                &match state.plan_type.is_individual_plan() {
+                    true => INDIVIDUAL_TRIAL_PERIOD,
+                    false => SCHOOL_TRIAL_PERIOD,
+                }
+                .to_string(),
+            )
+        };
+
+        let list_item_2 = if has_previous_subscription {
+            "As a returning subscriber you still get our 20% new user intro discount."
+        } else {
+            "Get a reminder 24 hours before your trial ends."
+        };
+
         dom.child(html!("auth-page", {
             .prop("img", "entry/user/side/main.webp")
             .child(html!("main", {
                 .child(html!("h1", {
-                    .text("Try Jigzi ")
-                    .text(state.plan_type.display_name())
-                    .text(" FREE for ")
-                    .text(&match state.plan_type.is_individual_plan() {
-                        true => INDIVIDUAL_TRIAL_PERIOD,
-                        false => SCHOOL_TRIAL_PERIOD,
-                    }.to_string())
-                    .text(" days")
+                    .text(&plan_title)
                 }))
                 .child(html!("p", {
                     .class("list-item")
                     .child(icon!("fa-solid fa-check"))
-                    .text("Get a ")
-                    .text(&match state.plan_type.is_individual_plan() {
-                        true => INDIVIDUAL_TRIAL_PERIOD,
-                        false => SCHOOL_TRIAL_PERIOD,
-                    }.to_string())
-                    .text(" day trial, cancel any time.")
+                    .text(&list_item_1)
                 }))
                 .child(html!("p", {
                     .class("list-item")
                     .child(icon!("fa-solid fa-check"))
-                    .text("Get a reminder 24 hours before your trial ends.")
+                    .text(list_item_2)
                 }))
-                .apply_if(has_previous_subscription, |dom| {
-                    log::info!("has prev");
-                    dom.child(html!("p", {
-                        .class("list-item")
-                        .child(icon!("fa-solid fa-circle", {
-                        .prop("style", "font-size: 9px; margin-top: 4px")
-                    }))
-                        .text("If you have already redeemed the Free Trial offer this form will enable you to (re)subscribe and start your plan immediately.")
-                    }))
-                })
                 .child(gap!(30))
                 .child(html!("h2", {
                     .text("Payment method")
@@ -138,7 +149,7 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                                     .prop("kind", "filled")
                                     .prop("color", "red")
                                     .prop("size", "large")
-                                    .text("Start free trial")
+                                    .text(if has_previous_subscription { "Start subscription" } else { "Start free trial" })
                                     .event(clone!(state => move |_: events::Click| {
                                         spawn_local(clone!(state => async move {
                                             if !has_previous_subscription {
