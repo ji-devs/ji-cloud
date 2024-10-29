@@ -9,15 +9,11 @@ export const collapseStyles = css`
         from {
         }
         to {
-            height: 0;
-            width: 0;
             overflow: hidden;
         }
     }
     @keyframes show {
         from {
-            height: 0;
-            width: 0;
             overflow: hidden;
         }
         to {
