@@ -91,7 +91,7 @@ jobs:
 #          toolchain: nightly
           toolchain: nightly-2023-06-08
 
-      - uses: davidB/rust-cargo-make@master
+      - uses: davidB/rust-cargo-make@main
 
       - name: install node
         uses: actions/setup-node@v3
@@ -163,7 +163,7 @@ jobs:
 #          toolchain: nightly
           toolchain: nightly-2023-06-08
 
-      - uses: davidB/rust-cargo-make@master
+      - uses: davidB/rust-cargo-make@main
 
       - name: install node
         uses: actions/setup-node@v3

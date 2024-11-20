@@ -56,7 +56,7 @@ jobs:
         with:
           toolchain: stable
 
-      - uses: davidB/rust-cargo-make@master
+      - uses: davidB/rust-cargo-make@main
 
       - id: 'auth'
         uses: 'google-github-actions/auth@v1'

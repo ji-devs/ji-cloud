@@ -66,7 +66,7 @@ jobs:
 #          toolchain: nightly
           toolchain: nightly-2023-06-08
 
-      - uses: davidB/rust-cargo-make@master
+      - uses: davidB/rust-cargo-make@main
 
       - name: build and deploy
         run: cargo make ${{ env.ENVIRONMENT }}-api-media-watch
