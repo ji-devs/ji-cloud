@@ -39,7 +39,7 @@ const STR_CONTACT_ISRAEL = "Ji Israel";
 const STR_ABOUT_TITLE = "Who we are";
 const STR_ABOUT_TEXT = `Jewish Interactive is a registered 501(c)(3) in the US with tax ID 46-1331618
 
-The Jewish interactive Educational Trust is a Section 18A (1)(a) in South Africa (Registration IT36/2012) (PBO 930 038 343)
+The Jewish Interactive Educational Trust is a Section 18A (1)(a) in South Africa (Registration IT36/2012) (PBO 930 038 343)
 
 Jewish Interactive is a registered charity in the UK (Charity Number 1151408)`;
 const STR_DONATE = "Donate";
@@ -88,9 +88,9 @@ export class _ extends LitElement {
                     column-gap: 38px;
                 }
                 .divider {
-                     
+
                     height: 210px;
-                       
+
                     width: 1px;
                     background-color: #63759d;
                     margin-top: 100px;

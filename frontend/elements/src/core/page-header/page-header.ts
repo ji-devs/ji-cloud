@@ -21,6 +21,10 @@ export class _ extends LitElement {
                         height: 88px;
                     }
                 }
+                .logo-anchor {
+                    margin-top: 12px;
+                    margin-right: 12rem;
+                }
                 .logo {
                     width: 85px;
                 }
@@ -63,7 +67,7 @@ export class _ extends LitElement {
                 .end .help ::slotted([slot="help"]:hover) {
                     place-content: center;
                     border-radius: 50%;
-                    background-color: #c4d9f7; 
+                    background-color: #c4d9f7;
                 }
                 .end .user {
                     display: flex;
@@ -89,7 +93,7 @@ export class _ extends LitElement {
                     :host {
                         justify-content: center;
                     }
-                    nav, .donate, .student-code, .help, .user {
+                    nav, .student-code, .help, .user {
                         display: none;
                     }
                     .beta {
@@ -114,7 +118,7 @@ export class _ extends LitElement {
 
     render() {
         return html`
-            <a href="/">
+            <a class="logo-anchor" href="/">
                 <img-ui class="logo" path="core/page-header/logo.svg"></img-ui>
             </a>
             <nav>

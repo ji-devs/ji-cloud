@@ -61,14 +61,16 @@ export class _ extends LitElement {
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     What happens when the free trial for a subscription expires?
                 </summary>
-                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire (Individual monthly & annual subscriptions). If you wish to cancel at any time during your trial period, go to Account in the top-right menu then, scroll down to My current plan, click on the pink Customer portal button and then you will have an option to Cancel Plan which will cancel your plan at the end of the free trial and you will not be charged. For School subscriptions you will be contacted towards the end of your free trial period with payment options in order to confirm the (annual) subscription.</p>
+                <p>When the subscription’s trial period expires, your paid subscription will begin immediately. You will get a reminder by email 24 hours before your free trial is due to expire (Individual monthly & annual subscriptions). If you wish to cancel at any time during your trial period, go to ‘Account’ in the top-right menu then, scroll down to ‘My current plan’, click on the pink ‘Manage my plan’ button and then you will have an option to ‘Cancel plan’ which will cancel your plan at the end of the free trial and you will not be charged.</p>
+                <p>For School subscriptions, if you didn’t enter payment details at the start of your free trial, you will be contacted towards the end of the 14-day period with payment options in order to confirm the (annual) subscription.</p>
             </details>
             <details>
                 <summary>
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     Can I cancel my paid subscription anytime?
                 </summary>
-                <p>After the free trial period has ended, you can downgrade to our free plan at any time and no further payments will be taken. To do this go to Account in the top-right menu, scroll down to My current plan, and click on the Auto renew slider to switch off the monthly or annual Auto renew function. You will still have full access to your subscription until the end of the billing period. You can also click the pink Customer portal button, where you can cancel your plan.</p>
+                <p>After the free trial period has ended, you can downgrade to our free plan at any time and no further payments will be taken. To do this go to ‘Account’ in the top-right menu, scroll down to ‘My current plan’, and click on the pink ‘Manage my plan’ button and then you will have an option to ‘Cancel plan’. You will still have full access to your subscription until the end of the billing period.</p>
+                <p>Instead of canceling, you can click the ‘Pause subscription’ button if you have a monthly plan. This will pause all payments until you click the ‘Unpause subscription’ button. While your plan is paused, you will not have access to premium content or tools.</p>
             </details>
             <details>
                 <summary>
@@ -82,21 +84,23 @@ export class _ extends LitElement {
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     How can I change my payment card details?
                 </summary>
-                <p>If a payment has already been made, we cannot refund and recharge this payment. However, if you would like to change payment methods for any upcoming charges, go to Account in the top-right account menu, scroll down to My current plan and then click the pink Customer portal button. There you can change your payment method.</p>
+                <p>If a payment has already been made, we cannot refund and recharge this payment. However, if you would like to change payment methods for any upcoming charges, go to ‘Account’ in the top-right account menu, scroll down to ‘My current plan’ and then click the pink ‘Manage my plan’ button. There you can change your payment method.</p>
             </details>
             <details>
                 <summary>
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     Can I switch subscriptions later on?
                 </summary>
-                <p>Yes, but you need to contact us by emailing info@jigzi.org. </p>
+                <p>Yes, you can upgrade your plan from a monthly to an annual plan. You can also upgrade from Basic to Pro in an individual account or increase the number of teachers in a school account. But, to downgrade, you need to contact us by emailing info@jigzi.org.</p>
+                <p>To make changes to your plan, go to ‘Account’ in the top-right account menu, scroll down to ‘My current plan’ and select one of the options available there.</p>
             </details>
             <details>
                 <summary>
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     If I cancel, can I resume a subscription later?
                 </summary>
-                <p>Yes, your JIGs, playlists, & resources, will remain in our cloud system and you'll still be able to use all of the features included in your FREE account. When you decide to return and renew a paid subscription, you will regain full access to premium content and tools provided in the paid plan.</p>
+                <p>Yes, your JIGs, playlists, & resources will remain in our cloud system and you’ll still be able to use all of the features included in your FREE account. When you decide to return and renew a paid subscription, you will regain full access to premium content and tools provided in the paid plan.</p>
+                <p>We recommend that instead of canceling, you click the ‘Pause subscription’ if you have a monthly subscription. Then you can ‘Unpause subscription’ later to resume.</p>
             </details>
             <details>
                 <summary>
