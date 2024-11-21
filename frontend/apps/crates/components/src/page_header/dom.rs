@@ -66,7 +66,7 @@ impl PageHeader {
             .child(html!("button-rect", {
                 .prop("slot", "donate")
                 .prop("color", "green")
-                .prop("size", "large")
+                .prop("size", "regular")
                 .prop("bold", true)
                 .prop("href", Route::Home(HomeRoute::Pricing(HomePricingRoute::Individual)).to_string())
                 // .prop("href", DONATE_LINK)

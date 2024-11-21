@@ -75,6 +75,9 @@ export class _ extends LitElement {
                     height: 100%;
                     justify-content: end;
                 }
+                .end .user ::slotted([slot="user"]) {
+                    white-space: nowrap;
+                }
                 .beta {
                     position: absolute;
                     background-color: var(--dark-blue-5);
