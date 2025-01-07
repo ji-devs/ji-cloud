@@ -142,7 +142,7 @@ args = [
     "-f",
     "backend/api/Dockerfile",
     "--tag",
-    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-sandbox:latest",
+    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-sandbox:latest",
     "--push",
     "--target",
     "sandbox",
