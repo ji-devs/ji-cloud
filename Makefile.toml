@@ -25,42 +25,68 @@ script = ["gcloud auth configure-docker"]
 run_task = [{name = [
     "gcloud-configure-docker",
     "docker-build-release-pages",
-    "docker-publish-release-pages",
     "deploy-release-pages",
 ]}]
 
 [tasks.docker-build-release-pages]
 command = "docker"
-args = ["build", "-f", "backend/pages/Dockerfile", "--target", "release", "-t", "gcr.io/ji-cloud/ji-cloud-pages:latest", "."]
-
-[tasks.docker-publish-release-pages]
-command = "docker"
-args = ["push", "gcr.io/ji-cloud/ji-cloud-pages:latest"]
+args = [
+    "buildx",
+    "build",
+    "-f",
+    "backend/pages/Dockerfile",
+    "--tag",
+    "us-east1-docker.pkg.dev/ji-cloud/docker/ji-cloud-pages:latest",
+    "--push",
+    "--target",
+    "release",
+    "."
+]
 
 [tasks.deploy-release-pages]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-pages --project ji-cloud --region europe-west1 --image gcr.io/ji-cloud/ji-cloud-pages:latest --platform managed"]
+script = ["""\
+    gcloud run deploy \
+        ji-cloud-pages \
+        --project ji-cloud \
+        --region europe-west1 \
+        --image us-east1-docker.pkg.dev/ji-cloud/docker/ji-cloud-pages:latest \
+        --platform managed
+"""]
 
 #------Sandbox-----------#
 [tasks.sandbox-pages]
 run_task = [{name = [
     "gcloud-configure-docker",
     "docker-build-sandbox-pages",
-    "docker-publish-sandbox-pages",
     "deploy-sandbox-pages",
 ]}]
 
 [tasks.docker-build-sandbox-pages]
 command = "docker"
-args = ["build", "-f", "backend/pages/Dockerfile", "--target", "sandbox", "-t", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-pages-sandbox:latest", "."]
-
-[tasks.docker-publish-sandbox-pages]
-command = "docker"
-args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-pages-sandbox:latest"]
+args = [
+    "buildx",
+    "build",
+    "-f",
+    "backend/pages/Dockerfile",
+    "--tag",
+    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-pages-sandbox:latest",
+    "--push",
+    "--target",
+    "sandbox",
+    ".",
+]
 
 [tasks.deploy-sandbox-pages]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-pages-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-pages-sandbox:latest --platform managed"]
+script = ["""\
+    gcloud run deploy \
+        ji-cloud-pages-sandbox \
+        --project ji-cloud-developer-sandbox \
+        --region europe-west1 \
+        --image us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-pages-sandbox:latest \
+        --platform managed
+"""]
 
 ###################
 ## API           ##
@@ -71,42 +97,68 @@ script = ["gcloud run deploy ji-cloud-pages-sandbox --project ji-cloud-developer
 run_task = [{name = [
     "gcloud-configure-docker",
     "docker-build-release-api",
-    "docker-publish-release-api",
     "deploy-release-api",
 ]}]
 
 [tasks.docker-build-release-api]
 command = "docker"
-args = ["build", "-f", "backend/api/Dockerfile", "--target", "release", "-t", "gcr.io/ji-cloud/ji-cloud-api:latest", "."]
-
-[tasks.docker-publish-release-api]
-command = "docker"
-args = ["push", "gcr.io/ji-cloud/ji-cloud-api:latest"]
+args = [
+    "buildx",
+    "build",
+    "-f",
+    "backend/api/Dockerfile",
+    "--tag",
+    "us-east1-docker.pkg.dev/ji-cloud/docker/ji-cloud-api:latest",
+    "--push",
+    "--target",
+    "release",
+    ".",
+]
 
 [tasks.deploy-release-api]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-api --project ji-cloud --region europe-west1 --image gcr.io/ji-cloud/ji-cloud-api:latest --platform managed"]
+script = ["""\
+    gcloud run deploy \
+        ji-cloud-api \
+        --project ji-cloud \
+        --region europe-west1 \
+        --image us-east1-docker.pkg.dev/ji-cloud/docker/ji-cloud-api:latest \
+        --platform managed
+"""]
 
 #------Sandbox-----------#
 [tasks.sandbox-api]
 run_task = [{name = [
     "gcloud-configure-docker",
     "docker-build-sandbox-api",
-    "docker-publish-sandbox-api",
     "deploy-sandbox-api",
 ]}]
 
 [tasks.docker-build-sandbox-api]
 command = "docker"
-args = ["build", "-f", "backend/api/Dockerfile", "--target", "sandbox", "-t", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest", "."]
-
-[tasks.docker-publish-sandbox-api]
-command = "docker"
-args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest"]
+args = [
+    "buildx",
+    "build",
+    "-f",
+    "backend/api/Dockerfile",
+    "--tag",
+    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-sandbox:latest",
+    "--push",
+    "--target",
+    "sandbox",
+    ".",
+]
 
 [tasks.deploy-sandbox-api]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-api-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-sandbox:latest --platform managed"]
+script = ["""\
+    gcloud run deploy \
+        ji-cloud-api-sandbox \
+        --project ji-cloud-developer-sandbox \
+        --region europe-west1 \
+        --image us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-sandbox:latest \
+        --platform managed
+"""]
 
 #####################
 ## API MEDIA WATCH ##
@@ -117,42 +169,68 @@ script = ["gcloud run deploy ji-cloud-api-sandbox --project ji-cloud-developer-s
 run_task = [{name = [
     "gcloud-configure-docker",
     "docker-build-release-api-media-watch",
-    "docker-publish-release-api-media-watch",
     "deploy-release-api-media-watch",
 ]}]
 
 [tasks.docker-build-release-api-media-watch]
 command = "docker"
-args = ["build", "-f", "backend/api/Dockerfile", "--target", "release_media_watch", "-t", "gcr.io/ji-cloud/ji-cloud-api-media-watch:latest", "."]
-
-[tasks.docker-publish-release-api-media-watch]
-command = "docker"
-args = ["push", "gcr.io/ji-cloud/ji-cloud-api-media-watch:latest"]
+args = [
+    "buildx",
+    "build",
+    "-f",
+    "backend/api/Dockerfile",
+    "--tag",
+    "us-east1-docker.pkg.dev/ji-cloud/docker/ji-cloud-api-media-watch:latest",
+    "--push",
+    "--target",
+    "release_media_watch",
+    ".",
+]
 
 [tasks.deploy-release-api-media-watch]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-api-media-watch --project ji-cloud --region europe-west1 --image gcr.io/ji-cloud/ji-cloud-api-media-watch:latest --platform managed"]
+script = ["""\
+    gcloud run deploy \
+        ji-cloud-api-media-watch \
+        --project ji-cloud \
+        --region europe-west1 \
+        --image us-east1-docker.pkg.dev/ji-cloud/docker/ji-cloud-api-media-watch:latest \
+        --platform managed
+"""]
 
 #------Sandbox-----------#
 [tasks.sandbox-api-media-watch]
 run_task = [{name = [
     "gcloud-configure-docker",
     "docker-build-sandbox-api-media-watch",
-    "docker-publish-sandbox-api-media-watch",
     "deploy-sandbox-api-media-watch",
 ]}]
 
 [tasks.docker-build-sandbox-api-media-watch]
 command = "docker"
-args = ["build", "-f", "backend/api/Dockerfile", "--target", "sandbox_media_watch", "-t", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-media-watch-sandbox:latest", "."]
-
-[tasks.docker-publish-sandbox-api-media-watch]
-command = "docker"
-args = ["push", "gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-media-watch-sandbox:latest"]
+args = [
+    "buildx",
+    "build",
+    "-f",
+    "backend/api/Dockerfile",
+    "--tag",
+    "us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-media-watch-sandbox:latest",
+    "--push",
+    "--target",
+    "sandbox_media_watch",
+    "."
+]
 
 [tasks.deploy-sandbox-api-media-watch]
 script_runner = "@shell"
-script = ["gcloud run deploy ji-cloud-api-media-watch-sandbox --project ji-cloud-developer-sandbox --region europe-west1 --image gcr.io/ji-cloud-developer-sandbox/ji-cloud-api-media-watch-sandbox:latest --platform managed"]
+script = ["""\
+    gcloud run deploy \
+        ji-cloud-api-media-watch-sandbox \
+        --project ji-cloud-developer-sandbox \
+        --region europe-west1 \
+        --image us-east1-docker.pkg.dev/ji-cloud-developer-sandbox/docker/ji-cloud-api-media-watch-sandbox:latest \
+        --platform managed
+"""]
 
 ###################
 ## Fastly Purge  ##

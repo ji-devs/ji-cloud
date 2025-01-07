@@ -25,7 +25,7 @@ sqlx = { version = "0.6.3", default-features = false, features = [
 ], optional = true }
 yup-oauth2 = "7.0.1"
 tracing = "0.1.31"
-time = "0.3.14"
+time = "0.3.37"
 
 [features]
 db = ["sqlx"]
