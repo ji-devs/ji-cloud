@@ -14,7 +14,7 @@ DOCKER_BUILDKIT = "1"
 
 [tasks.gcloud-configure-docker]
 script_runner = "@shell"
-script = ["gcloud auth configure-docker"]
+script = ["gcloud auth configure-docker --quiet us-east1-docker.pkg.dev"]
 
 ###################
 ## PAGES         ##
