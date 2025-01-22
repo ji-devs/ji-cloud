@@ -345,7 +345,7 @@ impl JigPlayer {
                         return;
                     } else {
                         // If the user is a student, then don't increase the play count
-                        if state.quota && !state.is_student restrictions::play_restricted().is_none() {
+                        if state.quota && !state.is_student && restrictions::play_restricted().is_none() {
                             restrictions::increase_played_count();
                         }
                     }
