@@ -27,7 +27,7 @@ fn send_event(data: impl Serialize + 'static) {
             Some(data),
         )
         .await
-        .unwrap_ji();
+        .ok();
     });
 }
 

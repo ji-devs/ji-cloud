@@ -276,7 +276,8 @@ impl JigPlayer {
 
     pub fn load_data(self: &Rc<Self>) {
         let state = self;
-        if state.quota {
+        // If the user is not a student and they've reached their quota of free plays, show a dialog
+        if state.quota && !state.is_student {
             if let Some(restricted) = restrictions::play_restricted() {
                 match restricted {
                     Restricted::FreeAccountLimit => {
@@ -343,7 +344,8 @@ impl JigPlayer {
                         ");
                         return;
                     } else {
-                        if state.quota && restrictions::play_restricted().is_none() {
+                        // If the user is a student, then don't increase the play count
+                        if state.quota && !state.is_student restrictions::play_restricted().is_none() {
                             restrictions::increase_played_count();
                         }
                     }
