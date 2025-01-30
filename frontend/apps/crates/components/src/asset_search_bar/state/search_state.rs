@@ -31,7 +31,7 @@ impl Default for SearchSelected {
             age_ranges: Mutable::new(HashSet::new()),
             language: Mutable::new(None),
             query: Mutable::new(String::new()),
-            rated_only: Mutable::new(true),
+            rated_only: Mutable::new(false),
             user_id: Mutable::new(None),
         }
     }
@@ -59,7 +59,7 @@ impl SearchSelected {
             age_ranges: Mutable::new(HashSet::from_iter(search.age_ranges)),
             language: Mutable::new(None),
             // default is true, so None => true
-            rated_only: Mutable::new(search.is_rated.unwrap_or(true)),
+            rated_only: Mutable::new(search.is_rated.unwrap_or(false)),
             query: Mutable::new(search.q),
             user_id: Mutable::new(search.user_id),
         }
@@ -70,8 +70,8 @@ impl SearchSelected {
             q: self.query.get_cloned(),
             // since default is true, only add when false
             is_rated: match self.rated_only.get() {
-                true => None,
-                false => Some(false),
+                true => Some(true),
+                false => None,
             },
             age_ranges: self.age_ranges.get_cloned().into_iter().collect(),
             affiliations: self.affiliations.get_cloned().into_iter().collect(),
@@ -103,7 +103,7 @@ impl SearchSelected {
             categories: self.categories.get_cloned().into_iter().collect(),
             page: Some(0),
             language: self.language.get_cloned(),
-            // is_rated: self.is_rated.get().then(|| true),
+            is_rated: self.rated_only.get().then(|| true),
             author_id: self.user_id.get_cloned().map(|u| u.into()),
             ..Default::default()
         }
@@ -117,7 +117,7 @@ impl SearchSelected {
             categories: self.categories.get_cloned().into_iter().collect(),
             page: Some(0),
             language: self.language.get_cloned(),
-            // is_rated: self.is_rated.get().then(|| true),
+            is_rated: self.rated_only.get().then(|| true),
             author_id: self.user_id.get_cloned().map(|u| u.into()),
             ..Default::default()
         }

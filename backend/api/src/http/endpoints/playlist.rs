@@ -309,6 +309,7 @@ async fn search(
             query.translated_keywords,
             &privacy_level,
             page_limit,
+            query.is_rated,
         )
         .await?
         .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;

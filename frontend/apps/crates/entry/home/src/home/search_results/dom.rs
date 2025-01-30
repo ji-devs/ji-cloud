@@ -40,8 +40,8 @@ impl SearchResults {
             .child(state.jigs.home_state.search_bar.render_rated_toggle(Rc::new(clone!(state => move || {
                 search(&state.jigs.home_state)
             })), Some("rated")))
-            .child_signal(search_results_signal(Rc::clone(&state.jigs)))
             .child_signal(search_results_signal(Rc::clone(&state.playlists)))
+            .child_signal(search_results_signal(Rc::clone(&state.jigs)))
             .child_signal(search_results_signal(Rc::clone(&state.resources)))
         })
     }

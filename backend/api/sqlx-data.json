@@ -4103,6 +4103,162 @@
     },
     "query": "\nselect jdm.id          as \"id!: ModuleId\",\n       stable_id   as \"stable_id!: StableModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom resource_data_module \"jdm\"\ninner join resource on resource.draft_id = jdm.resource_data_id \nwhere jdm.id is not distinct from $1 \n"
   },
+  "3e91ed53fd55db783c7fa9d57a9a8c8f06a41f40d9218a274bdb7a2c04c1e63e": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "language!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_description!: Json<HashMap<String, String>>",
+          "ordinal": 4,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "translated_name!: Json<HashMap<String, String>>",
+          "ordinal": 5,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "affiliations!",
+          "ordinal": 6,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "affiliation_names!",
+          "ordinal": 7,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "resource_types!",
+          "ordinal": 8,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "resource_type_names!",
+          "ordinal": 9,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "age_ranges!",
+          "ordinal": 10,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "age_range_names!",
+          "ordinal": 11,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "categories!",
+          "ordinal": 12,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "category_names!",
+          "ordinal": 13,
+          "type_info": "TextArray"
+        },
+        {
+          "name": "items!",
+          "ordinal": 14,
+          "type_info": "UuidArray"
+        },
+        {
+          "name": "privacy_level!: PrivacyLevel",
+          "ordinal": 15,
+          "type_info": "Int2"
+        },
+        {
+          "name": "author_id",
+          "ordinal": 16,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 17,
+          "type_info": "Text"
+        },
+        {
+          "name": "translated_keywords!",
+          "ordinal": 18,
+          "type_info": "Text"
+        },
+        {
+          "name": "author_name",
+          "ordinal": 19,
+          "type_info": "Text"
+        },
+        {
+          "name": "rating",
+          "ordinal": 20,
+          "type_info": "Int2"
+        },
+        {
+          "name": "likes!",
+          "ordinal": 21,
+          "type_info": "Int8"
+        },
+        {
+          "name": "plays!",
+          "ordinal": 22,
+          "type_info": "Int8"
+        },
+        {
+          "name": "published_at",
+          "ordinal": 23,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        false,
+        true,
+        false,
+        false,
+        null,
+        true,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nwith recursive categories_cte(id, name, parent_id, depth, full_name) as (\n    select\n        c.id, c.name, c.parent_id, 1::int as depth, c.name::text as full_name\n    from category as c\n    where c.parent_id is null\n    union all\n    select\n        c.id, c.name, c.parent_id, cte.depth + 1 as depth,\n        (cte.full_name || '/' || c.name)\n    from categories_cte as cte, category as c\n    where c.parent_id = cte.id\n)\nselect playlist.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from playlist_data_affiliation\n              where playlist_data_id = playlist_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join playlist_data_affiliation on affiliation.id = playlist_data_affiliation.affiliation_id\n              where playlist_data_affiliation.playlist_data_id = playlist_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from playlist_data_resource\n                where playlist_data_id = playlist_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join playlist_data_resource on resource_type.id = playlist_data_resource.resource_type_id\n             where playlist_data_resource.playlist_data_id = playlist_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from playlist_data_age_range\n              where playlist_data_id = playlist_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join playlist_data_age_range on age_range.id = playlist_data_age_range.age_range_id\n              where playlist_data_age_range.playlist_data_id = playlist_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from playlist_data_category\n              where playlist_data_id = playlist_data.id))                                                                     as \"categories!\",\n       array((select full_name\n              from categories_cte\n              join playlist_data_category on categories_cte.id = playlist_data_category.category_id\n              where playlist_data_category.playlist_data_id = playlist_data.id))                                    as \"category_names!\",\n        array(\n           (select jig_id\n            from playlist_data_jig\n            where playlist_data_jig.playlist_data_id = playlist_data.id)\n       )                                                                                                            as \"items!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = playlist.author_id)                                                       as \"author_name\",\n        rating                                                                                                      as \"rating\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom playlist\n         inner join playlist_data on live_id = playlist_data.id\n         inner join playlist_admin_data \"pad\" on pad.playlist_id = playlist.id\nwhere (last_synced_at is null and published_at is not null)\n    or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at)\nlimit 100 for no key update skip locked;\n     "
+  },
   "3e940a4ae4a432d2cc0ce4a8de4f98eacd1a9b8b356ecfaeeb5c9cd686ad008e": {
     "describe": {
       "columns": [],
@@ -6094,156 +6250,6 @@
       }
     },
     "query": "\nselect exists(select 1 from user_image_library where user_id = $1 and id = $2) as \"exists!\"\n    "
-  },
-  "62561ccfc187b174883679477680bad3410f9da1ad1906c90294e2050241929b": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "language!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "description!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_description!: Json<HashMap<String, String>>",
-          "ordinal": 4,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "translated_name!: Json<HashMap<String, String>>",
-          "ordinal": 5,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "affiliations!",
-          "ordinal": 6,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "affiliation_names!",
-          "ordinal": 7,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "resource_types!",
-          "ordinal": 8,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "resource_type_names!",
-          "ordinal": 9,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "age_ranges!",
-          "ordinal": 10,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "age_range_names!",
-          "ordinal": 11,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "categories!",
-          "ordinal": 12,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "category_names!",
-          "ordinal": 13,
-          "type_info": "TextArray"
-        },
-        {
-          "name": "items!",
-          "ordinal": 14,
-          "type_info": "UuidArray"
-        },
-        {
-          "name": "privacy_level!: PrivacyLevel",
-          "ordinal": 15,
-          "type_info": "Int2"
-        },
-        {
-          "name": "author_id",
-          "ordinal": 16,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "other_keywords!",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "translated_keywords!",
-          "ordinal": 18,
-          "type_info": "Text"
-        },
-        {
-          "name": "author_name",
-          "ordinal": 19,
-          "type_info": "Text"
-        },
-        {
-          "name": "likes!",
-          "ordinal": 20,
-          "type_info": "Int8"
-        },
-        {
-          "name": "plays!",
-          "ordinal": 21,
-          "type_info": "Int8"
-        },
-        {
-          "name": "published_at",
-          "ordinal": 22,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        false,
-        true,
-        false,
-        false,
-        null,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nwith recursive categories_cte(id, name, parent_id, depth, full_name) as (\n    select\n        c.id, c.name, c.parent_id, 1::int as depth, c.name::text as full_name\n    from category as c\n    where c.parent_id is null\n    union all\n    select\n        c.id, c.name, c.parent_id, cte.depth + 1 as depth,\n        (cte.full_name || '/' || c.name)\n    from categories_cte as cte, category as c\n    where c.parent_id = cte.id\n)\nselect playlist.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id\n              from playlist_data_affiliation\n              where playlist_data_id = playlist_data.id))                                                                     as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join playlist_data_affiliation on affiliation.id = playlist_data_affiliation.affiliation_id\n              where playlist_data_affiliation.playlist_data_id = playlist_data.id))                                                as \"affiliation_names!\",\n        array((select resource_type_id\n                from playlist_data_resource\n                where playlist_data_id = playlist_data.id))                                                                     as \"resource_types!\",\n        array((select resource_type.display_name\n              from resource_type\n                        inner join playlist_data_resource on resource_type.id = playlist_data_resource.resource_type_id\n             where playlist_data_resource.playlist_data_id = playlist_data.id))                                         as \"resource_type_names!\",\n       array((select age_range_id\n              from playlist_data_age_range\n              where playlist_data_id = playlist_data.id))                                                                     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join playlist_data_age_range on age_range.id = playlist_data_age_range.age_range_id\n              where playlist_data_age_range.playlist_data_id = playlist_data.id))                                                  as \"age_range_names!\",\n       array((select category_id\n              from playlist_data_category\n              where playlist_data_id = playlist_data.id))                                                                     as \"categories!\",\n       array((select full_name\n              from categories_cte\n              join playlist_data_category on categories_cte.id = playlist_data_category.category_id\n              where playlist_data_category.playlist_data_id = playlist_data.id))                                    as \"category_names!\",\n        array(\n           (select jig_id\n            from playlist_data_jig\n            where playlist_data_jig.playlist_data_id = playlist_data.id)\n       )                                                                                                            as \"items!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = playlist.author_id)                                                       as \"author_name\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom playlist\n         inner join playlist_data on live_id = playlist_data.id\nwhere (last_synced_at is null and published_at is not null)\n    or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at)\nlimit 100 for no key update skip locked;\n     "
   },
   "62c22549dcae2bed528e47fcaed23ebc682ec7c245456c3f0e4514a3cabf2345": {
     "describe": {

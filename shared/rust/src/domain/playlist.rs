@@ -415,6 +415,11 @@ pub struct PlaylistSearchQuery {
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub items: Vec<JigId>,
+
+    /// Optionally filter playlists based off of existence of rating
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_rated: Option<bool>,
 }
 
 /// Response for successful search.

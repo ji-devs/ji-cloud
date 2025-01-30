@@ -36,7 +36,7 @@ export class _ extends LitElement {
                 }
 
                 h1 a {
-                    text-decoration: none;
+                    text-decoration: underline;
                 }
 
                 .algolia {
@@ -94,8 +94,8 @@ export class _ extends LitElement {
             }
         }
 
-        addResultCount("jig", this.jigCount);
         addResultCount("playlist", this.playlistCount);
+        addResultCount("jig", this.jigCount);
         addResultCount("resource", this.resourceCount);
 
         // If we're rendering more than one set of results then add STR_AND

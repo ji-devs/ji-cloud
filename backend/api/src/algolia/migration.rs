@@ -124,6 +124,7 @@ pub(crate) async fn playlist_index(
             FacetAttribute::filter_only(Attribute("categories".to_owned())),
             FacetAttribute::filter_only(Attribute("resource_types".to_owned())),
             FacetAttribute::filter_only(Attribute("language".to_owned())),
+            FacetAttribute::filter_only(Attribute("rating".to_owned())),
         ]),
     };
 

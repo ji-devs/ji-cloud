@@ -140,6 +140,7 @@ struct BatchPlaylist<'a> {
     tags: Vec<&'static str>,
     other_keywords: &'a str,
     translated_keywords: &'a str,
+    rating: Option<i16>,
     likes: &'a i64,
     plays: &'a i64,
     published_at: Option<DateTime<Utc>>,
@@ -1113,11 +1114,13 @@ select playlist.id,
        (select given_name || ' '::text || family_name
         from user_profile
         where user_profile.user_id = playlist.author_id)                                                       as "author_name",
+        rating                                                                                                      as "rating",
         likes                                                                                                       as "likes!",
         plays                                                                                                       as "plays!",
         published_at                                                                                                as "published_at"
 from playlist
          inner join playlist_data on live_id = playlist_data.id
+         inner join playlist_admin_data "pad" on pad.playlist_id = playlist.id
 where (last_synced_at is null and published_at is not null)
     or (updated_at is not null and last_synced_at < updated_at)
     or (published_at < now() is true and last_synced_at < published_at)
@@ -1132,6 +1135,12 @@ limit 100 for no key update skip locked;
 
             if row.author_id.is_some() {
                 tags.push(HAS_AUTHOR_TAG);
+            }
+
+            if row.rating.is_some() {
+                tags.push(HAS_RATING_TAG);
+            } else {
+                tags.push(HAS_NO_RATING_TAG);
             }
 
             let mut translation_description: Vec<String> = Vec::new();
@@ -1165,6 +1174,7 @@ limit 100 for no key update skip locked;
                 tags,
                 other_keywords: &row.other_keywords,
                 translated_keywords: &row.translated_keywords,
+                rating: row.rating,
                 likes: &row.likes,
                 plays: &row.plays,
                 published_at: row.published_at,
@@ -2327,6 +2337,7 @@ impl Client {
         translated_keywords: Option<String>,
         privacy_level: &[PrivacyLevel],
         page_limit: u32,
+        is_rated: Option<bool>,
     ) -> anyhow::Result<Option<(Vec<PlaylistId>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -2382,6 +2393,23 @@ impl Client {
                 },
                 invert: false,
             }))
+        }
+
+        if let Some(is_rated) = is_rated {
+            match is_rated {
+                true => {
+                    and_filters.filters.push(Box::new(CommonFilter {
+                        filter: TagFilter(HAS_RATING_TAG.to_owned()),
+                        invert: false,
+                    }));
+                }
+                false => {
+                    and_filters.filters.push(Box::new(CommonFilter {
+                        filter: TagFilter(HAS_NO_RATING_TAG.to_owned()),
+                        invert: false,
+                    }));
+                }
+            }
         }
 
         filters_for_privacy(&mut and_filters.filters, privacy_level);
