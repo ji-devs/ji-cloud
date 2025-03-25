@@ -247,16 +247,16 @@ run_task = [{name = [
 
 [tasks.deploy-release-fastly-purge-frontend]
 script_runner = "@shell"
-script = ["gcloud functions deploy purgeFrontendRelease --project ji-cloud --trigger-resource ji-cloud-frontend-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+script = ["gcloud functions deploy purgeFrontendRelease --project ji-cloud --trigger-resource ji-cloud-frontend-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs20 --trigger-event google.storage.object.finalize"]
 
 [tasks.deploy-release-fastly-purge-uploads]
 script_runner = "@shell"
-script = ["gcloud functions deploy purgeUploadsRelease --project ji-cloud --trigger-resource ji-cloud-uploads-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+script = ["gcloud functions deploy purgeUploadsRelease --project ji-cloud --trigger-resource ji-cloud-uploads-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs20 --trigger-event google.storage.object.finalize"]
 
 # the media is on release project since it's used by release project (media.jigzi.org)
 [tasks.deploy-release-fastly-purge-media]
 script_runner = "@shell"
-script = ["gcloud functions deploy purgeMedia --project ji-cloud --trigger-resource ji-cloud-media-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs10 --trigger-event google.storage.object.finalize"]
+script = ["gcloud functions deploy purgeMedia --project ji-cloud --trigger-resource ji-cloud-media-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs20 --trigger-event google.storage.object.finalize"]
 
 #------Sandbox-----------#
 
@@ -268,11 +268,11 @@ run_task = [{name = [
 
 [tasks.deploy-sandbox-fastly-purge-frontend]
 script_runner = "@shell"
-script = ["gcloud functions deploy purgeFrontendSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-frontend-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs14 --trigger-event google.storage.object.finalize"]
+script = ["gcloud functions deploy purgeFrontendSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-frontend-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs20 --trigger-event google.storage.object.finalize"]
 
 [tasks.deploy-sandbox-fastly-purge-uploads]
 script_runner = "@shell"
-script = ["gcloud functions deploy purgeUploadsSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-uploads-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs14 --trigger-event google.storage.object.finalize"]
+script = ["gcloud functions deploy purgeUploadsSandbox --project ji-cloud-developer-sandbox --trigger-resource ji-cloud-sandbox-uploads-origin-eu-001 --region europe-west1 --source backend/fastly-purge --runtime nodejs20 --trigger-event google.storage.object.finalize"]
 
 
 
@@ -291,15 +291,15 @@ run_task = [{name = [
 
 [tasks.deploy-release-screenshot-save]
 script_runner = "@shell"
-script = ["gcloud functions deploy saveScreenshotRelease --trigger-http --project=ji-cloud --region=europe-west1 --source backend/screenshot --allow-unauthenticated --memory=1024MB --runtime=nodejs10 --timeout=540s"]
+script = ["gcloud functions deploy saveScreenshotRelease --trigger-http --project=ji-cloud --region=europe-west1 --source backend/screenshot --allow-unauthenticated --memory=1024MB --runtime=nodejs20 --timeout=540s"]
 
 [tasks.deploy-release-screenshot-show]
 script_runner = "@shell"
-script = ["gcloud functions deploy showScreenshotRelease --trigger-http --project=ji-cloud --region=europe-west1 --source backend/screenshot --allow-unauthenticated --memory=1024MB --runtime=nodejs10 --timeout=540s"]
+script = ["gcloud functions deploy showScreenshotRelease --trigger-http --project=ji-cloud --region=europe-west1 --source backend/screenshot --allow-unauthenticated --memory=1024MB --runtime=nodejs20 --timeout=540s"]
 
 [tasks.deploy-release-screenshot-queue]
 script_runner = "@shell"
-script = ["gcloud functions deploy queueScreenshotRelease --trigger-http --project=ji-cloud --region=europe-west1 --source backend/screenshot --allow-unauthenticated --runtime=nodejs10"]
+script = ["gcloud functions deploy queueScreenshotRelease --trigger-http --project=ji-cloud --region=europe-west1 --source backend/screenshot --allow-unauthenticated --runtime=nodejs20"]
 
 #------Sandbox-----------#
 
@@ -313,15 +313,15 @@ run_task = [{name = [
 
 [tasks.deploy-sandbox-screenshot-save]
 script_runner = "@shell"
-script = ["gcloud functions deploy saveScreenshotSandbox --trigger-http --project=ji-cloud-developer-sandbox --region=europe-west1 --source backend/screenshot --allow-unauthenticated --memory=1024MB --runtime=nodejs10 --timeout=540s"]
+script = ["gcloud functions deploy saveScreenshotSandbox --trigger-http --project=ji-cloud-developer-sandbox --region=europe-west1 --source backend/screenshot --allow-unauthenticated --memory=1024MB --runtime=nodejs20 --timeout=540s"]
 
 [tasks.deploy-sandbox-screenshot-show]
 script_runner = "@shell"
-script = ["gcloud functions deploy showScreenshotSandbox --trigger-http --project=ji-cloud-developer-sandbox --region=europe-west1 --source backend/screenshot --allow-unauthenticated --memory=1024MB --runtime=nodejs10 --timeout=540s"]
+script = ["gcloud functions deploy showScreenshotSandbox --trigger-http --project=ji-cloud-developer-sandbox --region=europe-west1 --source backend/screenshot --allow-unauthenticated --memory=1024MB --runtime=nodejs20 --timeout=540s"]
 
 [tasks.deploy-sandbox-screenshot-queue]
 script_runner = "@shell"
-script = ["gcloud functions deploy queueScreenshotSandbox --trigger-http --project=ji-cloud-developer-sandbox --region=europe-west1 --source backend/screenshot --allow-unauthenticated --runtime=nodejs10"]
+script = ["gcloud functions deploy queueScreenshotSandbox --trigger-http --project=ji-cloud-developer-sandbox --region=europe-west1 --source backend/screenshot --allow-unauthenticated --runtime=nodejs20"]
 
 
 

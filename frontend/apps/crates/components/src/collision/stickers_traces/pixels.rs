@@ -34,7 +34,6 @@ use shared::domain::module::body::{
 use std::borrow::Cow;
 use std::collections::HashMap;
 use utils::{math::bounds, prelude::*, resize::get_resize_info};
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlCanvasElement;
 

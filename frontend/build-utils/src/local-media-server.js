@@ -39,7 +39,7 @@ startCdnElements();
 
 function startCdnLegacy() {
 
-    if (!process.env.LOCAL_CDN_LEGACY_PORT 
+    if (!process.env.LOCAL_CDN_LEGACY_PORT
         || process.env.LOCAL_CDN_LEGACY_PORT === ""
         || !process.env.LOCAL_CDN_LEGACY_DIR
         || process.env.LOCAL_CDN_LEGACY_DIR === ""
@@ -52,7 +52,6 @@ function startCdnLegacy() {
 
     const app = express();
 
-    app.options("*", cors());
     app.use(cors());
     app.use(
         express.static(localPath, { cacheControl: false }),
@@ -71,7 +70,6 @@ function startCdnMedia() {
 
     const app = express();
 
-    app.options("*", cors());
     app.use(cors());
     app.use(
         express.static(localPath, { cacheControl: false }),
@@ -91,7 +89,6 @@ function startCdnElements() {
 
     const app = express();
 
-    app.options("*", cors());
     app.use(cors());
     app.use(
         express.static(localPath, { cacheControl: false }),
