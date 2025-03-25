@@ -46,7 +46,7 @@ jobs:
             echo "HOSTING=ji-cloud-sandbox-docs" >> $GITHUB_ENV
           fi
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Extract label
         shell: bash
