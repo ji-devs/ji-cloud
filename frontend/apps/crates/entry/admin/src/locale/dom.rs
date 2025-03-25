@@ -5,9 +5,7 @@ use dominator::{html, Dom};
 use futures_signals::signal::SignalExt;
 use std::rc::Rc;
 
-pub struct LocalePage {
-    pub state: Rc<State>,
-}
+pub struct LocalePage;
 
 impl LocalePage {
     pub fn render(state: Rc<LoaderState>) -> Dom {

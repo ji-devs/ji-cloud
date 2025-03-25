@@ -1,4 +1,3 @@
-use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::billing::{AccountId, PlanTier, PlanType, SchoolId};
 use shared::domain::user::{UserBadge, UserId, UserLoginType, UserResponse};
@@ -25,7 +24,7 @@ pub struct EditableUser {
     pub account_id: Option<AccountId>,
     pub school_account: String,
     pub tier_override: Option<PlanTier>,
-    pub loader: AsyncLoader,
+    // pub loader: AsyncLoader,
 }
 
 impl From<UserResponse> for EditableUser {
@@ -108,7 +107,7 @@ impl From<UserResponse> for EditableUser {
             account_id: user.account_id,
             school_account,
             tier_override: user.tier_override,
-            loader: AsyncLoader::new(),
+            // loader: AsyncLoader::new(),
         }
     }
 }

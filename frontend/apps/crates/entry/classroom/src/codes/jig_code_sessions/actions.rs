@@ -169,9 +169,11 @@ impl CodeSessions {
     pub fn export_sessions(&self) {
         let data = self.generate_csv_string();
         let data = JsValue::from_str(&data);
+        let blob_property_bag = web_sys::BlobPropertyBag::new();
+        blob_property_bag.set_type("text/csv");
         let blob = web_sys::Blob::new_with_str_sequence_and_options(
             &js_sys::Array::from_iter(vec![data]),
-            web_sys::BlobPropertyBag::new().type_("text/csv"),
+            &blob_property_bag,
         )
         .unwrap_ji();
         let url = web_sys::Url::create_object_url_with_blob(&blob).unwrap_ji();

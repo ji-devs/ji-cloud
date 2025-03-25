@@ -27,8 +27,6 @@ const IMAGE_UUID: &str = "9da11e0a-c17b-11eb-b863-570eea18a3bd";
 pub struct DebugSettings {
     pub data: Option<RawData>,
     pub skip_load_jig: bool,
-    pub no_shuffle: bool,
-    pub ending: bool,
     pub skip_play: bool,
 }
 
@@ -109,8 +107,6 @@ impl DebugSettings {
                 RawData { content: None }
             }),
             skip_load_jig: true,
-            no_shuffle: true,
-            ending: true,
             skip_play: true,
         }
     }

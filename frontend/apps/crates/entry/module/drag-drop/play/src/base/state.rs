@@ -1,6 +1,5 @@
 use components::module::_common::play::prelude::*;
 use shared::domain::{
-    asset::{Asset, AssetId},
     jig::{
         codes::{JigPlaySessionDragDrop, JigPlaySessionDragDropItem},
         player::{ModuleConfig, Seconds},
@@ -23,10 +22,8 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable};
 use std::rc::Rc;
 
 pub struct Base {
-    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub stable_module_id: StableModuleId,
-    pub asset: Asset,
     pub theme_id: ThemeId,
     pub instructions: ModuleAssist,
     pub feedback: ModuleAssist,
@@ -43,10 +40,8 @@ pub struct Base {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
-            asset_id,
             module_id,
             stable_module_id,
-            asset,
             raw,
             theme_id,
             ..
@@ -72,10 +67,8 @@ impl Base {
         };
 
         Rc::new(Self {
-            asset_id,
             module_id,
             stable_module_id,
-            asset,
             theme_id,
             instructions: content.instructions,
             feedback: content.feedback,

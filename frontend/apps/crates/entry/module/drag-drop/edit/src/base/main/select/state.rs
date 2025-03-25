@@ -3,12 +3,11 @@ use components::stickers::dom::TransformOverride;
 use dominator::clone;
 use futures_signals::{
     map_ref,
-    signal::{Mutable, Signal, SignalExt},
+    signal::{Signal, SignalExt},
     signal_vec::{SignalVec, SignalVecExt},
 };
 use shared::domain::module::body::_groups::design::Sticker as RawSticker;
 use std::rc::Rc;
-use utils::drag::Drag;
 
 pub struct MainSelect {
     pub base: Rc<Base>,
@@ -26,8 +25,6 @@ impl MainSelect {
             .map(|(index, item)| SelectItem {
                 item: item.clone(),
                 index,
-                drag: Mutable::new(None),
-                base: base.clone(),
             })
             .collect();
 
@@ -66,8 +63,6 @@ impl MainSelect {
 pub struct SelectItem {
     pub item: Item,
     pub index: usize,
-    pub drag: Mutable<Option<Rc<Drag<()>>>>,
-    pub base: Rc<Base>,
 }
 
 impl SelectItem {

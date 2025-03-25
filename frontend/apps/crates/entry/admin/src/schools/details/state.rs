@@ -20,7 +20,6 @@ pub struct SchoolDetails {
     pub account: Mutable<Option<Account>>,
     pub users: MutableVec<Rc<AccountUser>>,
     pub current_action: Mutable<CurrentAction>,
-    pub errored_users: Mutable<Vec<String>>,
     pub editing_name: Mutable<Option<Rc<SchoolNameState>>>,
 }
 
@@ -33,7 +32,6 @@ impl SchoolDetails {
             account: Mutable::new(None),
             users: MutableVec::new(),
             current_action: Mutable::new(CurrentAction::Viewing),
-            errored_users: Mutable::new(vec![]),
             editing_name: Mutable::new(None),
         })
     }

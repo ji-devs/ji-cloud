@@ -6,7 +6,6 @@ use shared::domain::module::body::find_answer::Question;
 
 pub struct Game {
     pub base: Rc<Base>,
-    pub phase: Mutable<Phase>,
     /// Holds the current question and its index in the list of questions.
     pub question: Mutable<Option<(usize, Rc<Question>)>>,
 }
@@ -33,7 +32,6 @@ impl Game {
         Rc::new(Self {
             question: base.current_question.clone(),
             base,
-            phase: Mutable::new(Phase::Playing),
         })
     }
 
@@ -47,9 +45,4 @@ impl Game {
 
         None
     }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Phase {
-    Playing,
 }

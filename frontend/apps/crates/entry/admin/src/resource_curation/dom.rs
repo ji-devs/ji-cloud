@@ -32,7 +32,6 @@ impl ResourceCuration {
                                 resource.map(|resource| {
                                     ResourceDetails::new(
                                         Rc::clone(&state),
-                                        resource.id,
                                         resource
                                     ).render()
                                 })

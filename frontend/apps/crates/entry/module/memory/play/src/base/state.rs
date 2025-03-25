@@ -1,12 +1,11 @@
 use shared::{
     config::MAX_LIST_WORDS,
     domain::{
-        asset::AssetId,
         jig::player::{ModuleConfig, Seconds},
         module::{
             body::{
                 Background, ModuleAssist,
-                _groups::cards::{CardPair as RawCardPair, Mode, Step},
+                _groups::cards::{Mode, Step},
                 memory::{ModuleData as RawData, PlayerSettings},
                 ModuleAssistType,
             },
@@ -26,12 +25,10 @@ use std::rc::Rc;
 use utils::prelude::*;
 
 pub struct Base {
-    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub stable_module_id: StableModuleId,
     pub mode: Mode,
     pub pair_lookup: Vec<usize>,
-    pub original_pairs: Vec<RawCardPair>,
     pub cards: Vec<Rc<CardState>>,
     pub theme_id: ThemeId,
     pub background: Option<Background>,
@@ -55,7 +52,6 @@ pub enum FlipState {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
-            asset_id,
             module_id,
             stable_module_id,
             asset: _,
@@ -128,12 +124,10 @@ impl Base {
         }
 
         Rc::new(Self {
-            asset_id,
             module_id,
             stable_module_id,
             mode: content.base.mode,
             pair_lookup,
-            original_pairs: content.base.pairs,
             cards,
             theme_id,
             background: content.base.background,

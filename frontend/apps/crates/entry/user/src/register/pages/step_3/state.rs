@@ -1,11 +1,9 @@
-use crate::register::state::{Step, Step2Data};
+use crate::register::state::Step2Data;
 use dominator_helpers::futures::AsyncLoader;
-use futures_signals::signal::Mutable;
 use std::cell::RefCell;
 use std::collections::HashSet;
 
 pub struct State {
-    pub step: Mutable<Step>,
     pub step_2: Step2Data,
     pub register_loader: AsyncLoader,
     pub affiliations: RefCell<HashSet<String>>,
@@ -14,9 +12,8 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(step: Mutable<Step>, step_2: Step2Data) -> Self {
+    pub fn new(step_2: Step2Data) -> Self {
         Self {
-            step,
             step_2,
             affiliations: RefCell::new(HashSet::new()),
             age_ranges: RefCell::new(HashSet::new()),

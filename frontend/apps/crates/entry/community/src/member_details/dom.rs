@@ -24,7 +24,7 @@ use utils::{
     unwrap::UnwrapJiExt,
 };
 use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{window, HtmlElement, ScrollBehavior, ScrollIntoViewOptions, ShadowRoot};
+use web_sys::{window, HtmlElement, ScrollIntoViewOptions, ShadowRoot};
 
 const STR_FOLLOWING: &str = "Following";
 const STR_FOLLOW: &str = "Follow";
@@ -620,8 +620,8 @@ fn jump_to(el: HtmlElement, selector: &str) -> Option<()> {
         .ok()?
         .query_selector(selector)
         .ok()??;
-    el.scroll_into_view_with_scroll_into_view_options(
-        ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth),
-    );
+    let options = ScrollIntoViewOptions::new();
+    options.set_behavior(web_sys::ScrollBehavior::Smooth);
+    el.scroll_into_view_with_scroll_into_view_options(&options);
     Some(())
 }

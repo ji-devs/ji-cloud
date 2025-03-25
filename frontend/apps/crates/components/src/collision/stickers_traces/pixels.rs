@@ -120,7 +120,7 @@ pub fn get_hit_index<V: AsRef<Trace>>(source: StickerHitSource, traces: &[V]) ->
 
         crate::traces::canvas::draw_trace(&ctx, &resize_info, trace.as_ref());
 
-        ctx.set_fill_style(&JsValue::from_str(&color));
+        ctx.set_fill_style_str(&color);
         ctx.fill();
     }
 
@@ -170,7 +170,7 @@ pub fn get_hit_index<V: AsRef<Trace>>(source: StickerHitSource, traces: &[V]) ->
         }
 
         if DEBUGGING_HIT && DEBUGGING_HIT_SOURCE_COLOR {
-            ctx.set_fill_style(&JsValue::from_str("blue"));
+            ctx.set_fill_style_str("blue");
         }
 
         if !DEBUGGING_HIT || DEBUGGING_HIT_CLIP {
@@ -300,7 +300,7 @@ pub fn debug_render_hit_trace<V: AsRef<Trace>>(index: usize, traces: &[V]) {
         let color = "red".to_string();
 
         crate::traces::canvas::draw_trace(&ctx, &resize_info, trace.as_ref());
-        ctx.set_fill_style(&JsValue::from_str(&color));
+        ctx.set_fill_style_str(&color);
         ctx.fill();
     }
 

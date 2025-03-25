@@ -10,7 +10,7 @@ pub fn set_hook() {
     });
 }
 
-fn hook(info: &panic::PanicInfo) {
+fn hook(info: &panic::PanicHookInfo) {
     show_panic_message();
     console_error_panic_hook::hook(info);
 }

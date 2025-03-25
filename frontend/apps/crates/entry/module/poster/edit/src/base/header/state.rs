@@ -1,15 +1,10 @@
 use components::module::_common::edit::prelude::*;
 
-use super::super::state::Base;
-use std::rc::Rc;
-
-pub struct Header {
-    pub base: Rc<Base>,
-}
+pub struct Header;
 
 impl Header {
-    pub fn new(base: Rc<Base>) -> Self {
-        Self { base }
+    pub fn new() -> Self {
+        Self
     }
 }
 

@@ -16,10 +16,7 @@ use shared::domain::module::body::BodyExt;
 use shared::domain::{
     asset::AssetId,
     module::{
-        body::{
-            resource_cover::{ModuleData as RawData, Step},
-            ModuleAssist,
-        },
+        body::resource_cover::{ModuleData as RawData, Step},
         ModuleId,
     },
 };
@@ -30,10 +27,8 @@ pub struct Base {
     pub history: Rc<HistoryStateImpl<RawData>>,
     pub step: ReadOnlyMutable<Step>,
     pub theme_id: Mutable<ThemeId>,
-    pub instructions: Mutable<ModuleAssist>,
     pub asset_id: AssetId,
     pub module_id: ModuleId,
-    pub continue_next_fn: ContinueNextFn,
     // ResourceCover-specific
     pub backgrounds: Rc<Backgrounds>,
     pub stickers: Rc<Stickers<Sticker>>,
@@ -56,8 +51,6 @@ impl Base {
         let base_content = content.base;
 
         let _self_ref: Rc<RefCell<Option<Rc<Self>>>> = Rc::new(RefCell::new(None));
-
-        let instructions = Mutable::new(base_content.instructions);
 
         let stickers_ref: Rc<RefCell<Option<Rc<Stickers<Sticker>>>>> = Rc::new(RefCell::new(None));
 
@@ -129,9 +122,7 @@ impl Base {
             module_id,
             history,
             step: step.read_only(),
-            continue_next_fn: Mutable::new(None),
             theme_id,
-            instructions,
             text_editor,
             backgrounds,
             stickers,

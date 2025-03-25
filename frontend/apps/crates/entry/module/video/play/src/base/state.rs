@@ -1,21 +1,17 @@
 use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
-use shared::domain::{
-    asset::AssetId,
-    module::{
-        body::{
-            ModuleAssist,
-            _groups::design::{Backgrounds, Sticker},
-            video::{Mode, ModuleData as RawData, Step},
-        },
-        ModuleId, StableModuleId,
+use shared::domain::module::{
+    body::{
+        ModuleAssist,
+        _groups::design::{Backgrounds, Sticker},
+        video::{Mode, ModuleData as RawData, Step},
     },
+    ModuleId, StableModuleId,
 };
 use std::rc::Rc;
 use utils::prelude::*;
 
 pub struct Base {
-    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub stable_module_id: StableModuleId,
     pub theme_id: ThemeId,
@@ -28,7 +24,6 @@ pub struct Base {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
-            asset_id,
             module_id,
             stable_module_id,
             raw,
@@ -40,7 +35,6 @@ impl Base {
         let base_content = content.base;
 
         Rc::new(Self {
-            asset_id,
             module_id,
             stable_module_id,
             theme_id,

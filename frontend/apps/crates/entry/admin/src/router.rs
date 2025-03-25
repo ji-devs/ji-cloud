@@ -50,7 +50,7 @@ impl Router {
 }
 
 pub enum AppState {
-    Locale(Rc<LocaleLoaderState>),
+    Locale,
 }
 
 impl Router {
@@ -110,7 +110,7 @@ impl Router {
                                                 AdminRoute::Categories=> Some(state.with_child(route, CategoriesPage::render())),
                                                 AdminRoute::Locale => {
                                                     let app_state = Rc::new(LocaleLoaderState::new());
-                                                    *state.app.borrow_mut() = Some(AppState::Locale(app_state.clone()));
+                                                    *state.app.borrow_mut() = Some(AppState::Locale);
                                                     Some(state.with_child(route, LocalePage::render(app_state)))
                                                 },
                                                 AdminRoute::ImageAdd => Some(state.with_child(route, ImageAddPage::render())),

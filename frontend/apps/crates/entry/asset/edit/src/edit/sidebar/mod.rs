@@ -10,5 +10,4 @@ mod playlist;
 mod spot;
 mod state;
 
-pub use dom::*;
 pub use state::*;

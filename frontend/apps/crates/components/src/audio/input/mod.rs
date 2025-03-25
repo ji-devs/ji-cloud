@@ -7,6 +7,5 @@ pub(super) mod recorder;
 pub(super) mod state;
 
 pub use callbacks::*;
-pub use dom::*;
 pub use options::*;
 pub use state::*;

@@ -17,10 +17,9 @@ use url::Url;
 use utils::unwrap::UnwrapJiExt;
 use uuid::Uuid;
 use wasm_bindgen::JsCast;
-use web_sys::{HtmlDialogElement, HtmlOptionElement, HtmlOptionsCollection};
+use web_sys::{HtmlOptionElement, HtmlOptionsCollection};
 
 pub struct LoaderState {
-    pub loader: AsyncLoader,
     pub inner: Mutable<Option<Rc<State>>>,
 }
 
@@ -33,7 +32,7 @@ impl LoaderState {
             inner.set(Some(Rc::new(State::new().await)));
         }));
 
-        Self { loader, inner }
+        Self { inner }
     }
 }
 
@@ -42,7 +41,6 @@ pub struct State {
     pub entries: MutableVec<Rc<Mutable<DisplayableEntry>>>,
     pub visible_columns: Rc<MutableVec<Column>>,
     pub hidden_columns: Rc<MutableVec<Column>>,
-    pub dialog_ref: Mutable<Option<HtmlDialogElement>>,
     pub loader: Rc<AsyncLoader>,
     pub saving_loader: Rc<AsyncLoader>,
 
@@ -127,7 +125,6 @@ impl State {
             entries,
             visible_columns,
             hidden_columns,
-            dialog_ref: Mutable::new(None),
             loader: Rc::new(AsyncLoader::new()),
             saving_loader: Rc::new(AsyncLoader::new()),
 

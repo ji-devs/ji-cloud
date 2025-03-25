@@ -12,7 +12,6 @@ pub struct Animation {
     pub dest_x: f64,
     pub dest_y: f64,
     pub dest_scale: f64,
-    pub side: Side,
 }
 
 #[derive(Clone)]
@@ -47,7 +46,6 @@ impl Animation {
             dest_x,
             dest_y,
             dest_scale,
-            side,
         }
     }
 

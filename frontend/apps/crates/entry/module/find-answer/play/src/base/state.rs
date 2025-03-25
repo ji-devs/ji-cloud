@@ -2,7 +2,6 @@ use components::module::_common::play::prelude::*;
 use once_cell::sync::OnceCell;
 use rand::prelude::*;
 use shared::domain::{
-    asset::{Asset, AssetId},
     jig::{
         codes::{JigPlaySessionFindAnswer, JigPlaySessionFindAnswerItem},
         player::{ModuleConfig, PlayerNavigationHandler, Seconds},
@@ -25,10 +24,8 @@ use std::{cell::RefCell, iter, rc::Rc};
 use web_sys::HtmlElement;
 
 pub struct Base {
-    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub stable_module_id: StableModuleId,
-    pub asset: Asset,
     pub theme_id: ThemeId,
     pub settings: PlaySettings,
     pub backgrounds: Backgrounds,
@@ -50,10 +47,8 @@ pub struct Base {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
-            asset_id,
             module_id,
             stable_module_id,
-            asset,
             raw,
             theme_id,
             ..
@@ -87,10 +82,8 @@ impl Base {
         };
 
         let base = Rc::new(Self {
-            asset_id,
             module_id,
             stable_module_id,
-            asset,
             theme_id,
             settings: content.play_settings,
             backgrounds: content.base.backgrounds,

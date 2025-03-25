@@ -8,5 +8,4 @@ mod edit_about;
 mod edit_bio;
 mod edit_image;
 
-pub use dom::*;
 pub use state::*;

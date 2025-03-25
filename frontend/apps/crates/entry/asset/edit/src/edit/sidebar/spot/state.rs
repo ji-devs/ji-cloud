@@ -4,7 +4,6 @@ use dominator::clone;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use std::cell::RefCell;
 use std::rc::Rc;
-use utils::drag::Drag;
 use utils::routes::{AssetEditRoute, CourseEditRoute, JigEditRoute};
 use web_sys::HtmlElement;
 
@@ -12,7 +11,6 @@ pub struct SpotState {
     pub spot: Rc<SidebarSpot>,
     pub tried_module_at_cover: Mutable<bool>,
     pub sidebar: Rc<SidebarState>,
-    pub drag: Mutable<Option<Drag<()>>>,
     pub index: usize,
     pub drag_target_index: Option<usize>,
     pub total_len: usize,
@@ -35,7 +33,6 @@ impl SpotState {
             drag_target_index,
             total_len,
             tried_module_at_cover: Mutable::new(false),
-            drag: Mutable::new(None),
             elem: RefCell::new(None),
             confirm_delete: Mutable::new(false),
         })

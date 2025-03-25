@@ -1,6 +1,4 @@
-use crate::{
-    email_handler::EmailHandler, password_handler::PasswordHandler, register::state::Step,
-};
+use crate::{email_handler::EmailHandler, password_handler::PasswordHandler};
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::{
     map_ref,
@@ -13,19 +11,17 @@ pub struct RegisterStart {
     pub loader: AsyncLoader,
     pub email: EmailHandler,
     pub password: PasswordHandler,
-    pub step: Mutable<Step>,
     pub tried_to_submit: Mutable<bool>,
     pub login_before_register: bool,
 }
 
 impl RegisterStart {
     // _is_no_auth check's if user was logged out
-    pub fn new(step: Mutable<Step>, query: RegisterQuery) -> Rc<Self> {
+    pub fn new(query: RegisterQuery) -> Rc<Self> {
         Rc::new(Self {
             loader: AsyncLoader::new(),
             email: EmailHandler::new(),
             password: PasswordHandler::new(),
-            step,
             tried_to_submit: Mutable::new(false),
             login_before_register: query.login_before_register,
         })

@@ -9,7 +9,6 @@ use std::{cell::RefCell, rc::Rc, sync::atomic::AtomicU8};
 use utils::unwrap::UnwrapJiExt;
 pub struct AskQuestions {
     pub base: Rc<Base>,
-    pub raw: RawAskQuestions,
     //in stack-order (i.e. reverse of input)
     pub item_bank: RefCell<Vec<RawQuestionItem>>,
     pub item: Mutable<Rc<QuestionItem>>,
@@ -32,7 +31,6 @@ impl AskQuestions {
 
         let _self = Rc::new(Self {
             base,
-            raw,
             item,
             item_bank: RefCell::new(item_bank),
             phase: Mutable::new(Phase::Play),

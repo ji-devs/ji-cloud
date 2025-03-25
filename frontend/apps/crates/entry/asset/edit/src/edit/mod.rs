@@ -8,5 +8,4 @@ mod publish;
 mod sidebar;
 mod state;
 
-pub use dom::*;
 pub use state::*;

@@ -6,5 +6,4 @@ mod state;
 mod details;
 mod table;
 
-pub use dom::*;
 pub use state::*;

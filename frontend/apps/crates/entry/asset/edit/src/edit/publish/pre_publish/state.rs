@@ -4,7 +4,7 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{
     category::{Category, CategoryId},
-    meta::{Affiliation, AgeRange, ResourceType},
+    meta::{AgeRange, ResourceType},
 };
 use utils::{
     editable_asset::EditableAsset,
@@ -26,7 +26,6 @@ pub struct PrePublish {
     pub category_label_lookup: Mutable<HashMap<CategoryId, String>>,
     pub resource_types: Mutable<Vec<ResourceType>>,
     pub ages: Mutable<Vec<AgeRange>>,
-    pub affiliations: Mutable<Vec<Affiliation>>,
     pub submission_tried: Mutable<bool>,
     pub show_missing_info_popup: Mutable<bool>,
     pub languages: Vec<Language>,
@@ -39,7 +38,6 @@ impl PrePublish {
         categories: Vec<Category>,
         category_label_lookup: HashMap<CategoryId, String>,
         ages: Vec<AgeRange>,
-        affiliations: Vec<Affiliation>,
         resource_types: Vec<ResourceType>,
         publish_state: Rc<Publish>,
     ) -> Self {
@@ -50,7 +48,6 @@ impl PrePublish {
             categories: Mutable::new(categories),
             category_label_lookup: Mutable::new(category_label_lookup),
             ages: Mutable::new(ages),
-            affiliations: Mutable::new(affiliations),
             resource_types: Mutable::new(resource_types),
             submission_tried: Mutable::new(false),
             show_missing_info_popup: Mutable::new(false),

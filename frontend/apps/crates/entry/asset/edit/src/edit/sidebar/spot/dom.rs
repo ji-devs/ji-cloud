@@ -274,9 +274,9 @@ impl SpotState {
                                     if idx == state.index {
                                         // Make sure that the module window is visible to the
                                         // teacher.
-
-                                        log::warn!("module");
-                                        elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
+                                        let scroll_into_view_options = ScrollIntoViewOptions::new();
+                                        scroll_into_view_options.set_behavior(ScrollBehavior::Smooth);
+                                        elem.scroll_into_view_with_scroll_into_view_options(&scroll_into_view_options);
                                         Some(html!("empty-fragment", {
                                             .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
                                                 html!("overlay-tooltip-error", {
@@ -299,9 +299,10 @@ impl SpotState {
                                     }
                                 },
                                 Some(ModuleHighlight::Unit(idx)) => {
-                                    log::warn!("unit");
                                     if idx == state.index {
-                                        elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
+                                        let scroll_into_view_options = ScrollIntoViewOptions::new();
+                                        scroll_into_view_options.set_behavior(ScrollBehavior::Smooth);
+                                        elem.scroll_into_view_with_scroll_into_view_options(&scroll_into_view_options);
                                         Some(html!("empty-fragment", {
                                             // Populate existing unit with it's data.
                                         }))

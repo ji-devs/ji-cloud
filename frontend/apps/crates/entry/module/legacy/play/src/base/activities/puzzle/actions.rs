@@ -109,7 +109,7 @@ impl PuzzleGame {
         .unwrap_ji();
 
         //draw the cutouts
-        ctx.set_fill_style(&JsValue::from_str("black"));
+        ctx.set_fill_style_str("black");
         for item in self.free_items.borrow().iter() {
             draw_single_shape(ctx, resize_info, &item.raw.hotspot.shape);
         }
@@ -171,7 +171,7 @@ impl PuzzleGame {
             mat.denormalize(resize_info);
             apply_transform_mat4(ctx, &mat);
 
-            ctx.set_fill_style(&JsValue::from_str(&color));
+            ctx.set_fill_style_str(&color);
             if !draw_single_shape(ctx, resize_info, &item.raw.hotspot.shape) {
                 ctx.fill();
             }

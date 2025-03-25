@@ -17,7 +17,6 @@ pub struct TalkType {
     pub base: Rc<Base>,
     pub raw: RawTalkType,
     pub items: Vec<Rc<TalkTypeItem>>,
-    pub rng: RefCell<ThreadRng>,
 }
 
 impl TalkType {
@@ -29,12 +28,7 @@ impl TalkType {
             .map(|raw_item| TalkTypeItem::new(base.clone(), raw_item.clone(), &mut rng))
             .collect();
 
-        let _self = Rc::new(Self {
-            base,
-            raw,
-            items,
-            rng: RefCell::new(rng),
-        });
+        let _self = Rc::new(Self { base, raw, items });
 
         _self.base.insert_start_listener(clone!(_self => move || {
             _self.clone().on_start();

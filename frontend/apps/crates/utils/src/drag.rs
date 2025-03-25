@@ -284,8 +284,8 @@ impl<T> Drag<T> {
     }
 
     pub fn trigger_drop_event(&self, x: i32, y: i32, data: &str) {
-        let mut options = CustomEventInit::new();
-        options.detail(&JsValue::from_str(&data));
+        let options = CustomEventInit::new();
+        options.set_detail(&JsValue::from_str(&data));
         let event = CustomEvent::new_with_event_init_dict("custom-drop", &options).unwrap_ji();
 
         if let Some(elem) = element_from_point(x as f32, y as f32) {

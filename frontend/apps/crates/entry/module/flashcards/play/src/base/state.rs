@@ -1,14 +1,11 @@
-use shared::domain::{
-    asset::AssetId,
-    module::{
-        body::{
-            Background, ModuleAssist,
-            _groups::cards::{CardPair, Mode, Step},
-            flashcards::{ModuleData as RawData, PlayerSettings},
-            ModuleAssistType,
-        },
-        ModuleId, StableModuleId,
+use shared::domain::module::{
+    body::{
+        Background, ModuleAssist,
+        _groups::cards::{CardPair, Mode, Step},
+        flashcards::{ModuleData as RawData, PlayerSettings},
+        ModuleAssistType,
     },
+    ModuleId, StableModuleId,
 };
 
 use futures_signals::signal::{Mutable, ReadOnlyMutable};
@@ -20,7 +17,6 @@ use utils::prelude::*;
 use super::game::state::Game;
 
 pub struct Base {
-    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub stable_module_id: StableModuleId,
     pub mode: Mode,
@@ -45,7 +41,6 @@ pub enum Phase {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, Mode, Step>) -> Rc<Self> {
         let InitFromRawArgs {
-            asset_id,
             module_id,
             stable_module_id,
             asset: _,
@@ -57,7 +52,6 @@ impl Base {
         let content = raw.content.unwrap_ji();
 
         let _self = Rc::new(Self {
-            asset_id,
             module_id,
             stable_module_id,
             mode: content.base.mode,

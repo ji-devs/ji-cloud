@@ -155,9 +155,9 @@ impl CommunitySearch {
 
     fn scroll_into_view(&self, el: &RefCell<Option<HtmlElement>>) {
         if let Some(el) = &*el.borrow() {
-            el.scroll_into_view_with_scroll_into_view_options(
-                &ScrollIntoViewOptions::new().behavior(web_sys::ScrollBehavior::Smooth),
-            );
+            let options = ScrollIntoViewOptions::new();
+            options.set_behavior(web_sys::ScrollBehavior::Smooth);
+            el.scroll_into_view_with_scroll_into_view_options(&options);
         }
     }
 }

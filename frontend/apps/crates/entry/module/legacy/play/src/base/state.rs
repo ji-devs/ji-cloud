@@ -7,15 +7,12 @@ use awsm_web::loaders::fetch::fetch_url;
 use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
 use shared::domain::module::{body::legacy::activity::Activity, StableModuleId};
-use shared::domain::{
-    asset::{Asset, AssetId},
-    module::{
-        body::{
-            legacy::{slide::Slide, ModuleData as RawData},
-            ModuleAssist,
-        },
-        ModuleId,
+use shared::domain::module::{
+    body::{
+        legacy::{slide::Slide, ModuleData as RawData},
+        ModuleAssist,
     },
+    ModuleId,
 };
 use std::collections::VecDeque;
 use std::{
@@ -28,11 +25,8 @@ use utils::prelude::*;
 use web_sys::Worker;
 
 pub struct Base {
-    pub asset_id: AssetId,
     pub module_id: ModuleId,
     pub stable_module_id: StableModuleId,
-    pub asset: Asset,
-    pub theme_id: ThemeId,
     pub module_phase: Mutable<ModulePlayPhase>,
     pub game_id: String,
     pub slide_id: String,
@@ -74,12 +68,9 @@ impl WorkerList {
 impl Base {
     pub async fn new(init_args: InitFromRawArgs<RawData, (), ()>) -> Rc<Self> {
         let InitFromRawArgs {
-            asset_id,
             module_id,
             stable_module_id,
-            asset,
             raw,
-            theme_id,
             ..
         } = init_args;
 
@@ -102,11 +93,8 @@ impl Base {
             .unwrap_ji();
 
         let _self = Rc::new(Self {
-            asset_id,
             module_id,
             stable_module_id,
-            asset,
-            theme_id,
             module_phase: init_args.play_phase,
             game_id: raw.game_id,
             slide_id,

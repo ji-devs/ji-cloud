@@ -53,7 +53,6 @@ impl PrePublish {
             categories,
             category_label_lookup,
             meta.age_ranges,
-            meta.affiliations,
             meta.resource_types,
             publish_state,
         )

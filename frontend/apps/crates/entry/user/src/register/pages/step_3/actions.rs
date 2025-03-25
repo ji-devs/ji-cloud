@@ -1,5 +1,4 @@
 use super::state::*;
-use serde::Serialize;
 use shared::{
     api::endpoints,
     domain::{
@@ -85,9 +84,4 @@ pub fn submit(state: Rc<State>) {
             }
         }
     });
-}
-
-#[derive(Serialize, Debug)]
-struct JsonRaw {
-    raw: String,
 }

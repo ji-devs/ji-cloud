@@ -34,9 +34,9 @@ pub async fn init_from_raw(
         base: base.clone(),
         main: Rc::new(Main::new(base.clone(), sidebar.clone())),
         sidebar,
-        header: Rc::new(Header::new(base.clone())),
-        footer: Rc::new(Footer::new(base.clone())),
-        overlay: Rc::new(Overlay::new(base)),
+        header: Rc::new(Header::new()),
+        footer: Rc::new(Footer::new()),
+        overlay: Rc::new(Overlay::new()),
     }
 }
 

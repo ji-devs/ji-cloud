@@ -5,5 +5,4 @@ pub mod jig_codes;
 pub mod jigs;
 mod state;
 
-pub use dom::*;
 pub use state::*;

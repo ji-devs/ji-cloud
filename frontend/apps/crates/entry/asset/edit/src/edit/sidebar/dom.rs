@@ -102,7 +102,9 @@ impl Sidebar {
                             match highlight {
                                 Some(ModuleHighlight::Publish) => {
                                     // Make sure that the publish window is visible to the teacher.
-                                    elem.scroll_into_view_with_scroll_into_view_options(ScrollIntoViewOptions::new().behavior(ScrollBehavior::Smooth));
+                                    let scroll_into_view_options = ScrollIntoViewOptions::new();
+                                    scroll_into_view_options.set_behavior(ScrollBehavior::Smooth);
+                                    elem.scroll_into_view_with_scroll_into_view_options(&scroll_into_view_options);
                                     Some(html!("empty-fragment", {
                                         .apply(OverlayHandle::lifecycle(clone!(state, elem => move || {
                                             html!("overlay-tooltip-error", {

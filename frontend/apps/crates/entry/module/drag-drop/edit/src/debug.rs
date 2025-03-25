@@ -36,8 +36,6 @@ pub struct DebugSettings {
     pub skip_save: bool,
     pub skip_load_jig: bool,
     pub draw_kind: Option<TraceKind>,
-    pub step_1_tab: Option<MenuTabKind>,
-    pub step_2_tab: Option<MenuTabKind>,
     pub step_4_tab: Option<MenuTabKind>,
 }
 
@@ -155,8 +153,6 @@ impl DebugSettings {
             draw_kind: None,
             skip_save: true,
             skip_load_jig: true,
-            step_1_tab: Some(MenuTabKind::Image),
-            step_2_tab: Some(MenuTabKind::Trace),
             step_4_tab: Some(MenuTabKind::PlaySettings),
         }
     }

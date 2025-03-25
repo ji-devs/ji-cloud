@@ -21,7 +21,7 @@ impl PlayState {
             .base
             .traces
             .iter()
-            .map(|trace| PlayTrace::new(game.clone(), trace.clone()))
+            .map(|trace| PlayTrace::new(trace.clone()))
             .collect();
 
         Rc::new(Self {
@@ -34,7 +34,6 @@ impl PlayState {
 }
 
 pub struct PlayTrace {
-    pub game: Rc<Game>,
     pub phase: Mutable<PlayPhase>,
     pub inner: Trace,
 }
@@ -48,9 +47,8 @@ impl Deref for PlayTrace {
 }
 
 impl PlayTrace {
-    pub fn new(game: Rc<Game>, trace: Trace) -> Rc<Self> {
+    pub fn new(trace: Trace) -> Rc<Self> {
         Rc::new(Self {
-            game,
             phase: Mutable::new(PlayPhase::Waiting),
             inner: trace,
         })

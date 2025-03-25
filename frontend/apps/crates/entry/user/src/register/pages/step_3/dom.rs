@@ -6,17 +6,14 @@ use utils::unwrap::UnwrapJiExt;
 use super::{actions, state::*};
 use std::rc::Rc;
 
-use crate::{
-    register::state::{Step, Step2Data},
-    strings::register::step_3::*,
-};
+use crate::{register::state::Step2Data, strings::register::step_3::*};
 use utils::{api_helpers::meta::MetaOptions, events};
 
 pub struct Step3Page {}
 
 impl Step3Page {
-    pub fn render(step: Mutable<Step>, step_2: Step2Data) -> Dom {
-        let state = Rc::new(State::new(step, step_2));
+    pub fn render(step_2: Step2Data) -> Dom {
+        let state = Rc::new(State::new(step_2));
 
         let meta_options: Mutable<Option<MetaOptions>> = Mutable::new(None);
 

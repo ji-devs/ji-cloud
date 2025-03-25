@@ -73,10 +73,10 @@ impl AssetEditState {
                                 },
                             }
                         },
-                        AssetEditRoute::Playlist(playlist_id, playlist_edit_route) => {
+                        AssetEditRoute::Playlist(_, playlist_edit_route) => {
                             match playlist_edit_route {
                                 PlaylistEditRoute::Landing => {
-                                    Some(PlaylistSelection::new(playlist_id, &state).render())
+                                    Some(PlaylistSelection::new().render())
                                 },
                                 PlaylistEditRoute::Cover(cover_id) => {
                                     Some(ModuleIframe::new(state.asset_id, cover_id).render())

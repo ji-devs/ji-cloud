@@ -34,7 +34,6 @@ pub struct JigPlayer {
     pub start_module_id: Option<ModuleId>,
     pub navigation_handler: Mutable<Option<PlayerNavigationHandler>>,
     pub timer: Mutable<Option<Timer>>,
-    pub can_show_time_up_popup: Mutable<bool>,
     pub points: Mutable<u32>,
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
     /// Whether this activity has started (via clicking Play button, or automatically).
@@ -66,7 +65,6 @@ pub struct JigPlayer {
     pub direction: Mutable<TextDirection>,
     pub url_scoring: Option<bool>,
     pub scoring: Mutable<bool>,
-    pub url_drag_assist: Option<bool>,
     pub drag_assist: Mutable<bool>,
 }
 
@@ -94,7 +92,6 @@ impl JigPlayer {
             play_tracked: RefCell::new(false),
             start_module_id: module_id,
             timer: Mutable::new(None),
-            can_show_time_up_popup: Mutable::new(true),
             navigation_handler: Mutable::new(None),
             points: Mutable::new(0),
             iframe: Rc::new(RefCell::new(None)),
@@ -122,7 +119,6 @@ impl JigPlayer {
             direction: Mutable::new(player_options.direction.unwrap_or_default()),
             url_scoring: player_options.scoring,
             scoring: Mutable::new(player_options.scoring.unwrap_or_default()),
-            url_drag_assist: player_options.drag_assist,
             drag_assist: Mutable::new(player_options.drag_assist.unwrap_or_default()),
         })
     }
