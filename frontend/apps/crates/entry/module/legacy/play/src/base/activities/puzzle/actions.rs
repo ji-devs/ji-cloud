@@ -34,7 +34,6 @@ use utils::{
     prelude::*,
     resize::{get_resize_info, ResizeInfo},
 };
-use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 
 impl Puzzle {

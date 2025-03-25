@@ -2,7 +2,7 @@ import rust from "@wasm-tool/rollup-plugin-rust";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import injectProcessEnv from "rollup-plugin-inject-process-env";
-import { getEnv } from "./rollup.common.js";
+import { getEnv } from "./rollup.common.mjs";
 
 const { URL_FRONTEND_RELEASE } = require("../config/constants");
 
@@ -30,7 +30,9 @@ export default {
             debug: false,
         }),
         nodeResolve(),
-        commonjs(),
+        commonjs({
+            transformMixedEsModules: true,
+        }),
         injectProcessEnv(getEnv()),
     ],
 };

@@ -51,7 +51,7 @@
     <script src="/static/js/reload.js"></script>
     {% endif -%}
 
-    <script src="{{ app_custom_elements_js|safe }}"></script>
+    <script src="{{ app_custom_elements_js|safe }}" type="module"></script>
 
     {% if firebase -%}
     <script src="https://www.gstatic.com/firebasejs/7.14.2/firebase-app.js"></script>
@@ -86,7 +86,7 @@
 
     <div id="root"></div>
 
-    <script src="{{ app_js|safe }}"></script>
+    <script src="{{ app_js|safe }}" type="module"></script>
 
     <script>
         navigator.serviceWorker.register("/service-worker.js", { scope: "/" });

@@ -4,7 +4,7 @@ import livereload from "rollup-plugin-livereload";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import injectProcessEnv from "rollup-plugin-inject-process-env";
-import { getEnv } from "./rollup.common.js";
+import { getEnv } from "./rollup.common.mjs";
 import static_files from "rollup-plugin-static-files";
 import dev from 'rollup-plugin-dev'
 import fp from 'fastify-plugin'
@@ -42,6 +42,7 @@ export default [
         },
         output: {
             dir: `./dist/static/`,
+            format: "es",
         },
         plugins: [
             static_files({
@@ -56,22 +57,25 @@ export default [
         },
         output: {
             dir: `./dist/${APP_NAME}/js/`,
-            format: "iife",
+            format: "es",
             sourcemap: true,
         },
         plugins: [
             rust({
-                serverPath: `/${APP_NAME}/js/`,
-                // serverPath: `/js/`,
-                debug: true,
+                // serverPath: `/${APP_NAME}/js/`,
+                optimize: {
+                    release: false,
+                },
                 watchPatterns,
-                // wasmBindgenArgs: ["--reference-types"],
-                cargoArgs: ["--features", "local quiet"],
-                watch: true,
+                extraArgs: {
+                    cargo: ["--features", "local quiet"],
+                }
             }),
 
             nodeResolve(),
-            commonjs(),
+            commonjs({
+                transformMixedEsModules: true,
+            }),
 
             injectProcessEnv(getEnv()),
 

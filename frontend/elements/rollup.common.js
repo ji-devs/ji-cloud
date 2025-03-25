@@ -7,8 +7,12 @@ import typescript from "rollup-plugin-typescript2";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import minifyHTML from 'rollup-plugin-minify-html-literals';
+import dotenv from "dotenv";
+import path from 'path';
 
-const path = require("path");
+const __dirname = path.resolve();
+
+dotenv.config({ path: __dirname + "/./../../.env" });
 
 const filesizeConfig = {
     showGzippedSize: true,
@@ -42,7 +46,9 @@ export function createConfig(target) {
 
         resolve(),
 
-        commonjs(),
+        commonjs({
+            transformMixedEsModules: true,
+        }),
 
         typescript({
             tsconfigOverride: {
@@ -52,10 +58,17 @@ export function createConfig(target) {
 
         filesize(filesizeConfig),
 
-        injectProcessEnv({
-            NODE_ENV: target === "local" ? "development" : "production",
-            DEPLOY_TARGET: target,
-        }),
+        injectProcessEnv(
+            // Exclude LOCAL_ values if they're not set (any environment except local)
+            Object.fromEntries(
+                Object.entries({
+                    NODE_ENV: target === "local" ? "development" : "production",
+                    DEPLOY_TARGET: target,
+                    LOCAL_MEDIA_URL: process.env.LOCAL_MEDIA_URL,
+                    LOCAL_UPLOADS_URL: process.env.LOCAL_UPLOADS_URL,
+                }).filter(([_, value]) => value !== null && value !== undefined)
+            )
+        ),
     ];
 
     if (target !== "local") {

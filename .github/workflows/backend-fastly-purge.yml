@@ -43,7 +43,7 @@ jobs:
             echo "GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON_KEY_SANDBOX }}" >> $GITHUB_ENV
           fi
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Extract label
         shell: bash
