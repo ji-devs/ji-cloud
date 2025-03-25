@@ -226,7 +226,7 @@ impl JigPlayer {
     pub fn show_assist(self: &Rc<Self>, visible: bool) {
         if let Some(module_assist) = self.module_assist.get_cloned() {
             self.module_assist_visible.set_neq(visible);
-            self.set_timer_paused(visible);
+            self.set_paused(visible);
 
             if visible {
                 self.play_assist_audio();
@@ -468,7 +468,7 @@ impl JigPlayer {
         });
     }
 
-    fn set_timer_paused(self: &Rc<Self>, paused: bool) {
+    pub fn set_timer_paused(self: &Rc<Self>, paused: bool) {
         match &*self.timer.lock_ref() {
             None => {}
             Some(timer) => {

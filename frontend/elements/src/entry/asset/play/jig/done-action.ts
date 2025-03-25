@@ -1,18 +1,20 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { actionStyles } from "./action-styles";
 
-export type Kind = "replay" | "exit" | "share";
+export type Kind = "replay" | "exit" | "share" | "continue";
 
 const STR_LABEL_LOOKUP: { [key in Kind]: string } = {
     "replay": "Replay",
     "exit": "Exit",
     "share": "Share",
+    "continue": "Continue",
 };
 
 const icon: { [key in Kind]: string } = {
     "replay": "fa-solid fa-rotate-left",
     "exit": "fa-solid fa-arrow-right-from-bracket",
     "share": "fa-solid fa-share-nodes",
+    "continue": "fa-solid fa-arrow-right",
 };
 
 @customElement("jig-play-done-action")

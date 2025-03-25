@@ -547,6 +547,7 @@ impl JigPlayer {
             match done {
                 false => None,
                 true => {
+                    state.set_timer_paused(true);
                     Some(html!("dialog-overlay", {
                         .prop("slot", "dialog")
                         .prop("open", true)
@@ -606,7 +607,8 @@ impl JigPlayer {
     }
 
     fn time_up_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
-        self.timer
+        let timer_signal = self
+            .timer
             .signal_cloned()
             .map(|timer| {
                 DefaultSignal::new(
@@ -614,7 +616,11 @@ impl JigPlayer {
                     timer.map(|timer| timer.time.signal().map(|time| time == 0)),
                 )
             })
-            .flatten()
+            .flatten();
+        map_ref! {
+            let timer = timer_signal,
+            let done = self.done.signal() => *timer && !*done
+        }
     }
 
     fn render_time_up_popup(self: &Rc<Self>) -> impl Signal<Item = Option<Dom>> {
@@ -629,6 +635,17 @@ impl JigPlayer {
                         .prop("autoClose", false)
                         .child(html!("jig-play-time-up-popup", {
                             .apply(|mut dom| {
+                                if state.scoring.get() {
+                                    dom = dom.child(
+                                        html!("jig-play-done-action", {
+                                            .prop("slot", "actions")
+                                            .prop("kind", "continue")
+                                            .event(clone!(state => move |_: events::Click| {
+                                                state.navigate_forward_or_handle();
+                                            }))
+                                        })
+                                    );
+                                };
                                 if !state.scoring.get() {
                                     dom = dom.child(
                                         html!("jig-play-done-action", {

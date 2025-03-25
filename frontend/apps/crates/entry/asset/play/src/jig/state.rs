@@ -34,6 +34,7 @@ pub struct JigPlayer {
     pub start_module_id: Option<ModuleId>,
     pub navigation_handler: Mutable<Option<PlayerNavigationHandler>>,
     pub timer: Mutable<Option<Timer>>,
+    pub can_show_time_up_popup: Mutable<bool>,
     pub points: Mutable<u32>,
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
     /// Whether this activity has started (via clicking Play button, or automatically).
@@ -93,6 +94,7 @@ impl JigPlayer {
             play_tracked: RefCell::new(false),
             start_module_id: module_id,
             timer: Mutable::new(None),
+            can_show_time_up_popup: Mutable::new(true),
             navigation_handler: Mutable::new(None),
             points: Mutable::new(0),
             iframe: Rc::new(RefCell::new(None)),
@@ -153,8 +155,12 @@ impl PlayModuleAssist {
         module_assist: ModuleAssist,
         module_assist_type: ModuleAssistType,
     ) -> Self {
+        let text = match module_assist.text {
+            Some(text) => text,
+            None => "Playing instructions...".to_string(),
+        };
         Self {
-            text: module_assist.text,
+            text: Some(text),
             audio: module_assist.audio,
             always_show: module_assist.always_show,
             module_assist_type,
