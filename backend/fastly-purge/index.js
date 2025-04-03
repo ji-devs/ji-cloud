@@ -4,8 +4,9 @@ const URL_FRONTEND_SANDBOX = "https://frontend.sandbox.jigzi.org";
 const URL_UPLOADS_RELEASE = "https://uploads.jigzi.org";
 const URL_UPLOADS_SANDBOX = "https://uploads.sandbox.jigzi.org";
 
-const fetch = require("node-fetch");
-const { Storage } = require("@google-cloud/storage");
+import fetch from "node-fetch";
+import { Storage } from "@google-cloud/storage";
+
 const storage = new Storage();
 
 const hasExtension = (ext) => (target) => {
@@ -95,9 +96,9 @@ const makePurger = (FASTLY_PUBLIC_BASEURL) => async (obj, context) => {
   }
 };
 
-exports.purgeMedia = makePurger(URL_MEDIA);
+export const purgeMedia = makePurger(URL_MEDIA);
 
-exports.purgeFrontendRelease = makePurger(URL_FRONTEND_RELEASE);
-exports.purgeFrontendSandbox = makePurger(URL_FRONTEND_SANDBOX);
-exports.purgeUploadsRelease = makePurger(URL_UPLOADS_RELEASE);
-exports.purgeUploadsSandbox = makePurger(URL_UPLOADS_SANDBOX);
+export const purgeFrontendRelease = makePurger(URL_FRONTEND_RELEASE);
+export const purgeFrontendSandbox = makePurger(URL_FRONTEND_SANDBOX);
+export const purgeUploadsRelease = makePurger(URL_UPLOADS_RELEASE);
+export const purgeUploadsSandbox = makePurger(URL_UPLOADS_SANDBOX);
