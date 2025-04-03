@@ -25,10 +25,12 @@ export default {
     },
     plugins: [
         rust({
-            serverPath: `${URL_FRONTEND_SANDBOX}/${APP_NAME}/js/`,
-            // wasmBindgenArgs: ["--reference-types"],
-            cargoArgs: ["--features", "sandbox"],
-            debug: false,
+            optimize: {
+                release: false,
+            },
+            extraArgs: {
+                cargo: ["--features", "sandbox"],
+            }
         }),
         nodeResolve(),
         commonjs({
