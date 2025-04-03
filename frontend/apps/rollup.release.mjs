@@ -19,7 +19,7 @@ export default {
     },
     output: {
         dir: `./dist/${APP_NAME}/js/`,
-        format: "iife",
+        format: "es",
         sourcemap: true,
     },
     plugins: [
