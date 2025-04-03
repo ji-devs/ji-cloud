@@ -4,7 +4,8 @@ import commonjs from "@rollup/plugin-commonjs";
 import injectProcessEnv from "rollup-plugin-inject-process-env";
 import { getEnv } from "./rollup.common.mjs";
 
-import { URL_FRONTEND_RELEASE } from "../config/constants";
+import constants from "../config/constants.js";
+const { URL_FRONTEND_RELEASE } = constants;
 
 let { APP_NAME } = process.env;
 
