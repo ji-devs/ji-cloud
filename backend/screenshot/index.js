@@ -373,7 +373,7 @@ function makeResponders(res) {
     respondError: (error) => {
       console.error(error);
       res.status(400);
-      res.json({ error: true, message: JSON.stringify(error) });
+      res.json({ error: true, message: error.message });
       res.end();
     },
 
