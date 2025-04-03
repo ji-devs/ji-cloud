@@ -5,9 +5,9 @@
     "version": "0.1.0",
     "scripts": {
         "build:watch": "rollup --config rollup.local.mjs --watch",
-        "build:watch:backtrace": "cross-env RUSTFLAGS=\"-Z macro-backtrace\" rollup --config rollup.local.js --watch",
-        "build:release": "rollup --config rollup.release.js",
-        "build:sandbox": "rollup --config rollup.sandbox.js"
+        "build:watch:backtrace": "cross-env RUSTFLAGS=\"-Z macro-backtrace\" rollup --config rollup.local.mjs --watch",
+        "build:release": "rollup --config rollup.release.mjs",
+        "build:sandbox": "rollup --config rollup.sandbox.mjs"
     },
     "dependencies": {
         "@rollup/plugin-node-resolve": "^16.0.1",
