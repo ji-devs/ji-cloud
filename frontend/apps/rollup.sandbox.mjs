@@ -27,7 +27,6 @@ export default {
         rust({
             optimize: {
                 release: true,
-                rustc: true,
             },
             extraArgs: {
                 cargo: ["--features", "sandbox"],
