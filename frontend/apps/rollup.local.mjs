@@ -64,6 +64,7 @@ export default [
             rust({
                 // serverPath: `/${APP_NAME}/js/`,
                 optimize: {
+                    // Set this to true to remove debug_assertions checks which sets trace matches to "red"
                     release: false,
                 },
                 watchPatterns,

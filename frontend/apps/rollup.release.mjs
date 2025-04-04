@@ -26,7 +26,7 @@ export default {
     plugins: [
         rust({
             optimize: {
-                release: false,
+                release: true,
             },
             extraArgs: {
                 cargo: ["--features", "release"],
