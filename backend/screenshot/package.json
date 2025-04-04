@@ -6,10 +6,10 @@
   "scripts": {
     "start": "node index.js",
     "dev": "watchexec -w index.js -r -s SIGKILL \"npm run _dev:save\"",
+    "gcp-build": "node node_modules/puppeteer/install.js",
     "_dev:show": "functions-framework --target=showScreenshotSandbox --port=8081",
     "_dev:save": "functions-framework --target=saveScreenshotSandbox --port=8081",
-    "_dev:queue": "functions-framework --target=queueScreenshotSandbox --port=8081",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "_dev:queue": "functions-framework --target=queueScreenshotSandbox --port=8081"
   },
   "author": "",
   "license": "ISC",
@@ -25,7 +25,7 @@
     "uuid-validate": "^0.0.3"
   },
   "devDependencies": {
-    "@google-cloud/functions-framework": "^1.9.0",
+    "@google-cloud/functions-framework": "^3.5.1",
     "cross-env": "^7.0.2"
   }
 }
