@@ -48,7 +48,7 @@ jobs:
         with:
           toolchain: nightly
           components: rustfmt
-          targets: wasm32-unknown-unknown
+          targets: wasm32-unknown-unknown,nightly-x86_64-unknown-linux-gnu
 
       - run: cargo check --all --manifest-path frontend/apps/Cargo.toml
       - run: cargo fmt --all --manifest-path frontend/apps/Cargo.toml --check
@@ -89,7 +89,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly
-          targets: wasm32-unknown-unknown
+          targets: wasm32-unknown-unknown,nightly-x86_64-unknown-linux-gnu
 
       - uses: davidB/rust-cargo-make@main
 
@@ -161,7 +161,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: nightly
-          targets: wasm32-unknown-unknown
+          targets: wasm32-unknown-unknown,nightly-x86_64-unknown-linux-gnu
 
       - uses: davidB/rust-cargo-make@main
 
