@@ -151,15 +151,15 @@ impl PlayModuleAssist {
         module_assist: ModuleAssist,
         module_assist_type: ModuleAssistType,
     ) -> Self {
-        let text = match module_assist.text {
-            Some(text) => text,
-            None => "Playing instructions...".to_string(),
-        };
         Self {
-            text: Some(text),
+            text: module_assist.text,
             audio: module_assist.audio,
             always_show: module_assist.always_show,
             module_assist_type,
         }
+    }
+
+    pub fn is_audio_only(&self) -> bool {
+        self.audio.is_some() && self.text.is_none()
     }
 }

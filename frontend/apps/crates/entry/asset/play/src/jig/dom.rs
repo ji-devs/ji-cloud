@@ -117,7 +117,9 @@ impl JigPlayer {
             .future(should_show_assist.for_each(clone!(state => move |should_show| {
                 match should_show {
                     Some(ShowAssist::AudioOnly) => {
-                        state.play_assist_audio();
+                        // state.play_assist_audio();
+                        // Workaround - play assist audio before other audio is played
+                        state.show_assist(true);
                     }
                     Some(ShowAssist::All) => {
                         // Only show, never hide from here. Otherwise we can cause a race condition between Play and Pause.
@@ -283,7 +285,9 @@ impl JigPlayer {
                                         // If there is a timer or assist is set to always_show, and the type is `Instructions`, or if there is text, show the popup
                                         state.show_assist(true);
                                     } else if module_assist.audio.is_some() {
-                                        state.play_assist_audio();
+                                        // state.play_assist_audio();
+                                        // Workaround - play assist audio before other audio is played
+                                        state.show_assist(true);
                                     }
                                 }
                             }))
@@ -294,7 +298,12 @@ impl JigPlayer {
                                     .with_node!(elem => {
                                         .apply(OverlayHandle::lifecycle(
                                             clone!(state, module_assist => move || {
-                                                html!("overlay-tooltip-info", {
+                                                let tooltip = match module_assist.is_audio_only() {
+                                                    true => "overlay-tooltip-noop",
+                                                    false => "overlay-tooltip-info",
+                                                };
+                                                log::info!("{}", tooltip);
+                                                html!(tooltip, {
                                                     .prop("centeredContent", true)
                                                     .prop("marginX", -16)
                                                     .prop("target", &elem)
@@ -302,6 +311,8 @@ impl JigPlayer {
                                                     .attr("contentAnchor", "oppositeV")
                                                     .prop("size", "large")
                                                     .prop("color", "dark-blue")
+                                                    .prop("closeable", true)
+                                                    .prop("strategy", "track")
                                                     .apply(clone!(module_assist => move |dom| {
                                                         match module_assist.module_assist_type {
                                                             ModuleAssistType::Instructions => {
@@ -316,8 +327,6 @@ impl JigPlayer {
                                                             }
                                                         }
                                                     }))
-                                                    .prop("closeable", true)
-                                                    .prop("strategy", "track")
                                                     .event(clone!(state => move |_evt: events::Close| {
                                                         state.show_assist(false);
                                                     }))

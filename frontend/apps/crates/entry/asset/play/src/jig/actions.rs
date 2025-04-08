@@ -260,6 +260,8 @@ impl JigPlayer {
                         if !((state.timer.get_cloned().is_some() || module_assist.always_show) && module_assist.module_assist_type.is_instructions()) && module_assist.text.is_none() {
                             // If there is no text, then we can notify the activity that the assist audio has completed.
                             state.module_assist_done(module_assist.clone());
+                            // Workaround - hide the assist after the audio has completed
+                            state.show_assist(false);
                         }
                     }))
                 )));
