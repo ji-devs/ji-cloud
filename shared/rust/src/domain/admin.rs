@@ -141,6 +141,9 @@ pub enum InviteFailedReason {
     /// The user could not be found (not registered yet)
     #[strum(serialize = "Not found")]
     UserNotFound,
+    /// The user hasn't completed setting up their profile
+    #[strum(serialize = "Incomplete profile")]
+    IncompleteProfile,
 }
 
 make_path_parts!(SchoolNamesPath => "/v1/admin/school-names");

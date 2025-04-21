@@ -296,25 +296,30 @@ async fn invite_school_user(
 ) -> Result<Option<InviteSchoolUserFailure>, error::Server> {
     let user_id = match db::user::get_user_id_by_email(pool, &email).await? {
         Some(user_id) => {
-            if let Some(account_summary) =
-                db::account::get_user_account_summary(pool, &user_id).await?
-            {
-                match account_summary.school_id {
-                    Some(_) => Err(InviteFailedReason::AssociatedWithSchool),
-                    None => {
-                        match account_summary.subscription_status {
-                            Some(SubscriptionStatus::Expired) | None => {
-                                // If they have an account with an expired subscription or no subscription,
-                                // then delete that account so that they can be added to a school account.
-                                db::account::delete_account_for_user(pool, &user_id).await?;
-                                Ok(user_id)
+            if db::user::get_profile(pool, &user_id).await?.is_none() {
+                // Incomplete profiles cause a bunch of queries to fail, so we prevent them from being added to schools until their profile is complete.
+                Err(InviteFailedReason::IncompleteProfile)
+            } else {
+                if let Some(account_summary) =
+                    db::account::get_user_account_summary(pool, &user_id).await?
+                {
+                    match account_summary.school_id {
+                        Some(_) => Err(InviteFailedReason::AssociatedWithSchool),
+                        None => {
+                            match account_summary.subscription_status {
+                                Some(SubscriptionStatus::Expired) | None => {
+                                    // If they have an account with an expired subscription or no subscription,
+                                    // then delete that account so that they can be added to a school account.
+                                    db::account::delete_account_for_user(pool, &user_id).await?;
+                                    Ok(user_id)
+                                }
+                                _ => Err(InviteFailedReason::HasIndividualAccount),
                             }
-                            _ => Err(InviteFailedReason::HasIndividualAccount),
                         }
                     }
+                } else {
+                    Ok(user_id)
                 }
-            } else {
-                Ok(user_id)
             }
         }
         None => Err(InviteFailedReason::UserNotFound),
