@@ -330,56 +330,64 @@ impl JigPlayer {
                                                     .event(clone!(state => move |_evt: events::Close| {
                                                         state.show_assist(false);
                                                     }))
-                                                    .apply_if(module_assist.audio.is_some(), clone!(state => move |dom| {
-                                                        let hover = Mutable::new(false);
-                                                        dom.child(html!("button-rect", {
-                                                            .prop("slot", "actions")
-                                                            .prop("kind", "text")
-                                                            .prop("color", "lightBlue")
-                                                            .prop("size", "regular")
-                                                            .event(clone!(hover => move |_evt: events::PointerEnter| hover.set_neq(true)))
-                                                            .event(clone!(hover => move |_evt: events::PointerLeave| hover.set_neq(false)))
-                                                            .child(html!("img-ui", {
-                                                                .style("height", "24px")
-                                                                .prop_signal("path", hover.signal_ref(|hover| {
-                                                                    if *hover {
-                                                                        "jig/play/icon-repeat-hover.svg"
-                                                                    } else {
-                                                                        "jig/play/icon-repeat.svg"
-                                                                    }
+                                                    .apply_if(module_assist.audio.is_some(), clone!(state, module_assist => move |dom| {
+                                                        if module_assist.is_audio_only() {
+                                                            dom
+                                                        } else {
+                                                            let hover = Mutable::new(false);
+                                                            dom.child(html!("button-rect", {
+                                                                .prop("slot", "actions")
+                                                                .prop("kind", "text")
+                                                                .prop("color", "lightBlue")
+                                                                .prop("size", "regular")
+                                                                .event(clone!(hover => move |_evt: events::PointerEnter| hover.set_neq(true)))
+                                                                .event(clone!(hover => move |_evt: events::PointerLeave| hover.set_neq(false)))
+                                                                .child(html!("img-ui", {
+                                                                    .style("height", "24px")
+                                                                    .prop_signal("path", hover.signal_ref(|hover| {
+                                                                        if *hover {
+                                                                            "jig/play/icon-repeat-hover.svg"
+                                                                        } else {
+                                                                            "jig/play/icon-repeat.svg"
+                                                                        }
+                                                                    }))
+                                                                }))
+                                                                .text("Repeat")
+                                                                .event(clone!(state => move |_evt: events::Click| {
+                                                                    state.play_assist_audio();
                                                                 }))
                                                             }))
-                                                            .text("Repeat")
-                                                            .event(clone!(state => move |_evt: events::Click| {
-                                                                state.play_assist_audio();
-                                                            }))
-                                                        }))
+                                                        }
                                                     }))
-                                                    .apply(clone!(state => move |dom| {
-                                                        let hover = Mutable::new(false);
-                                                        dom.child(html!("button-rect", {
-                                                            .prop("slot", "actions")
-                                                            .prop("kind", "filled")
-                                                            .prop("color", "blue")
-                                                            .prop("size", "regular")
-                                                            .style("margin-left", "auto")
-                                                            .event(clone!(hover => move |_evt: events::PointerEnter| hover.set_neq(true)))
-                                                            .event(clone!(hover => move |_evt: events::PointerLeave| hover.set_neq(false)))
-                                                            .child(html!("img-ui", {
-                                                                .style("height", "24px")
-                                                                .prop_signal("path", hover.signal_ref(|hover| {
-                                                                    if *hover {
-                                                                        "jig/play/icon-thumbsup-hover.svg"
-                                                                    } else {
-                                                                        "jig/play/icon-thumbsup.svg"
-                                                                    }
+                                                    .apply(clone!(state, module_assist => move |dom| {
+                                                        if module_assist.is_audio_only() {
+                                                            dom
+                                                        } else {
+                                                            let hover = Mutable::new(false);
+                                                            dom.child(html!("button-rect", {
+                                                                .prop("slot", "actions")
+                                                                .prop("kind", "filled")
+                                                                .prop("color", "blue")
+                                                                .prop("size", "regular")
+                                                                .style("margin-left", "auto")
+                                                                .event(clone!(hover => move |_evt: events::PointerEnter| hover.set_neq(true)))
+                                                                .event(clone!(hover => move |_evt: events::PointerLeave| hover.set_neq(false)))
+                                                                .child(html!("img-ui", {
+                                                                    .style("height", "24px")
+                                                                    .prop_signal("path", hover.signal_ref(|hover| {
+                                                                        if *hover {
+                                                                            "jig/play/icon-thumbsup-hover.svg"
+                                                                        } else {
+                                                                            "jig/play/icon-thumbsup.svg"
+                                                                        }
+                                                                    }))
+                                                                }))
+                                                                .text("OK")
+                                                                .event(clone!(state => move |_evt: events::Click| {
+                                                                    state.show_assist(false);
                                                                 }))
                                                             }))
-                                                            .text("OK")
-                                                            .event(clone!(state => move |_evt: events::Click| {
-                                                                state.show_assist(false);
-                                                            }))
-                                                        }))
+                                                        }
                                                     }))
                                                 })
                                             })
