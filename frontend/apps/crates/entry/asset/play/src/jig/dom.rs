@@ -88,22 +88,6 @@ impl JigPlayer {
             }
         };
 
-        let should_show_paused_overlay = map_ref! {
-            let paused = state.paused.signal_cloned(),
-            let module_assist = state.module_assist.signal_cloned()
-            => {
-                if let Some(module_assist) = module_assist {
-                    if module_assist.is_audio_only() {
-                        false
-                    } else {
-                        *paused
-                    }
-                } else {
-                    *paused
-                }
-            }
-        };
-
         html!("jig-play-landing", {
             .future(state.jig.signal_cloned().for_each(clone!(state => move |jig| {
                 // Don't unwrap the jig field because we don't want analytics logic to break the app.
@@ -150,7 +134,7 @@ impl JigPlayer {
             })))
             // Use state.player_options, not jig.jig_data.default_player_settings
             .prop_signal("rtl", state.direction.signal().map(|d| d.is_rtl()))
-            .prop_signal("paused", should_show_paused_overlay)
+            .prop_signal("paused", state.paused.signal())
             .prop_signal("isLegacy", state.jig.signal_ref(|jig| {
                 if let Some(jig) = jig {
                     if let Some(first_module) = jig.jig_data.modules.get(0) {
