@@ -47,14 +47,6 @@ export class _ extends LitElement {
         }
     };
 
-    onClose = () => {
-        this.dispatchEvent(new Event("close"));
-        this.selfClosed = true;
-    };
-
-    @property({ type: Boolean })
-    closeable: boolean = false;
-
     @property({ type: Boolean })
     selfClosed: boolean = false;
 
@@ -89,18 +81,6 @@ export class _ extends LitElement {
 
     @property({ type: Number })
     marginY: number = 0;
-
-    renderClose() {
-        if (!this.closeable) {
-            return nothing;
-        }
-
-        return html`
-            <button class="close-button" @click=${this.onClose}>
-                <fa-icon icon="fa-light fa-xmark"></fa-icon>
-            </button>
-        `;
-    }
 
     render() {
         const {
