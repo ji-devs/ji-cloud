@@ -95,9 +95,13 @@ export class _ extends LitElement {
             targetAnchor,
         } = this;
 
+        console.log("noop: render");
+
         if (selfClosed) {
             return nothing;
         }
+
+        console.log("noop: render: not nothing");
 
         return html`
             <overlay-content
@@ -115,6 +119,15 @@ export class _ extends LitElement {
                 this.currTargetAnchor = targetAnchor;
             }}
             >
+                <tooltip-container
+                    style="display: none;"
+                    id="tooltip"
+                    .contentAnchor=${this.currContentAnchor}
+                    .targetAnchor=${this.currTargetAnchor}
+                >
+                    <section class="content">
+                    </section>
+                </tooltip-container>
             </overlay-content>
         `;
     }
