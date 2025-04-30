@@ -177,9 +177,7 @@ export class _ extends LitElement {
         this.killInstance();
     }
     private onGlobalMouseDown = (evt: MouseEvent) => {
-        console.log("onGlobalMouseDown");
         if (!evt.composedPath().includes(this)) {
-            console.log("onGlobalMouseDown: dispatching close");
             this.dispatchEvent(new Event("close"));
         }
     };

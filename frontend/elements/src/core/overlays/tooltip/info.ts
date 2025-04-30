@@ -240,7 +240,6 @@ export class _ extends LitElement {
         if (selfClosed) {
             return nothing;
         }
-        console.log("info: render");
 
         return html`
             <overlay-content

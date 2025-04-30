@@ -302,7 +302,6 @@ impl JigPlayer {
                                                     true => "overlay-tooltip-noop",
                                                     false => "overlay-tooltip-info",
                                                 };
-                                                log::info!("{}", tooltip);
                                                 html!(tooltip, {
                                                     .prop("centeredContent", true)
                                                     .prop("marginX", -16)

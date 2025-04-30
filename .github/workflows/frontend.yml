@@ -270,7 +270,7 @@ jobs:
   build-module-elements:
     runs-on: ubuntu-latest
     name: "[${{ needs.prepare.outputs.branch }}] Build - Module - Elements (${{matrix.app}}, ${{matrix.mode}})"
-    needs: [prepare, test]
+    needs: [prepare]
 
     strategy:
       matrix:
@@ -328,7 +328,7 @@ jobs:
         run: gsutil -m rsync -d -r frontend/elements/dist/module/${{ matrix.app }}/${{ matrix.mode }} gs://${{ env.STORAGE_BUCKET }}/module/${{ matrix.app }}/${{ matrix.mode }}/elements
 
   build-entry-elements:
-    needs: [prepare, test]
+    needs: [prepare]
     name: "[${{ needs.prepare.outputs.branch }}] Build - Entry - Elements (${{matrix.app}})"
     runs-on: ubuntu-latest
 
