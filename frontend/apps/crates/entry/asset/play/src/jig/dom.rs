@@ -327,7 +327,6 @@ impl JigPlayer {
                                                         }
                                                     }))
                                                     .event(clone!(state => move |_evt: events::Close| {
-                                                        log::info!("dom: close");
                                                         state.show_assist(false);
                                                     }))
                                                     .apply_if(module_assist.audio.is_some(), clone!(state, module_assist => move |dom| {
