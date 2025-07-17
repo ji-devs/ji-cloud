@@ -2,7 +2,7 @@
 ## BUILDER        ##
 ####################
 
-FROM clux/muslrust:stable-2025-05-20 AS pages-builder
+FROM  blackdex/rust-musl:x86_64-musl AS pages-builder
 
 # Add our source code.
 

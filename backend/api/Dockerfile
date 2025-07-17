@@ -2,7 +2,7 @@
 ## BUILDER        ##
 ####################
 
-FROM clux/muslrust:stable-2025-05-20 AS api-builder
+FROM  blackdex/rust-musl:x86_64-musl AS api-builder
 
 # Use crates.io sparse protocol
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
