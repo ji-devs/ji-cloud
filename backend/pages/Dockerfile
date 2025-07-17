@@ -19,7 +19,7 @@ RUN cargo build --release --no-default-features
 ## RELEASE        ##
 ####################
 
-FROM alpine:latest as release
+FROM alpine:latest AS release
 
 # Used at runtime
 ENV PROJECT_ID=ji-cloud
@@ -44,7 +44,7 @@ CMD ["./ji-cloud-pages", "release"]
 ## Sandbox        ##
 ####################
 
-FROM alpine:latest as sandbox
+FROM alpine:latest AS sandbox
 
 # Used at runtime
 ENV PROJECT_ID=ji-cloud-developer-sandbox

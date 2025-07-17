@@ -21,7 +21,7 @@ RUN cargo build --release --no-default-features
 ## Release        ##
 ####################
 
-FROM alpine:latest as release
+FROM alpine:latest AS release
 
 # Used at runtime
 ENV PROJECT_ID=ji-cloud
@@ -43,7 +43,7 @@ CMD ["./ji-cloud-api", "release"]
 ## Sandbox        ##
 ####################
 
-FROM alpine:latest as sandbox
+FROM alpine:latest AS sandbox
 
 # Used at runtime
 ENV PROJECT_ID=ji-cloud-developer-sandbox
@@ -67,7 +67,7 @@ CMD ["./ji-cloud-api", "sandbox"]
 ## Release (media) ##
 #####################
 
-FROM alpine:latest as release_media_watch
+FROM alpine:latest AS release_media_watch
 
 # Used at runtime
 ENV PROJECT_ID=ji-cloud
@@ -89,7 +89,7 @@ CMD ["./media-watch", "release"]
 ## Sandbox (media) ##
 #####################
 
-FROM alpine:latest as sandbox_media_watch
+FROM alpine:latest AS sandbox_media_watch
 
 # Used at runtime
 ENV PROJECT_ID=ji-cloud-developer-sandbox
