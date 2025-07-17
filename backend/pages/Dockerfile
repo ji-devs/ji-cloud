@@ -2,7 +2,7 @@
 ## BUILDER        ##
 ####################
 
-FROM clux/muslrust:stable AS pages-builder
+FROM clux/muslrust:stable-2025-05-20 AS pages-builder
 
 # Add our source code.
 
