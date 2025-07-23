@@ -2,7 +2,7 @@ use anyhow;
 use serde::Deserialize;
 use shared::domain::search::{ImageType, WebImageSearchItem, WebImageSearchResponse};
 
-const QUERY_TYPE: &str = "imageType";
+const QUERY_TYPE: &str = "image_type";
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -48,8 +48,9 @@ pub async fn get_images(
         .get("https://pixabay.com/api/")
         .query(&[("q", query)])
         .query(&[image_type])
-        .query(&[("safeSearch", "true")])
+        .query(&[("safesearch", "true")])
         .query(&[("key", key)])
+        .query(&[("per_page", "21")])
         .send()
         .await?
         .error_for_status()?

@@ -390,12 +390,6 @@ pub enum DevRoute {
     Scratch(StringId, String),
 }
 
-//Just for serializing across local routes
-#[derive(Serialize, Deserialize)]
-struct JsonQuery {
-    pub data: String, //json-encoded data as-needed
-}
-
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum OauthData {
     Google(OauthCode),
