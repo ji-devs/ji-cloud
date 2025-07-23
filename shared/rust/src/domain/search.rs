@@ -43,6 +43,12 @@ pub enum ImageType {
     Line = 3,
     /// Images with transparent backgrounds
     Transparent = 4,
+    /// All images
+    All = 5,
+    /// Illustration images
+    Illustration = 6,
+    /// Vector images
+    Vector = 7,
 }
 
 /// Image types used in query string
@@ -56,7 +62,15 @@ impl ImageType {
             Self::Photo => "Photo",
             Self::Line => "Line",
             Self::Transparent => "Transparent",
+            Self::All => "All",
+            Self::Illustration => "Illustration",
+            Self::Vector => "Vector",
         }
+    }
+
+    /// Returns the types that are enabled for the web image search.
+    pub fn enabled_types() -> Vec<ImageType> {
+        vec![Self::All, Self::Photo, Self::Illustration, Self::Vector]
     }
 }
 

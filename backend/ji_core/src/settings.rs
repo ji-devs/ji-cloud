@@ -87,7 +87,7 @@ pub struct RuntimeSettings {
     ///
     /// If missing, implies that bing searching is disabled.
     // todo: move this and make it runtime reloadable somehow (bing suggests rotating keys)
-    pub bing_search_key: Option<String>,
+    pub pixabay_search_key: Option<String>,
 
     remote_target: RemoteTarget,
 
@@ -121,7 +121,7 @@ impl RuntimeSettings {
         api_port: u16,
         pages_port: u16,
         media_watch_port: u16,
-        bing_search_key: Option<String>,
+        pixabay_search_key: Option<String>,
         google_api_key: Option<String>,
         google_oauth: Option<GoogleOAuth>,
         token_secret: Box<[u8; 32]>,
@@ -137,7 +137,7 @@ impl RuntimeSettings {
             media_watch_port,
             epoch: get_epoch(),
             remote_target,
-            bing_search_key,
+            pixabay_search_key,
             google_oauth,
             google_api_key,
             token_secret,
@@ -149,7 +149,7 @@ impl RuntimeSettings {
 
     pub(crate) fn with_env(
         remote_target: RemoteTarget,
-        bing_search_key: Option<String>,
+        pixabay_search_key: Option<String>,
         google_api_key: Option<String>,
         google_oauth: Option<GoogleOAuth>,
         token_secret: Box<[u8; 32]>,
@@ -175,7 +175,7 @@ impl RuntimeSettings {
             media_watch_port,
             epoch: get_epoch(),
             remote_target,
-            bing_search_key,
+            pixabay_search_key,
             google_oauth,
             google_api_key,
             token_secret,
@@ -837,7 +837,7 @@ impl SettingsManager {
                 Ok(Box::new(secret))
             })?;
 
-        let bing_search_key = self.get_optional_secret(keys::BING_SEARCH_KEY).await?;
+        let pixabay_search_key = self.get_optional_secret(keys::PIXABAY_SEARCH_KEY).await?;
 
         let google_api_key = self.get_optional_secret(keys::GOOGLE_API_KEY).await?;
 
@@ -859,7 +859,7 @@ impl SettingsManager {
 
         RuntimeSettings::with_env(
             self.remote_target,
-            bing_search_key,
+            pixabay_search_key,
             google_api_key,
             google_oauth,
             token_secret,

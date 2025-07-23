@@ -11,7 +11,6 @@ use futures_signals::{
 };
 use shared::domain::search::{ImageType, WebImageSearchItem};
 use std::{pin::Pin, rc::Rc};
-use strum::IntoEnumIterator;
 use utils::{paywall, prelude::*};
 
 const STR_SHOW_ONLY_BACKGROUNDS: &str = "Only background";
@@ -358,8 +357,8 @@ impl ImageSearch {
         html!("image-search-filters", {
             .prop("slot", "filters")
             .children(
-                ImageType::iter()
-                    .filter(|it| it != &ImageType::AnimatedGif)
+                ImageType::enabled_types()
+                    .into_iter()
                     .map(clone!(state => move |image_type| {
                         html!("image-search-style-option", {
                             .prop("slot", "style-options")

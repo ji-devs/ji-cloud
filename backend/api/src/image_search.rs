@@ -7,14 +7,16 @@ const QUERY_TYPE: &str = "imageType";
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Image {
+    #[serde(rename(deserialize = "previewURL"))]
     thumbnail_url: url::Url,
+    #[serde(rename(deserialize = "largeImageURL"))]
     content_url: url::Url,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct ImagesResponse {
-    value: Vec<Image>,
+    hits: Vec<Image>,
 }
 
 pub async fn get_images(
@@ -31,6 +33,9 @@ pub async fn get_images(
             ImageType::Photo => ImageType::Photo.to_str(),
             ImageType::Line => ImageType::Line.to_str(),
             ImageType::Transparent => ImageType::Transparent.to_str(),
+            ImageType::All => ImageType::All.to_str(),
+            ImageType::Illustration => ImageType::Illustration.to_str(),
+            ImageType::Vector => ImageType::Vector.to_str(),
         };
 
         (QUERY_TYPE, im_type)
@@ -38,14 +43,13 @@ pub async fn get_images(
         ("", "")
     };
 
-    // https://docs.microsoft.com/en-us/bing/search-apis/bing-image-search/reference/endpoints
-    // https://docs.microsoft.com/en-us/bing/search-apis/bing-image-search/reference/query-parameters
+    // https://pixabay.com/api/docs/#api_search_images
     let res = reqwest::Client::new()
-        .get("https://api.bing.microsoft.com/v7.0/images/search")
+        .get("https://pixabay.com/api/")
         .query(&[("q", query)])
         .query(&[image_type])
-        .query(&[("safeSearch", "strict")])
-        .header("Ocp-Apim-Subscription-Key", key)
+        .query(&[("safeSearch", "true")])
+        .query(&[("key", key)])
         .send()
         .await?
         .error_for_status()?
@@ -54,7 +58,7 @@ pub async fn get_images(
 
     let res = WebImageSearchResponse {
         images: res
-            .value
+            .hits
             .into_iter()
             .map(|it| WebImageSearchItem {
                 thumbnail_url: it.thumbnail_url,
