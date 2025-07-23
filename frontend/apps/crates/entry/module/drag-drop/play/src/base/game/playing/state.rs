@@ -110,7 +110,7 @@ impl InteractiveItem {
     pub fn get_hit_source(
         &self,
         transform_override: Option<SourceTransformOverride>,
-    ) -> Option<StickerHitSource> {
+    ) -> Option<StickerHitSource<'_>> {
         self.size.get_cloned().map(|size| {
             let transform_override = transform_override.map(|t| match t {
                 SourceTransformOverride::Current => {
