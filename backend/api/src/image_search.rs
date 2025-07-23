@@ -26,21 +26,21 @@ pub async fn get_images(
 ) -> anyhow::Result<WebImageSearchResponse> {
     // returns tuple if there is a valid user input,
     // otherwise empty query for image type field
-    let image_type: (&str, &str) = if let Some(image) = image_type {
+    let image_type: (&str, String) = if let Some(image) = image_type {
         let im_type = match image {
-            ImageType::Clipart => ImageType::Clipart.to_str(),
-            ImageType::AnimatedGif => ImageType::AnimatedGif.to_str(),
-            ImageType::Photo => ImageType::Photo.to_str(),
-            ImageType::Line => ImageType::Line.to_str(),
-            ImageType::Transparent => ImageType::Transparent.to_str(),
-            ImageType::All => ImageType::All.to_str(),
-            ImageType::Illustration => ImageType::Illustration.to_str(),
-            ImageType::Vector => ImageType::Vector.to_str(),
+            ImageType::Clipart => ImageType::Clipart.to_str().to_lowercase(),
+            ImageType::AnimatedGif => ImageType::AnimatedGif.to_str().to_lowercase(),
+            ImageType::Photo => ImageType::Photo.to_str().to_lowercase(),
+            ImageType::Line => ImageType::Line.to_str().to_lowercase(),
+            ImageType::Transparent => ImageType::Transparent.to_str().to_lowercase(),
+            ImageType::All => ImageType::All.to_str().to_lowercase(),
+            ImageType::Illustration => ImageType::Illustration.to_str().to_lowercase(),
+            ImageType::Vector => ImageType::Vector.to_str().to_lowercase(),
         };
 
         (QUERY_TYPE, im_type)
     } else {
-        ("", "")
+        ("", "".to_string())
     };
 
     // https://pixabay.com/api/docs/#api_search_images
