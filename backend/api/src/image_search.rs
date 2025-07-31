@@ -50,7 +50,7 @@ pub async fn get_images(
         .query(&[image_type])
         .query(&[("safesearch", "true")])
         .query(&[("key", key)])
-        .query(&[("per_page", "21")])
+        .query(&[("per_page", "200")])
         .send()
         .await?
         .error_for_status()?
