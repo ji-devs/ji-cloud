@@ -16,15 +16,13 @@ const STR_JIGS_SONGS = "Songs";
 const STR_PRODUCT_TITLE = "Product";
 const STR_PRODUCT_MANAGE_CLASSROOM = "Manage classroom";
 const STR_PRODUCT_CREATE_ACTIVITIES = "Create activities";
-const STR_PRODUCT_JOIN_COMMUNITY = "Join community";
-const STR_JIGZI_ROADMAP = "Jigzi Roadmap";
+const STR_PRODUCT_JOIN_COMMUNITY = "Jigzi community";
 
 const STR_HELP_TITLE = "Help";
 const STR_HELP_SUPPORT = "Support & FAQ";
 const STR_HELP_TOUR = "Quick tour";
 const STR_HELP_TUTORIALS = "Ji Tutorials";
 const STR_HELP_WEBINARS = "Online webinars";
-const STR_HELP_ACCESSIBILITY = "Accessibility";
 const STR_ACCESSIBILITY_ALERT =
     "We are working toward making JIGZI easy to access for children of all abilities.";
 
@@ -47,14 +45,10 @@ const STR_DONATE = "Donate";
 const STR_SERVICES_TITLE = "Products & Services";
 const STR_SERVICES_TEACHERS = "Teachers";
 const STR_SERVICES_PARENTS = "Parents";
-const STR_SERVICES_BITES = "Ji Bytes";
 const STR_SERVICES_PRIME = "Ji Prime";
-const STR_SERVICES_TAP = "Ji Tap";
 const STR_SERVICES_STUDIO = "Ji Studio";
 const STR_SERVICES_COLLECTION = "The Ji Collection";
 const STR_SERVICES_J_STEM = "J-STEM";
-const STR_SERVICES_BLOG = "Ji Blog";
-const STR_SERVICES_JOBS = "Jobs";
 
 const STR_PRIVACY = "Privacy Policy";
 const STR_TERMS = "Terms & Conditions";
@@ -251,7 +245,7 @@ export class _ extends LitElement {
                             <h4>${STR_PRODUCT_TITLE}</h4>
                             <ul>
                                 <li>
-                                    <a href="${COMING_SOON_ALERT}" target="_top">
+                                    <a href="/classroom/codes" target="_top">
                                         ${STR_PRODUCT_MANAGE_CLASSROOM}
                                     </a>
                                 </li>
@@ -265,20 +259,16 @@ export class _ extends LitElement {
                                         ${STR_PRODUCT_JOIN_COMMUNITY}
                                     </a>
                                 </li>
-                                <li>
-                                    <a href="https://www.jewishinteractive.org/flipbook/index.html?page=1"
-                                        target="_blank">${STR_JIGZI_ROADMAP}</a>
-                                </li>
                             </ul>
                         </div>
                         <div class="column">
                             <h4>${STR_HELP_TITLE}</h4>
                             <ul>
                                 <li>
-                                    <a href="mailto:info@jigzi.org" target="_top">${STR_HELP_SUPPORT}</a>
+                                    <a href="/home/help" target="_top">${STR_HELP_SUPPORT}</a>
                                 </li>
                                 <li>
-                                    <a href="${COMING_SOON_ALERT}" target="_top">
+                                    <a href="https://youtu.be/QTqqS_fnfX8" target="_top">
                                         ${STR_HELP_TOUR}
                                     </a>
                                 </li>
@@ -290,11 +280,6 @@ export class _ extends LitElement {
                                 <li>
                                     <a href="https://www.jewishinteractive.org/jigzi-demo-sessions/" target="_blank">
                                         ${STR_HELP_WEBINARS}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a @click="${this.accessibilityClicked}" target="_top">
-                                        ${STR_HELP_ACCESSIBILITY}
                                     </a>
                                 </li>
                             </ul>
@@ -378,15 +363,8 @@ export class _ extends LitElement {
                                         target="_blank">${STR_SERVICES_PARENTS}</a>
                                 </li>
                                 <li>
-                                    <a href="https://bytes.jikids.org/" target="_blank">${STR_SERVICES_BITES}</a>
-                                </li>
-                                <li>
                                     <a href="https://www.jewishinteractive.org/ji-prime-initiatives/"
                                         target="_blank">${STR_SERVICES_PRIME}</a>
-                                </li>
-                                <li>
-                                    <a href="https://www.jewishinteractive.org/ji-tap-schools/"
-                                        target="_blank">${STR_SERVICES_TAP}</a>
                                 </li>
                                 <li>
                                     <a href="https://www.jewishinteractive.org/ji-studio-5/"
@@ -399,13 +377,6 @@ export class _ extends LitElement {
                                 <li>
                                     <a href="https://www.jewishinteractive.org/ji-products-services/jstem/"
                                         target="_blank">${STR_SERVICES_J_STEM}</a>
-                                </li>
-                                <li>
-                                    <a href="https://info.jewishinteractive.org/blog" target="_blank">${STR_SERVICES_BLOG}</a>
-                                </li>
-                                <li>
-                                    <a href="https://www.jewishinteractive.org/positions-available-at-ji/"
-                                        target="_blank">${STR_SERVICES_JOBS}</a>
                                 </li>
                             </ul>
                         </div>
