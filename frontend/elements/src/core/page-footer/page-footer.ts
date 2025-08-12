@@ -21,7 +21,7 @@ const STR_PRODUCT_JOIN_COMMUNITY = "Jigzi community";
 const STR_HELP_TITLE = "Help";
 const STR_HELP_SUPPORT = "Support & FAQ";
 const STR_HELP_TOUR = "Quick tour";
-const STR_HELP_TUTORIALS = "Ji Tutorials";
+const STR_HELP_TUTORIALS = "Jigzi tutorials";
 const STR_HELP_WEBINARS = "Online webinars";
 const STR_ACCESSIBILITY_ALERT =
     "We are working toward making JIGZI easy to access for children of all abilities.";
@@ -268,12 +268,12 @@ export class _ extends LitElement {
                                     <a href="/home/help" target="_top">${STR_HELP_SUPPORT}</a>
                                 </li>
                                 <li>
-                                    <a href="https://youtu.be/QTqqS_fnfX8" target="_top">
+                                    <a href="https://youtu.be/QTqqS_fnfX8" target="_blank">
                                         ${STR_HELP_TOUR}
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="https://www.jewishinteractive.org/pd-ji/" target="_blank">
+                                    <a href="https://www.jewishinteractive.org/how-to-jigzi/" target="_blank">
                                         ${STR_HELP_TUTORIALS}
                                     </a>
                                 </li>
