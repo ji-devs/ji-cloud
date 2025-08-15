@@ -4,7 +4,7 @@ Clone repo
 
 `cd ji-cloud`
 
-`nvm install v20 && nvm alias default v20`
+`nvm install v15 && nvm alias default v15`
 
 `rustup default nightly && rustup update`
  
