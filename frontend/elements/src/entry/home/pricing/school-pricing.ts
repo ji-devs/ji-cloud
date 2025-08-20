@@ -78,12 +78,11 @@ export class _ extends LitElement {
                 display: none;
             }
             .price-line {
-                display: grid;
-                grid-template-columns: 1fr auto 1fr;
+                display: flex;
                 gap: 8px;
+                align-items: center;
             }
             .price {
-                grid-column: 2;
                 font-size: 38px;
                 font-weight: 700;
                 color: var(--dark-gray-6);
@@ -94,7 +93,8 @@ export class _ extends LitElement {
                 gap: 16px;
             }
             .price-original {
-                grid-column: 3;
+                display: flex;
+                align-items: center;
                 font-size: 16px;
                 font-weight: 600;
                 color: var(--dark-gray-3);
