@@ -34,11 +34,14 @@ impl Home {
             }))
             .child(search_section::render(state.clone(), is_search))
             .child(html!("empty-fragment", {
+                // remove slight gap
+                .style("display", "block") 
+                .style("line-height", "0")
                 .child_signal(state.mode.signal_cloned().map(move |mode| {
                     match mode {
                         HomePageMode::Home => {
                             Some(html!("iframe", {
-                                .prop("src", "https://corinne4371.wixstudio.io/basic/blank")
+                                .prop("src", "https://corinne4371.wixstudio.io/basic/blank") // wix
                                 .style("width", "100%")
                                 .style("height", "200px")
                                 .style("border", "0")
@@ -55,9 +58,9 @@ impl Home {
                     HomePageMode::Search(_) => vec![],
                     HomePageMode::Home => {
                         let mut divs = vec![];
-                        divs.push(state.render_strip("Trending JIGs", "trending", state.trending.read_only()));
-                        divs.push(state.render_strip("Top picks", "featured", state.featured.read_only()));
                         if is_user_set() {
+                            divs.push(state.render_strip("Trending JIGs", "trending", state.trending.read_only()));
+                            divs.push(state.render_strip("Top picks", "featured", state.featured.read_only()));
                             divs.push(state.render_strip("My likes", "liked", state.liked.read_only()));
                             divs.push(state.render_strip("Recently played", "played", state.played.read_only()));
                         }
@@ -66,6 +69,7 @@ impl Home {
                 }
             })).to_signal_vec())
             .child(html!("empty-fragment", {
+                
                 .child_signal(state.mode.signal_cloned().map(move |mode| {
                     match mode {
                         HomePageMode::Home => {
