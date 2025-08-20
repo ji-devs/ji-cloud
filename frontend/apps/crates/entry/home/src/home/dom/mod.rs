@@ -34,9 +34,6 @@ impl Home {
             }))
             .child(search_section::render(state.clone(), is_search))
             .child(html!("empty-fragment", {
-                // remove slight gap
-                .style("display", "block") 
-                .style("line-height", "0")
                 .child_signal(state.mode.signal_cloned().map(move |mode| {
                     match mode {
                         HomePageMode::Home => {
@@ -71,7 +68,7 @@ impl Home {
             .child(html!("empty-fragment", {
                 // there's a 10px top margin in the iframe content
                 .style("display", "block")
-                .style("transform", "translateY(-10px)")
+                .style("transform", "translateY(-16px)")
                 .child_signal(state.mode.signal_cloned().map(move |mode| {
                     match mode {
                         HomePageMode::Home => {
