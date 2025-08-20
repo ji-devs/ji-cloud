@@ -69,7 +69,6 @@ impl Home {
                 }
             })).to_signal_vec())
             .child(html!("empty-fragment", {
-                
                 .child_signal(state.mode.signal_cloned().map(move |mode| {
                     match mode {
                         HomePageMode::Home => {
