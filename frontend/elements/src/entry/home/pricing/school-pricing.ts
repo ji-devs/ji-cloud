@@ -17,6 +17,10 @@ export class _ extends LitElement {
                 color: var(--dark-blue-4);
                 margin: 0;
             }
+            .plans-wrapper {
+                display: flex;
+                flex-direction: column;
+            }
             .options-wrapper {
                 height: 48px;
                 width: 300px;
@@ -117,6 +121,10 @@ export class _ extends LitElement {
                 font-weight: 500;
                 margin-top: 12px;
             }
+            .contact-line {
+                font-size: 12px;
+                margin-bottom: 12px;
+            }
         `];
     }
 
@@ -141,6 +149,9 @@ export class _ extends LitElement {
     @property({ type: Number })
     school_level_4_max?: number;
 
+    @property({ type: Number })
+    school_unlimited_max?: number;
+
     @property()
     billing_interval: string = "";
 
@@ -163,37 +174,43 @@ export class _ extends LitElement {
                 }
             </style>
             <h3>How many Teacher Pro accounts?</h3>
-            <div class="options-wrapper">
-                <div class="indicator-wrapper">
-                    <div class="indicator"></div>
+            <div class="plans-wrapper">
+                <div class="options-wrapper">
+                    <div class="indicator-wrapper">
+                        <div class="indicator"></div>
+                    </div>
+                    <div class="options">
+                        <label>
+                            <span class="label-top">up to</span>
+                            <span class="count">${this.school_level_1_max}</span>
+                            <input name="count" type="radio" @change=${() => this.onChange(0)}>
+                        </label>
+                        <label>
+                            <span class="label-top">up to</span>
+                            <span class="count">${this.school_level_2_max}</span>
+                            <input name="count" type="radio" @change=${() => this.onChange(1)}>
+                        </label>
+                        <label>
+                            <span class="label-top">up to</span>
+                            <span class="count">${this.school_level_3_max}</span>
+                            <input name="count" type="radio" @change=${() => this.onChange(2)}>
+                        </label>
+                        <label>
+                            <span class="label-top">up to</span>
+                            <span class="count">${this.school_level_4_max}</span>
+                            <input name="count" type="radio" @change=${() => this.onChange(3)}>
+                        </label>
+                        <label>
+                            <span class="label-top">up to</span>
+                            <span class="count">${this.school_unlimited_max}</span>
+                            <input name="count" type="radio" @change=${() => this.onChange(4)}>
+                        </label>
+                    </div>
                 </div>
-                <div class="options">
-                    <label>
-                        <span class="label-top">up to</span>
-                        <span class="count">${this.school_level_1_max}</span>
-                        <input name="count" type="radio" @change=${() => this.onChange(0)}>
-                    </label>
-                    <label>
-                        <span class="label-top">up to</span>
-                        <span class="count">${this.school_level_2_max}</span>
-                        <input name="count" type="radio" @change=${() => this.onChange(1)}>
-                    </label>
-                    <label>
-                        <span class="label-top">up to</span>
-                        <span class="count">${this.school_level_3_max}</span>
-                        <input name="count" type="radio" @change=${() => this.onChange(2)}>
-                    </label>
-                    <label>
-                        <span class="label-top">up to</span>
-                        <span class="count">${this.school_level_4_max}</span>
-                        <input name="count" type="radio" @change=${() => this.onChange(3)}>
-                    </label>
-                    <label>
-                        <span class="label-top">More than</span>
-                        <span class="count">${this.school_level_4_max}+</span>
-                        <input name="count" type="radio" @change=${() => this.onChange(4)}>
-                    </label>
-                </div>
+                
+            </div>
+            <div class="contact-line">
+                <div class="contact-line-text">Contact us if you need more than ${this.school_unlimited_max} accounts.</div>
             </div>
             <div class="price-line">
                 <div class="price">${price(
