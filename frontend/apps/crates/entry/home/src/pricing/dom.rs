@@ -236,6 +236,7 @@ impl Pricing {
                         .prop("school_level_2_max", billing::PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT)
                         .prop("school_level_3_max", billing::PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT)
                         .prop("school_level_4_max", billing::PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
+                        .prop("school_unlimited_max", billing::PLAN_SCHOOL_UNLIMITED_TEACHER_COUNT)
                         .prop_signal("plan_price", map_ref! {
                             let selected_index = selected_index.signal(),
                             let billing_interval = state.billing_interval.signal() => move {

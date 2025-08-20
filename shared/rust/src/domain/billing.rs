@@ -26,6 +26,8 @@ pub const PLAN_SCHOOL_LEVEL_2_TEACHER_COUNT: i64 = 10;
 pub const PLAN_SCHOOL_LEVEL_3_TEACHER_COUNT: i64 = 15;
 /// Level 4 max teacher count
 pub const PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT: i64 = 20;
+/// Level 5 max teacher count
+pub const PLAN_SCHOOL_UNLIMITED_TEACHER_COUNT: i64 = 30;
 
 /// Individual plan trial period in days
 pub const INDIVIDUAL_TRIAL_PERIOD: i64 = 7;
@@ -820,8 +822,8 @@ impl PlanType {
                 PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
             ),
             Self::SchoolUnlimitedMonthly => formatcp!(
-                "School - More than {} teachers - Monthly",
-                PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
+                "School - Up to {} teachers - Monthly",
+                PLAN_SCHOOL_UNLIMITED_TEACHER_COUNT
             ),
             Self::SchoolLevel1Annually => formatcp!(
                 "School - Up to {} teachers",
@@ -840,8 +842,8 @@ impl PlanType {
                 PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
             ),
             Self::SchoolUnlimitedAnnually => formatcp!(
-                "School - More than {} teachers",
-                PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT
+                "School - Up to {} teachers",
+                PLAN_SCHOOL_UNLIMITED_TEACHER_COUNT
             ),
         }
     }
@@ -865,7 +867,7 @@ impl PlanType {
                 formatcp!("Up to {} teachers", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
             }
             Self::SchoolUnlimitedMonthly | Self::SchoolUnlimitedAnnually => {
-                formatcp!("More than {} teachers", PLAN_SCHOOL_LEVEL_4_TEACHER_COUNT)
+                formatcp!("Up to {} teachers", PLAN_SCHOOL_UNLIMITED_TEACHER_COUNT)
             }
         }
     }
