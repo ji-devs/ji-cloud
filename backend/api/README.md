@@ -16,12 +16,12 @@ docker run -p 9000:9000 \
 run postgres database
 ```bash
 docker run -d \
-                                                  --name postgres \
-                                                  -p 5432:5432 \
-                                                  -e POSTGRES_PASSWORD=password \
-                                                  -e POSTGRES_DB=ji-jicloud-dev \
-                                                  --restart=always \
-                                                  postgres:12
+  --name postgres \
+  -p 5432:5432 \
+  -e POSTGRES_PASSWORD=password \
+  -e POSTGRES_DB=ji-jicloud-dev \
+  --restart=always \
+  postgres:17
 
 ```
 note: no redis necessary for this API
@@ -59,7 +59,7 @@ ulimit -nS 65000
 ```
 Optional: Run postgres in memory
 ```bash
-docker run --name postgres12 --tmpfs /var/lib/postgresql/data -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres:12 -c max_connections=250
+docker run --name postgres17 --tmpfs /var/lib/postgresql/data -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres:17 -c max_connections=250
 ```
 
 To run tests:
