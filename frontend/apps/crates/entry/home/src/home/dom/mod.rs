@@ -68,7 +68,7 @@ impl Home {
             .child(html!("empty-fragment", {
                 // there's a 10px top margin in the iframe content
                 .style("display", "block")
-                .style("transform", "translateY(-16px)")
+                .style("transform", "translateY(-10px)")
                 .child_signal(state.mode.signal_cloned().map(move |mode| {
                     match mode {
                         HomePageMode::Home => {
