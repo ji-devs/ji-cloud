@@ -13,7 +13,7 @@ pub const EVENTARC_AUDITLOG_SERVICE_NAME: &str = "cloudaudit.googleapis.com";
 pub const DB_INSTANCE_SANDBOX: &str =
     "ji-cloud-developer-sandbox:europe-west1:ji-cloud-004-sandbox";
 /// Release target
-pub const DB_INSTANCE_RELEASE: &str = "ji-cloud:europe-west1:ji-cloud-002";
+pub const DB_INSTANCE_RELEASE: &str = "ji-cloud:europe-west1:ji-cloud-003";
 /// Maximum # of DB pools
 pub const DB_POOL_CONNECTIONS: u32 = 20;
 /// User and DB owner
