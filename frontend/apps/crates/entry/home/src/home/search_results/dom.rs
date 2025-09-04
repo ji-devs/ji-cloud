@@ -36,6 +36,7 @@ impl SearchResults {
             .prop_signal("jigCount", state.jigs.total.signal())
             .prop_signal("playlistCount", state.playlists.total.signal())
             .prop_signal("resourceCount", state.resources.total.signal())
+            .prop("isRated", state.rated_only)
             .prop("query", &state.query)
             .child(state.jigs.home_state.search_bar.render_rated_toggle(Rc::new(clone!(state => move || {
                 search(&state.jigs.home_state)
