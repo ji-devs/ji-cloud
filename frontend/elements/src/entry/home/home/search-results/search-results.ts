@@ -59,6 +59,9 @@ export class _ extends LitElement {
     @property()
     query: string = "";
 
+    @property()
+    isRated: boolean = true;
+
     @property({ type: Number })
     jigCount: number = 0;
 
@@ -130,8 +133,10 @@ export class _ extends LitElement {
                 ${
                     this.query.trim() !== "" ? html`
                         ${STR_FOR}
-                        <span class="query">${this.query}</span>.
-                        Try selecting <strong>All</strong> instead of <strong>Top Rated</strong>
+                        <span class="query">"${this.query}"</span>.
+                        ${this.isRated ? html`
+                            <br />Try selecting <strong>All</strong> instead of <strong>Top Rated</strong>`
+                            : nothing}
                     ` : nothing
                 }
             </h1>
