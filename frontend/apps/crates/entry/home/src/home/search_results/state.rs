@@ -25,7 +25,7 @@ impl SearchResults {
             .search_bar
             .search_selected
             .rated_only
-            .get_cloned();
+            .get();
 
         Rc::new(Self {
             loading: Mutable::new(loading),
