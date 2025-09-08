@@ -12,7 +12,7 @@ use super::{super::state::Home, search_results_section::SearchResultsSection};
 pub struct SearchResults {
     pub loading: Mutable<bool>,
     pub query: String,
-    pub rated_only: bool, 
+    pub rated_only: bool,
     pub jigs: Rc<SearchResultsSection>,
     pub resources: Rc<SearchResultsSection>,
     pub playlists: Rc<SearchResultsSection>,
@@ -21,7 +21,11 @@ pub struct SearchResults {
 impl SearchResults {
     pub fn new(home_state: &Rc<Home>, loading: bool) -> Rc<Self> {
         let query = home_state.search_bar.search_selected.query.get_cloned();
-        let rated_only = home_state.search_bar.search_selected.rated_only.get_cloned();
+        let rated_only = home_state
+            .search_bar
+            .search_selected
+            .rated_only
+            .get_cloned();
 
         Rc::new(Self {
             loading: Mutable::new(loading),
