@@ -465,8 +465,8 @@ export class _ extends LitElement {
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `,
                             individuals: html`
-                                <div class="cell">Limited to 3 JIGs</div>
-                                <div class="cell">Limited to 3 JIGs</div>
+                                <div class="cell">Limited to 5 JIGs</div>
+                                <div class="cell">Limited to 5 JIGs</div>
                                 <div class="cell"><fa-icon icon="fa-solid fa-check"></fa-icon></div>
                             `
                         })}
