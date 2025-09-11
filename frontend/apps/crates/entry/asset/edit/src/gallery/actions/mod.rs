@@ -108,8 +108,8 @@ impl Gallery {
                 if !can_create {
                     paywall::dialog_limit(
                         "
-                        Wanting to create more jigs?
-                        Upgrade now to create UNLIMITED jigs.
+                        Wanting to create more JIGs?
+                        Upgrade now to create UNLIMITED JIGs.
                     ",
                     );
                 }
