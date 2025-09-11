@@ -36,7 +36,6 @@ lazy_static! {
     pub static ref EMAIL_LANGUAGES: Vec<Language> = vec![
         Language(LANGUAGE_ENGLISH_CODE, STR_LANGUAGE_ENGLISH),
         Language(LANGUAGE_HEBREW_CODE, STR_LANGUAGE_HEBREW),
-        Language(LANGUAGE_FRENCH_CODE, STR_LANGUAGE_FRENCH),
     ];
     pub static ref JIG_LANGUAGES: Vec<Language> = vec![
         Language(LANGUAGE_ENGLISH_CODE, STR_LANGUAGE_ENGLISH),
