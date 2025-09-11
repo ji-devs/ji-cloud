@@ -25,8 +25,8 @@ pub fn render_studio() -> Dom {
                     if !paywall::can_create_jig(jig_count) {
                         paywall::dialog_limit(
                             "
-                            Wanting to create more jigs?
-                            Upgrade now to create UNLIMITED jigs.
+                            Wanting to create more JIGs?
+                            Upgrade now to create UNLIMITED JIGs.
                         ",
                         );
                         return;
