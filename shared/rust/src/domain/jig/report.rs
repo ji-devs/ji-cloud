@@ -104,7 +104,7 @@ impl JigReportType {
             JigReportType::CopyrightInfringement => "Copyright Infringement",
             JigReportType::Spam => "Spam",
             JigReportType::Privacy => "Privacy",
-            JigReportType::JiTapGameNotPlaying => "Ji Tap Game Not Playing",
+            JigReportType::JiTapGameNotPlaying => "JIG Not Playing",
             JigReportType::Other => "Other",
         }
     }
