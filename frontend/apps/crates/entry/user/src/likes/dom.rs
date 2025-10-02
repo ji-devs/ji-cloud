@@ -21,6 +21,7 @@ impl Likes {
                 .style("height", "86px")
                 .style("background-color", "var(--light-blue-6)")
                 .style("margin", "0px")
+                .style("margin-bottom", "20px")
                 .style("display", "grid")
                 .style("align-items", "center")
                 .style("justify-content", "start")
@@ -30,8 +31,8 @@ impl Likes {
                 .style("color", "var(--main-yellow)")
                 .text("My likes")
             }))
-            .child(state.jigs.render())
             .child(state.playlists.render())
+            .child(state.jigs.render())
             .child(state.resources.render())
             .child_signal(state.play_asset.signal_cloned().map(clone!(state => move |play_asset| {
                 play_asset.map(|asset_id| {
