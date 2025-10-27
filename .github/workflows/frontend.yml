@@ -46,7 +46,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2025-08-15
+          toolchain: nightly-2025-06-01
           components: rustfmt,rust-src
           targets: wasm32-unknown-unknown
 
@@ -88,7 +88,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2025-08-15
+          toolchain: nightly-2025-06-01
           components: rust-src
           targets: wasm32-unknown-unknown
 
@@ -161,7 +161,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2025-08-15
+          toolchain: nightly-2025-06-01
           components: rust-src
           targets: wasm32-unknown-unknown
 
