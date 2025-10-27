@@ -198,6 +198,7 @@ script = ["npm run build:watch"]
 ## BUILD - CI DEPS    ##
 ########################
 [tasks.ci-deps]
+toolchain = "nightly-2025-09-15"
 install_crate = { rustup_component_name = "rust-src" }
 run_task = {name = [
     "npm-install-app",
