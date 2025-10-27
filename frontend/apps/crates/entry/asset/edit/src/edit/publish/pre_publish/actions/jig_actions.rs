@@ -3,6 +3,7 @@ use shared::{
     domain::jig::{JigGetDraftPath, JigId, JigPublishPath, JigResponse, JigUpdateDraftDataPath},
     error::IntoAnyhow,
 };
+use utils::init::user::refresh;
 use utils::prelude::ApiEndpointExt;
 
 use utils::editable_asset::EditableJig;
@@ -17,6 +18,7 @@ pub async fn save_jig(jig: &EditableJig) -> anyhow::Result<()> {
 
 pub async fn publish_jig(jig_id: JigId) -> anyhow::Result<JigResponse> {
     jig::Publish::api_with_auth(JigPublishPath(jig_id), None).await?;
+    refresh().await;
 
     let jig = jig::GetDraft::api_with_auth(JigGetDraftPath(jig_id), None).await?;
 

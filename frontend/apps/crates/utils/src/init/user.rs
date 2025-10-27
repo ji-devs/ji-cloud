@@ -27,6 +27,14 @@ pub(crate) async fn init() {
     }
 }
 
+pub async fn refresh() {
+    let result = Profile::api_with_auth(GetProfilePath(), None).await;
+
+    if let Ok(updated_profile) = result {
+        get_user_mutable().set(Some(updated_profile.clone()));
+    }
+}
+
 pub fn get_user_mutable() -> Mutable<Option<UserProfile>> {
     USER.get().cloned().unwrap_ji()
 }

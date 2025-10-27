@@ -17,6 +17,8 @@ use std::rc::Rc;
 use strum::IntoEnumIterator;
 use utils::asset::{AssetPlayerOptions, ResourceContentExt};
 use utils::init::analytics;
+use utils::init::user::with_user;
+use utils::paywall;
 use utils::prelude::*;
 
 const STR_EDIT: &str = "Edit";
@@ -234,6 +236,16 @@ impl Gallery {
                                                     .prop("icon", "duplicate")
                                                     .text(STR_DUPLICATE)
                                                     .event(clone!(state, asset_id => move |_: events::Click| {
+                                                        let jig_count = with_user(|user| user.jig_count).unwrap_or(0);
+                                                        if !paywall::can_create_jig(jig_count) {
+                                                            paywall::dialog_limit(
+                                                                "
+                                                                Wanting to create more JIGs?
+                                                                Upgrade now to create UNLIMITED JIGs.
+                                                            ",
+                                                            );
+                                                            return;
+                                                        }
                                                         state.copy_asset(asset_id);
                                                     }))
                                                 }),

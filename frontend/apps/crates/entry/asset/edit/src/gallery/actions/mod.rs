@@ -187,6 +187,8 @@ impl Gallery {
                 },
             };
 
+            refresh().await;
+
             match result {
                 Ok(_) => {
                     state.assets.lock_mut().retain(|asset| {
