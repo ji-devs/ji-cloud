@@ -34,13 +34,13 @@ env_files = ["../../.env"]
 [tasks.local-port-main]
 script_runner = "@duckscript"
 script = '''
-set_env APP_PORT 4104 
+set_env APP_PORT 4104
 '''
 
 [tasks.local-port-iframe]
 script_runner = "@duckscript"
 script = '''
-set_env APP_PORT 4105 
+set_env APP_PORT 4105
 '''
 
 ##########################
@@ -51,42 +51,42 @@ set_env APP_PORT 4105
 [tasks.sandbox]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME ${1} 
+set_env APP_NAME ${1}
 cm_run_task build-sandbox
 '''
 
 [tasks.release]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME ${1} 
+set_env APP_NAME ${1}
 cm_run_task build-release
 '''
 
 [tasks.local-main]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME ${1} 
+set_env APP_NAME ${1}
 cm_run_task build-local-main
 '''
 
 [tasks.local-iframe]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME ${1} 
+set_env APP_NAME ${1}
 cm_run_task build-local-iframe
 '''
 
 [tasks.local-main-no-media]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME ${1} 
+set_env APP_NAME ${1}
 cm_run_task build-local-main-no-media
 '''
 
 [tasks.local-iframe-with-media]
 script_runner = "@duckscript"
 script = '''
-set_env APP_NAME ${1} 
+set_env APP_NAME ${1}
 cm_run_task build-local-iframe-with-media
 '''
 
@@ -198,6 +198,7 @@ script = ["npm run build:watch"]
 ## BUILD - CI DEPS    ##
 ########################
 [tasks.ci-deps]
+install_crate = { rustup_component_name = "rust-src" }
 run_task = {name = [
     "npm-install-app",
     "npm-install-build-utils",
