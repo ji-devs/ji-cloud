@@ -8,7 +8,7 @@ use components::{
 };
 use dominator::{clone, html, link, Dom};
 use futures_signals::map_ref;
-use futures_signals::signal::SignalExt;
+use futures_signals::signal::{Mutable, SignalExt};
 use futures_signals::signal_vec::SignalVecExt;
 use gloo::utils::window;
 use shared::domain::asset::{Asset, AssetId};
@@ -187,8 +187,10 @@ impl Gallery {
                                     bottom_indicator: AssetCardBottomIndicator::Status,
                                     dense: true,
                                     menu: Some(Rc::new(clone!(state, resource_link => move || {
+                                        let is_open = Mutable::new(false);
                                         html!("menu-kebab", {
                                             .prop("slot", "menu")
+                                            .prop_signal("visible", is_open.signal_cloned())
                                             .child(html!("menu-line", {
                                                 .prop("icon", "edit")
                                                 .text(STR_EDIT)
@@ -236,6 +238,7 @@ impl Gallery {
                                                     .prop("icon", "duplicate")
                                                     .text(STR_DUPLICATE)
                                                     .event(clone!(state, asset_id => move |_: events::Click| {
+                                                        is_open.set(false); // Not using set_neq to ensure the menu is closed even if the previous value was false
                                                         let jig_count = with_user(|user| user.jig_count).unwrap_or(0);
                                                         if !paywall::can_create_jig(jig_count) {
                                                             paywall::dialog_limit(
