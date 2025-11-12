@@ -760,6 +760,10 @@ pub struct PatchProfileAdminDataRequest {
     #[serde(deserialize_with = "super::deserialize_optional_field")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub badge: Option<Option<UserBadge>>,
+
+    /// Users email
+    #[serde(default)]
+    pub email: String,
 }
 
 make_path_parts!(CreateUserPath => "/v1/user");

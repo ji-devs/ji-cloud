@@ -14538,6 +14538,19 @@
     },
     "query": "\nselect published_at as \"published_at?\"\nfrom course\nwhere id = $1\n    "
   },
+  "d00a288a6caa9db9a2d8ffcb73ee2f6e9a0c2cf46dfb06190fc372e0a41e9a10": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text"
+        ]
+      }
+    },
+    "query": "\nupdate user_email\nset email = $2::text,\nupdated_at = now()\nwhere user_id = $1\n    "
+  },
   "d07feb752f409708df595d2507f3fbcd52d8e96649fa0dc0174f57300d2fac08": {
     "describe": {
       "columns": [

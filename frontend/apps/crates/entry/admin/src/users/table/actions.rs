@@ -40,6 +40,8 @@ impl UsersTable {
         self.loader.load(clone!(user => async move {
             let req = PatchProfileAdminDataRequest {
                 badge: Some(user.badge.get()),
+                email: user.email.get_cloned(),
+
             };
             endpoints::user::PatchProfileAdminData::api_with_auth(
                 PatchProfileAdminDataPath(user.id),

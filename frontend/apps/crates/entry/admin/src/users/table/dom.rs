@@ -6,7 +6,7 @@ use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::Mutable;
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::billing::{PlanTier, PlanType};
-use shared::domain::user::UserBadge;
+use shared::domain::user::{UserBadge, UserLoginType};
 use std::{rc::Rc, str::FromStr};
 use strum::IntoEnumIterator;
 use utils::{events, routes::AdminUsersRoute, unwrap::UnwrapJiExt};
@@ -98,6 +98,9 @@ impl UsersTable {
                 let user_id = user.id;
                 let tier_override_signal = Mutable::new(user.tier_override.map_or("".to_string(), |tier| tier.to_string()));
                 let plan_type_signal = Mutable::new(None::<PlanType>);
+
+                let edit_user_email = Mutable::new(false);
+
                 html!("admin-table-line", {
                     .children(&mut [
                         html!("span", {
@@ -114,14 +117,48 @@ impl UsersTable {
                             .text_signal(user.last_name.signal_cloned())
                         }),
                         html!("span", {
-                            .child(
-                                html!("a", {
-                                    .prop("href", format!("mailto:{}", user.email.get_cloned()))
-                                    .prop("target", "_blank")
-                                    .prop("rel", "noopener norefferer")
-                                    .text_signal(user.email.signal_cloned())
-                                })
-                            )
+                            .child_signal(edit_user_email.signal_cloned().map(clone!(state, user, edit_user_email => move |edit| {
+                                let is_email_login = matches!(user.login_type, UserLoginType::Email);
+                                if edit && is_email_login {
+                                    Some(html!("div", {
+                                        .style("display", "flex")
+                                        .style("gap", "3px")
+                                        .child(html!("input" => web_sys::HtmlInputElement, {
+                                            .with_node!(elem => {
+                                                .style("width", "200px")
+                                                .style("padding", "4px")
+                                                .prop("type", "email")
+                                                .prop_signal("value", user.email.signal_cloned())
+                                                .event(clone!(user => move |_: events::Input| {
+                                                    let value: String = elem.value();
+                                                    user.email.set(value);
+                                                }))
+                                            })
+                                        }))
+                                        .child(html!("button", {
+                                            .text("Save")
+                                            .event(clone!(state, user, edit_user_email => move |_: events::Click| {
+                                                state.save_admin_data(&user);
+                                                edit_user_email.set(false);
+                                            }))
+                                        }))
+                                        .child(html!("button", {
+                                            .text("x")
+                                            .event(clone!(edit_user_email => move |_: events::Click| {
+                                                edit_user_email.set(false);
+                                            }))
+                                        }))
+                                    }))
+                                } else {
+                                    Some(html!("a", {
+                                        .prop("href", "#")
+                                        .text_signal(user.email.signal_cloned())
+                                        .event(clone!(edit_user_email => move |_: events::Click| {
+                                            edit_user_email.set(true);
+                                        }))
+                                    }))
+                                }
+                            })))
                         }),
                         html!("span", {
                             .text(&user.login_type.to_string())

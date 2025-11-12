@@ -880,9 +880,24 @@ and ($2 is distinct from badge)
             badge as i16,
         )
         .execute(&mut txn)
-        .instrument(tracing::info_span!("update user_profile"))
+        .instrument(tracing::info_span!("update user_profile badge"))
         .await?;
     }
+
+    sqlx::query!(
+        //language=SQL
+        r#"
+update user_email
+set email = $2::text,
+updated_at = now()
+where user_id = $1
+    "#,
+        user_id.0,
+        &req.email,
+    )
+    .execute(&mut txn)
+    .instrument(tracing::info_span!("update user_profile email"))
+    .await?;
 
     txn.commit().await?;
 
