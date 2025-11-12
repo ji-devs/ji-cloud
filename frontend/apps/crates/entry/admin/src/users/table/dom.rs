@@ -129,7 +129,8 @@ impl UsersTable {
                                                 .style("padding", "4px")
                                                 .prop("type", "email")
                                                 .prop_signal("value", user.email.signal_cloned())
-                                                .event(clone!(user => move |_: events::Input| {
+                                                .event(clone!(user => move |e: events::Input| {
+                                                    e.prevent_default();
                                                     let value: String = elem.value();
                                                     user.email.set(value);
                                                 }))
