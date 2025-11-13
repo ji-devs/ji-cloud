@@ -100,6 +100,7 @@ impl UsersTable {
                 let plan_type_signal = Mutable::new(None::<PlanType>);
 
                 let edit_user_email = Mutable::new(false);
+                let origin_email = Mutable::new(user.email.get_cloned());
 
                 html!("admin-table-line", {
                     .children(&mut [
@@ -129,8 +130,7 @@ impl UsersTable {
                                                 .style("padding", "4px")
                                                 .prop("type", "email")
                                                 .prop_signal("value", user.email.signal_cloned())
-                                                .event(clone!(user => move |e: events::Input| {
-                                                    e.prevent_default();
+                                                .event(clone!(user => move |_: events::Input| {
                                                     let value: String = elem.value();
                                                     user.email.set(value);
                                                 }))
@@ -138,23 +138,28 @@ impl UsersTable {
                                         }))
                                         .child(html!("button", {
                                             .text("Save")
-                                            .event(clone!(state, user, edit_user_email => move |_: events::Click| {
+                                            .event(clone!(state, user, edit_user_email, origin_email => move |_: events::Click| {
                                                 state.save_admin_data(&user);
                                                 edit_user_email.set(false);
+                                                origin_email.set(user.email.get_cloned());
                                             }))
                                         }))
                                         .child(html!("button", {
                                             .text("x")
-                                            .event(clone!(edit_user_email => move |_: events::Click| {
+                                            .event(clone!(edit_user_email, origin_email, user => move |_: events::Click| {
                                                 edit_user_email.set(false);
+                                                user.email.set(origin_email.get_cloned());
                                             }))
                                         }))
                                     }))
                                 } else {
                                     Some(html!("a", {
-                                        .prop("href", "#")
+                                        .style("cursor", "pointer")
+                                        .style("color", "var(--dark-blue-5)")
                                         .text_signal(user.email.signal_cloned())
-                                        .event(clone!(edit_user_email => move |_: events::Click| {
+                                        .event(clone!(edit_user_email => move |e: events::Click| {
+                                            e.stop_propagation();
+                                            e.prevent_default();
                                             edit_user_email.set(true);
                                         }))
                                     }))
