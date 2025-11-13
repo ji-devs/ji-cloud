@@ -11,7 +11,7 @@ export class _ extends LitElement {
                 }
                 ::slotted(select) {
                     border: solid 2px var(--dark-blue-1);
-                    width: 300px;
+                    width: 250px;
                     border-radius: 16px 0 0 16px;
                     font-size: 16px;
                     color: var(--dark-gray-6);
