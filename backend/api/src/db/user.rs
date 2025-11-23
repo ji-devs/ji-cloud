@@ -887,6 +887,21 @@ and ($2 is distinct from badge)
     sqlx::query!(
         //language=SQL
         r#"
+update user_auth_basic
+set email = $2::text,
+updated_at = now()
+where user_id = $1
+    "#,
+        user_id.0,
+        &req.email,
+    )
+    .execute(&mut txn)
+    .instrument(tracing::info_span!("update user_auth email"))
+    .await?;
+
+    sqlx::query!(
+        //language=SQL
+        r#"
 update user_email
 set email = $2::text,
 updated_at = now()
