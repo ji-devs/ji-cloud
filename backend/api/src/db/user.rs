@@ -5,6 +5,7 @@ use shared::domain::billing::{
     AccountId, AmountInCents, PlanTier, PlanType, SchoolId, SubscriptionStatus,
 };
 use shared::domain::user::UserLoginType;
+use shared::domain::UpdateNonNullable;
 use shared::domain::{
     admin::DateFilterType,
     circle::CircleId,

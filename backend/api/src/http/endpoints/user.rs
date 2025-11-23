@@ -44,6 +44,7 @@ use crate::{
     error::{self},
     extractor::{ScopeAdmin, SessionCreateProfile, SessionDelete, TokenSessionOf, TokenUser},
     service::{mail, s3, ServiceData},
+    stripe::create_stripe_client,
     token::{create_auth_token, SessionMask},
 };
 use crate::{
@@ -859,10 +860,38 @@ async fn patch_profile_admin_data(
     _auth: TokenUserWithScope<ScopeAdmin>,
     req: Json<<PatchProfileAdminData as ApiEndpoint>::Req>,
     path: web::Path<UserId>,
+    settings: Data<RuntimeSettings>,
 ) -> Result<HttpResponse, error::UserUpdate> {
     let user_id: UserId = path.into_inner();
 
+    let user_profile = db::user::get_profile(&*db, &user_id).await?;
+
+    if user_profile.is_none() {
+        return Err(error::UserUpdate::UserNotFound);
+    }
+
+    let user_profile = user_profile.unwrap();
+
+    let new_email = req.email.clone();
+    let email_changed = user_profile.email != new_email;
+
+    let account = db::account::get_account_by_user_id(&*db, &user_id).await?;
+    let stripe_id = match account {
+        Some(account) => account.stripe_customer_id,
+        None => None,
+    };
+
     db::user::update_profile_admin_data(&*db, user_id, req.into_inner()).await?;
+
+    if let Some(customer_id) = stripe_id {
+        if email_changed {
+            let client = create_stripe_client(&settings)?;
+            let mut update_customer = stripe::UpdateCustomer::default();
+            update_customer.email = Some(new_email.as_str());
+
+            stripe::Customer::update(&client, &customer_id.into(), update_customer).await?;
+        }
+    }
 
     Ok(HttpResponse::NoContent().finish())
 }
