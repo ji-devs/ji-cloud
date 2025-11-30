@@ -24,6 +24,7 @@ use shared::{
         ApiEndpoint, PathParts,
     },
     domain::{
+        billing::AccountType,
         image::{ImageId, ImageSize},
         session::{NewSessionResponse, OAuthProvider},
         user::{
@@ -875,21 +876,25 @@ async fn patch_profile_admin_data(
     let new_email = req.email.clone();
     let email_changed = user_profile.email != new_email;
 
-    let account = db::account::get_account_by_user_id(&*db, &user_id).await?;
-    let stripe_id = match account {
-        Some(account) => account.stripe_customer_id,
-        None => None,
-    };
-
     db::user::update_profile_admin_data(&*db, user_id, req.into_inner()).await?;
 
-    if let Some(customer_id) = stripe_id {
-        if email_changed {
-            let client = create_stripe_client(&settings)?;
-            let mut update_customer = stripe::UpdateCustomer::default();
-            update_customer.email = Some(new_email.as_str());
+    let account = db::account::get_account_by_user_id(&*db, &user_id).await?;
+    let update_stripe =
+        account.map_or_else(false, |account| matches!(account, AccountType::Individual));
+    if update_stripe {
+        let stripe_id = match account {
+            Some(account) => account.stripe_customer_id,
+            None => None,
+        };
 
-            stripe::Customer::update(&client, &customer_id.into(), update_customer).await?;
+        if let Some(customer_id) = stripe_id {
+            if email_changed {
+                let client = create_stripe_client(&settings)?;
+                let mut update_customer = stripe::UpdateCustomer::default();
+                update_customer.email = Some(new_email.as_str());
+
+                stripe::Customer::update(&client, &customer_id.into(), update_customer).await?;
+            }
         }
     }
 
