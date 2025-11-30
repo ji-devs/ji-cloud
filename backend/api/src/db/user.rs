@@ -872,8 +872,7 @@ select exists(select 1 from user_profile where user_id = $1 for update) as "exis
             //language=SQL
             r#"
 update user_profile
-set badge      = $2,
-    updated_at = now()
+set badge      = $2
 where user_id = $1
 and ($2 is distinct from badge)
         "#,
@@ -912,7 +911,21 @@ where user_id = $1
         &req.email,
     )
     .execute(&mut txn)
-    .instrument(tracing::info_span!("update user_profile email"))
+    .instrument(tracing::info_span!("update user_email"))
+    .await?;
+
+    // Once done, we should update the profile updated_at so that Algolia sync works correctly
+    sqlx::query!(
+        //language=SQL
+        r#"
+update user_profile
+set updated_at = now()
+where user_id = $1
+    "#,
+        user_id.0,
+    )
+    .execute(&mut txn)
+    .instrument(tracing::info_span!("update user_profile updated_at"))
     .await?;
 
     txn.commit().await?;

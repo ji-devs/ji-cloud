@@ -869,19 +869,6 @@
     },
     "query": "\ninsert into jig_data_additional_resource(jig_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom jig_data_additional_resource\nwhere jig_data_id = $1\n        "
   },
-  "11c3d54d1f9d611a8d5fb20586d426b10909496f063701144437d8d6ca345b5d": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate user_profile\nset badge      = $2,\n    updated_at = now()\nwhere user_id = $1\nand ($2 is distinct from badge)\n        "
-  },
   "11eb915c9d72698b78f7bc819c97a9583421cd35477c5b860f717a8d0a1937e7": {
     "describe": {
       "columns": [
@@ -2124,6 +2111,19 @@
       }
     },
     "query": "\nupdate playlist_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            "
+  },
+  "2a0a4d797700825bddc13126b2d4cceea3283dfbfdd0ed16046b1d6e4b9bc094": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate user_profile\nset badge      = $2\nwhere user_id = $1\nand ($2 is distinct from badge)\n        "
   },
   "2a984fffff273bed208ddd30beb37b3cb7a9af1fa7ed014c9c4d8565618ca4d0": {
     "describe": {
@@ -3605,6 +3605,18 @@
       }
     },
     "query": "update category set name = $1 where id = $2"
+  },
+  "39b0f5738c641b3774d97899ccc93df7e7a28532b5ab1e3d66dd304e2cf681a8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nupdate user_profile\nset updated_at = now()\nwhere user_id = $1\n    "
   },
   "39b31581380a0a23120ba243d769d95b2b7da4abd9691e7c16262e27b57fe272": {
     "describe": {
