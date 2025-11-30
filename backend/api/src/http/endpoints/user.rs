@@ -880,7 +880,7 @@ async fn patch_profile_admin_data(
 
     let account = db::account::get_account_by_user_id(&*db, &user_id).await?;
     let update_stripe =
-        account.map_or_else(false, |account| matches!(account.account_type, AccountType::Individual));
+        account.as_ref().map_or(false, |account| matches!(account.account_type, AccountType::Individual));
     if update_stripe {
         let stripe_id = match account {
             Some(account) => account.stripe_customer_id,
