@@ -65,8 +65,6 @@ export class _ extends LitElement {
                     margin-top: 7px;
                     transition-property: margin-top;
                     height: 100%;
-                    overflow-y: auto;
-                    overflow-x: hidden;
                     scrollbar-width: thin;
                     scrollbar-color: #d3d4dd transparent;
                 }
@@ -117,6 +115,7 @@ export class _ extends LitElement {
                 <div class="side-head collapsing-phase">
                     <slot name="side-head"></slot>
                 </div>
+                <div style="position: relative; overflow-y: auto; overlfow-x: hidden;">
                 <section class="collapsing-phase">
                     <div class="cover-module collapsing-phase" style="margin-top: ${coverModuleMarginTop}">
                         <slot name="cover-module"></slot>
@@ -128,6 +127,7 @@ export class _ extends LitElement {
                         <slot name="publish"></slot>
                     </div>
                 </section>
+                </div>
             </div>
         `;
     }
