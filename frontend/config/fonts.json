@@ -251,5 +251,13 @@
     "Nunito-light": {
         "file": "Nunito/Nunito-Light.ttf",
         "format": "truetype"
+    },
+    "Ezra SIL": {
+        "file": "Ezra_SIL/SILEOT.ttf",
+        "format": "truetype"
+    },
+    "Ezra SIL SR": {
+        "file": "Ezra_SIL/SILEOTSR.ttf",
+        "format": "truetype"
     }
 }
