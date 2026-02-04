@@ -57,7 +57,7 @@ select
     given_name,
     family_name,
     profile_image_id       as "profile_image?: ImageId",
-    (select case when exists(select * from user_auth_google where user_id = $1) = true then 1 else 0 end)     as "is_oauth!: bool",
+    exists(select * from user_auth_google where user_id = $1) as "is_oauth!: bool",
     languages_spoken         as "languages_spoken!: Vec<String>",
     language_app,
     language_emails,

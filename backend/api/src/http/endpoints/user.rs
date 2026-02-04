@@ -879,8 +879,9 @@ async fn patch_profile_admin_data(
     db::user::update_profile_admin_data(&*db, user_id, req.into_inner()).await?;
 
     let account = db::account::get_account_by_user_id(&*db, &user_id).await?;
-    let update_stripe =
-        account.as_ref().map_or(false, |account| matches!(account.account_type, AccountType::Individual));
+    let update_stripe = account.as_ref().map_or(false, |account| {
+        matches!(account.account_type, AccountType::Individual)
+    });
     if update_stripe {
         let stripe_id = match account {
             Some(account) => account.stripe_customer_id,

@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use actix_web::{
     web::{Data, ServiceConfig},
     HttpResponse,
@@ -6,7 +8,10 @@ use chrono::{Duration, Utc};
 use ji_core::settings::RuntimeSettings;
 use shared::{
     api::{endpoints::session, ApiEndpoint, PathParts},
-    domain::session::{CreateSessionResponse, NewSessionResponse},
+    domain::{
+        session::{CreateSessionResponse, NewSessionResponse},
+        user::UserId,
+    },
 };
 use sqlx::PgPool;
 
