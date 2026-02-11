@@ -3,9 +3,7 @@ use crate::settings::{
     state::{ActivePopup, IndividualOrSchool, ResetPasswordStatus},
 };
 use components::{
-    editable_profile_image::{EditableProfileImage, EditableProfileImageConfig},
-    overlay::handle::OverlayHandle,
-    page_header::{PageHeader, PageHeaderConfig},
+    editable_profile_image::{EditableProfileImage, EditableProfileImageConfig}, overlay::handle::OverlayHandle, page_header::{PageHeader, PageHeaderConfig}
 };
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{
@@ -62,7 +60,7 @@ impl SettingsPage {
             .unwrap_or_default();
 
         let confirm_oauth_switch = Mutable::new(false);
-        let oauth_switched = Mutable::new(true);
+        let oauth_switched = Mutable::new(false);
 
         html!("user-profile", {
             .child(EditableProfileImage::new(
