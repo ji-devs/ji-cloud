@@ -4,12 +4,13 @@ use crate::settings::{
 };
 use components::{
     editable_profile_image::{EditableProfileImage, EditableProfileImageConfig},
+    overlay::handle::OverlayHandle,
     page_header::{PageHeader, PageHeaderConfig},
 };
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{
     map_ref,
-    signal::{Signal, SignalExt},
+    signal::{Mutable, Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
 use shared::domain::meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Subject, SubjectId};
@@ -60,6 +61,9 @@ impl SettingsPage {
             .map(|plan_type| plan_type.is_individual_plan() || matches!(is_admin, Some(true)))
             .unwrap_or_default();
 
+        let confirm_oauth_switch = Mutable::new(false);
+        let oauth_switched = Mutable::new(true);
+
         html!("user-profile", {
             .child(EditableProfileImage::new(
                 state.user.profile_image.read_only(),
@@ -77,6 +81,7 @@ impl SettingsPage {
                 ..Default::default()
             }).render())
             .prop("showExpandedDetails", show_expanded_details)
+            .prop_signal("isOauth", state.user.is_oauth.signal())
             .prop_signal("email", state.user.email.signal_cloned())
             .prop_signal("name", state.full_name_signal())
             .children(&mut [
@@ -255,7 +260,18 @@ impl SettingsPage {
                         state.active_popup.set(ActivePopup::Affiliation)
                     }))
                 }),
-
+                html!("div", {
+                    .prop("slot", "switch-auth")
+                    .child(html!("button-rect", {
+                        .prop("kind", "outline")
+                        .prop("color", "blue")
+                        .prop("size", "regular")
+                        .text("Enable password login")
+                        .event(clone!(confirm_oauth_switch => move |_: events::Click| {
+                            confirm_oauth_switch.set_neq(true);
+                        }))
+                    }))
+                }),
             ])
             .child_signal(state.reset_password_status.signal().map(clone!(state => move |status| {
                 Some(match status {
@@ -314,6 +330,66 @@ impl SettingsPage {
                 }
             })).to_signal_vec())
             .child_signal(state.render_popups())
+            .child_signal(confirm_oauth_switch.signal().map(clone!(state, confirm_oauth_switch, oauth_switched => move |confirm_oauth_switch_modal| {
+                if confirm_oauth_switch_modal {
+                    Some(html!("empty-fragment", {
+                        .apply(OverlayHandle::lifecycle(clone!(state, confirm_oauth_switch, oauth_switched => move || {
+                            html!("modal-confirm", {
+                                .prop("dangerous", true)
+                                .prop("title", "Enable password login")
+                                .prop("cancel_text", "Cancel")
+                                .prop("confirm_text", "Enable")
+                                .child(html!("div", {
+                                    .prop("slot", "content")
+                                    .child(html!("p", {
+                                        .text("Are you sure you want to enable password login?")
+                                    }))
+                                    .child(html!("p", {
+                                        .text("Enabling password login will permanently disable Google login.")
+                                    }))
+                                }))
+                                .event(clone!(confirm_oauth_switch => move |_evt: events::CustomCancel| confirm_oauth_switch.set_neq(false)))
+                                .event(clone!(state, confirm_oauth_switch, oauth_switched => move |_evt: events::CustomConfirm| {
+                                    confirm_oauth_switch.set_neq(false);
+                                    state.switch_to_basic_auth();
+                                    oauth_switched.set_neq(true);
+                                    // state.delete_asset(asset_id);
+                                }))
+                            })
+                        })))
+                    }))
+                } else {
+                    None
+                }
+            })))
+            .child_signal(oauth_switched.signal().map(clone!(oauth_switched => move |oauth_switched_modal| {
+                if oauth_switched_modal {
+                    Some(html!("empty-fragment", {
+                        .apply(OverlayHandle::lifecycle(clone!(oauth_switched => move || {
+                            html!("modal-confirm", {
+                                .prop("title", "Reset password")
+                                .prop("render_cancel", false)
+                                .prop("confirm_text", "OK")
+                                .child(html!("div", {
+                                    .prop("slot", "content")
+                                    .child(html!("p", {
+                                        .text("We have sent you a reset password email.")
+                                    }))
+                                    .child(html!("p", {
+                                        .text("Reset your password to ensure you can continue to login.")
+                                    }))
+                                }))
+                                .event(clone!(oauth_switched => move |_evt: events::CustomCancel| oauth_switched.set_neq(false)))
+                                .event(clone!(oauth_switched => move |_evt: events::CustomConfirm| {
+                                    oauth_switched.set_neq(false);
+                                }))
+                            })
+                        })))
+                    }))
+                } else {
+                    None
+                }
+            })))
         })
     }
 

@@ -61,6 +61,7 @@ pub struct SettingsPageUser {
     pub id: Mutable<UserId>,
     pub username: Mutable<String>,
     pub email: Mutable<String>,
+    pub is_oauth: Mutable<bool>,
     pub given_name: Mutable<String>,
     pub family_name: Mutable<String>,
     pub profile_image: Mutable<Option<ImageId>>,
@@ -80,6 +81,7 @@ impl SettingsPageUser {
             id: Mutable::new(UserId::from_u128(0)),
             username: Mutable::new(String::new()),
             email: Mutable::new(String::new()),
+            is_oauth: Mutable::new(false),
             given_name: Mutable::new(String::new()),
             family_name: Mutable::new(String::new()),
             profile_image: Mutable::new(None),
@@ -98,6 +100,7 @@ impl SettingsPageUser {
         self.id.set(user.id);
         self.username.set(user.username);
         self.email.set(user.email);
+        self.is_oauth.set(user.is_oauth);
         self.given_name.set(user.given_name);
         self.family_name.set(user.family_name);
         self.profile_image.set(user.profile_image);

@@ -213,6 +213,15 @@ export class _ extends LitElement {
                         align-items: center;
                     }
                 }
+                section#basic-info .password-wrapper .value.oauth {
+                    display: flex;
+                    flex-direction: column;
+                }
+                section#basic-info .password-wrapper .value.oauth .oauth-icon {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                }
                 section#basic-info .password-wrapper .edit-button::slotted(*) {
                     grid-column: 3;
                 }
@@ -282,6 +291,9 @@ export class _ extends LitElement {
 
     @property()
     email: string = "";
+
+    @property({ type: Boolean })
+    isOauth: boolean = false;
 
     @property({ type: Boolean })
     showPlan: boolean = false;
@@ -369,13 +381,28 @@ export class _ extends LitElement {
                             <span class="key">${STR_EMAIL}</span>
                             <slot class="value" name="email"></slot>
                         </label>
-                        <label>
-                            <span class="key">${STR_PASSWORD}</span>
-                            <div class="password-wrapper">
-                                <span class="value">************</span>
-                                <slot class="edit-button" name="reset-password"></slot>
-                            </div>
-                        </label>
+                        ${this.isOauth
+                            ? html`<label>
+                                    <span class="key">Login</span>
+                                    <div class="password-wrapper">
+                                        <div class="value oauth">
+                                            <div class="oauth-icon">
+                                                <img-ui path="entry/user/google.svg" alt="" style="height: 48px"></img-ui>
+                                                <span>Google Sign-In</span>
+                                            </div>
+                                            <slot name="switch-auth"></slot>
+                                        </div>
+                                    </div>
+                                </label>`
+                            : html`<label>
+                                    <span class="key">${STR_PASSWORD}</span>
+                                    <div class="password-wrapper">
+                                        <span class="value">************</span>
+                                        <slot class="edit-button" name="reset-password"></slot>
+                                    </div>
+                                </label>`
+                        }
+
                         <label>
                             <span class="key">${STR_FIRST_NAME}</span>
                             <slot class="value" name="first-name"></slot>

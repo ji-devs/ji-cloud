@@ -8,6 +8,7 @@ use shared::domain::billing::{
     CreateCustomerPortalLinkPath, PlanType, SubscriptionPauseRequest, SubscriptionStatus,
     UpdateSubscriptionPausedPath,
 };
+use shared::domain::user::SwitchToBasicAuthPath;
 use shared::{
     api::endpoints::{self, meta, user},
     domain::{
@@ -221,6 +222,16 @@ impl SettingsPage {
                 todo!()
             }
         }));
+    }
+
+    pub fn switch_to_basic_auth(self: &Rc<Self>) {
+        let state = self;
+        state.loader.load(async move {
+            let res = user::SwitchToBasicAuth::api_with_auth(SwitchToBasicAuthPath(), None).await;
+            if let Err(_err) = res {
+                todo!()
+            }
+        });
     }
 
     pub fn load_portal_link(self: &Rc<Self>) {

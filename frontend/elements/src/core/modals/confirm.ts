@@ -127,6 +127,9 @@ export class _ extends BaseButton {
     @property({ type: String })
     content!: string;
 
+    @property({type: Boolean})
+    render_cancel: boolean = true
+
     @property({ type: String })
     cancel_text: string = STR_DEFAULT_CANCEL_TEXT;
 
@@ -195,7 +198,7 @@ export class _ extends BaseButton {
     renderActions() {
         return html`
             <div class="options">
-                ${this.renderCancel()}
+                ${this.render_cancel ? this.renderCancel() : nothing}
                 ${this.renderConfirm()}
             </div>
         `;
