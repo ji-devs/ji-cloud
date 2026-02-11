@@ -806,6 +806,8 @@ pub enum ChangePasswordRequest {
     },
 }
 
+make_path_parts!(SwitchToBasicAuthPath => "/v1/user/me/basic-auth");
+
 make_path_parts!(UserDeletePath => "/v1/user/me");
 
 // Colors

@@ -7,10 +7,10 @@ use crate::{
         user::{
             ChangePasswordPath, ChangePasswordRequest, CreateUserPath, CreateUserRequest,
             OtherUser, ResetEmailPath, ResetEmailRequest, ResetEmailResponse, ResetPasswordPath,
-            ResetPasswordRequest, UserBrowsePath, UserBrowseQuery, UserBrowseResponse,
-            UserDeletePath, UserLookupPath, UserLookupQuery, UserSearchPath, UserSearchQuery,
-            UserSearchResponse, VerifyEmailPath, VerifyEmailRequest, VerifyResetEmailPath,
-            VerifyResetEmailRequest,
+            ResetPasswordRequest, SwitchToBasicAuthPath, UserBrowsePath, UserBrowseQuery,
+            UserBrowseResponse, UserDeletePath, UserLookupPath, UserLookupQuery, UserSearchPath,
+            UserSearchQuery, UserSearchResponse, VerifyEmailPath, VerifyEmailRequest,
+            VerifyResetEmailPath, VerifyResetEmailRequest,
         },
     },
     error::EmptyError,
@@ -151,6 +151,16 @@ impl ApiEndpoint for ChangePassword {
     type Req = ChangePasswordRequest;
     type Res = ();
     type Path = ChangePasswordPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Put;
+}
+
+/// Switch to basic auth from Google Auth
+pub struct SwitchToBasicAuth;
+impl ApiEndpoint for SwitchToBasicAuth {
+    type Req = ();
+    type Res = ();
+    type Path = SwitchToBasicAuthPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Put;
 }

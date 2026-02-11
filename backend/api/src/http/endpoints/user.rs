@@ -8,7 +8,10 @@ use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use chrono::{Duration, Utc};
 use futures::try_join;
 use ji_core::{config::IMAGE_BODY_SIZE_LIMIT, settings::RuntimeSettings};
-use rand::thread_rng;
+use rand::{
+    distributions::{Alphanumeric, DistString},
+    thread_rng,
+};
 use sendgrid::v3::Email;
 use serde::{Deserialize, Serialize};
 use shared::{
@@ -18,8 +21,8 @@ use shared::{
             BrowseResources, BrowseUserJigs, ChangePassword, Create, CreateColor, CreateFont,
             CreateProfile, Delete, DeleteColor, DeleteFont, Follow, GetColors, GetFonts,
             GetPublicUser, PatchProfile, PatchProfileAdminData, Profile, ResetEmail, ResetPassword,
-            Search, SearchUser, Unfollow, UpdateColor, UpdateFont, UserLookup, VerifyEmail,
-            VerifyResetEmail,
+            Search, SearchUser, SwitchToBasicAuth, Unfollow, UpdateColor, UpdateFont, UserLookup,
+            VerifyEmail, VerifyResetEmail,
         },
         ApiEndpoint, PathParts,
     },
@@ -38,6 +41,7 @@ use shared::{
 };
 use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
 use tracing::{instrument, Instrument};
+use uuid::Uuid;
 
 use crate::{
     db::{self, user::upsert_profile},
@@ -923,6 +927,59 @@ async fn get_profile(
     }
 }
 
+/// Switch to basic auth
+#[instrument(skip_all)]
+async fn switch_to_basic_auth(
+    config: Data<RuntimeSettings>,
+    db: Data<PgPool>,
+    claims: TokenUser,
+    mail: ServiceData<mail::Client>,
+) -> Result<HttpResponse, error::UserNotFound> {
+    let user_id = claims.user_id();
+
+    let mut generator = rand::thread_rng();
+
+    let random_password = Alphanumeric.sample_string(&mut generator, 16);
+    let pass_hash = hash_password(random_password).await?;
+
+    let profile = db::user::get_profile(db.as_ref(), &user_id).await?.unwrap();
+
+    let mut txn = db.begin().await.into_anyhow()?;
+
+    let uuid: Uuid = user_id.into();
+
+    sqlx::query!(
+        r#"delete from "user_auth_google" where user_id = $1"#,
+        &uuid,
+    )
+    .execute(db.as_ref())
+    .await?;
+
+    sqlx::query!(
+        "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
+        &uuid,
+        profile.email,
+        pass_hash,
+    )
+    .execute(&mut txn)
+    .await
+    .into_anyhow()?;
+
+    send_password_email(
+        &mut txn,
+        user_id,
+        profile.email,
+        mail.as_ref(),
+        &config.remote_target().pages_url(),
+        false,
+    )
+    .await?;
+
+    txn.commit().await.into_anyhow()?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 /// Delete your account
 #[instrument(skip_all)]
 async fn delete(
@@ -1157,6 +1214,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <Profile as ApiEndpoint>::Path::PATH,
         Profile::METHOD.route().to(get_profile),
+    )
+    .route(
+        <SwitchToBasicAuth as ApiEndpoint>::Path::PATH,
+        SwitchToBasicAuth::METHOD.route().to(switch_to_basic_auth),
     )
     .route(
         <Create as ApiEndpoint>::Path::PATH,
