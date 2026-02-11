@@ -3,7 +3,9 @@ use crate::settings::{
     state::{ActivePopup, IndividualOrSchool, ResetPasswordStatus},
 };
 use components::{
-    editable_profile_image::{EditableProfileImage, EditableProfileImageConfig}, overlay::handle::OverlayHandle, page_header::{PageHeader, PageHeaderConfig}
+    editable_profile_image::{EditableProfileImage, EditableProfileImageConfig},
+    overlay::handle::OverlayHandle,
+    page_header::{PageHeader, PageHeaderConfig},
 };
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::{
@@ -13,12 +15,15 @@ use futures_signals::{
 };
 use shared::domain::meta::{Affiliation, AffiliationId, AgeRange, AgeRangeId, Subject, SubjectId};
 use std::rc::Rc;
-use utils::prelude::get_user_cloned;
 use utils::{
     component::Component,
     events,
     languages::{Language, EMAIL_LANGUAGES},
     unwrap::UnwrapJiExt,
+};
+use utils::{
+    prelude::get_user_cloned,
+    routes::{Route, UserRoute},
 };
 use web_sys::{HtmlElement, HtmlInputElement};
 
@@ -351,7 +356,6 @@ impl SettingsPage {
                                     confirm_oauth_switch.set_neq(false);
                                     state.switch_to_basic_auth();
                                     oauth_switched.set_neq(true);
-                                    // state.delete_asset(asset_id);
                                 }))
                             })
                         })))
@@ -380,6 +384,8 @@ impl SettingsPage {
                                 .event(clone!(oauth_switched => move |_evt: events::CustomCancel| oauth_switched.set_neq(false)))
                                 .event(clone!(oauth_switched => move |_evt: events::CustomConfirm| {
                                     oauth_switched.set_neq(false);
+                                    let route: String = Route::User(UserRoute::Login(Default::default())).into();
+                                    dominator::routing::go_to_url(&route);
                                 }))
                             })
                         })))
