@@ -269,7 +269,7 @@ impl SettingsPage {
                         .prop("kind", "outline")
                         .prop("color", "blue")
                         .prop("size", "regular")
-                        .text("Enable password login")
+                        .text("Switch to Email/Password Login")
                         .event(clone!(confirm_oauth_switch => move |_: events::Click| {
                             confirm_oauth_switch.set_neq(true);
                         }))
