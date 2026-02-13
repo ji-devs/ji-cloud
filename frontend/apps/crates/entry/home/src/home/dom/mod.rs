@@ -67,6 +67,7 @@ impl Home {
             })).to_signal_vec())
             .child(html!("empty-fragment", {
                 .style("display", "block")
+                .style("margin-top", "32px")
                 .child_signal(state.mode.signal_cloned().map(move |mode| {
                     match mode {
                         HomePageMode::Home => {
@@ -120,6 +121,7 @@ impl Home {
                 .style("display", "flex")
                 .style("gap", "10px")
                 .style("align-items", "end")
+                .style("position", "absolute") // we need to position this absolute so that we can get the popup characters in the jigs to be visible
                 .child(html!("img-ui", {
                     .style("height", "52px")
                     .prop("path", {
@@ -130,7 +132,7 @@ impl Home {
             }))
             .child(html!("div", {
                 .style("overflow-x", "auto")
-                .style("padding", "24px")
+                .style("padding", "120px 24px 24px 24px") // high padding top to account for the heading being absolute positioned and show the popup characters on the jigs (can't have overflow-x auto and overflow-y visible)
                 .style("display", "grid")
                 .style("grid-auto-flow", "column")
                 .style("justify-content", "start")
