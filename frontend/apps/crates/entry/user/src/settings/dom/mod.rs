@@ -66,6 +66,7 @@ impl SettingsPage {
 
         let confirm_oauth_switch = Mutable::new(false);
         let oauth_switched = Mutable::new(false);
+        let email_change_modal_visible = Mutable::new(false);
 
         html!("user-profile", {
             .child(EditableProfileImage::new(
@@ -98,6 +99,9 @@ impl SettingsPage {
                         .prop("slot", "icon")
                         .prop("path", "entry/user/profile/lock-blue.svg")
                         .style("width", "14px")
+                    }))
+                    .event(clone!(email_change_modal_visible => move |_: events::Click| {
+                        email_change_modal_visible.set_neq(true);
                     }))
                 }),
                 html!("input-wrapper", {
@@ -350,6 +354,9 @@ impl SettingsPage {
                                     .child(html!("p", {
                                         .text("Enabling password login will permanently disable Google login.")
                                     }))
+                                    .child(html!("p", {
+                                        .text("After confirming you will receive an email with a password reset link. Check your spam folder if you cannot locate it straight away. You will then be able to login with your email address and new password.")
+                                    }))
                                 }))
                                 .event(clone!(confirm_oauth_switch => move |_evt: events::CustomCancel| confirm_oauth_switch.set_neq(false)))
                                 .event(clone!(state, confirm_oauth_switch, oauth_switched => move |_evt: events::CustomConfirm| {
@@ -386,6 +393,36 @@ impl SettingsPage {
                                     oauth_switched.set_neq(false);
                                     let route: String = Route::User(UserRoute::Login(Default::default())).into();
                                     dominator::routing::go_to_url(&route);
+                                }))
+                            })
+                        })))
+                    }))
+                } else {
+                    None
+                }
+            })))
+            .child_signal(email_change_modal_visible.signal().map(clone!(email_change_modal_visible => move |visible| {
+                if visible {
+                    Some(html!("empty-fragment", {
+                        .apply(OverlayHandle::lifecycle(clone!(email_change_modal_visible => move || {
+                            html!("modal-confirm", {
+                                .prop("title", "Change email address")
+                                .prop("render_cancel", false)
+                                .prop("confirm_text", "OK")
+                                .child(html!("div", {
+                                    .prop("slot", "content")
+                                    .child(html!("p", {
+                                        .text("Please ")
+                                        .child(html!("a", {
+                                            .text("contact us")
+                                            .prop("href", "mailto:info@jewishinteractive.org")
+                                        }))
+                                        .text(" to change your account email address.")
+                                    }))
+                                }))
+                                .event(clone!(email_change_modal_visible => move |_evt: events::CustomCancel| email_change_modal_visible.set_neq(false)))
+                                .event(clone!(email_change_modal_visible => move |_evt: events::CustomConfirm| {
+                                    email_change_modal_visible.set_neq(false);
                                 }))
                             })
                         })))
