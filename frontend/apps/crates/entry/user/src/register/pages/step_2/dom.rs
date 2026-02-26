@@ -34,6 +34,11 @@ impl Step2Page {
                     .prop_signal("error", state.location_error.signal())
                     .child(html!("input-location", {
                         .prop("placeholder", STR_LOCATION_PLACEHOLDER)
+                        .event(clone!(state => move |evt:events::CustomInput| {
+                            if evt.value().trim().is_empty() {
+                                *state.location_json.borrow_mut() = None;
+                            }
+                        }))
                         .event(clone!(state => move |evt:events::GoogleLocation| {
                             *state.location_json.borrow_mut() = evt.raw_json().and_then(|s| {
                                 let trimmed = s.trim().to_string();
