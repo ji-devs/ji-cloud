@@ -352,10 +352,11 @@ impl SettingsPage {
                                         .text("Are you sure you want to enable password login?")
                                     }))
                                     .child(html!("p", {
+                                        .style("font-weight", "bold")
                                         .text("Enabling password login will permanently disable Google login.")
                                     }))
                                     .child(html!("p", {
-                                        .text("After confirming you will receive an email with a password reset link. Check your spam folder if you cannot locate it straight away. You will then be able to login with your email address and new password.")
+                                        .text("After confirming, we’ll send you an email with a password reset link. Check your spam folder if it’s not in your inbox. Choose a password and you will be able to login with your email address and new password.")
                                     }))
                                 }))
                                 .event(clone!(confirm_oauth_switch => move |_evt: events::CustomCancel| confirm_oauth_switch.set_neq(false)))
