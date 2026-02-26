@@ -193,8 +193,7 @@ account_cte as (
         school.school_id,
         school.school_name,
         account.account_id,
-        account.tier_override,
-        user_auth_google.google_id as google_auth
+        account.tier_override
     from user_account
     inner join account using (account_id)
     left join (
@@ -216,7 +215,6 @@ account_cte as (
     ) as subscription using (account_id)
     left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id
     left join school using (account_id)
-    left join public.user_auth_google on user_auth_google.user_id = user_account.user_id
 )
 select  cte1.id                 as "id!: UserId",
         username,
@@ -238,9 +236,10 @@ select  cte1.id                 as "id!: UserId",
         account_cte.school_name::text as "school_name?",
         account_cte.account_id as "account_id?: AccountId",
         account_cte.tier_override as "tier_override?: PlanTier",
-        account_cte.google_auth as "google_auth?: String"
+        user_auth_google.google_id as "google_auth?: String"
 from cte1
         left join account_cte on cte1.id = account_cte.user_id
+        left join user_auth_google on user_auth_google.user_id = cte1.id
         inner join user_profile on cte1.id = user_profile.user_id
         inner join user_email on cte1.id = user_email.user_id
 order by ord asc
@@ -316,8 +315,7 @@ with account_cte as (
         school.school_id,
         school.school_name,
         account.account_id,
-        account.tier_override,
-        user_auth_google.google_id as google_auth
+        account.tier_override
     from user_account
     inner join account using (account_id)
     left join (
@@ -339,7 +337,6 @@ with account_cte as (
     ) as subscription using (account_id)
     left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id
     left join school using (account_id)
-    left join public.user_auth_google on user_auth_google.user_id = user_account.user_id
 )
 select  "user".id                 as "id!: UserId",
         username,
@@ -361,9 +358,10 @@ select  "user".id                 as "id!: UserId",
         account_cte.school_name::text as "school_name?",
         account_cte.account_id as "account_id?: AccountId",
         account_cte.tier_override as "tier_override?: PlanTier",
-        account_cte.google_auth as "google_auth?: String"
+        user_auth_google.google_id as "google_auth?: String"
 from "user"
 left join account_cte on "user".id = account_cte.user_id
+left join user_auth_google on user_auth_google.user_id = "user".id
 inner join user_profile on "user".id = user_profile.user_id
 inner join user_email on user_email.user_id = "user".id
 inner join unnest($1::uuid[])
