@@ -35,7 +35,10 @@ impl Step2Page {
                     .child(html!("input-location", {
                         .prop("placeholder", STR_LOCATION_PLACEHOLDER)
                         .event(clone!(state => move |evt:events::GoogleLocation| {
-                            *state.location_json.borrow_mut() = evt.raw_json();
+                            *state.location_json.borrow_mut() = evt.raw_json().and_then(|s| {
+                                let trimmed = s.trim().to_string();
+                                if trimmed.is_empty() { None } else { Some(trimmed) }
+                            });
                         }))
                     }))
                 }),
@@ -99,7 +102,7 @@ impl Step2Page {
                     .child(html!("input" => HtmlInputElement, {
                         .with_node!(elem => {
                             .event(clone!(state => move |_:events::Input| {
-                                let value = elem.value();
+                                let value = elem.value().trim().to_string();
                                 *state.organization.borrow_mut() = if value.is_empty() {
                                     None
                                 } else {

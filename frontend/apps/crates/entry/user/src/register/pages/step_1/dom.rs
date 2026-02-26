@@ -28,7 +28,7 @@ impl Step1Page {
                             .prop("value", &*state.firstname.borrow())
                             .event(clone!(state, elem => move |_:events::Input| {
                                 state.clear_firstname_status();
-                                *state.firstname.borrow_mut() = elem.value();
+                                *state.firstname.borrow_mut() = elem.value().trim().to_string();
                             }))
                         })
                     }))
@@ -45,7 +45,7 @@ impl Step1Page {
                             .prop("value", &*state.lastname.borrow())
                             .event(clone!(state => move |_:events::Input| {
                                 state.clear_lastname_status();
-                                *state.lastname.borrow_mut() = elem.value();
+                                *state.lastname.borrow_mut() = elem.value().trim().to_string();
                             }))
                         })
                     }))
@@ -63,7 +63,7 @@ impl Step1Page {
                             .prop("value", &*state.username.borrow())
                             .event(clone!(state => move |_:events::Input| {
                                 state.clear_username_status();
-                                *state.username.borrow_mut() = elem.value();
+                                *state.username.borrow_mut() = elem.value().trim().to_string();
                             }))
                         })
                     }))
