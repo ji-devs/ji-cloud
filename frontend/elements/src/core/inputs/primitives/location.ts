@@ -56,6 +56,17 @@ export class _ extends LitElement {
         geolocate(this.autoComplete);
     }
 
+    onInput(evt: InputEvent) {
+        const { value } = evt.target as any;
+        this.value = value;
+
+        this.dispatchEvent(
+            new CustomEvent("custom-input", {
+                detail: { value },
+            })
+        );
+    }
+
     render() {
         return html`
             <input
@@ -64,6 +75,7 @@ export class _ extends LitElement {
                 type="text"
                 value="${this.value}"
                 @focus="${this.onFocus}"
+                @input="${this.onInput}"
             />
         `;
     }
