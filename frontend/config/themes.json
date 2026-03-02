@@ -2585,7 +2585,7 @@
             "en": "Hebrew Reading"
         },
         "fontFamilies": [
-            "'Frank Ruhl Libre - Medium', 'Noto-Sans'",
+            "'Ezra SIL SR', 'Noto-Sans'",
             "'Shesek FM Regular', 'Caveat - Medium'"
         ],
         "colors": ["#192150", "#FFFDA6","#192150"],
