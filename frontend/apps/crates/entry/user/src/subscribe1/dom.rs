@@ -176,6 +176,9 @@ impl Component<Subscribe1> for Rc<Subscribe1> {
                 .child_signal(state.pay_with_check.signal_cloned().map(clone!(state => move |pay_with_check| {
                     pay_with_check.then(|| {
                         dialog!{
+                            .event(clone!(state => move |_: events::Cancel| {
+                                state.pay_with_check.set(false);
+                            }))
                             .child(CheckPopup::new(&state).render())
                         }
                     })

@@ -137,6 +137,9 @@ impl Component<CirclesList> for Rc<CirclesList> {
                 .map(clone!(state => move |open| {
                     open.then(|| {
                         dialog!{
+                            .event(clone!(state => move |_: events::Cancel| {
+                                state.create_popup_open.set(false);
+                            }))
                             .child(CreateCircle::new(&state).render())
                         }
                     })

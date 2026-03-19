@@ -15,6 +15,9 @@ impl Component<QrDialog> for Rc<QrDialog> {
         let state = self;
         dom.child(dialog! {
             .class("qr-dialog")
+            .event(clone!(state => move |_: events::Cancel| {
+                (state.callbacks.on_close)();
+            }))
             .event_with_options(&EventOptions::bubbles(), clone!(state => move |e: events::Click| {
                 e.stop_propagation();
                 (state.callbacks.on_close)();

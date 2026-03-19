@@ -459,6 +459,9 @@ impl JigPlayer {
                     true => {
                         Some(dialog! {
                             .prop("slot", "dialog")
+                            .event(clone!(state => move |_: events::Cancel| {
+                                state.play_login_popup_shown.set(false);
+                            }))
                             .child(html!("home-login-before-play", {
                                 .apply_if(is_iframe(), clone!(state => move |dom| {
                                     dom.child(html!("fa-button", {

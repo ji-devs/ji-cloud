@@ -65,6 +65,10 @@ html, body, main {
     --yellow-5: #f5ba2b;
     ---dfb: #447dfb;
 }
+/* Ensure Google Maps Autocomplete dropdown renders above dialogs */
+.pac-container {
+    z-index: 10001 !important;
+}
 #root:empty {
     min-height: 100vh;
     background-color: #6ca1fc3d;

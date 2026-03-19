@@ -42,8 +42,14 @@ impl Component<PaywallDialog> for PaywallDialog {
 
     fn dom(&self, dom: DomBuilder<ShadowRoot>) -> DomBuilder<ShadowRoot> {
         let el_id = self.el_id.clone();
+        let cancel_el_id = self.el_id.clone();
         dom
             .child(dialog! {
+                .event(move |_: events::Cancel| {
+                    if let Some(el) = document().get_element_by_id(&cancel_el_id) {
+                        el.remove();
+                    }
+                })
                 .child(html!("div", {
                     .class("dialog")
                     .children(&mut [

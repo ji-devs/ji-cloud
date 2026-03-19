@@ -288,6 +288,9 @@ impl CircleDetails {
                             }))
                         };
                         dialog!{
+                            .event(clone!(state => move |_: events::Cancel| {
+                                state.active_popup.set(None);
+                            }))
                             .child(match active_popup {
                                 ActivePopup::About => {
                                     EditAbout::new(
