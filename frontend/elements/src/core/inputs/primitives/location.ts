@@ -31,6 +31,10 @@ export class _ extends LitElement {
 
     private autoComplete: any;
 
+    focus() {
+        this.shadowRoot?.getElementById("input")?.focus();
+    }
+
     onLocation(data: { input: string; place: any } | null) {
         this.dispatchEvent(
             new CustomEvent("google-location", {
