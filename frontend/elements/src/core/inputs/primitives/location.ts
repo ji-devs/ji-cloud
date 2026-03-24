@@ -117,9 +117,8 @@ export class _ extends LitElement {
             this.predictions = suggestions
                 .filter((s) => s.placePrediction)
                 .filter((s) => {
-                    // Filter out results without seecondary text, but if the user is searching for a country specifically,
-                    // ensure the results include it.
-                    return !!s.placePrediction?.secondaryText || s.placePrediction?.types.includes('country');
+                    // Filter out country-only results (results without secondary text are typically countries)
+                    return !!s.placePrediction?.secondaryText;
                 })
                 .map((s) => ({
                     description: s.placePrediction!.text.text,
