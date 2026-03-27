@@ -1,7 +1,10 @@
 use std::rc::Rc;
 
 use super::state::*;
-use components::module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase};
+use components::module::_common::play::{
+    prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
+    scoring::MAX_POINTS_PER_ITEM,
+};
 use shared::domain::jig::codes::JigPlaySessionModule;
 use shared::domain::module::body::_groups::design::Trace;
 use utils::toasts;
@@ -149,8 +152,11 @@ impl PlayState {
                             .unwrap_ji()
                             .failed_tries as u32,
                     );
-                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
-                        .try_post_message_to_player();
+                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(
+                        points,
+                        MAX_POINTS_PER_ITEM,
+                    ))
+                    .try_post_message_to_player();
 
                     if !Self::evaluate_all_completed(state.clone()) {
                         item.play_audio_effect(AudioEffect::Correct);
@@ -192,7 +198,7 @@ impl PlayState {
 
 fn calculate_point_count(tried_count: u32) -> u32 {
     // start with 2 point, reduce one point for every try. min points: 0.
-    let base = 2_u32;
+    let base = MAX_POINTS_PER_ITEM;
     base.saturating_sub(tried_count)
 }
 

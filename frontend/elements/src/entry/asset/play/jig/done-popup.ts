@@ -41,12 +41,26 @@ export class _ extends PopupBase {
                         font-size: 64px;
                     }
                 }
+                .percentage {
+                    font-size: 22px;
+                    font-weight: 600;
+                    font-style: italic;
+                    color: var(--light-orange-6);
+                }
+                @media (min-width: 1024px) {
+                    .percentage {
+                        font-size: 40px;
+                    }
+                }
             `,
         ];
     }
 
     @property({ type: Number })
     score?: number;
+
+    @property({ type: Number })
+    percentage?: number;
 
     render() {
         return html`
@@ -57,7 +71,12 @@ export class _ extends PopupBase {
                         ? html`
                             <div class="score-section">
                                 <h3>${STR_SCORE}</h3>
-                                <h2>${this.score}</h2>
+                                <h2>
+                                    ${this.score}
+                                    ${this.percentage !== undefined
+                                        ? html` <span class="percentage">(${this.percentage}%)</span>`
+                                        : nothing}
+                                </h2>
                             </div>
                         ` : nothing}
                 `;

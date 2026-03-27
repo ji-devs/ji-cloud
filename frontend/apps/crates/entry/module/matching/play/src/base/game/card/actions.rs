@@ -1,5 +1,6 @@
 use super::{super::state::*, state::*};
 use components::audio::mixer::{play_random_negative, play_random_positive, AUDIO_MIXER};
+use components::module::_common::play::scoring::MAX_POINTS_PER_ITEM;
 use std::rc::Rc;
 use utils::{
     math::BoundsF64,
@@ -44,8 +45,11 @@ impl CardDrag {
                     play_random_positive();
 
                     let points = calculate_point_count(*bottom.tried_count.borrow());
-                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
-                        .try_post_message_to_player();
+                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(
+                        points,
+                        MAX_POINTS_PER_ITEM,
+                    ))
+                    .try_post_message_to_player();
 
                     // card_report.succeeded = true;
                 } else {
@@ -122,6 +126,6 @@ pub fn start_drag(state: Rc<CardBottom>, elem: HtmlElement, x: i32, y: i32) {
 
 fn calculate_point_count(tried_count: u32) -> u32 {
     // start with 2 point, reduce one point for every try. min points: 0.
-    let base = 2_u32;
+    let base = MAX_POINTS_PER_ITEM;
     base.saturating_sub(tried_count)
 }

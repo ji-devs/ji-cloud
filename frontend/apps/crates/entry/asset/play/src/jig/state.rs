@@ -35,6 +35,7 @@ pub struct JigPlayer {
     pub navigation_handler: Mutable<Option<PlayerNavigationHandler>>,
     pub timer: Mutable<Option<Timer>>,
     pub points: Mutable<u32>,
+    pub max_points: Mutable<u32>,
     pub iframe: Rc<RefCell<Option<HtmlIFrameElement>>>,
     /// Whether this activity has started (via clicking Play button, or automatically).
     ///
@@ -94,6 +95,7 @@ impl JigPlayer {
             timer: Mutable::new(None),
             navigation_handler: Mutable::new(None),
             points: Mutable::new(0),
+            max_points: Mutable::new(0),
             iframe: Rc::new(RefCell::new(None)),
             started: Mutable::new(false),
             paused: Mutable::new(false),

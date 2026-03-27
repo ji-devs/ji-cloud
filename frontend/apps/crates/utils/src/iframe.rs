@@ -206,7 +206,7 @@ pub enum JigToModulePlayerMessage {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigPlayerMessage {
-    AddPoints(u32),
+    AddPoints(u32, u32),
     Start(ModuleConfig, StableModuleId),
     Previous,
     AddCodeSessionInfo(JigPlaySessionModule),

@@ -6,7 +6,10 @@ use std::sync::atomic::Ordering;
 
 use components::{
     audio::mixer::{AudioMixer, AudioPath, AUDIO_MIXER},
-    module::_common::play::prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
+    module::_common::play::{
+        prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
+        scoring::MAX_POINTS_PER_ITEM,
+    },
 };
 
 use dominator::clone;
@@ -134,7 +137,7 @@ impl Game {
 
                     phase.set(CurrentPhase::Correct(pair_id));
                     let points = calculate_point_count(state.base.play_report.lock_mut().rounds.last().unwrap_ji().failed_tries as u32);
-                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
+                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points, MAX_POINTS_PER_ITEM))
                         .try_post_message_to_player();
 
                     TimeoutFuture::new(crate::config::SUCCESS_TIME).await;
@@ -175,6 +178,6 @@ impl Game {
 
 fn calculate_point_count(tried_count: u32) -> u32 {
     // start with 2 point, reduce one point for every try. min points: 0.
-    let base = 2_u32;
+    let base = MAX_POINTS_PER_ITEM;
     base.saturating_sub(tried_count)
 }

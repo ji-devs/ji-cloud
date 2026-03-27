@@ -575,6 +575,16 @@ impl JigPlayer {
                             .apply(|mut dom| {
                                 if state.scoring.get() {
                                     dom = dom.prop_signal("score", state.points.signal().map(|p| p * 100));
+                                    dom = dom.prop_signal("percentage", map_ref! {
+                                        let points = state.points.signal(),
+                                        let max_points = state.max_points.signal() => {
+                                            if *max_points > 0 {
+                                                JsValue::from((*points as f64 / *max_points as f64 * 100.0).round() as u32)
+                                            } else {
+                                                JsValue::UNDEFINED
+                                            }
+                                        }
+                                    });
                                 };
                                 if !state.scoring.get() {
                                     dom = dom.child(

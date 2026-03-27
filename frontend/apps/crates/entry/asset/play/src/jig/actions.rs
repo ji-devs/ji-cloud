@@ -503,9 +503,9 @@ impl JigPlayer {
 
     pub fn on_iframe_message(self: &Rc<Self>, message: ModuleToJigPlayerMessage) {
         match message {
-            ModuleToJigPlayerMessage::AddPoints(amount) => {
-                let mut points = self.points.lock_mut();
-                *points += amount;
+            ModuleToJigPlayerMessage::AddPoints(earned, max) => {
+                *self.points.lock_mut() += earned;
+                *self.max_points.lock_mut() += max;
             }
             ModuleToJigPlayerMessage::Start(config, stable_module_id) => {
                 self.start_player(config);
