@@ -39,15 +39,14 @@ export class _ extends LitElement {
                     top: 50%;
                     transform: translateY(-50%);
                     margin: 0 auto;
+                    height: 100%;
+                    width: 100%;
                 }
                 :host([size=aspect-ratio]) .iframe-wrapper {
-                    max-height: 100dvh;
-                    max-width: 100vw;
                     aspect-ratio: 16 / 9;
                 }
                 :host([size=full-screen]) .iframe-wrapper {
-                    height: 100dvh;
-                    width: 100vw;
+
                 }
                 .iframe-wrapper ::slotted(iframe) {
                     height: 100%;
