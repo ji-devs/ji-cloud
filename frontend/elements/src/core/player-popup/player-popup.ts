@@ -27,8 +27,8 @@ export class _ extends LitElement {
                     top: 0;
                     left: 0;
                     z-index: 9999;
-                    height: 100dvh;
-                    width: 100vw;
+                    height: 100%;
+                    width: 100%;
                     background-color: #ececec;
                 }
                 .iframe-wrapper {
