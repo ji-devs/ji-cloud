@@ -37,6 +37,7 @@ export class _ extends LitElement {
                     aspect-ratio: 16 / 9;
                 }
                 :host([size=full-screen]) .iframe-wrapper {
+                    height: 100dvh;
                     width: 100vw;
                 }
                 .iframe-wrapper ::slotted(iframe) {
