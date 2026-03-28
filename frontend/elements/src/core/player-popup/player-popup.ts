@@ -19,11 +19,8 @@ export class _ extends LitElement {
             css`
                 :host {
                     position: fixed;
-                    top: 0;
-                    left: 0;
+                    inset: 0;
                     z-index: 9999;
-                    height: 100dvh;
-                    width: 100dvw;
                     background-color: #ececec;
                 }
                 .iframe-wrapper {
@@ -34,13 +31,13 @@ export class _ extends LitElement {
                     top: 50%;
                     transform: translateY(-50%);
                     margin: 0 auto;
-                    width: 100%;
+                    max-height: 100dvh;
                 }
                 :host([size=aspect-ratio]) .iframe-wrapper {
                     aspect-ratio: 16 / 9;
                 }
                 :host([size=full-screen]) .iframe-wrapper {
-                    height: 100%;
+                    width: 100vw;
                 }
                 .iframe-wrapper ::slotted(iframe) {
                     height: 100%;
