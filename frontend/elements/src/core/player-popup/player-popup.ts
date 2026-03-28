@@ -1,14 +1,9 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
 import { nothing } from "lit-html";
 
-const CSS_RULE_WEBKIT = `
-    :root::-webkit-scrollbar {
-        display: none;
-    }
-`;
-const CSS_RULE_FIREFOX = `
-    :root {
-        scrollbar-width: none;
+const CSS_RULE_BODY = `
+    body {
+        overflow: hidden !important;
     }
 `;
 
@@ -27,8 +22,8 @@ export class _ extends LitElement {
                     top: 0;
                     left: 0;
                     z-index: 9999;
-                    height: 100%;
-                    width: 100%;
+                    height: 100dvh;
+                    width: 100dvw;
                     background-color: #ececec;
                 }
                 .iframe-wrapper {
@@ -45,7 +40,7 @@ export class _ extends LitElement {
                     aspect-ratio: 16 / 9;
                 }
                 :host([size=full-screen]) .iframe-wrapper {
-
+                    height: 100%;
                 }
                 .iframe-wrapper ::slotted(iframe) {
                     height: 100%;
@@ -102,14 +97,12 @@ export class _ extends LitElement {
     connectedCallback() {
         super.connectedCallback();
 
-        stylesheet.sheet!.insertRule(CSS_RULE_WEBKIT);
-        stylesheet.sheet!.insertRule(CSS_RULE_FIREFOX);
+        stylesheet.sheet!.insertRule(CSS_RULE_BODY);
     }
 
     disconnectedCallback() {
         super.disconnectedCallback();
 
-        stylesheet.sheet!.deleteRule(0);
         stylesheet.sheet!.deleteRule(0);
     }
 
