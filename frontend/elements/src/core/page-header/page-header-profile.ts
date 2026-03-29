@@ -93,6 +93,7 @@ export class _ extends LitElement {
                     .main ::slotted([slot="profile-image"]) {
                         height: 32px;
                         width: 32px;
+                        --profile-image-font-size: 22px;
                     }
                     anchored-overlay[open] .main::after {
                         bottom: -1.25em;
