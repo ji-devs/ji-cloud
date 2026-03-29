@@ -84,8 +84,8 @@ export class _ extends LitElement {
     }
 
     initials(): string {
-        const initial_a = this.givenName[0] + "";
-        const initial_b = this.familyName[0] + "";
+        const initial_a = this.givenName?.[0] ?? "";
+        const initial_b = this.familyName?.[0] ?? "";
         return initial_a.toUpperCase() + initial_b.toUpperCase();
     }
 
