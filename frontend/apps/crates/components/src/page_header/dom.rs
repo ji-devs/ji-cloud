@@ -76,17 +76,6 @@ impl PageHeader {
                     analytics::event("Pricing Click", None);
                 })
             }))
-            .child(html!("div", {
-                .prop("slot", "help")
-                .child(html!("img-ui", {
-                    .prop("path", "core/page-header/icon-help.svg")
-                    .style("width", "20px")
-                    .style("height", "20px")
-                }))
-                .event(move |_evt: events::Click| {
-                    analytics::event("Help Center Click", None);
-                })
-            }))
             .apply(|dom| {
                 if let Some(PageLinks::Home) = state.config.active_page {
                     dom.child(html!("page-header-student-code", {
@@ -121,6 +110,18 @@ fn render_logged_in(state: Rc<PageHeader>, user: &UserProfile) -> Vec<Dom> {
         .prop("slot", "user")
         .prop("name", &user.given_name)
         .prop("email", &user.email)
+        .child(html!("a", {
+            .prop("slot", "help")
+            .prop("href", "/home/help")
+            .child(html!("img-ui", {
+                .prop("path", "core/page-header/icon-help.svg")
+                .style("width", "20px")
+                .style("height", "20px")
+            }))
+            .event(move |_evt: events::Click| {
+                analytics::event("Help Center Click", None);
+            })
+        }))
         .children(&mut [
             html!("button-rect", {
                 .prop("slot", "logout")

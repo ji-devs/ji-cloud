@@ -48,26 +48,7 @@ export class _ extends LitElement {
                     place-content: center;
                 }
                 .end {
-                    display: grid;
-                    grid-template-columns: repeat(2, auto);
                     height: 100%;
-                    column-gap: 16px;
-                    justify-content: space-between;
-                }
-                .end .help {
-                    display: grid;
-                    place-content: center;
-                }
-                .end .help ::slotted([slot="help"]){
-                    display: grid;
-                    place-content: center;
-                    padding: .5em;
-                    color: none;
-                }
-                .end .help ::slotted([slot="help"]:hover) {
-                    place-content: center;
-                    border-radius: 50%;
-                    background-color: #c4d9f7;
                 }
                 .end .user {
                     display: flex;
@@ -92,11 +73,12 @@ export class _ extends LitElement {
                     color: inherit;
                 }
                 /* mobile */
-                @media (max-width: 1023px) {
+                @media (max-width: 1024px) {
                     :host {
-                        justify-content: center;
+                        display: flex;
+                        justify-content: space-between;
                     }
-                    nav, .student-code, .help, .user {
+                    nav, .student-code {
                         display: none;
                     }
                     .beta {
@@ -134,11 +116,6 @@ export class _ extends LitElement {
                 <slot name="student-code"></slot>
             </div>
             <div class="end">
-                <div class="help">
-                    <a href= "/home/help" color="black">
-                        <slot name="help"></slot>
-                    </a>
-                </div>
                 <div class="user">
                     <slot name="user"></slot>
                 </div>

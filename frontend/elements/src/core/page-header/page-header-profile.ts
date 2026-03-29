@@ -19,6 +19,22 @@ export class _ extends LitElement {
                     height: 100%;
                     position: relative;
                 }
+                .wrapper {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    height: 100%;
+                }
+                ::slotted([slot="help"]) {
+                    display: grid;
+                    place-content: center;
+                    padding: .5em;
+                    cursor: pointer;
+                }
+                ::slotted([slot="help"]:hover) {
+                    border-radius: 50%;
+                    background-color: #c4d9f7;
+                }
                 anchored-overlay,
                 anchored-overlay::part(anchor) {
                     height: 100%;
@@ -50,7 +66,6 @@ export class _ extends LitElement {
                     height: 48px;
                     width: 48px;
                     border-radius: 50%;
-                    margin-right: 10px;
                     overflow: hidden;
                 }
                 .main .name {
@@ -67,11 +82,38 @@ export class _ extends LitElement {
                 anchored-overlay[open] .main .open-icon {
                     transform: rotate(-90deg);
                 }
+                @media (max-width: 1024px) {
+                    .main {
+                        grid-template-columns: auto;
+                    }
+                    .main .name,
+                    .main .open-icon {
+                        display: none;
+                    }
+                    .main ::slotted([slot="profile-image"]) {
+                        height: 32px;
+                        width: 32px;
+                    }
+                    anchored-overlay[open] .main::after {
+                        bottom: -1.25em;
+                    }
+                    anchored-overlay::part(overlay) {
+                        left: 0 !important;
+                        width: 100vw;
+                        border-radius: 0;
+                        margin-top: 1.25em;
+                    }
+                }
                 .overlay {
                     background-color: var(--light-orange-1);
                     padding: 24px 32px;
                     display: grid;
                     row-gap: 24px;
+                }
+                @media (min-width: 1025px) {
+                    .overlay {
+                        min-width: 350px;
+                    }
                 }
                 .overlay .divider {
                     height: 1px;
@@ -96,11 +138,19 @@ export class _ extends LitElement {
                     font-weight: 500;
                     color: var(--dark-gray-6);
                     align-self: end;
+                    max-width: 200px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
                 .overlay .info .email {
                     font-size: 14px;
                     font-weight: 500;
                     color: var(--dark-gray-6);
+                    max-width: 200px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
                 }
                 .overlay .user-links {
                     display: grid;
@@ -150,6 +200,8 @@ export class _ extends LitElement {
 
     render() {
         return html`
+          <div class="wrapper">
+            <slot name="help"></slot>
             <anchored-overlay
                 .autoClose=${false}
                 .open=${this.open}
@@ -182,6 +234,7 @@ export class _ extends LitElement {
                     </div>
                 </div>
             </anchored-overlay>
+          </div>
             <slot name="admin"></slot>
         `;
     }
