@@ -145,6 +145,7 @@ where
                         },
                         likes: 0,
                         plays: 0,
+                        max_score: 0,
                     }))
                 } else {
                     let resp = match draft_or_live {

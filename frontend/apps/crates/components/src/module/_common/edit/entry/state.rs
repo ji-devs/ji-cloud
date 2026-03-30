@@ -241,6 +241,7 @@ where
                             translated_keywords: String::from(""),
                             translated_description: HashMap::new(),
                         },
+                        max_score: 0,
                     }));
                 }
 

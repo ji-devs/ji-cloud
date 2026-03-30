@@ -78,5 +78,6 @@ pub fn get_jig() -> JigResponse {
         },
         likes: 0,
         plays: 0,
+        max_score: 0,
     }
 }
