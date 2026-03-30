@@ -152,11 +152,8 @@ impl PlayState {
                             .unwrap_ji()
                             .failed_tries as u32,
                     );
-                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(
-                        points,
-                        MAX_POINTS_PER_ITEM,
-                    ))
-                    .try_post_message_to_player();
+                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
+                        .try_post_message_to_player();
 
                     if !Self::evaluate_all_completed(state.clone()) {
                         item.play_audio_effect(AudioEffect::Correct);

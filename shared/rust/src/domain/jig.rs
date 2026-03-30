@@ -485,6 +485,10 @@ pub struct JigResponse {
 
     /// Admin data for Jig
     pub admin_data: JigAdminData,
+
+    /// Maximum possible score for this JIG
+    #[serde(default)]
+    pub max_score: u32,
 }
 
 make_path_parts!(JigGetLivePath => "/v1/jig/{}/live" => JigId);

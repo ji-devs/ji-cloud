@@ -45,11 +45,8 @@ impl CardDrag {
                     play_random_positive();
 
                     let points = calculate_point_count(*bottom.tried_count.borrow());
-                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(
-                        points,
-                        MAX_POINTS_PER_ITEM,
-                    ))
-                    .try_post_message_to_player();
+                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
+                        .try_post_message_to_player();
 
                     // card_report.succeeded = true;
                 } else {

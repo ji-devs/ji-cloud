@@ -73,6 +73,9 @@ export class _ extends PopupBase {
                                 <h3>${STR_SCORE}</h3>
                                 <h2>
                                     ${this.score}
+                                    ${this.percentage !== undefined
+                                        ? html` <span class="percentage">(${this.percentage}%)</span>`
+                                        : nothing}
                                 </h2>
                             </div>
                         ` : nothing}

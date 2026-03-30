@@ -229,6 +229,28 @@ select cte.jig_id                                          as "jig_id: JigId",
                 where jig_data_id = jig_data.id
                 order by "index"
         )                                               as "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>",
+        (
+            select coalesce(sum(
+                case
+                    when kind = 2 then
+                        LEAST(
+                            coalesce((contents->'content'->'player_settings'->>'n_choices')::int, 0),
+                            coalesce(jsonb_array_length(contents->'content'->'base'->'pairs'), 0)
+                        ) * coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2
+                    when kind = 9 then
+                        coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2
+                    when kind = 10 then
+                        (select count(*)::int from jsonb_array_elements(
+                            coalesce(contents->'content'->'items', '[]'::jsonb)
+                        ) as item where item->'kind' ? 'Interactive') * 2
+                    when kind = 13 then
+                        coalesce(jsonb_array_length(contents->'content'->'questions'), 0) * 2
+                    else 0
+                end
+            )::int, 0)
+            from jig_data_module
+            where jig_data_id = jig_data.id
+        )                                               as "max_score!",
         array(select row (category_id)
                 from jig_data_category
                 where jig_data_id = cte.draft_or_live_id)     as "categories!: Vec<(CategoryId,)>",
@@ -328,6 +350,7 @@ from jig_data
             curated: row.curated,
             premium: row.premium,
         },
+        max_score: row.max_score as u32,
     });
 
     Ok(jig)
@@ -407,6 +430,28 @@ select id,
                 where jig_data_id = jig_data.id
                 order by "index"
        )                                               as "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>",
+       (
+            select coalesce(sum(
+                case
+                    when kind = 2 then
+                        LEAST(
+                            coalesce((contents->'content'->'player_settings'->>'n_choices')::int, 0),
+                            coalesce(jsonb_array_length(contents->'content'->'base'->'pairs'), 0)
+                        ) * coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2
+                    when kind = 9 then
+                        coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2
+                    when kind = 10 then
+                        (select count(*)::int from jsonb_array_elements(
+                            coalesce(contents->'content'->'items', '[]'::jsonb)
+                        ) as item where item->'kind' ? 'Interactive') * 2
+                    when kind = 13 then
+                        coalesce(jsonb_array_length(contents->'content'->'questions'), 0) * 2
+                    else 0
+                end
+            )::int, 0)
+            from jig_data_module
+            where jig_data_id = jig_data.id
+       )                                               as "max_score!",
        array(select row (category_id)
              from jig_data_category
              where jig_data_id = jig_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -527,6 +572,7 @@ order by ord asc
                 curated: jig_row.curated,
                 premium: jig_row.premium,
             },
+            max_score: jig_data_row.max_score as u32,
         })
         .collect();
 
@@ -612,6 +658,28 @@ select jig.id                                              as "jig_id: JigId",
            where jig_data_id = jig_data.id
            order by "index"
     )                                               as "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>",
+   (
+        select coalesce(sum(
+            case
+                when kind = 2 then
+                    LEAST(
+                        coalesce((contents->'content'->'player_settings'->>'n_choices')::int, 0),
+                        coalesce(jsonb_array_length(contents->'content'->'base'->'pairs'), 0)
+                    ) * coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2
+                when kind = 9 then
+                    coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2
+                when kind = 10 then
+                    (select count(*)::int from jsonb_array_elements(
+                        coalesce(contents->'content'->'items', '[]'::jsonb)
+                    ) as item where item->'kind' ? 'Interactive') * 2
+                when kind = 13 then
+                    coalesce(jsonb_array_length(contents->'content'->'questions'), 0) * 2
+                else 0
+            end
+        )::int, 0)
+        from jig_data_module
+        where jig_data_id = jig_data.id
+   )                                               as "max_score!",
    array(select row (category_id)
          from jig_data_category
          where jig_data_id = jig_data.id)     as "categories!: Vec<(CategoryId,)>",
@@ -752,6 +820,7 @@ limit $8
                 curated: jig_data_row.curated,
                 premium: jig_data_row.premium,
             },
+            max_score: jig_data_row.max_score as u32,
         })
         .collect();
 

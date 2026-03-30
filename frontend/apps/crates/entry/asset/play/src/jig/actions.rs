@@ -369,6 +369,7 @@ impl JigPlayer {
                     if state.url_scoring.is_none() {
                         state.drag_assist.set_neq(jig.jig_data.default_player_settings.drag_assist);
                     }
+                    state.max_points.set(jig.max_score);
                     state.jig.set(Some(jig));
                     state.jig_liked.set(Some(jig_liked));
                 },
@@ -503,9 +504,8 @@ impl JigPlayer {
 
     pub fn on_iframe_message(self: &Rc<Self>, message: ModuleToJigPlayerMessage) {
         match message {
-            ModuleToJigPlayerMessage::AddPoints(earned, max) => {
+            ModuleToJigPlayerMessage::AddPoints(earned) => {
                 *self.points.lock_mut() += earned;
-                *self.max_points.lock_mut() += max;
             }
             ModuleToJigPlayerMessage::Start(config, stable_module_id) => {
                 self.start_player(config);

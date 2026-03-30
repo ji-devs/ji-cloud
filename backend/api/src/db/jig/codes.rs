@@ -286,6 +286,28 @@ pub async fn jigs_with_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
                     where jig_data_id = jig_data.id
                     order by "index"
                 ) as "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>",
+                (
+                    select coalesce(sum(
+                        case
+                            when kind = 2 then
+                                LEAST(
+                                    coalesce((contents->'content'->'player_settings'->>'n_choices')::int, 0),
+                                    coalesce(jsonb_array_length(contents->'content'->'base'->'pairs'), 0)
+                                ) * coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2
+                            when kind = 9 then
+                                coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2
+                            when kind = 10 then
+                                (select count(*)::int from jsonb_array_elements(
+                                    coalesce(contents->'content'->'items', '[]'::jsonb)
+                                ) as item where item->'kind' ? 'Interactive') * 2
+                            when kind = 13 then
+                                coalesce(jsonb_array_length(contents->'content'->'questions'), 0) * 2
+                            else 0
+                        end
+                    )::int, 0)
+                    from jig_data_module
+                    where jig_data_id = jig_data.id
+                ) as "max_score!",
                 array(select row (category_id)
                     from jig_data_category
                     where jig_data_id = cte.live_id)     as "categories!: Vec<(CategoryId,)>",
@@ -304,7 +326,7 @@ pub async fn jigs_with_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
                 inner join cte on cte.live_id = jig_data.id
                 inner join jig_code on cte.jig_id = jig_code.jig_id
             where jig_code.creator_id = $1
-            group by cte.jig_id, display_name, cte.creator_id, cte.author_id, author_id, author_name, updated_at, published_at, privacy_level, language, description, translated_description, theme, audio_background, liked_count, play_count, live_up_to_date, locked, other_keywords, translated_keywords, rating, blocked, curated, premium, audio_feedback_positive, audio_feedback_negative, jig_data.created_at, jig_data.updated_at, jig_data.direction, jig_data.scoring, jig_data.drag_assist, "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>", "categories!: Vec<(CategoryId,)>", "affiliations!: Vec<(AffiliationId,)>", "age_ranges!: Vec<(AgeRangeId,)>", "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
+            group by cte.jig_id, display_name, cte.creator_id, cte.author_id, author_id, author_name, updated_at, published_at, privacy_level, language, description, translated_description, theme, audio_background, liked_count, play_count, live_up_to_date, locked, other_keywords, translated_keywords, rating, blocked, curated, premium, audio_feedback_positive, audio_feedback_negative, jig_data.created_at, jig_data.updated_at, jig_data.direction, jig_data.scoring, jig_data.drag_assist, jig_data.id, "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>", "categories!: Vec<(CategoryId,)>", "affiliations!: Vec<(AffiliationId,)>", "age_ranges!: Vec<(AgeRangeId,)>", "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
             order by last_code_created_at desc
         "#,
         user_id.0
@@ -426,6 +448,7 @@ pub async fn jigs_with_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
                     curated: row.curated,
                     premium: row.premium,
                 },
+                max_score: row.max_score as u32,
             };
 
             Ok(JigWithCodes {

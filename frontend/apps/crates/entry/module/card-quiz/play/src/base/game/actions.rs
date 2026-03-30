@@ -137,7 +137,7 @@ impl Game {
 
                     phase.set(CurrentPhase::Correct(pair_id));
                     let points = calculate_point_count(state.base.play_report.lock_mut().rounds.last().unwrap_ji().failed_tries as u32);
-                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points, MAX_POINTS_PER_ITEM))
+                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
                         .try_post_message_to_player();
 
                     TimeoutFuture::new(crate::config::SUCCESS_TIME).await;
