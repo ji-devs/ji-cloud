@@ -61,6 +61,9 @@ async fn fetch_trending_algolia(
                 "model": TRENDING_ITEMS,
                 "threshold": 0,
                 "maxRecommendations": TRENDING_JIG_COUNT,
+                "queryParameters": {
+                    "filters": "blocked:false"
+                }
             }]
         }))
         .send()
