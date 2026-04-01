@@ -49,44 +49,46 @@ jobs:
 
       - run: cargo check --manifest-path backend/api/Cargo.toml --no-default-features
 
+  ## Disabled until we can resolve the psql container error
   # work in progress: currently yarn doesn't work right
-  test:
-    services:
-      # Label used to access the service container
-      postgres:
-        # Docker Hub image
-        image: postgres
-        # Provide the password for postgres
-        env:
-          POSTGRES_PASSWORD: password
-          # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          --tmpfs /var/lib/postgresql/data
-        ports:
-          # Maps tcp port 5432 on service container to the host
-          - 5432:5432
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # test:
+  #   services:
+  #     # Label used to access the service container
+  #     postgres:
+  #       # Docker Hub image
+  #       image: postgres
+  #       # Provide the password for postgres
+  #       env:
+  #         POSTGRES_PASSWORD: password
+  #         # Set health checks to wait until postgres has started
+  #       options: >-
+  #         --health-cmd pg_isready
+  #         --health-interval 10s
+  #         --health-timeout 5s
+  #         --health-retries 5
+  #         --tmpfs /var/lib/postgresql/data
+  #       ports:
+  #         # Maps tcp port 5432 on service container to the host
+  #         - 5432:5432
 
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable
+  #   name: Test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            backend/api/target
-          key: ${{ runner.os }}-test-backend-rs-${{ hashFiles('backend/api/Cargo.lock') }}
+  #     - uses: dtolnay/rust-toolchain@master
+  #       with:
+  #         toolchain: stable
 
-      - run: cargo test --manifest-path backend/api/Cargo.toml --no-default-features
-        env:
-          DATABASE_URL: postgres://postgres:password@localhost
-          SQLX_OFFLINE: 1
+  #     - uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ~/.cargo/registry
+  #           ~/.cargo/git
+  #           backend/api/target
+  #         key: ${{ runner.os }}-test-backend-rs-${{ hashFiles('backend/api/Cargo.lock') }}
+
+  #     - run: cargo test --manifest-path backend/api/Cargo.toml --no-default-features
+  #       env:
+  #         DATABASE_URL: postgres://postgres:password@localhost
+  #         SQLX_OFFLINE: 1
