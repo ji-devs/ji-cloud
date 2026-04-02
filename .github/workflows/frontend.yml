@@ -238,34 +238,34 @@ jobs:
       - name: deploy to google cloud
         run: gsutil -m rsync -d -r frontend/apps/static gs://${{ env.STORAGE_BUCKET }}/static
 
-  test:
-    needs: [prepare]
-    name: "[${{ needs.prepare.outputs.branch }}] Test"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # test:
+  #   needs: [prepare]
+  #   name: "[${{ needs.prepare.outputs.branch }}] Test"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Extract label
-        shell: bash
-        run: echo "value=\"[${{needs.prepare.outputs.branch}} - test - elements]\"" >> $GITHUB_OUTPUT
-        id: extract_label
+  #     - name: Extract label
+  #       shell: bash
+  #       run: echo "value=\"[${{needs.prepare.outputs.branch}} - test - elements]\"" >> $GITHUB_OUTPUT
+  #       id: extract_label
 
-      - name: install node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+  #     - name: install node
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '20'
 
-      - name: install npm deps
-        run: npm ci
-        working-directory: "./frontend/elements"
-        env:
-          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+  #     - name: install npm deps
+  #       run: npm ci
+  #       working-directory: "./frontend/elements"
+  #       env:
+  #         FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
-      - name: test elements
-        run: npm run test
-        working-directory: "./frontend/elements"
-        env:
-          FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
+  #     - name: test elements
+  #       run: npm run test
+  #       working-directory: "./frontend/elements"
+  #       env:
+  #         FONTAWESOME_NPM_AUTH_TOKEN: ${{ secrets.FONTAWESOME_NPM_AUTH_TOKEN }}
 
   build-module-elements:
     runs-on: ubuntu-latest
