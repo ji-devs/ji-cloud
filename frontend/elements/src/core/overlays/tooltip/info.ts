@@ -26,6 +26,7 @@ export class _ extends LitElement {
                 overlay-content {
                     animation: jump 1s ease-in-out;
                 }
+
                 @keyframes jump {
                     0% {
                         transform: translateY(0px);
@@ -85,10 +86,17 @@ export class _ extends LitElement {
                     margin-top: 28px;
                 }
                 :host([size="large"]) .body {
-                    font-size: 22px;
+                    font-size: 12px;
                     width: max-content;
-                    max-width: 504px;
-                    min-width: 304px;
+                    max-width: min(160px, calc(100vw - 48px));
+                    min-width: min(120px, calc(100vw - 48px));
+                }
+                @media (min-width: 1024px) {
+                    :host([size="large"]) .body {
+                        font-size: 22px;
+                        max-width: min(504px, calc(100vw - 48px));
+                        min-width: 304px;
+                    }
                 }
 
                 :host([color="dark-blue"]) .body {
