@@ -90,12 +90,14 @@ export class _ extends LitElement {
                     width: max-content;
                     max-width: min(160px, calc(100vw - 48px));
                     min-width: min(120px, calc(100vw - 48px));
+                    padding: 0 8px;
                 }
                 @media (min-width: 1024px) {
                     :host([size="large"]) .body {
                         font-size: 22px;
                         max-width: min(504px, calc(100vw - 48px));
                         min-width: 304px;
+                        padding: 0;
                     }
                 }
 
