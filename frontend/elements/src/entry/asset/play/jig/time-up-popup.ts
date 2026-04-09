@@ -9,12 +9,27 @@ export class _ extends PopupBase {
         return [
             ...super.styles,
             css`
+                :host {
+                    grid-template-rows: 1fr auto;
+                }
+                .top-section {
+                    grid-template-rows: 1fr auto;
+                    overflow: hidden;
+                }
+                @media (min-width: 1024px) {
+                    :host {
+                        grid-template-rows: 1fr 164px;
+                    }
+                }
                 img-ui {
                     height: 60px;
+                    object-fit: contain;
+                    justify-self: center;
                 }
                 @media (min-width: 1024px) {
                     img-ui {
-                        height: 350px;
+                        height: 100%;
+                        min-height: 0;
                     }
                 }
                 h2 {
