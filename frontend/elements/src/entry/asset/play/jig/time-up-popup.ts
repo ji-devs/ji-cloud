@@ -32,9 +32,12 @@ export class _ extends PopupBase {
                         min-height: 0;
                     }
                 }
+                .actions {
+                    padding: 16px 0;
+                }
                 h2 {
                     margin: 0;
-                    font-size: 24px;
+                    font-size: 16px;
                     font-weight: bold;
                     color: var(--light-orange-6);
                 }

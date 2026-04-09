@@ -35,8 +35,13 @@ export class _ extends LitElement {
                 }
                 .text {
                     color: var(--dark-gray-6);
-                    font-size: 14px;
+                    font-size: 11px;
                     font-weight: 600;
+                }
+                @media (min-width: 1024px) {
+                    .text {
+                        font-size: 14px;
+                    }
                 }
             `,
         ];
