@@ -77,26 +77,26 @@ export class _ extends LitElement {
                     font-size: 14px;
                     letter-spacing: -0.18px;
                     color: #ffffff;
-                    width: 304px;
+                    width: 280px;
                     margin: 8px 0 8px 0;
                     white-space: pre-wrap;
                     overflow-wrap: break-word;
                 }
+                @media (min-width: 1024px) {
+                    .body {
+                        width: 320px;
+                    }
+                }
                 ::slotted([slot="actions"]) {
-                    margin-top: 28px;
+                    margin-top: 6px;
                 }
                 :host([size="large"]) .body {
                     font-size: 12px;
-                    width: max-content;
-                    max-width: min(160px, calc(100vw - 48px));
-                    min-width: min(120px, calc(100vw - 48px));
                     padding: 0 8px;
                 }
                 @media (min-width: 1024px) {
                     :host([size="large"]) .body {
-                        font-size: 22px;
-                        max-width: min(504px, calc(100vw - 48px));
-                        min-width: 304px;
+                        font-size: 16px;
                         padding: 0;
                     }
                 }
