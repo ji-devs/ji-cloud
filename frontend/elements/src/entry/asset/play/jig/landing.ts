@@ -93,9 +93,16 @@ export class _ extends LitElement {
                         height: 28px;
                     }
                 }
+
                 :host([inIframe]) .top-bar .module-assist {
-                    margin-right: 96px;
+                    margin-right: 31px;
                 }
+                @media (min-width: 1024px) {
+                    :host([inIframe]) .top-bar .module-assist {
+                        margin-top: -12px;
+                    }
+                }
+
                 ::slotted([slot="module-assist"]) {
                     width: 30px;
                     height: 30px;
