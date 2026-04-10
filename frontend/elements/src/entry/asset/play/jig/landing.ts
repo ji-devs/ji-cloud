@@ -96,10 +96,11 @@ export class _ extends LitElement {
 
                 :host([inIframe]) .top-bar .module-assist {
                     margin-right: 31px;
+                    margin-top: -12px;
                 }
                 @media (min-width: 1024px) {
                     :host([inIframe]) .top-bar .module-assist {
-                        margin-top: -12px;
+                        margin-top: 0;
                     }
                 }
 
