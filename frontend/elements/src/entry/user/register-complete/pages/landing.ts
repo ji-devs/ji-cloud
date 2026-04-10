@@ -60,7 +60,8 @@ export class _ extends LitElement {
                 }
                 .actions {
                     display: flex;
-                    gap: 24px;
+                    gap: 12rem;
+                    flex-wrap: wrap;
                 }
                 ::slotted(p) {
                     font-size: 14px;
