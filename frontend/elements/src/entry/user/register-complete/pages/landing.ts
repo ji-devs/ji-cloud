@@ -40,9 +40,14 @@ export class _ extends LitElement {
                     max-width: 95vw;
                     border-radius: 32px;
                     box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
-                    padding: 64px;
+                    padding: 32px;
                     box-sizing: border-box;
                     background-color: #fff;
+                }
+                @media (min-width: 1024px) {
+                    .content {
+                        padding: 64px;
+                    }
                 }
                 .title {
                     text-align: left;
