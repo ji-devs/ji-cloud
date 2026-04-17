@@ -25,11 +25,11 @@ use shared::domain::{
     asset::AssetId,
     module::{
         body::{
-            ModuleAssist,
             _groups::design::TraceKind,
             tapping_board::{
                 Hint, Mode, ModuleData as RawData, Next, PlaySettings as RawPlaySettings, Step,
             },
+            ModuleAssist,
         },
         ModuleId,
     },

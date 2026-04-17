@@ -11,12 +11,12 @@ use shared::domain::{
     jig::JigId,
     module::{
         body::{
-            ModuleAssist,
             _groups::cards::{
                 BaseContent, Card as RawCard, CardContent as RawCardContent,
                 CardPair as RawCardPair, Mode, Step,
             },
             memory::{Content, ModuleData as RawData, PlayerSettings},
+            ModuleAssist,
         },
         ModuleId,
     },

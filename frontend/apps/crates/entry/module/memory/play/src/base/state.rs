@@ -4,10 +4,9 @@ use shared::{
         jig::player::{ModuleConfig, Seconds},
         module::{
             body::{
-                Background, ModuleAssist,
                 _groups::cards::{Mode, Step},
                 memory::{ModuleData as RawData, PlayerSettings},
-                ModuleAssistType,
+                Background, ModuleAssist, ModuleAssistType,
             },
             ModuleId, StableModuleId,
         },

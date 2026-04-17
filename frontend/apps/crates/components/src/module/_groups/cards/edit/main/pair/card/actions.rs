@@ -1,10 +1,10 @@
 use crate::module::_groups::cards::{edit::state::*, lookup::Side};
 use dominator::clone;
 use shared::domain::module::body::{
-    Image,
     _groups::cards::{
         BaseContent as RawBaseContent, Card as RawCard, CardContent as RawCardContent, Mode,
     },
+    Image,
 };
 use utils::prelude::*;
 

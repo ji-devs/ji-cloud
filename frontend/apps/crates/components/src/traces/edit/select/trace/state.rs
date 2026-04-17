@@ -1,6 +1,6 @@
 use shared::domain::module::body::{
-    Audio, Transform,
     _groups::design::{Trace as RawTrace, TraceKind, TraceShape},
+    Audio, Transform,
 };
 use std::cell::RefCell;
 use std::rc::Rc;

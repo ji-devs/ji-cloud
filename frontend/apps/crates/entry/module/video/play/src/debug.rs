@@ -11,12 +11,12 @@ use shared::{
         image::ImageId,
         module::{
             body::{
-                Image, ModuleAssist,
                 _groups::design::{
                     Backgrounds, BaseContent, Embed, EmbedHost, Sprite, Sticker, Text,
                     YoutubeEmbed, YoutubeUrl,
                 },
                 video::{Content, Mode, ModuleData as RawData},
+                Image, ModuleAssist,
             },
             ModuleId,
         },

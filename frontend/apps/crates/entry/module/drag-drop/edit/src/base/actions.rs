@@ -4,12 +4,12 @@ use super::{
 };
 use components::module::_common::edit::prelude::*;
 use shared::domain::module::body::{
-    Audio,
     _groups::design::Trace as RawTrace,
     drag_drop::{
         Interactive as RawInteractive, ItemKind as RawItemKind, Mode, ModuleData as RawData, Step,
         TargetArea, TargetTransform,
     },
+    Audio,
 };
 use std::rc::Rc;
 

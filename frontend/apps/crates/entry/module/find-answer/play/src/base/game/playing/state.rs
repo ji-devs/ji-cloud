@@ -3,9 +3,9 @@ use components::audio::mixer::AudioHandle;
 use components::traces::{bubble::TraceBubble, utils::TraceExt};
 use dominator::clone;
 use futures_signals::signal::Mutable;
-use shared::domain::module::body::Audio;
 use shared::domain::module::body::_groups::design::Trace;
 use shared::domain::module::body::find_answer::Question;
+use shared::domain::module::body::Audio;
 use std::cell::RefCell;
 use std::{ops::Deref, rc::Rc};
 

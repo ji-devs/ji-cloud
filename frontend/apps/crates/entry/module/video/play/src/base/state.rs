@@ -2,9 +2,9 @@ use components::module::_common::play::prelude::*;
 use futures_signals::signal::Mutable;
 use shared::domain::module::{
     body::{
-        ModuleAssist,
         _groups::design::{Backgrounds, Sticker},
         video::{Mode, ModuleData as RawData, Step},
+        ModuleAssist,
     },
     ModuleId, StableModuleId,
 };

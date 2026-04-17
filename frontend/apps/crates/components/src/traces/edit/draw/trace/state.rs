@@ -4,8 +4,8 @@ use std::rc::Rc;
 
 use crate::transform::state::{TransformCallbacks, TransformState};
 use shared::domain::module::body::{
-    Audio, Transform,
     _groups::design::{PathCommand, Trace as RawTrace, TraceKind, TraceShape as RawTraceShape},
+    Audio, Transform,
 };
 
 use utils::{math::BoundsF64, prelude::*};

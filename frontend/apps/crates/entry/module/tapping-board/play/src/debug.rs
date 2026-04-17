@@ -8,11 +8,11 @@ use shared::{
         image::ImageId,
         module::{
             body::{
-                Audio, Image, ModuleAssist, Transform,
                 _groups::design::{
                     Backgrounds, BaseContent, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
                 },
                 tapping_board::{Content, Hint, Mode, ModuleData as RawData, Next, PlaySettings},
+                Audio, Image, ModuleAssist, Transform,
             },
             ModuleId,
         },

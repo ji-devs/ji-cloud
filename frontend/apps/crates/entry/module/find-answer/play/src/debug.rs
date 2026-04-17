@@ -8,9 +8,9 @@ use shared::{
         jig::JigId,
         module::{
             body::{
-                Image, ModuleAssist,
                 _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
                 find_answer::{Content, Mode, ModuleData as RawData, Ordering, PlaySettings},
+                Image, ModuleAssist,
             },
             ModuleId,
         },

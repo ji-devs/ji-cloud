@@ -7,9 +7,9 @@ use shared::{
         image::ImageId,
         module::{
             body::{
-                Image, ModuleAssist,
                 _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
                 cover::{Content, ModuleData as RawData},
+                Image, ModuleAssist,
             },
             ModuleId,
         },

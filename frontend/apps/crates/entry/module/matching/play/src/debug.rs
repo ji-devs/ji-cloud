@@ -5,12 +5,12 @@ use shared::{
         asset::AssetId,
         image::ImageId,
         module::body::{
-            Image, ModuleAssist,
             _groups::cards::{
                 BaseContent, Card as RawCard, CardContent as RawCardContent,
                 CardPair as RawCardPair, Mode,
             },
             matching::{Content, ModuleData as RawData, PlayerSettings},
+            Image, ModuleAssist,
         },
         module::ModuleId,
     },

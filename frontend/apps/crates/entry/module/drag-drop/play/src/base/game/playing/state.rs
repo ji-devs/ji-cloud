@@ -5,9 +5,9 @@ use futures_signals::{
     signal_vec::{self, SignalVecExt},
 };
 use shared::domain::module::body::{
-    Audio, Transform,
     _groups::design::Sticker,
     drag_drop::{Interactive, ItemKind},
+    Audio, Transform,
 };
 use std::{cell::RefCell, rc::Rc};
 use utils::drag::Drag;

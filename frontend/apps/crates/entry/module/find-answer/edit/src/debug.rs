@@ -9,9 +9,9 @@ use shared::{
         jig::JigId,
         module::{
             body::{
-                Image, ModuleAssist,
                 _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text, TraceKind},
                 find_answer::{Content, Mode, ModuleData as RawData, Step},
+                Image, ModuleAssist,
             },
             ModuleId,
         },

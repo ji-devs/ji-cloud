@@ -8,9 +8,9 @@ use shared::{
         asset::AssetId,
         image::ImageId,
         module::body::{
-            Image, ModuleAssist,
             _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
             video::{Content, Mode, ModuleData as RawData, Step},
+            Image, ModuleAssist,
         },
         module::ModuleId,
     },

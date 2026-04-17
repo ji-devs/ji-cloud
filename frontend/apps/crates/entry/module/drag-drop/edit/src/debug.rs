@@ -7,7 +7,6 @@ use shared::{
         image::ImageId,
         module::{
             body::{
-                Image, ModuleAssist, Transform,
                 _groups::design::{
                     Backgrounds, Sprite, Sticker, Text, Trace, TraceKind, TraceShape,
                 },
@@ -15,6 +14,7 @@ use shared::{
                     Content, Hint, Interactive, Item, ItemKind, Mode, ModuleData as RawData,
                     PlaySettings, Step, TargetArea,
                 },
+                Image, ModuleAssist, Transform,
             },
             ModuleId,
         },

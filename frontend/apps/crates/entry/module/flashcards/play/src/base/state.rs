@@ -1,9 +1,8 @@
 use shared::domain::module::{
     body::{
-        Background, ModuleAssist,
         _groups::cards::{CardPair, Mode, Step},
         flashcards::{ModuleData as RawData, PlayerSettings},
-        ModuleAssistType,
+        Background, ModuleAssist, ModuleAssistType,
     },
     ModuleId, StableModuleId,
 };

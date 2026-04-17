@@ -19,18 +19,18 @@ use futures_signals::{
     signal_vec::MutableVec,
 };
 use shared::domain::asset::AssetId;
-use shared::domain::module::body::Audio;
 use shared::domain::module::body::_groups::design::Trace;
 use shared::domain::module::body::find_answer::{
     Ordering, Question as RawQuestion, QuestionField, DEFAULT_ATTEMPTS_LIMIT,
 };
+use shared::domain::module::body::Audio;
 use shared::domain::{
     jig::JigId,
     module::{
         body::{
-            BodyExt, ModuleAssist,
             _groups::design::TraceKind,
             find_answer::{Mode, ModuleData as RawData, PlaySettings as RawPlaySettings, Step},
+            BodyExt, ModuleAssist,
         },
         ModuleId,
     },

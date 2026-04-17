@@ -2,8 +2,8 @@ use crate::base::game::state::{CardPairId, Game};
 use components::module::_groups::cards::lookup::Side;
 use futures_signals::signal::Mutable;
 use shared::domain::module::body::{
-    ThemeId,
     _groups::cards::{Card, Mode},
+    ThemeId,
 };
 use std::cell::RefCell;
 use std::rc::Rc;

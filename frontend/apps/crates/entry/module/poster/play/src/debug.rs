@@ -12,9 +12,9 @@ use shared::{
         jig::JigId,
         module::{
             body::{
-                Image, ModuleAssist,
                 _groups::design::{Backgrounds, BaseContent, Sprite, Sticker, Text},
                 poster::{Content, Mode, ModuleData as RawData},
+                Image, ModuleAssist,
             },
             ModuleId,
         },

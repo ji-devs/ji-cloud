@@ -14,7 +14,7 @@ use futures_signals::{
 use gloo_timers::future::TimeoutFuture;
 use js_sys::Reflect;
 use shared::domain::module::body::{
-    find_answer::QuestionField, ModuleAssist, ModuleAssistType, _groups::design::TraceKind,
+    _groups::design::TraceKind, find_answer::QuestionField, ModuleAssist, ModuleAssistType,
 };
 use std::rc::Rc;
 use utils::{prelude::*, resize::resize_info_signal};

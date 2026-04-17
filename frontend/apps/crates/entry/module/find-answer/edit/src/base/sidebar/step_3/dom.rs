@@ -21,9 +21,9 @@ use futures_signals::{
 };
 use js_sys::Reflect;
 use shared::domain::module::body::{
-    Audio,
     _groups::design::{Sticker as RawSticker, Text, TraceKind},
     find_answer::QuestionField,
+    Audio,
 };
 use utils::prelude::*;
 use wasm_bindgen::JsValue;

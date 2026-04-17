@@ -1,5 +1,5 @@
 use futures_signals::signal::{Mutable, Signal, SignalExt};
-use shared::domain::module::body::{Transform, _groups::design::Embed as RawEmbed};
+use shared::domain::module::body::{_groups::design::Embed as RawEmbed, Transform};
 use std::rc::Rc;
 
 use crate::transform::state::{TransformCallbacks, TransformState};

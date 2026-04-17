@@ -28,8 +28,8 @@
 */
 use awsm_web::{canvas::get_2d_context, dom::StyleExt};
 use shared::domain::module::body::{
-    Transform,
     _groups::design::{Sticker, Trace},
+    Transform,
 };
 use std::borrow::Cow;
 use std::collections::HashMap;

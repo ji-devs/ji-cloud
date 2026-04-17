@@ -3,8 +3,8 @@ use js_sys::Reflect;
 use shared::{
     domain::module::{
         body::{
-            Body, BodyExt, ModeExt, StepExt,
             _groups::cards::{CardContent, CardPair},
+            Body, BodyExt, ModeExt, StepExt,
         },
         ModuleBody,
     },

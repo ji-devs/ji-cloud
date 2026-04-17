@@ -5,12 +5,12 @@ use shared::domain::{
     asset::AssetId,
     module::{
         body::{
-            ModuleAssist,
             _groups::cards::{
                 BaseContent, Card as RawCard, CardContent as RawCardContent,
                 CardPair as RawCardPair, Mode, Step,
             },
             flashcards::{Content, ModuleData as RawData, PlayerSettings},
+            ModuleAssist,
         },
         ModuleId,
     },

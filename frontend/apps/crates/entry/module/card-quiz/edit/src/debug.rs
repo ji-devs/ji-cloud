@@ -7,12 +7,12 @@ use shared::domain::{
     asset::AssetId,
     module::{
         body::{
-            ModuleAssist,
             _groups::cards::{
                 BaseContent, Card as RawCard, CardContent as RawCardContent,
                 CardPair as RawCardPair, Mode, Step,
             },
             card_quiz::{Content, ModuleData as RawData},
+            ModuleAssist,
         },
         ModuleId,
     },

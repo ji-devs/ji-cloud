@@ -3,8 +3,8 @@ use futures_signals::{
     signal::{Mutable, Signal, SignalExt},
 };
 use shared::domain::module::body::{
-    HoverAnimation, Image, StickerHidden, Transform,
     _groups::design::{Sprite as RawSprite, SpriteEffect},
+    HoverAnimation, Image, StickerHidden, Transform,
 };
 use std::rc::Rc;
 

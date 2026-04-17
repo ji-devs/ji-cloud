@@ -2,8 +2,8 @@ use crate::audio::mixer::AUDIO_MIXER;
 use crate::module::_groups::cards::lookup::Side;
 use dominator::{clone, html, Dom, DomBuilder};
 use shared::domain::module::body::{
-    ModeExt,
     _groups::cards::{Card, Mode},
+    ModeExt,
 };
 use utils::prelude::*;
 use web_sys::HtmlElement;

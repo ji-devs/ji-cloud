@@ -25,13 +25,12 @@ use shared::domain::{
     asset::AssetId,
     module::{
         body::{
-            Audio, ModuleAssist, Transform,
             _groups::design::{Trace as RawTrace, TraceKind},
             drag_drop::{
                 Hint, Interactive as RawInteractive, Item as RawItem, ItemKind as RawItemKind,
                 Mode, ModuleData as RawData, PlaySettings as RawPlaySettings, Step, TargetArea,
             },
-            BodyExt,
+            Audio, BodyExt, ModuleAssist, Transform,
         },
         ModuleId,
     },

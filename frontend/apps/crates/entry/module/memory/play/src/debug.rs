@@ -12,12 +12,12 @@ use shared::{
         {
             jig::JigId,
             module::body::{
-                Image, ModuleAssist,
                 _groups::cards::{
                     BaseContent, Card as RawCard, CardContent as RawCardContent,
                     CardPair as RawCardPair, Mode,
                 },
                 memory::{Content, ModuleData as RawData, PlayerSettings},
+                Image, ModuleAssist,
             },
             module::ModuleId,
         },

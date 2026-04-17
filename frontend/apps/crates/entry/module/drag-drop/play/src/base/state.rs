@@ -6,12 +6,11 @@ use shared::domain::{
     },
     module::{
         body::{
-            ModuleAssist,
             _groups::design::Backgrounds,
             drag_drop::{
                 Item, Mode, ModuleData as RawData, PlaySettings, Step, TargetArea, TargetTransform,
             },
-            ModuleAssistType,
+            ModuleAssist, ModuleAssistType,
         },
         ModuleId, StableModuleId,
     },
