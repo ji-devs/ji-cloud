@@ -473,7 +473,8 @@ select
     user_id     as "id!: UserId",
     password,
     exists(select 1 from user_profile where user_id = user_auth_basic.user_id) as "has_profile!",
-    exists(select 1 from user_email where user_id = user_auth_basic.user_id) as "has_verified_email!"
+    exists(select 1 from user_email where user_id = user_auth_basic.user_id) as "has_verified_email!",
+    (select blocked from "user" where id = user_auth_basic.user_id) as "blocked?"
 from user_auth_basic where email = $1::text
 "#,
                 &*email.to_lowercase()
@@ -508,6 +509,12 @@ from user_auth_basic where email = $1::text
                 password_hasher
                     .verify_password(password.as_bytes(), &hash)
                     .map_err(|_| Either::Left(BasicError::new(StatusCode::UNAUTHORIZED)))?;
+
+                if user.blocked.unwrap_or(false) {
+                    return Err(Either::Left(BasicError::new(
+                        StatusCode::UNAUTHORIZED,
+                    )));
+                }
 
                 let registration_status = match (user.has_verified_email, user.has_profile) {
                     // todo: "???"

@@ -50,7 +50,7 @@ pub async fn get(
             exists(select 1 from user_follow where follower_id = $2 and user_id = "user".id) as "following!"
         from "user"
         inner join user_profile on "user".id = user_profile.user_id
-        where id = $1
+        where id = $1 and "user".blocked = false
         "#,
         user_id.0,
         token.map(|id| id.0)
@@ -111,6 +111,7 @@ pub async fn browse_users(
             left join circle_member "cm" on cm.user_id = public_user.user_id
             where (cm.id = any($1) or $1 = array[]::uuid[])
                 and (user_profile.badge = any($6) or $6 = array[]::smallint[])
+                and "user".blocked = false
             group by "user".created_at, total_asset_count
             order by case when $4 = 0 then total_asset_count
                 else extract(epoch from "user".created_at)
@@ -392,6 +393,7 @@ pub async fn get_by_ids(
             inner join user_profile on "user".id = user_profile.user_id
             inner join unnest($1::uuid[])
             with ordinality t(id, ord) using (id)
+            where "user".blocked = false
 "#,
             ids,
             token.map(|id| id.0)
@@ -548,7 +550,7 @@ pub async fn browse_followers(
         from cte
         inner join user_profile on cte.id = user_profile.user_id
         inner join "user" on (cte.id = "user".id)
-        where ord > (1 * $2 * $3)
+        where ord > (1 * $2 * $3) and "user".blocked = false
         limit $3;
             "#,
             user_id.0,
@@ -641,7 +643,7 @@ pub async fn browse_following(
             from cte
             inner join user_profile on cte.id = user_profile.user_id
             inner join "user" on (cte.id = "user".id)
-            where ord > (1 * $2 * $3)
+            where ord > (1 * $2 * $3) and "user".blocked = false
             limit $3;
             "#,
             user_id.0,
@@ -703,6 +705,7 @@ pub async fn total_user_count(
             left join circle_member "cm" on cm.user_id = up.user_id
             where (cm.id = any($1) or $1 = array[]::uuid[])
                 and (up.badge = any($2) or $2 = array[]::smallint[])
+                and "user".blocked = false
             group by "user".created_at
         )
             select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id

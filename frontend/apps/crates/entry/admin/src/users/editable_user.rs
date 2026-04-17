@@ -24,6 +24,7 @@ pub struct EditableUser {
     pub account_id: Option<AccountId>,
     pub school_account: String,
     pub tier_override: Option<PlanTier>,
+    pub blocked: Mutable<bool>,
     // pub loader: AsyncLoader,
 }
 
@@ -107,6 +108,7 @@ impl From<UserResponse> for EditableUser {
             account_id: user.account_id,
             school_account,
             tier_override: user.tier_override,
+            blocked: Mutable::new(user.blocked),
             // loader: AsyncLoader::new(),
         }
     }

@@ -323,7 +323,8 @@ pub async fn browse_circle_members(
                    array_agg(scope) as scopes
             from circle_member cm
             left join user_scope on cm.user_id = user_scope.user_id
-            where cm.id = $1
+            inner join "user" on cm.user_id = "user".id
+            where cm.id = $1 and "user".blocked = false
             group by cm.user_id
         )
         select us.user_id  "user_id: UserId"

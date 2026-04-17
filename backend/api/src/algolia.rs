@@ -191,6 +191,7 @@ struct BatchPublicUser<'a> {
     location: Option<String>,
     persona: &'a Option<Vec<String>>,
     circles: &'a [Uuid],
+    blocked: bool,
 }
 
 #[derive(Serialize)]
@@ -205,6 +206,7 @@ struct BatchUser<'a> {
     language_emails: &'a str,
     created_at: DateTime<Utc>,
     organization: Option<String>,
+    blocked: bool,
 }
 
 #[derive(Serialize)]
@@ -1241,7 +1243,8 @@ where playlist_data.id = any (select live_id from playlist where playlist.id = a
                 from circle_member bm
                 inner join circle on bm.id = circle.id
                 where bm.user_id = "user".id
-            )) as "circles!"
+            )) as "circles!",
+            "user".blocked as "blocked!"
     from user_profile "up"
     inner join "user" on "user".id = up.user_id
     inner join public_user on public_user.user_id = up.user_id
@@ -1262,7 +1265,8 @@ where playlist_data.id = any (select live_id from playlist where playlist.id = a
                 organization: row.organization,
                 persona: &row.persona,
                 location: row.location,
-                circles: &row.circles
+                circles: &row.circles,
+                blocked: row.blocked,
             })
             .expect("failed to serialize BatchPublicUser to json")
             {
@@ -1317,7 +1321,8 @@ where playlist_data.id = any (select live_id from playlist where playlist.id = a
             language_emails                          as "language_emails!",
             organization                             as "organization?",
             location                                 as "location?",
-            user_email.created_at                    as "created_at"
+            user_email.created_at                    as "created_at",
+            "user".blocked                           as "blocked!"
 from user_profile "up"
         inner join "user" on "user".id = up.user_id
         inner join user_email on user_email.user_id = up.user_id
@@ -1342,6 +1347,7 @@ limit 100 for no key update skip locked;
                     state: location.state,
                     country: location.country_short,
                     created_at: row.created_at,
+                    blocked: row.blocked,
                 })
                 .expect("failed to serialize BatchUser to json")
                 {
@@ -2523,6 +2529,15 @@ impl Client {
         page: Option<u32>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
+
+        // Always filter out blocked users
+        and_filters.filters.push(Box::new(CommonFilter {
+            filter: FacetFilter {
+                facet_name: "blocked".to_owned(),
+                value: "false".to_owned(),
+            },
+            invert: false,
+        }));
 
         if let Some(user_id) = user_id {
             and_filters.filters.push(Box::new(CommonFilter {

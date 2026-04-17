@@ -414,6 +414,10 @@ pub struct UserResponse {
 
     /// Login type
     pub login_type: UserLoginType,
+
+    /// Whether the user is blocked
+    #[serde(default)]
+    pub blocked: bool,
 }
 
 /// A user's profile export representation.
@@ -764,6 +768,11 @@ pub struct PatchProfileAdminDataRequest {
     /// Users email
     #[serde(default)]
     pub email: String,
+
+    /// Whether the user is blocked
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocked: Option<bool>,
 }
 
 make_path_parts!(CreateUserPath => "/v1/user");

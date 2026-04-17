@@ -145,11 +145,18 @@ async fn handle_google_oauth(
         Some(google_auth) => {
             // make sure that the user either has a profile, or can only *create* one.
             let check_profile = sqlx::query!(
-                r#"select exists(select 1 from user_profile where user_id = $1) as "exists!""#,
+                r#"select
+                    exists(select 1 from user_profile where user_id = $1) as "exists!",
+                    (select blocked from "user" where id = $1) as "blocked?"
+                "#,
                 google_auth.user_id
             )
             .fetch_one(&mut txn)
             .await?;
+
+            if check_profile.blocked.unwrap_or(false) {
+                return Err(error::OAuth::Unauthorized);
+            }
 
             let mask = if check_profile.exists {
                 SessionMask::GENERAL

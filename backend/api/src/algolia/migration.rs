@@ -193,6 +193,7 @@ pub(crate) async fn user_index(
             FacetAttribute::filter_only(Attribute("organization".to_owned())),
             FacetAttribute::filter_only(Attribute("persona".to_owned())),
             FacetAttribute::filter_only(Attribute("location".to_owned())),
+            FacetAttribute::filter_only(Attribute("blocked".to_owned())),
         ]),
     };
 
@@ -229,6 +230,7 @@ pub(crate) async fn public_user_index(
             FacetAttribute::filter_only(Attribute("organization".to_owned())),
             FacetAttribute::filter_only(Attribute("persona".to_owned())),
             FacetAttribute::filter_only(Attribute("location".to_owned())),
+            FacetAttribute::filter_only(Attribute("blocked".to_owned())),
         ]),
     };
 

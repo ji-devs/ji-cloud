@@ -169,6 +169,33 @@ impl UsersTable {
                         html!("span", {
                             .text(&user.login_type.to_string())
                         }),
+                        html!("span", {
+                            .child(html!("fa-button", {
+                                .style_signal("color", user.blocked.signal().map(|blocked| {
+                                    match blocked {
+                                        true => "red",
+                                        false => "green",
+                                    }
+                                }))
+                                .prop_signal("icon", user.blocked.signal().map(|blocked| {
+                                    match blocked {
+                                        true => "fa-solid fa-eye-slash",
+                                        false => "fa-solid fa-eye",
+                                    }
+                                }))
+                                .prop_signal("title", user.blocked.signal().map(|blocked| {
+                                    match blocked {
+                                        true => "Blocked",
+                                        false => "Active",
+                                    }
+                                }))
+                                .event(clone!(state, user => move |_: events::Click| {
+                                    let mut blocked = user.blocked.lock_mut();
+                                    *blocked = !*blocked;
+                                    state.save_admin_data(&user);
+                                }))
+                            }))
+                        }),
                         html!("label", {
                             .child(html!("select" => HtmlSelectElement, {
                                 .with_node!(select => {

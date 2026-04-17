@@ -41,7 +41,7 @@ impl UsersTable {
             let req = PatchProfileAdminDataRequest {
                 badge: Some(user.badge.get()),
                 email: user.email.get_cloned(),
-
+                blocked: Some(user.blocked.get()),
             };
             endpoints::user::PatchProfileAdminData::api_with_auth(
                 PatchProfileAdminDataPath(user.id),

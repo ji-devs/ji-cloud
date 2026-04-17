@@ -7,6 +7,7 @@ pub enum OAuth {
     InternalServerError(anyhow::Error),
     Google(GoogleOAuth),
     Conflict,
+    Unauthorized,
 }
 
 impl<T: Into<anyhow::Error>> From<T> for OAuth {
@@ -31,6 +32,7 @@ impl Into<actix_web::Error> for OAuth {
                 "User with same email exists, but they haven't enabled oauth".to_owned(),
             )
             .into(),
+            Self::Unauthorized => BasicError::new(http::StatusCode::UNAUTHORIZED).into(),
         }
     }
 }
