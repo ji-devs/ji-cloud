@@ -1,7 +1,7 @@
 use crate::domain::module::{
     body::{
-        Audio, Body, BodyConvert, BodyExt, ModeExt, ModuleAssist, StepExt, ThemeId, Transform,
         _groups::design::{Backgrounds, Sticker, Trace},
+        Audio, Body, BodyConvert, BodyExt, ModeExt, ModuleAssist, StepExt, ThemeId, Transform,
     },
     ModuleKind,
 };
