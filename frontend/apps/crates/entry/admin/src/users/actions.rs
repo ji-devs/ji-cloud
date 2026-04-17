@@ -45,6 +45,7 @@ impl Users {
     async fn load_users_browse(&self) -> UserListResponse {
         let req = UserBrowseQuery {
             page: Some(self.active_page.get()),
+            blocked: self.blocked_filter.get(),
             ..Default::default()
         };
 

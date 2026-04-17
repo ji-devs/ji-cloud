@@ -159,6 +159,7 @@ pub async fn browse(
     page: i32,
     page_limit: u32,
     badge: Vec<UserBadge>,
+    blocked: Option<bool>,
 ) -> sqlx::Result<Vec<UserResponse>> {
     let mut txn = db.begin().await?;
 
@@ -174,6 +175,7 @@ with cte as (
         inner join user_email on user_profile.user_id = user_email.user_id
     where (user_profile.user_id = $1 or $1 is null)
       and (user_profile.badge = any($4) or $4 = array[]::smallint[])
+      and ("user".blocked = $5 or $5 is null)
     group by "user".created_at
     order by "user".created_at desc
 ),
@@ -251,7 +253,8 @@ offset $2
         author_id.map(|x| x.0),
         (page * page_limit as i32) as i32,
         page_limit as i32,
-        &badges[..]
+        &badges[..],
+        blocked
     )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query user_profile"))
@@ -1362,6 +1365,7 @@ pub async fn filtered_count(
     db: &PgPool,
     user_id: Option<UserId>,
     badge: Vec<UserBadge>,
+    blocked: Option<bool>,
 ) -> sqlx::Result<u64> {
     let badges: Vec<i16> = badge.iter().map(|x| *x as i16).collect();
 
@@ -1375,13 +1379,15 @@ pub async fn filtered_count(
             inner join user_email on user_email.user_id = user_profile.user_id
             where ("user".id = $1 or $1 is null)
             and (user_profile.badge = any($2) or $2 = array[]::smallint[])
+            and ("user".blocked = $3 or $3 is null)
             group by "user".created_at
             order by "user".created_at desc
         )
         select count(*) as "count!" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)
         "#,
         user_id.map(|it| it.0),
-        &badges[..]
+        &badges[..],
+        blocked
     )
     .fetch_one(db)
     .await?;

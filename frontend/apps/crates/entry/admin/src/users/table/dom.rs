@@ -24,6 +24,42 @@ impl UsersTable {
                     state.search_users(e.query());
                 }))
             }))
+            .child(html!("select" => HtmlSelectElement, {
+                .prop("slot", "search")
+                .style("margin-left", "10px")
+                .style("padding", "4px")
+                .with_node!(select => {
+                    .children(&mut [
+                        html!("option", {
+                            .text("All users")
+                            .prop("value", "all")
+                            .prop_signal("selected", state.users_state.blocked_filter.signal().map(|f| f.is_none()))
+                        }),
+                        html!("option", {
+                            .text("Active only")
+                            .prop("value", "active")
+                            .prop_signal("selected", state.users_state.blocked_filter.signal().map(|f| f == Some(false)))
+                        }),
+                        html!("option", {
+                            .text("Blocked only")
+                            .prop("value", "blocked")
+                            .prop_signal("selected", state.users_state.blocked_filter.signal().map(|f| f == Some(true)))
+                        }),
+                    ])
+                    .event(clone!(state, select => move |_: events::Change| {
+                        let value = select.value();
+                        let blocked_filter = match value.as_str() {
+                            "all" => None,
+                            "active" => Some(false),
+                            "blocked" => Some(true),
+                            _ => Some(false),
+                        };
+                        state.users_state.blocked_filter.set(blocked_filter);
+                        state.users_state.active_page.set(0);
+                        state.users_state.load_data();
+                    }))
+                })
+            }))
             .child_signal(
                 state.search_count().map(|count| {
                     match count {

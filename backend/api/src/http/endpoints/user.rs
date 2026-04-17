@@ -1164,10 +1164,15 @@ async fn browse(
         query.page.unwrap_or(0) as i32,
         page_limit,
         query.badge.to_owned(),
+        query.blocked,
     );
 
-    let total_count_future =
-        db::user::filtered_count(db.as_ref(), query.user_id, query.badge.to_owned());
+    let total_count_future = db::user::filtered_count(
+        db.as_ref(),
+        query.user_id,
+        query.badge.to_owned(),
+        query.blocked,
+    );
 
     let (users, total_count) = try_join!(browse_future, total_count_future,)?;
 

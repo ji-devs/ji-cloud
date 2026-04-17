@@ -901,6 +901,11 @@ pub struct UserBrowseQuery {
     #[serde(deserialize_with = "super::from_csv")]
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub badge: Vec<UserBadge>,
+
+    /// Optional filter for blocked status (None = all users, Some(true) = only blocked, Some(false) = only non-blocked)
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocked: Option<bool>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::user::Browse).

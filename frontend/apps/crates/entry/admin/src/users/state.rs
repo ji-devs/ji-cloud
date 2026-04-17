@@ -14,6 +14,7 @@ pub struct Users {
     pub active_page: Mutable<u32>,
     pub total_pages: Mutable<Option<u32>>,
     pub total_user_count: Mutable<Option<u64>>,
+    pub blocked_filter: Mutable<Option<bool>>,
 }
 
 impl Users {
@@ -26,6 +27,7 @@ impl Users {
             active_page: Mutable::new(0),
             total_pages: Mutable::new(None),
             total_user_count: Mutable::new(Some(0)),
+            blocked_filter: Mutable::new(None),
         })
     }
 }
