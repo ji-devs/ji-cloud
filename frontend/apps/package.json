@@ -14,7 +14,7 @@
         "@stripe/stripe-js": "^4.1.0",
         "@wasm-tool/rollup-plugin-rust": "3.0.4",
         "cross-env": "^7.0.3",
-        "firebase": "^9.6.1",
+        "firebase": "^12.12.0",
         "mixpanel-browser": "^2.45.0",
         "rollup": "^4.37",
         "slate": "^0.94.1",
