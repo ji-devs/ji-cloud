@@ -14335,6 +14335,38 @@
     },
     "query": "\nupdate jig_data\nset direction = $2,\n    scoring = $3,\n    drag_assist = $4,\n    updated_at = now()\nwhere id = $1 and\n    (($2 is distinct from direction) or\n     ($3 is distinct from scoring) or\n     ($4 is distinct from drag_assist))\n            "
   },
+  "ceedcac7984d75b772309c94aa09f5ee21a1859d5708fcbcd7a07a51e94b085c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "is_oauth!",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "blocked?",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n        select user_id \"user_id: UserId\",\n        (\n           select\n             case\n                when exists(select 1 from user_auth_basic where user_auth_basic.email = lower($1::text)) = true then false\n                else true\n            end\n        )     as \"is_oauth!\",\n        (select blocked from \"user\" where id = user_email.user_id) as \"blocked?\"\n         from user_email\n         where email = lower($1::text)"
+  },
   "ceee83d2943409d2f3a3e5a70b7ae3d423d39cf2b15af44565c6f4100abcfc31": {
     "describe": {
       "columns": [],
@@ -14568,32 +14600,6 @@
       }
     },
     "query": "\nwith cte as (\n    insert into user_color\n    (user_id, color, index)\n    values ($1, $2, (select count(*) from user_color where user_id = $1)) returning color\n), colors as (\n    select color\n    from user_color\n    where user_id = $1\n    order by index\n)\nselect color as \"color!\" from colors\nunion all\nselect color as \"color!\" from cte\n    "
-  },
-  "d51353640336b46516c6e2877ae86bb04e1f905c6893cc21275ec7ebc7ce7327": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "is_oauth!",
-          "ordinal": 1,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      }
-    },
-    "query": "\n        select user_id \"user_id: UserId\",\n        (\n           select\n             case\n                when exists(select 1 from user_auth_basic where user_auth_basic.email = lower($1::text)) = true then false\n                else true\n            end\n        )     as \"is_oauth!\"\n         from user_email\n         where email = lower($1::text)"
   },
   "d5f7bcda61b8abb751cc560960d08dbc327b476eb3b9ee8b7e8acb627833fbce": {
     "describe": {

@@ -902,6 +902,17 @@ and ($2 is distinct from blocked)
         .execute(&mut txn)
         .instrument(tracing::info_span!("update user blocked"))
         .await?;
+
+        if blocked {
+            sqlx::query!(
+                //language=SQL
+                r#"delete from session where user_id = $1"#,
+                user_id.0,
+            )
+            .execute(&mut txn)
+            .instrument(tracing::info_span!("delete sessions for blocked user"))
+            .await?;
+        }
     }
 
     sqlx::query!(

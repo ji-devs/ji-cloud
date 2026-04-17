@@ -1023,7 +1023,8 @@ async fn reset_password(
                 when exists(select 1 from user_auth_basic where user_auth_basic.email = lower($1::text)) = true then false
                 else true
             end
-        )     as "is_oauth!"
+        )     as "is_oauth!",
+        (select blocked from "user" where id = user_email.user_id) as "blocked?"
          from user_email
          where email = lower($1::text)"#,
         &email
@@ -1032,10 +1033,15 @@ async fn reset_password(
     .instrument(tracing::info_span!("get user_id"))
     .await.into_anyhow()?;
 
-    let (user_id, is_oauth) = match user {
-        Some(user) => (user.user_id, user.is_oauth),
+    let (user_id, is_oauth, blocked) = match user {
+        Some(user) => (user.user_id, user.is_oauth, user.blocked.unwrap_or(false)),
         None => return Ok(HttpResponse::NoContent().finish()),
     };
+
+    // Silently skip sending email for blocked users
+    if blocked {
+        return Ok(HttpResponse::NoContent().finish());
+    }
 
     send_password_email(
         &mut txn,
