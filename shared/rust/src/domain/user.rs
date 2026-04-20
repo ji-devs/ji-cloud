@@ -486,8 +486,8 @@ pub struct UserProfileExport {
     pub liked_jig_count: i64,
     /// Number of published jigs
     pub published_jigs_count: i64,
-    // /// Users plan type
-    // pub plan_type: Option<String>
+    /// Whether this user is blocked
+    pub blocked: bool,
 }
 
 fn serialize_list<S, T>(list: &Vec<T>, serializer: S) -> Result<S::Ok, S::Error>

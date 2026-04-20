@@ -58,7 +58,10 @@ impl Component<CommunitySearch> for Rc<CommunitySearch> {
             }))
             .text(" ")
             .text(STR_FOR)
-            .text(&state.query.q)
+            .text(" ")
+            .child(html!("strong", {
+                .text(&state.query.q)
+            }))
         }))
         .child(html!("section", {
             .after_inserted(clone!(state => move |el: HtmlElement| {

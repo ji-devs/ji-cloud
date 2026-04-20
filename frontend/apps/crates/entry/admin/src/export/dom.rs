@@ -80,6 +80,40 @@ impl Export {
                     })
                 }))
             }))
+            .child(html!("input-select", {
+                .prop("label", "User status")
+                .prop("multiple", false)
+                .prop_signal("value", state.blocked_filter.signal().map(|blocked| {
+                    match blocked {
+                        None => "All users".to_string(),
+                        Some(false) => "Active only".to_string(),
+                        Some(true) => "Blocked only".to_string(),
+                    }
+                }))
+                .children(&mut [
+                    html!("input-select-option", {
+                        .text("All users")
+                        .prop_signal("selected", state.blocked_filter.signal().map(|b| b.is_none()))
+                        .event(clone!(state => move |_: events::CustomSelectedChange| {
+                            state.blocked_filter.set(None);
+                        }))
+                    }),
+                    html!("input-select-option", {
+                        .text("Active only")
+                        .prop_signal("selected", state.blocked_filter.signal().map(|b| b == Some(false)))
+                        .event(clone!(state => move |_: events::CustomSelectedChange| {
+                            state.blocked_filter.set(Some(false));
+                        }))
+                    }),
+                    html!("input-select-option", {
+                        .text("Blocked only")
+                        .prop_signal("selected", state.blocked_filter.signal().map(|b| b == Some(true)))
+                        .event(clone!(state => move |_: events::CustomSelectedChange| {
+                            state.blocked_filter.set(Some(true));
+                        }))
+                    }),
+                ])
+            }))
             .child(html!("input-wrapper", {
                 .prop("label", "From date")
                 .child(html!("input" => HtmlInputElement, {
@@ -110,7 +144,8 @@ impl Export {
                 .prop_signal("href", map_ref! {
                     let date_filter_type = state.date_filter_type.signal_cloned(),
                     let from_date = state.from_date.signal_cloned(),
-                    let to_date = state.to_date.signal_cloned()
+                    let to_date = state.to_date.signal_cloned(),
+                    let blocked = state.blocked_filter.signal()
                         => {
                             let mut params = Vec::new();
 
@@ -121,6 +156,9 @@ impl Export {
                             }
                             if let Some(to_date) = to_date {
                                 params.push(format!("to_date={}", to_date.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)));
+                            }
+                            if let Some(blocked) = blocked {
+                                params.push(format!("blocked={}", blocked));
                             }
                             let remote = SETTINGS.get().unwrap_ji().remote_target.api_url();
                             format!("{}{}?{}", remote, <AdminUserExport as ApiEndpoint>::Path::PATH, params.join("&"))

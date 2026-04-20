@@ -82,8 +82,14 @@ async fn export_user_data(
     db: Data<PgPool>,
     query: Query<<admin::AdminUserExport as ApiEndpoint>::Req>,
 ) -> actix_web::Result<HttpResponse, error::Server> {
-    let data =
-        db::user::user_export(&db, &query.date_filter_type, query.from_date, query.to_date).await?;
+    let data = db::user::user_export(
+        &db,
+        &query.date_filter_type,
+        query.from_date,
+        query.to_date,
+        query.blocked,
+    )
+    .await?;
 
     create_csv_response(data)
 }

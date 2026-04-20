@@ -427,6 +427,7 @@ pub async fn user_export(
     date_filter_type: &DateFilterType,
     from_date: Option<DateTime<Utc>>,
     to_date: Option<DateTime<Utc>>,
+    blocked: Option<bool>,
 ) -> anyhow::Result<Vec<UserProfileExport>> {
     let date_filter_type = serde_json::to_value(&date_filter_type)?;
     let date_filter_type: &str = date_filter_type.as_str().unwrap();
@@ -475,6 +476,7 @@ select
     ),
     location,
     opt_into_edu_resources,
+    "user".blocked as "blocked!",
     array(
         select subject.display_name
         from subject
@@ -497,25 +499,28 @@ from "user"
     inner join user_profile on "user".id = user_profile.user_id
     inner join user_email using(user_id)
 where
-    (
-        ($3 = 'either' or $3 = 'onlynew')
-        and (
-            user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end
-            and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
+    ($4::bool is null or "user".blocked = $4)
+    and (
+        (
+            ($3 = 'either' or $3 = 'onlynew')
+            and (
+                user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end
+                and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
+            )
         )
-    )
-    or (
-        ($3 = 'either' or $3 = 'onlyupdated')
-        and (
-            user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end
-            and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
+        or (
+            ($3 = 'either' or $3 = 'onlyupdated')
+            and (
+                user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end
+                and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end
+            )
         )
     )
 "#,
-        // date_filter_type,
         from_date,
         to_date,
         date_filter_type,
+        blocked,
     )
     .fetch_all(db)
     .await?;
@@ -576,6 +581,7 @@ where
                 opt_into_edu_resources: row.opt_into_edu_resources,
                 liked_jig_count: row.liked_jig_count.unwrap_or_default(),
                 published_jigs_count: row.published_jigs_count.unwrap_or_default(),
+                blocked: row.blocked,
             }
         })
         .collect())

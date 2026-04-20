@@ -18,6 +18,9 @@ pub struct AdminUserExportRequest {
     pub from_date: Option<chrono::DateTime<Utc>>,
     /// Optionally the date to export data to
     pub to_date: Option<chrono::DateTime<Utc>>,
+    /// Filter by blocked status: None = all users, Some(true) = blocked only, Some(false) = active only
+    #[serde(default)]
+    pub blocked: Option<bool>,
 }
 
 make_path_parts!(AdminJigExportPath => "/v1/admin/export/jigs");
