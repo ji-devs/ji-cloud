@@ -93,7 +93,7 @@ unicode-segmentation = "1.8.0"
 lazy_static = "1.4.0"
 wee_alloc = { version = "0.4.5" }
 regex = "1.5.4"
-rand = "0.8.4"
+rand = "0.8.6"
 chrono-tz = { version = "0.6.0", features = ["serde"] }
 convert_case = "0.6.0"
 zxcvbn = "2.1.2"
