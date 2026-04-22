@@ -65,7 +65,8 @@ pub enum CreateSessionResponse {
     ///         "oauth_profile": {
     ///             "email": <EMAIL>,
     ///             ... # other optional profile fields
-    ///         }
+    ///         },
+    ///         "needsEmailVerification": true
     ///     }
     /// }
     /// ```
@@ -76,6 +77,9 @@ pub enum CreateSessionResponse {
         /// Oauth profile
         #[serde(skip_serializing_if = "Option::is_none")]
         oauth_profile: Option<OAuthUserProfile>,
+        /// Whether the user needs to verify their email before continuing
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        needs_email_verification: bool,
     },
 }
 

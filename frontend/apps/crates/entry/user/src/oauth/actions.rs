@@ -39,11 +39,22 @@ pub async fn finalize(data: OauthData, redirect_kind: OAuthUrlKind) {
             CreateSessionResponse::Register {
                 response,
                 oauth_profile,
+                needs_email_verification,
             } => {
                 let csrf = response.csrf;
                 storage::save_csrf_token(&csrf);
-                let route = Route::User(UserRoute::ContinueRegistration(oauth_profile)).to_string();
-                dominator::routing::go_to_url(&route);
+                if needs_email_verification {
+                    let email = oauth_profile
+                        .as_ref()
+                        .map(|p| p.email.clone())
+                        .unwrap_or_default();
+                    let route = Route::User(UserRoute::SendEmailConfirmation(email)).to_string();
+                    dominator::routing::go_to_url(&route);
+                } else {
+                    let route =
+                        Route::User(UserRoute::ContinueRegistration(oauth_profile)).to_string();
+                    dominator::routing::go_to_url(&route);
+                }
             }
         },
         Err(_) => match status {

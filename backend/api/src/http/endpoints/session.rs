@@ -64,6 +64,7 @@ async fn create_session(
         CreateSessionResponse::Register {
             response,
             oauth_profile: None,
+            needs_email_verification: false,
         }
     } else {
         CreateSessionResponse::Login(response)

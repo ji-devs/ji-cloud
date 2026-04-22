@@ -477,6 +477,20 @@
     },
     "query": "\n            update resource_curation_data\n            set curation_status = $2\n            where resource_id = $1 and $2 is distinct from curation_status\n             "
   },
+  "0c48894fce2a3858a305f483e9fe0a2702df7fe87ca3045f50edcf5d080cfdd4": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "insert into user_auth_google (user_id, google_id, unverified_email) values ($1, $2, lower($3::text))"
+  },
   "0c4b84c76182bfad4ebfc4f30997af5fad4a1cee5aa7de260227b5f78c2e4a55": {
     "describe": {
       "columns": [
@@ -1743,19 +1757,6 @@
     },
     "query": "\n            select id as \"id: AgeRangeId\", display_name, short_display_name, created_at, updated_at from age_range\n            order by index\n        "
   },
-  "19e13d35722d768bfabd2104aaabd88c7c6b7436ac230485dfe370a6b4609aee": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      }
-    },
-    "query": "insert into user_auth_google (user_id, google_id) values ($1, $2)"
-  },
   "1a8b1e8b534e0c03972838146a54d715f11f647be57465718d61defdd7af242d": {
     "describe": {
       "columns": [],
@@ -2934,27 +2935,6 @@
     },
     "query": "update user_profile set last_synced_at = now() where user_id = any($1)"
   },
-  "309109ef31f64630b41aa1fcd908b73399c46ebc23656d54f3266964eedc2bd3": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\ninsert into user_email (user_id, email)\nselect session.user_id, lower(user_auth_basic.email)\nfrom session\ninner join user_auth_basic on user_auth_basic.user_id = session.user_id\nwhere\n    session.token = $1 and\n    session.expires_at > now() and\n    (session.scope_mask & $2) = $2\nreturning user_id as \"id!: UserId\"\n"
-  },
   "30e211c77af70b7a52d9ffde24d7a442e3565e2135840cb8d2646bb7fa048509": {
     "describe": {
       "columns": [
@@ -2998,19 +2978,6 @@
       }
     },
     "query": "\nselect id,\n       kind as \"kind: MediaKind\",\n       created_at,\n       updated_at,\n       array(select media_url from web_media_library_url where media_id = $1) as \"urls!\"\nfrom web_media_library\nwhere id = $1"
-  },
-  "31ce17afc04ee73392c393cd0ad04a56b0b78c6a155dfb0e7a8d8f6397f13b04": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      }
-    },
-    "query": "insert into user_email (user_id, email) values ($1, lower($2::text))"
   },
   "32bbb9dc2446795abc480d132b14960dc9b5d636d4b95d75400cffae27762155": {
     "describe": {
@@ -4104,26 +4071,6 @@
       }
     },
     "query": "\nupdate user_font\nset index = index - 1\nwhere index > $2 and user_id = $1\n        "
-  },
-  "4430bd26da5d8c88b520bdb3933083e2dcc3a67b8416f4cc4c9cb2d5e36baaab": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text"
-        ]
-      }
-    },
-    "query": "\nselect user_id          \"id!: UserId\"\nfrom user_auth_basic\nwhere\n    email = $1::text and\n    not exists(select 1 from user_email where email = $1)\n"
   },
   "457c728cb149fc869a3625cb05fc1188616305fa009f1dedcafecd42e3814998": {
     "describe": {
@@ -6058,6 +6005,27 @@
     },
     "query": "\n    update jig_data\n    set last_synced_at = null\n    where id = any($1)\n            "
   },
+  "649cbaf2bc16c5769f329d9415315b0f81f63b59ad5f36b49bd72b8d9590a8d1": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\ninsert into user_email (user_id, email)\nselect session.user_id, coalesce(\n    (select lower(email) from user_auth_basic where user_id = session.user_id),\n    (select lower(unverified_email) from user_auth_google where user_id = session.user_id)\n)\nfrom session\nwhere\n    session.token = $1 and\n    session.expires_at > now() and\n    (session.scope_mask & $2) = $2 and\n    (\n        exists(select 1 from user_auth_basic where user_id = session.user_id) or\n        exists(select 1 from user_auth_google where user_id = session.user_id and unverified_email is not null)\n    )\nreturning user_id as \"id!: UserId\"\n"
+  },
   "64cfdb8662f781313ee5765279e6d4b9a03cc12c3873a00386e94a1eda9e472b": {
     "describe": {
       "columns": [
@@ -6204,6 +6172,18 @@
       }
     },
     "query": "\ninsert into course_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n"
+  },
+  "678d69980c49598e8cc96a86289177f13aa264495e732301967f6733a1397419": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "update user_auth_google set unverified_email = null where user_id = $1"
   },
   "682dbdf7b9a0f373daad74e4f4face9e425a493e9965c6ba7c9a11e74252c866": {
     "describe": {
@@ -8730,6 +8710,26 @@
       }
     },
     "query": "\nselect id                               as \"id!: ImageId\",\n       description\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere description <> '' and translated_description = '{}'\nand processed_at is not null\nand description_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n "
+  },
+  "808e79b36940a4a5d96c895d4cd1153413fe3ab59d5095c412c118363336fe39": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\nselect user_id \"id!: UserId\"\nfrom (\n    select user_id, email from user_auth_basic\n    union all\n    select user_id, unverified_email as email from user_auth_google where unverified_email is not null\n) as pending_emails\nwhere\n    email = $1::text and\n    not exists(select 1 from user_email where user_id = pending_emails.user_id)\n"
   },
   "80e01d48b2deca10d1bbdd15cd319c204e235705bb642eaba2a05a7cf17c5036": {
     "describe": {
@@ -12695,6 +12695,38 @@
     },
     "query": "\nupdate playlist_data_resource\nset resource_content = $3\nwhere playlist_data_id = $1 and id = $2\n            "
   },
+  "bce9a462235fc284c2a48bc534d3021af32fe8f801dac229d5547afc906bc772": {
+    "describe": {
+      "columns": [
+        {
+          "name": "has_profile!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        },
+        {
+          "name": "has_verified_email!",
+          "ordinal": 1,
+          "type_info": "Bool"
+        },
+        {
+          "name": "blocked?",
+          "ordinal": 2,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null,
+        null,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "select\n                    exists(select 1 from user_profile where user_id = $1) as \"has_profile!\",\n                    exists(select 1 from user_email where user_id = $1) as \"has_verified_email!\",\n                    (select blocked from \"user\" where id = $1) as \"blocked?\"\n                "
+  },
   "bd95d3cd5b445f69b7e3ff5b998449809bc925172a749621b4712ae1c0f63804": {
     "describe": {
       "columns": [
@@ -14772,32 +14804,6 @@
     },
     "query": "\n    insert into jig_report(jig_id, report_type, reporter_id)\n    values ($1, $2, $3)\n    returning id as \"id!: ReportId\"\n            "
   },
-  "d98ab96c390b72d64b8330927293bf3e8ae2b1d24c884aed9e13cf6aa46d21bc": {
-    "describe": {
-      "columns": [
-        {
-          "name": "exists!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        },
-        {
-          "name": "blocked?",
-          "ordinal": 1,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "select\n                    exists(select 1 from user_profile where user_id = $1) as \"exists!\",\n                    (select blocked from \"user\" where id = $1) as \"blocked?\"\n                "
-  },
   "d9dece07f099db7120d4ef5b2221f32cd810b399b584d63d513279f13d7fae85": {
     "describe": {
       "columns": [
@@ -15282,6 +15288,26 @@
       }
     },
     "query": "\nupdate playlist_data\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description"
+  },
+  "e763f4fb5d2959d3f62f6732bd7a34361de4e7e381e9cda1fcf28c2084032f28": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists!",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "select exists(select 1 from user_email where email = lower($1::text)) as \"exists!\""
   },
   "e844fcef9a18fca356013f7762a171a6c6d4c0ffa6df42c1e231cf8619c331fc": {
     "describe": {
@@ -17210,5 +17236,25 @@
       }
     },
     "query": "\nwith recursive categories_cte(id, name, parent_id, depth, full_name) as (\n    select\n        c.id, c.name, c.parent_id, 1::int as depth, c.name::text as full_name\n    from category as c\n    where c.parent_id is null\n    union all\n    select\n        c.id, c.name, c.parent_id, cte.depth + 1 as depth,\n        (cte.full_name || '/' || c.name)\n    from categories_cte as cte, category as c\n    where c.parent_id = cte.id\n)\nselect course.id,\n       display_name                                                                                                 as \"name\",\n       language                                                                                                     as \"language!\",\n       description                                                                                                  as \"description!\",\n       translated_description                                                                                       as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                                              as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select resource_type_id\n               from course_data_resource\n               where course_data_id = course_data.id))                                                              as \"resource_types!\",\n       array((select resource_type.display_name\n             from resource_type\n                       inner join course_data_resource on resource_type.id = course_data_resource.resource_type_id\n            where course_data_resource.course_data_id = course_data.id))                                            as \"resource_type_names!\",\n       array((select category_id\n              from course_data_category\n              where course_data_id = course_data.id))                                                               as \"categories!\",\n       array((select full_name\n              from categories_cte\n              join course_data_category on categories_cte.id = course_data_category.category_id\n              where course_data_category.course_data_id = course_data.id))                                          as \"category_names!\",\n        array(\n           (select unit_id\n            from course_data_unit\n            where course_data_unit.course_data_id = course_data.id)\n       )                                                                                                            as \"units!\",\n       privacy_level                                                                                                as \"privacy_level!: PrivacyLevel\",\n       author_id                                                                                                    as \"author_id\",\n       other_keywords                                                                                               as \"other_keywords!\",\n       translated_keywords                                                                                          as \"translated_keywords!\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = course.author_id)                                                             as \"author_name\",\n        likes                                                                                                       as \"likes!\",\n        plays                                                                                                       as \"plays!\",\n        published_at                                                                                                as \"published_at\"\nfrom course\n         inner join course_data on live_id = course_data.id\nwhere (last_synced_at is null and published_at is not null)\n    or (updated_at is not null and last_synced_at < updated_at)\n    or (published_at < now() is true and last_synced_at < published_at)\nlimit 100 for no key update skip locked;\n     "
+  },
+  "ffe8a0517c0395e96594c47c9e6a2eb2a8095108664e62323041bd3341ed8f85": {
+    "describe": {
+      "columns": [
+        {
+          "name": "email!",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "select unverified_email::text as \"email!\" from user_auth_google where user_id = $1 and unverified_email is not null"
   }
 }

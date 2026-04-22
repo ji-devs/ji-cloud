@@ -64,7 +64,7 @@ mod font;
 pub mod public_user;
 
 #[instrument(skip(txn, email_address, mail))]
-async fn send_verification_email(
+pub async fn send_verification_email(
     txn: &mut PgConnection,
     user_id: UserId,
     email_address: String,
@@ -311,15 +311,18 @@ async fn verify_email(
 
             let lowercase_email = &email.to_lowercase();
 
-            // todo: make this more future proof and exhaustive.
-
+            // Check both basic auth and Google auth for unverified emails
             let user = sqlx::query!(
                 r#"
-select user_id          "id!: UserId"
-from user_auth_basic
+select user_id "id!: UserId"
+from (
+    select user_id, email from user_auth_basic
+    union all
+    select user_id, unverified_email as email from user_auth_google where unverified_email is not null
+) as pending_emails
 where
     email = $1::text and
-    not exists(select 1 from user_email where email = $1)
+    not exists(select 1 from user_email where user_id = pending_emails.user_id)
 "#,
                 lowercase_email
             )
@@ -363,18 +366,23 @@ where
         VerifyEmailRequest::Verify { token } => {
             let mut txn = db.begin().await?;
 
-            // todo: make this more future proof and exhaustive.
-
+            // Get email from either basic auth or Google auth
             let user = sqlx::query!(
                 r#"
 insert into user_email (user_id, email)
-select session.user_id, lower(user_auth_basic.email)
+select session.user_id, coalesce(
+    (select lower(email) from user_auth_basic where user_id = session.user_id),
+    (select lower(unverified_email) from user_auth_google where user_id = session.user_id)
+)
 from session
-inner join user_auth_basic on user_auth_basic.user_id = session.user_id
 where
     session.token = $1 and
     session.expires_at > now() and
-    (session.scope_mask & $2) = $2
+    (session.scope_mask & $2) = $2 and
+    (
+        exists(select 1 from user_auth_basic where user_id = session.user_id) or
+        exists(select 1 from user_auth_google where user_id = session.user_id and unverified_email is not null)
+    )
 returning user_id as "id!: UserId"
 "#,
                 token,
@@ -395,6 +403,14 @@ returning user_id as "id!: UserId"
             .ok_or(error::VerifyEmail::ServiceSession(
                 error::ServiceSession::Unauthorized,
             ))?;
+
+            // Clear the unverified email from user_auth_google if present
+            sqlx::query!(
+                "update user_auth_google set unverified_email = null where user_id = $1",
+                user.id.0
+            )
+            .execute(&mut txn)
+            .await?;
 
             // make sure they can't use the link, now that they're verified.
             db::session::clear_any(&mut txn, user.id, SessionMask::VERIFY_EMAIL).await?;

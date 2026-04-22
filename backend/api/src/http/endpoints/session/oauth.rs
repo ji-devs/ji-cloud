@@ -22,7 +22,9 @@ use shared::{
 use crate::{
     db, error,
     google_oauth::{self, oauth_url},
+    http::endpoints::user::send_verification_email,
     jwk::{self, IdentityClaims},
+    service::{mail, ServiceData},
     token::{create_auth_token, SessionMask},
 };
 use shared::domain::session::OAuthUserProfile;
@@ -82,6 +84,7 @@ pub async fn get_url(
 pub async fn create(
     db: Data<PgPool>,
     settings: Data<RuntimeSettings>,
+    mail: ServiceData<mail::Client>,
     req: Json<CreateSessionOAuthRequest>,
     jwks: Data<jwk::JwkVerifier>,
 ) -> Result<HttpResponse, error::OAuth> {
@@ -105,6 +108,7 @@ pub async fn create(
                 settings.login_token_valid_duration,
                 settings.remote_target(),
                 redirect_kind,
+                &mail,
             )
             .await?
         }
@@ -125,6 +129,7 @@ async fn handle_google_oauth(
     login_token_valid_duration: Option<Duration>,
     remote_target: RemoteTarget,
     redirect_kind: OAuthUrlKind,
+    mail: &mail::Client,
 ) -> Result<(CreateSessionResponse, Cookie<'static>), error::OAuth> {
     let redirect_url = google_oauth::oauth_url(remote_target, redirect_kind);
 
@@ -143,10 +148,11 @@ async fn handle_google_oauth(
 
     let (user_id, mask) = match &google_auth {
         Some(google_auth) => {
-            // make sure that the user either has a profile, or can only *create* one.
-            let check_profile = sqlx::query!(
+            // Check user status: blocked, has verified email, has profile
+            let check_status = sqlx::query!(
                 r#"select
-                    exists(select 1 from user_profile where user_id = $1) as "exists!",
+                    exists(select 1 from user_profile where user_id = $1) as "has_profile!",
+                    exists(select 1 from user_email where user_id = $1) as "has_verified_email!",
                     (select blocked from "user" where id = $1) as "blocked?"
                 "#,
                 google_auth.user_id
@@ -154,14 +160,35 @@ async fn handle_google_oauth(
             .fetch_one(&mut txn)
             .await?;
 
-            if check_profile.blocked.unwrap_or(false) {
+            if check_status.blocked.unwrap_or(false) {
                 return Err(error::OAuth::Unauthorized);
             }
 
-            let mask = if check_profile.exists {
+            let mask = if check_status.has_profile {
                 SessionMask::GENERAL
-            } else {
+            } else if check_status.has_verified_email {
                 SessionMask::PUT_PROFILE | SessionMask::DELETE_ACCOUNT
+            } else {
+                // Email not yet verified - resend verification email
+                let email = sqlx::query_scalar!(
+                    r#"select unverified_email::text as "email!" from user_auth_google where user_id = $1 and unverified_email is not null"#,
+                    google_auth.user_id
+                )
+                .fetch_one(&mut txn)
+                .await
+                .map_err(|_| anyhow::anyhow!("Google auth record missing email"))?;
+
+                send_verification_email(
+                    &mut txn,
+                    UserId(google_auth.user_id),
+                    email,
+                    mail,
+                    &remote_target.pages_url(),
+                )
+                .await
+                .map_err(|e| error::OAuth::InternalServerError(e.into()))?;
+
+                SessionMask::VERIFY_EMAIL
             };
 
             (google_auth.user_id, mask)
@@ -171,35 +198,53 @@ async fn handle_google_oauth(
                 return Err(error::OAuth::Google(error::GoogleOAuth::UnverifiedEmail));
             }
 
+            // Check if email already exists (verified by another user)
+            let email_exists = sqlx::query!(
+                r#"select exists(select 1 from user_email where email = lower($1::text)) as "exists!""#,
+                &claims.email
+            )
+            .fetch_one(&mut txn)
+            .await?
+            .exists;
+
+            if email_exists {
+                return Err(error::OAuth::Conflict);
+            }
+
             let id = sqlx::query!(r#"insert into "user" default values returning id"#)
                 .fetch_one(&mut txn)
                 .await?
                 .id;
 
+            // Store email in user_auth_google (unverified) instead of user_email
             sqlx::query!(
-                r"insert into user_auth_google (user_id, google_id) values ($1, $2)",
+                r"insert into user_auth_google (user_id, google_id, unverified_email) values ($1, $2, lower($3::text))",
                 id,
-                &claims.google_id
+                &claims.google_id,
+                &claims.email
             )
             .execute(&mut txn)
             .await?;
 
-            sqlx::query!(
-                "insert into user_email (user_id, email) values ($1, lower($2::text))",
-                id,
-                &claims.email
+            // Send verification email
+            send_verification_email(
+                &mut txn,
+                UserId(id),
+                claims.email.to_lowercase(),
+                mail,
+                &remote_target.pages_url(),
             )
-            .execute(&mut txn)
             .await
-            .map_err(handle_user_email_error)?;
-            (id, SessionMask::PUT_PROFILE)
+            .map_err(|e| error::OAuth::InternalServerError(e.into()))?;
+
+            (id, SessionMask::VERIFY_EMAIL)
         }
     };
 
     let login_ttl = login_token_valid_duration.unwrap_or(Duration::weeks(2));
 
     let valid_until = Utc::now()
-        + if mask.contains(SessionMask::PUT_PROFILE) {
+        + if mask.contains(SessionMask::PUT_PROFILE) || mask.contains(SessionMask::VERIFY_EMAIL) {
             Duration::hours(1)
         } else {
             login_ttl
@@ -227,6 +272,7 @@ async fn handle_google_oauth(
         CreateSessionResponse::Register {
             response,
             oauth_profile: Some(profile),
+            needs_email_verification: mask.contains(SessionMask::VERIFY_EMAIL),
         }
     } else {
         CreateSessionResponse::Login(response)
