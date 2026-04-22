@@ -103,7 +103,7 @@ default = ["listenfd", "ji_core/listenfd"]
 
 # we use native-tls but this ensures we have a stable version of OpenSSL on *nix
 [target.'cfg(unix)'.dependencies]
-openssl = { version = "0.10.36", features = ["vendored"] }
+openssl = { version = "0.10.78", features = ["vendored"] }
 
 # argon2 *needs* perf
 [profile.dev.package.argon2]
