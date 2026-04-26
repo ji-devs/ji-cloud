@@ -418,6 +418,10 @@ pub struct UserResponse {
     /// Whether the user is blocked
     #[serde(default)]
     pub blocked: bool,
+
+    /// Last time the user logged in
+    #[serde(default)]
+    pub last_login: Option<DateTime<Utc>>,
 }
 
 /// A user's profile export representation.

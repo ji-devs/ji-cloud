@@ -239,7 +239,14 @@ select  cte1.id                 as "id!: UserId",
         account_cte.account_id as "account_id?: AccountId",
         account_cte.tier_override as "tier_override?: PlanTier",
         user_auth_google.google_id as "google_auth?: String",
-        "user".blocked as "blocked!"
+        "user".blocked as "blocked!",
+        (
+            select created_at as "last_login?"
+            from session
+            where session.user_id = "user".id
+            order by created_at desc
+            limit 1
+        ) as "last_login?: DateTime<Utc>"
 from cte1
         inner join "user" on cte1.id = "user".id
         left join account_cte on cte1.id = account_cte.user_id
@@ -294,6 +301,7 @@ offset $2
                     UserLoginType::Email
                 },
                 blocked: user_row.blocked,
+                last_login: user_row.last_login,
             }
         })
         .collect();
@@ -365,7 +373,14 @@ select  "user".id                 as "id!: UserId",
         account_cte.account_id as "account_id?: AccountId",
         account_cte.tier_override as "tier_override?: PlanTier",
         user_auth_google.google_id as "google_auth?: String",
-        "user".blocked as "blocked!"
+        "user".blocked as "blocked!",
+        (
+            select created_at as "last_login?"
+            from session
+            where session.user_id = "user".id
+            order by created_at desc
+            limit 1
+        ) as "last_login?: DateTime<Utc>"
 from "user"
 left join account_cte on "user".id = account_cte.user_id
 left join user_auth_google on user_auth_google.user_id = "user".id
@@ -413,6 +428,7 @@ with ordinality t(id, ord) using (id)
                     UserLoginType::Email
                 },
                 blocked: row.blocked,
+                last_login: row.last_login,
             }
         })
         .collect();

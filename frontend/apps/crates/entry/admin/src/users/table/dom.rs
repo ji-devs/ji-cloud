@@ -277,6 +277,12 @@ impl UsersTable {
                             .text_signal(user.signup_date.signal_cloned())
                         }),
                         html!("span", {
+                            .text(&user.last_login.map_or_else(
+                                || "-".to_string(),
+                                |dt| dt.format("%Y-%m-%d %H:%M").to_string()
+                            ))
+                        }),
+                        html!("span", {
                             .text_signal(user.language.signal_cloned())
                         }),
                         html!("span", {

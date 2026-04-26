@@ -57,6 +57,7 @@ export class _ extends LitElement {
         "City",
         "School/Organization",
         "Signup Date",
+        "Last Login",
         "Language",
         "Subscription",
         "Subscription Change",

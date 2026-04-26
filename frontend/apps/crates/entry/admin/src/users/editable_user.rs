@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use futures_signals::signal::Mutable;
 use shared::domain::billing::{AccountId, PlanTier, PlanType, SchoolId};
 use shared::domain::user::{UserBadge, UserId, UserLoginType, UserResponse};
@@ -25,6 +26,7 @@ pub struct EditableUser {
     pub school_account: String,
     pub tier_override: Option<PlanTier>,
     pub blocked: Mutable<bool>,
+    pub last_login: Option<DateTime<Utc>>,
     // pub loader: AsyncLoader,
 }
 
@@ -109,6 +111,7 @@ impl From<UserResponse> for EditableUser {
             school_account,
             tier_override: user.tier_override,
             blocked: Mutable::new(user.blocked),
+            last_login: user.last_login,
             // loader: AsyncLoader::new(),
         }
     }
