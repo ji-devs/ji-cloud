@@ -118,6 +118,7 @@ pub mod instance {
     use crate::{
         db, error,
         extractor::IPAddress,
+        share_url,
         token::{create_player_session_instance_token, validate_token},
     };
     use uuid::Uuid;
@@ -146,11 +147,28 @@ pub mod instance {
             Utc::now(),
         )?;
 
+        let share_url = share_url::generate_jig_share_url(
+            &settings,
+            resp.0,
+            share_url::JigShareUrlOptions {
+                module_id: None,
+                draft_or_live: shared::domain::asset::DraftOrLive::Live,
+                play_token: Some(&token),
+                players_name: None,
+                is_student: true,
+                quota: false,
+                direction: Some(resp.1.direction),
+                scoring: Some(resp.1.scoring),
+                drag_assist: Some(resp.1.drag_assist),
+            },
+        );
+
         Ok((
             Json(PlayerSessionInstanceResponse {
                 jig_id: resp.0,
                 settings: resp.1,
                 token,
+                share_url,
             }),
             actix_web::http::StatusCode::CREATED,
         ))

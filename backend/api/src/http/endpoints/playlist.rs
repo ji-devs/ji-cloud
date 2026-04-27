@@ -4,7 +4,10 @@ use actix_web::{
 };
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
-use shared::domain::{playlist::ListLikedResponse, user::UserScope};
+use shared::domain::{
+    playlist::{ListLikedResponse, PlaylistShareUrlResponse},
+    user::UserScope,
+};
 use shared::{
     api::{endpoints::playlist, ApiEndpoint, PathParts},
     domain::{
@@ -28,6 +31,7 @@ use crate::{
     error::{self},
     extractor::{get_user_id, TokenUser},
     service::ServiceData,
+    share_url,
 };
 
 pub const DEFAULT_PAGE_LIMIT: u32 = 20;
@@ -79,30 +83,36 @@ async fn create(
 #[instrument(skip_all)]
 async fn get_live(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     auth: Option<TokenUser>,
     path: web::Path<PlaylistId>,
 ) -> Result<Json<<playlist::GetLive as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = get_user_id(&auth);
 
-    let playlist_response =
+    let mut playlist_response =
         db::playlist::get_one(&db, path.into_inner(), DraftOrLive::Live, user_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?;
+
+    share_url::add_share_url_to_playlist(&settings, &mut playlist_response);
 
     Ok(Json(playlist_response))
 }
 
 async fn get_draft(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     auth: Option<TokenUser>,
     path: web::Path<PlaylistId>,
 ) -> Result<Json<<playlist::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = get_user_id(&auth);
 
-    let playlist_response =
+    let mut playlist_response =
         db::playlist::get_one(&db, path.into_inner(), DraftOrLive::Draft, user_id)
             .await?
             .ok_or(error::NotFound::ResourceNotFound)?;
+
+    share_url::add_share_url_to_playlist(&settings, &mut playlist_response);
 
     Ok(Json(playlist_response))
 }
@@ -161,9 +171,10 @@ async fn delete(
     Ok(HttpResponse::NoContent().finish())
 }
 
-#[instrument(skip(db, claims))]
+#[instrument(skip(db, settings, claims))]
 async fn browse(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: Option<TokenUser>,
     query: Option<Query<<playlist::Browse as ApiEndpoint>::Req>>,
 ) -> Result<Json<<playlist::Browse as ApiEndpoint>::Res>, error::Auth> {
@@ -197,7 +208,11 @@ async fn browse(
         resource_types.to_owned(),
     );
 
-    let (playlists, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
+    let (mut playlists, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
+
+    for playlist in &mut playlists {
+        share_url::add_share_url_to_playlist(&settings, playlist);
+    }
 
     let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 
@@ -281,6 +296,7 @@ delete from playlist_data where id = $1
 #[instrument(skip_all)]
 async fn search(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
     query: Option<Query<<playlist::Search as ApiEndpoint>::Req>>,
@@ -314,9 +330,14 @@ async fn search(
         .await?
         .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
-    let playlists: Vec<_> = db::playlist::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id)
-        .await
-        .into_anyhow()?;
+    let mut playlists: Vec<_> =
+        db::playlist::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id)
+            .await
+            .into_anyhow()?;
+
+    for playlist in &mut playlists {
+        share_url::add_share_url_to_playlist(&settings, playlist);
+    }
 
     Ok(Json(PlaylistSearchResponse {
         playlists,
@@ -445,6 +466,7 @@ async fn unlike(
 /// Get users liked playlist
 async fn list_liked(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: TokenUser,
     query: Option<Query<<playlist::ListLiked as ApiEndpoint>::Req>>,
 ) -> Result<Json<<playlist::ListLiked as ApiEndpoint>::Res>, error::Server> {
@@ -455,9 +477,13 @@ async fn list_liked(
 
     let ids = db::playlist::list_liked(&*db, user_id, query.page.unwrap_or(0), page_limit).await?;
 
-    let playlists = db::playlist::get_by_ids(&db, &ids, DraftOrLive::Live, Some(user_id))
+    let mut playlists = db::playlist::get_by_ids(&db, &ids, DraftOrLive::Live, Some(user_id))
         .await
         .into_anyhow()?;
+
+    for playlist in &mut playlists {
+        share_url::add_share_url_to_playlist(&settings, playlist);
+    }
 
     let total_playlist_count = db::playlist::liked_count(&*db, user_id).await?;
 
@@ -493,6 +519,18 @@ async fn update_admin_data(
         .map_err(|_| error::NotFound::ResourceNotFound)?;
 
     Ok(HttpResponse::NoContent().finish())
+}
+
+/// Generate a signed share URL for a Playlist with custom player settings.
+async fn get_share_url(
+    settings: Data<RuntimeSettings>,
+    path: web::Path<PlaylistId>,
+) -> Json<<playlist::ShareUrl as ApiEndpoint>::Res> {
+    let playlist_id = path.into_inner();
+
+    let share_url = share_url::generate_playlist_share_url(&settings, playlist_id);
+
+    Json(PlaylistShareUrlResponse { share_url })
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {
@@ -539,6 +577,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <playlist::View as ApiEndpoint>::Path::PATH,
         playlist::View::METHOD.route().to(view),
+    )
+    .route(
+        <playlist::ShareUrl as ApiEndpoint>::Path::PATH,
+        playlist::ShareUrl::METHOD.route().to(get_share_url),
     )
     .route(
         <playlist::Liked as ApiEndpoint>::Path::PATH,

@@ -24,8 +24,10 @@ shared = { path = "../../shared/rust", features = ["backend"] }
 futures = "0.3.23"
 regex = "1.6.0"
 cached = "0.43.0"
+paseto = { version = "2.0.2", default-features = false, features = ["v2", "easy_tokens_chrono"] }
 reqwest = { version = "0.11.17", default-features = false, features = ["rustls-tls"] }
 actix-web-httpauth = "0.8.2"
+serde_json = { version = "1.0.85", features = ["preserve_order"] }
 
 [dependencies.sqlx]
 default-features = false

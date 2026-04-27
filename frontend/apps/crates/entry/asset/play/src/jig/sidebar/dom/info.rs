@@ -6,14 +6,10 @@ use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
 };
-use shared::domain::{
-    asset::{Asset, DraftOrLive},
-    jig::JigResponse,
-    meta::ResourceTypeId,
-};
+use shared::domain::{asset::Asset, jig::JigResponse, meta::ResourceTypeId};
 use utils::{
     ages::AgeRangeVecExt,
-    asset::{published_at_string, PlaylistPlayerOptions, ResourceContentExt},
+    asset::{published_at_string, ResourceContentExt},
     events,
     iframe::{AssetPlayerToPlayerPopup, IframeInit, IframeMessageExt},
     routes::{AssetPlayRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route},
@@ -165,23 +161,17 @@ impl Sidebar {
             })
             .apply_if(!state.player_state.playlists.get_cloned().is_empty() ,|dom| {
                 dom.prop("showPlaylists", true)
-                .children_signal_vec(state.player_state.playlists.signal_cloned().map(clone!(state => move |playlist| {
+                .children_signal_vec(state.player_state.playlists.signal_cloned().map(move |playlist| {
                     playlist.into_iter().map(|playlist| {
                         html!("a", {
                             .prop("slot", "playlists")
                             .prop("target", "_BLANK")
                             .prop("title", &playlist.playlist_data.display_name)
-                            .prop("href",  Route::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(
-                                playlist.id,
-                                PlaylistPlayerOptions {
-                                    draft_or_live: DraftOrLive::Live,
-                                    is_student: state.player_state.is_student
-                                }
-                            ))).to_string())
+                            .prop("href", &playlist.share_url)
                             .text(format!(" {}  ", &playlist.playlist_data.display_name).as_str())
                         })
                     }).collect()
-                })).to_signal_vec())
+                }).to_signal_vec())
             })
             .children_signal_vec(report::render(Rc::clone(&state)).to_signal_vec())
         })

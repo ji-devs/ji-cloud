@@ -31,7 +31,7 @@ impl StudentCode {
                     state.play_jig.set(Some(PlayJig {
                         id: res.jig_id,
                         settings: res.settings,
-                        token: res.token,
+                        share_url: res.share_url,
                         name: Mutable::new(None),
                     }));
                 },

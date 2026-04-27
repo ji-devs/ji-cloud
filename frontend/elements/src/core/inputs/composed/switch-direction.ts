@@ -45,12 +45,20 @@ export class _ extends LitElement {
                 fa-icon {
                     font-size: 12px;
                 }
+                :host([disabled]) .main {
+                    cursor: default;
+                    opacity: 0.5;
+                    pointer-events: none;
+                }
             `,
         ];
     }
 
     @property({ reflect: true })
     direction: Direction = "ltr";
+
+    @property({ type: Boolean, reflect: true })
+    disabled: boolean = false;
 
     private toggleDirection() {
         if (this.direction === "ltr") this.direction = "rtl";

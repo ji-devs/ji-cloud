@@ -5,12 +5,7 @@ use futures_signals::signal::Mutable;
 use shared::domain::asset::Asset;
 use shared::domain::jig::codes::JigCode;
 use shared::domain::jig::TextDirection;
-use utils::asset::{
-    CoursePlayerOptions, JigPlayerOptions, PlaylistPlayerOptions, ResourceContentExt,
-};
-use utils::routes::{AssetRoute, Route};
-
-use utils::prelude::*;
+use utils::asset::ResourceContentExt;
 
 use crate::qr_dialog::QrDialog;
 
@@ -28,17 +23,48 @@ pub struct ShareAsset {
     pub code_name: Mutable<Option<String>>,
     pub direction: Mutable<TextDirection>,
     pub scoring: Mutable<bool>,
+    // signed share URL
+    pub share_url: Mutable<String>,
+    pub student_share_url: Mutable<String>,
 }
 
 impl ShareAsset {
     pub fn new(asset: Asset) -> Rc<Self> {
-        let direction = match &asset {
-            Asset::Jig(jig) => jig.jig_data.default_player_settings.direction,
-            _ => Default::default(),
-        };
-        let scoring = match &asset {
-            Asset::Jig(jig) => jig.jig_data.default_player_settings.scoring,
-            _ => Default::default(),
+        let (direction, scoring, share_url, student_share_url) = match &asset {
+            Asset::Jig(jig) => (
+                jig.jig_data.default_player_settings.direction,
+                jig.jig_data.default_player_settings.scoring,
+                jig.share_url.clone(),
+                jig.student_share_url.clone(),
+            ),
+            Asset::Playlist(playlist) => (
+                Default::default(),
+                Default::default(),
+                playlist.share_url.clone(),
+                playlist.share_url.clone(),
+            ),
+            Asset::Course(course) => (
+                Default::default(),
+                Default::default(),
+                course.share_url.clone(),
+                course.share_url.clone(),
+            ),
+            Asset::Resource(resource) => (
+                Default::default(),
+                Default::default(),
+                resource
+                    .resource_data
+                    .additional_resources
+                    .get(0)
+                    .map(|resource| resource.resource_content.get_link())
+                    .unwrap_or_default(),
+                resource
+                    .resource_data
+                    .additional_resources
+                    .get(0)
+                    .map(|resource| resource.resource_content.get_link())
+                    .unwrap_or_default(),
+            ),
         };
         Rc::new(Self {
             asset,
@@ -53,73 +79,21 @@ impl ShareAsset {
             code_name: Mutable::new(None),
             direction: Mutable::new(direction),
             scoring: Mutable::new(scoring),
+            share_url: Mutable::new(share_url),
+            student_share_url: Mutable::new(student_share_url),
         })
     }
 
     pub fn embed_code(&self) -> String {
-        let link = self.asset_link(true, false);
+        let link = self.student_share_url.get_cloned();
+        self.embed_code_with_url(&link)
+    }
+
+    pub fn embed_code_with_url(&self, link: &str) -> String {
         format!(
             r#"<iframe src="{}" width="960" height="540" allow="autoplay; fullscreen" frameborder="0"></iframe>"#,
             link
         )
-    }
-
-    pub(super) fn asset_link(&self, is_student: bool, quota: bool) -> String {
-        let origin = web_sys::window()
-            .unwrap_ji()
-            .location()
-            .origin()
-            .unwrap_ji();
-        let url = match &self.asset {
-            Asset::Jig(jig) => {
-                let path = Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(
-                    jig.id,
-                    None,
-                    JigPlayerOptions {
-                        is_student,
-                        quota,
-                        direction: Some(self.direction.get()),
-                        scoring: Some(self.scoring.get()),
-                        ..Default::default()
-                    },
-                )))
-                .to_string();
-                format!("{}{}", origin, path)
-            }
-            Asset::Resource(resource) => {
-                match resource.resource_data.additional_resources.get(0) {
-                    Some(resource) => resource.resource_content.get_link(),
-                    None => {
-                        // Should't really get here
-                        String::new()
-                    }
-                }
-            }
-            Asset::Playlist(playlist) => {
-                let path = Route::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(
-                    playlist.id,
-                    PlaylistPlayerOptions {
-                        is_student,
-                        ..Default::default()
-                    },
-                )))
-                .to_string();
-                format!("{}{}", origin, path)
-            }
-            Asset::Course(course) => {
-                let path = Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(
-                    course.id,
-                    None,
-                    CoursePlayerOptions {
-                        is_student,
-                        ..Default::default()
-                    },
-                )))
-                .to_string();
-                format!("{}{}", origin, path)
-            }
-        };
-        url
     }
 
     pub(super) fn asset_type_name(&self) -> &'static str {

@@ -14,7 +14,7 @@ use shared::{
         asset::{DraftOrLive, PrivacyLevel, UserOrMe},
         jig::{
             GetJigPlaylistsResponse, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
-            JigLikedResponse, JigSearchResponse,
+            JigLikedResponse, JigSearchResponse, JigShareUrlResponse,
         },
         user::UserId,
         CreateResponse,
@@ -30,7 +30,7 @@ use crate::{
     error,
     extractor::{get_user_id, ScopeAdmin, TokenUser, TokenUserWithScope},
     service::ServiceData,
-    trending,
+    share_url, trending,
 };
 
 mod codes;
@@ -88,31 +88,37 @@ async fn create(
     ))
 }
 
-#[instrument(skip_all)]
+#[instrument(skip(db, settings, auth))]
 async fn get_live(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     auth: Option<TokenUser>,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::GetLive as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = get_user_id(&auth);
 
-    let jig_response = db::jig::get_one(&db, path.into_inner(), DraftOrLive::Live, user_id)
+    let mut jig_response = db::jig::get_one(&db, path.into_inner(), DraftOrLive::Live, user_id)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
+
+    share_url::add_share_url_to_jig(&settings, &mut jig_response);
 
     Ok(Json(jig_response))
 }
 
 async fn get_draft(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     auth: Option<TokenUser>,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
     let user_id = get_user_id(&auth);
 
-    let jig_response = db::jig::get_one(&db, path.into_inner(), DraftOrLive::Draft, user_id)
+    let mut jig_response = db::jig::get_one(&db, path.into_inner(), DraftOrLive::Draft, user_id)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
+
+    share_url::add_share_url_to_jig(&settings, &mut jig_response);
 
     Ok(Json(jig_response))
 }
@@ -174,9 +180,10 @@ async fn delete(
     Ok(HttpResponse::NoContent().finish())
 }
 
-#[instrument(skip(db, claims))]
+#[instrument(skip(db, settings, claims))]
 async fn browse(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: Option<TokenUser>,
     query: Option<Query<<jig::Browse as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::Browse as ApiEndpoint>::Res>, error::Auth> {
@@ -219,7 +226,11 @@ async fn browse(
         resource_types.to_owned(),
     );
 
-    let (jigs, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
+    let (mut jigs, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
+
+    for jig in &mut jigs {
+        share_url::add_share_url_to_jig(&settings, jig);
+    }
 
     let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 
@@ -230,16 +241,21 @@ async fn browse(
     }))
 }
 
-#[instrument(skip(db, claims))]
+#[instrument(skip(db, settings, claims))]
 async fn get_jig_playlists(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: Option<TokenUser>,
     path: web::Path<JigId>,
 ) -> Result<Json<<jig::GetJigPlaylists as ApiEndpoint>::Res>, error::Auth> {
     let jig_id = path.into_inner();
     let user_id = get_user_id(&claims);
 
-    let playlists = db::jig::get_jig_playlists(db.as_ref(), jig_id, user_id).await?;
+    let mut playlists = db::jig::get_jig_playlists(db.as_ref(), jig_id, user_id).await?;
+
+    for playlist in &mut playlists {
+        share_url::add_share_url_to_playlist(&settings, playlist);
+    }
 
     Ok(Json(GetJigPlaylistsResponse { playlists }))
 }
@@ -290,6 +306,7 @@ async fn clone(
 #[instrument(skip_all)]
 async fn search(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
     query: Option<Query<<jig::Search as ApiEndpoint>::Req>>,
@@ -330,9 +347,13 @@ async fn search(
         .await?
         .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
-    let jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id)
+    let mut jigs: Vec<_> = db::jig::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live, user_id)
         .await
         .into_anyhow()?;
+
+    for jig in &mut jigs {
+        share_url::add_share_url_to_jig(&settings, jig);
+    }
 
     Ok(Json(JigSearchResponse {
         jigs,
@@ -352,9 +373,13 @@ async fn trending(
     let user_id = claims.map(|c| c.user_id());
     let ids = trending::get_trending(algolia, settings.remote_target()).await?;
 
-    let jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, user_id)
+    let mut jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, user_id)
         .await
         .into_anyhow()?;
+
+    for jig in &mut jigs {
+        share_url::add_share_url_to_jig(&settings, jig);
+    }
 
     Ok(Json(JigTrendingResponse { jigs }))
 }
@@ -362,14 +387,19 @@ async fn trending(
 /// Featured jigs.
 async fn featured(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: Option<TokenUser>,
 ) -> Result<Json<<jig::Featured as ApiEndpoint>::Res>, error::Server> {
     let user_id = claims.map(|c| c.user_id());
     let ids = db::jig::featured(&*db).await?;
 
-    let jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, user_id)
+    let mut jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, user_id)
         .await
         .into_anyhow()?;
+
+    for jig in &mut jigs {
+        share_url::add_share_url_to_jig(&settings, jig);
+    }
 
     Ok(Json(JigFeaturedResponse { jigs }))
 }
@@ -468,6 +498,7 @@ async fn unlike(
 /// Get users liked jigs
 async fn list_liked(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: TokenUser,
     query: Option<Query<<jig::ListLiked as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::ListLiked as ApiEndpoint>::Res>, error::Server> {
@@ -478,9 +509,13 @@ async fn list_liked(
 
     let ids = db::jig::list_liked(&*db, user_id, query.page.unwrap_or(0), page_limit).await?;
 
-    let jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, Some(user_id))
+    let mut jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, Some(user_id))
         .await
         .into_anyhow()?;
+
+    for jig in &mut jigs {
+        share_url::add_share_url_to_jig(&settings, jig);
+    }
 
     let total_jig_count = db::jig::liked_count(&*db, user_id).await?;
 
@@ -493,6 +528,7 @@ async fn list_liked(
 /// Get users played jigs
 async fn list_played(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: TokenUser,
     query: Option<Query<<jig::ListPlayed as ApiEndpoint>::Req>>,
 ) -> Result<Json<<jig::ListPlayed as ApiEndpoint>::Res>, error::Server> {
@@ -503,9 +539,13 @@ async fn list_played(
 
     let ids = db::jig::list_played(&*db, user_id, query.page.unwrap_or(0), page_limit).await?;
 
-    let jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, Some(user_id))
+    let mut jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, Some(user_id))
         .await
         .into_anyhow()?;
+
+    for jig in &mut jigs {
+        share_url::add_share_url_to_jig(&settings, jig);
+    }
 
     Ok(Json(ListPlayedResponse { jigs }))
 }
@@ -526,6 +566,38 @@ async fn user_play(
     db::jig::jig_user_play(&*db, path.into_inner(), claims.user_id()).await?;
 
     Ok(HttpResponse::NoContent().finish())
+}
+
+/// Generate a signed share URL for a JIG with custom player settings.
+async fn get_share_url(
+    db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
+    path: web::Path<JigId>,
+    req: Json<<jig::ShareUrl as ApiEndpoint>::Req>,
+) -> Result<Json<<jig::ShareUrl as ApiEndpoint>::Res>, error::NotFound> {
+    let jig_id = path.into_inner();
+    let req = req.into_inner();
+    let jig_response = db::jig::get_one(&db, jig_id, DraftOrLive::Live, None)
+        .await?
+        .ok_or(error::NotFound::ResourceNotFound)?;
+
+    let share_url = share_url::generate_public_jig_share_url(
+        &settings,
+        jig_id,
+        &jig_response.jig_data.default_player_settings,
+        &req,
+    );
+    let student_share_url = share_url::generate_student_jig_share_url(
+        &settings,
+        jig_id,
+        &jig_response.jig_data.default_player_settings,
+        &req,
+    );
+
+    Ok(Json(JigShareUrlResponse {
+        share_url,
+        student_share_url,
+    }))
 }
 
 /// remove all resources
@@ -768,6 +840,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <jig::Unlike as ApiEndpoint>::Path::PATH,
         jig::Unlike::METHOD.route().to(unlike),
+    )
+    .route(
+        <jig::ShareUrl as ApiEndpoint>::Path::PATH,
+        jig::ShareUrl::METHOD.route().to(get_share_url),
     )
     .route(
         <jig::RemoveResource as ApiEndpoint>::Path::PATH,

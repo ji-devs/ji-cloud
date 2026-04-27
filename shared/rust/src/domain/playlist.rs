@@ -194,11 +194,30 @@ pub struct PlaylistResponse {
 
     /// Admin data for a course
     pub admin_data: PlaylistAdminData,
+
+    /// Pre-signed share URL for this playlist.
+    #[serde(default)]
+    pub share_url: String,
 }
 
 make_path_parts!(PlaylistGetLivePath => "/v1/playlist/{}/live" => PlaylistId);
 
 make_path_parts!(PlaylistGetDraftPath => "/v1/playlist/{}/draft" => PlaylistId);
+
+make_path_parts!(PlaylistShareUrlPath => "/v1/playlist/{}/share-url" => PlaylistId);
+
+/// Request for generating a signed play URL for a Playlist.
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PlaylistShareUrlRequest {}
+
+/// Response containing a signed share URL for a Playlist.
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct PlaylistShareUrlResponse {
+    /// The signed share URL.
+    pub share_url: String,
+}
 
 make_path_parts!(PlaylistUpdateDraftDataPath => "/v1/playlist/{}" => PlaylistId);
 

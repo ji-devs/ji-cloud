@@ -16,3 +16,6 @@ pub mod settings;
 
 /// Const config values.
 pub mod config;
+
+/// URL signing and verification.
+pub mod url_signature;

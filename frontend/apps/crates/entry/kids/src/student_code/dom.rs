@@ -3,6 +3,7 @@ use std::rc::Rc;
 use components::player_popup::{PlayerPopup, PreviewPopupCallbacks};
 use dominator::{clone, html, with_node, Dom};
 use futures_signals::signal::{Mutable, SignalExt};
+use js_sys::encode_uri_component;
 use shared::domain::asset::DraftOrLive;
 use utils::{asset::JigPlayerOptions, events};
 use web_sys::HtmlInputElement;
@@ -131,19 +132,27 @@ impl StudentCode {
 
         let player_options = JigPlayerOptions {
             draft_or_live: DraftOrLive::Live,
-            play_token: Some(play_jig.token),
             players_name: play_jig.name.get_cloned(),
             is_student: true,
             quota: false,
             direction: Some(play_jig.settings.direction),
             scoring: Some(play_jig.settings.scoring),
             drag_assist: Some(play_jig.settings.drag_assist),
+            ..Default::default()
         };
 
-        PlayerPopup::new(
+        let signed_url = match play_jig.name.get_cloned() {
+            Some(name) => format!(
+                "{}#players_name={}",
+                play_jig.share_url,
+                encode_uri_component(&name)
+            ),
+            None => play_jig.share_url,
+        };
+
+        PlayerPopup::new_signed_url(
             play_jig.id.into(),
-            None,
-            None,
+            signed_url,
             player_options.into(),
             PreviewPopupCallbacks::new(close),
         )

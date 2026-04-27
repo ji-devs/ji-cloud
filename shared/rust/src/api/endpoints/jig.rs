@@ -8,11 +8,11 @@ use crate::{
             JigCreateRequest, JigDeleteAllPath, JigDeletePath, JigFeaturedPath,
             JigFeaturedResponse, JigFeaturedUpdateRequest, JigGetDraftPath, JigGetLivePath, JigId,
             JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath, JigPublishPath, JigResponse,
-            JigSearchPath, JigSearchQuery, JigSearchResponse, JigTransferAdminPath,
-            JigTrendingPath, JigTrendingResponse, JigUnlikePath, JigUpdateAdminDataRequest,
-            JigUpdateDraftDataPath, JigUpdateDraftDataRequest, JigUserPlayPath, ListLikedPath,
-            ListLikedRequest, ListLikedResponse, ListPlayedPath, ListPlayedRequest,
-            ListPlayedResponse,
+            JigSearchPath, JigSearchQuery, JigSearchResponse, JigShareUrlPath, JigShareUrlRequest,
+            JigShareUrlResponse, JigTransferAdminPath, JigTrendingPath, JigTrendingResponse,
+            JigUnlikePath, JigUpdateAdminDataRequest, JigUpdateDraftDataPath,
+            JigUpdateDraftDataRequest, JigUserPlayPath, ListLikedPath, ListLikedRequest,
+            ListLikedResponse, ListPlayedPath, ListPlayedRequest, ListPlayedResponse,
         },
         CreateResponse,
     },
@@ -402,4 +402,17 @@ impl ApiEndpoint for GetJigPlaylists {
     type Path = GetJigPlaylistsPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
+}
+
+/// Generate a signed share URL for a JIG with custom player settings.
+///
+/// # Authorization
+/// * None
+pub struct ShareUrl;
+impl ApiEndpoint for ShareUrl {
+    type Req = JigShareUrlRequest;
+    type Res = JigShareUrlResponse;
+    type Path = JigShareUrlPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Post;
 }

@@ -1,13 +1,22 @@
 use crate::db::{get_course_metadata, get_jig_metadata, get_playlist_metadata, AssetMetadata};
 use actix_web::{
-    error::ErrorInternalServerError,
+    error::{ErrorForbidden, ErrorInternalServerError},
     web::{Data, Path},
     HttpRequest, HttpResponse,
 };
-use ji_core::settings::RuntimeSettings;
+use ji_core::{settings::RuntimeSettings, url_signature::verify_signed_url};
+use paseto::TimeBackend;
+use serde::Deserialize;
 use shared::{
     config::RemoteTarget,
-    domain::{asset::AssetId, course::CourseId, jig::JigId, playlist::PlaylistId},
+    domain::{
+        asset::AssetId,
+        course::CourseId,
+        jig::JigId,
+        playlist::PlaylistId,
+        session::AUTH_COOKIE_NAME,
+        user::{UserId, UserScope},
+    },
 };
 use sqlx::PgPool;
 use std::borrow::Cow;
@@ -17,6 +26,12 @@ use askama::Template;
 
 const DEFAULT_DESCRIPTION: &str = "Jigzi is a game-creation tool and crowd-sourcing platform which currently holds thousands of educational activities that teach children about Judaism, Hebrew, Israel and their culture in an engaging and interactive way. Educators can use current games, as well as create their own to complement their curriculum at any level and any language. The creation tool includes a huge collection of educational clipart that updates constantly.";
 const DEFAULT_KEYWORDS: &str = "Jigzi, Judaism, Hebrew, educational, teaching, interactive";
+const AUTHORIZED_FOOTER: &str = "authorized";
+
+#[derive(Deserialize)]
+struct AuthorizedTokenClaims {
+    sub: String,
+}
 
 #[derive(Debug, Clone, PartialEq, Copy, Eq, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -167,6 +182,20 @@ pub async fn asset_template(
     let (page_kind, asset_path) = path.into_inner();
     let metadata = load_asset_spa_metadata(&settings, &db, &req, page_kind, &asset_path).await;
 
+    if page_kind == ModuleAssetPageKind::Play {
+        let path_and_query = req
+            .uri()
+            .path_and_query()
+            .map(|pq| pq.as_str())
+            .unwrap_or(req.uri().path());
+
+        if verify_signed_url(path_and_query, &settings.token_secret).is_none()
+            && !can_view_unsigned_play_url(&settings, &db, &req, &asset_path).await
+        {
+            return Err(ErrorForbidden("Invalid or missing signature"));
+        }
+    }
+
     spa_template(&settings, SpaPage::Asset(page_kind), metadata)
 }
 
@@ -190,6 +219,152 @@ pub async fn module_template(
 ) -> actix_web::Result<HttpResponse> {
     let (module_kind, page_kind, _) = path.into_inner();
     spa_template(&settings, SpaPage::Module(module_kind, page_kind), None)
+}
+
+async fn can_view_unsigned_play_url(
+    settings: &RuntimeSettings,
+    db: &PgPool,
+    req: &HttpRequest,
+    asset_path: &str,
+) -> bool {
+    let Some(user_id) = auth_user_id(settings, db, req).await else {
+        return false;
+    };
+
+    let Ok(is_admin) = user_has_admin_asset_access(db, user_id).await else {
+        return false;
+    };
+
+    if is_admin {
+        return true;
+    }
+
+    let Some(asset_id) = asset_id_from_asset_path(asset_path) else {
+        return false;
+    };
+
+    user_owns_asset(db, asset_id, user_id)
+        .await
+        .unwrap_or(false)
+}
+
+async fn auth_user_id(
+    settings: &RuntimeSettings,
+    db: &PgPool,
+    req: &HttpRequest,
+) -> Option<UserId> {
+    let token_string = req.cookie(AUTH_COOKIE_NAME)?.value().to_owned();
+    let token = paseto::validate_local_token(
+        &token_string,
+        Some(AUTHORIZED_FOOTER),
+        settings.token_secret.as_ref(),
+        &TimeBackend::Chrono,
+    )
+    .ok()?;
+    let claims: AuthorizedTokenClaims = serde_json::from_value(token).ok()?;
+
+    let session_info = sqlx::query!(
+        r#"
+select user_id as "user_id: UserId"
+from session
+where token = $1
+  and expires_at < now() is not true
+  and (scope_mask & $2) = $2
+  and (
+      impersonator_id is null
+      or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3)
+  )
+"#,
+        &claims.sub,
+        1i16,
+        UserScope::Admin as i16,
+    )
+    .fetch_optional(db)
+    .await
+    .ok()??;
+
+    Some(session_info.user_id)
+}
+
+async fn user_has_admin_asset_access(db: &PgPool, user_id: UserId) -> sqlx::Result<bool> {
+    let res = sqlx::query!(
+        r#"
+select exists(
+    select 1
+    from user_scope
+    where user_id = $1
+      and scope = any($2)
+) as "exists!"
+"#,
+        user_id.0,
+        &[UserScope::Admin as i16, UserScope::AdminAsset as i16]
+    )
+    .fetch_one(db)
+    .await?;
+
+    Ok(res.exists)
+}
+
+async fn user_owns_asset(db: &PgPool, asset_id: AssetId, user_id: UserId) -> sqlx::Result<bool> {
+    let user_id = user_id.0;
+
+    match asset_id {
+        AssetId::JigId(jig_id) => {
+            let res = sqlx::query!(
+                r#"
+select exists(
+    select 1
+    from jig
+    where id = $1
+      and (creator_id = $2 or author_id = $2)
+) as "exists!"
+"#,
+                jig_id.0,
+                user_id,
+            )
+            .fetch_one(db)
+            .await?;
+
+            Ok(res.exists)
+        }
+        AssetId::PlaylistId(playlist_id) => {
+            let res = sqlx::query!(
+                r#"
+select exists(
+    select 1
+    from playlist
+    where id = $1
+      and (creator_id = $2 or author_id = $2)
+) as "exists!"
+"#,
+                playlist_id.0,
+                user_id,
+            )
+            .fetch_one(db)
+            .await?;
+
+            Ok(res.exists)
+        }
+        AssetId::CourseId(course_id) => {
+            let res = sqlx::query!(
+                r#"
+select exists(
+    select 1
+    from course
+    where id = $1
+      and (creator_id = $2 or author_id = $2)
+) as "exists!"
+"#,
+                course_id.0,
+                user_id,
+            )
+            .fetch_one(db)
+            .await?;
+
+            Ok(res.exists)
+        }
+        AssetId::ResourceId(_) => Ok(false),
+    }
 }
 
 pub async fn dev_template(

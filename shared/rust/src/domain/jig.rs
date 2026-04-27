@@ -489,6 +489,14 @@ pub struct JigResponse {
     /// Maximum possible score for this JIG
     #[serde(default)]
     pub max_score: u32,
+
+    /// Pre-signed share URL for this JIG.
+    #[serde(default)]
+    pub share_url: String,
+
+    /// Pre-signed student share URL for this JIG.
+    #[serde(default)]
+    pub student_share_url: String,
 }
 
 make_path_parts!(JigGetLivePath => "/v1/jig/{}/live" => JigId);
@@ -922,4 +930,30 @@ pub struct AdminJigExport {
     pub published_at: Option<DateTime<Utc>>,
     /// The language the jig uses.
     pub language: String,
+}
+
+make_path_parts!(JigShareUrlPath => "/v1/jig/{}/share-url" => JigId);
+
+/// Request for generating a signed play URL for a JIG.
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JigShareUrlRequest {
+    /// Text direction.
+    #[serde(default)]
+    pub direction: Option<TextDirection>,
+
+    /// Whether scoring is enabled.
+    #[serde(default)]
+    pub scoring: Option<bool>,
+}
+
+/// Response containing a signed share URL for a JIG.
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct JigShareUrlResponse {
+    /// The signed share URL.
+    pub share_url: String,
+
+    /// The signed student share URL.
+    pub student_share_url: String,
 }

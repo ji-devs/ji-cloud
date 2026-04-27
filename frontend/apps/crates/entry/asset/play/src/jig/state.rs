@@ -16,7 +16,7 @@ use shared::domain::{
     },
     playlist::PlaylistResponse,
 };
-use utils::asset::JigPlayerOptions;
+use utils::{asset::JigPlayerOptions, unwrap::UnwrapJiExt};
 use web_sys::HtmlIFrameElement;
 
 use super::timer::Timer;
@@ -113,7 +113,7 @@ impl JigPlayer {
             play_login_popup_shown: Mutable::new(false),
             draft_or_live: player_options.draft_or_live,
             play_token: player_options.play_token,
-            players_name: player_options.players_name,
+            players_name: player_options.players_name.or_else(players_name_from_hash),
             is_student: player_options.is_student,
             quota: player_options.quota,
             url_direction: player_options.direction,
@@ -123,6 +123,12 @@ impl JigPlayer {
             drag_assist: Mutable::new(player_options.drag_assist.unwrap_or_default()),
         })
     }
+}
+
+fn players_name_from_hash() -> Option<String> {
+    let hash = web_sys::window()?.location().hash().ok()?;
+    hash.strip_prefix("#players_name=")
+        .map(|name| js_sys::decode_uri_component(name).unwrap_ji().into())
 }
 
 /// Returns whether the liked status should be loaded for a JIG

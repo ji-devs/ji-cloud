@@ -242,6 +242,8 @@ where
                             translated_description: HashMap::new(),
                         },
                         max_score: 0,
+                        share_url: String::new(),
+                        student_share_url: String::new(),
                     }));
                 }
 

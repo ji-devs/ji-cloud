@@ -146,6 +146,8 @@ where
                         likes: 0,
                         plays: 0,
                         max_score: 0,
+                        share_url: String::new(),
+                        student_share_url: String::new(),
                     }))
                 } else {
                     let resp = match draft_or_live {

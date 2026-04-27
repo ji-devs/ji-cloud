@@ -5,9 +5,9 @@ use futures_signals::signal::Mutable;
 use gloo_timers::callback::Timeout;
 use shared::{
     api::endpoints::jig,
-    domain::jig::{codes::JigPlayerSessionCreatePath, JigPlayerSettings},
+    domain::jig::{codes::JigPlayerSessionCreatePath, JigPlayerSettings, JigShareUrlPath},
 };
-use utils::{bail_on_err, prelude::*};
+use utils::{bail_on_err, clipboard, prelude::*};
 
 use crate::qr_dialog::{QrDialog, QrDialogCallbacks};
 
@@ -33,6 +33,51 @@ impl ShareAsset {
             let res = bail_on_err!(res);
             state.student_code.set(Some(res.index));
         }));
+    }
+
+    pub(super) fn refresh_share_url(self: &Rc<Self>) {
+        let state = self;
+        state.loader.load(clone!(state => async move {
+            if let Some((share_url, student_share_url)) = state.signed_share_urls().await {
+                state.share_url.set(share_url);
+                state.student_share_url.set(student_share_url);
+            }
+        }));
+    }
+
+    pub(super) async fn signed_share_urls(&self) -> Option<(String, String)> {
+        match &self.asset {
+            shared::domain::asset::Asset::Jig(jig) => {
+                let req = shared::domain::jig::JigShareUrlRequest {
+                    direction: Some(self.direction.get()),
+                    scoring: Some(self.scoring.get()),
+                };
+
+                let res = jig::ShareUrl::api_no_auth(JigShareUrlPath(jig.id), Some(req))
+                    .await
+                    .toast_on_err();
+                res.ok().map(|res| (res.share_url, res.student_share_url))
+            }
+            _ => Some((
+                self.share_url.get_cloned(),
+                self.student_share_url.get_cloned(),
+            )),
+        }
+    }
+
+    pub(super) fn copy_share_url(&self, copied: Mutable<bool>) {
+        clipboard::write_text(&self.share_url.get_cloned());
+        ShareAsset::set_copied_mutable(copied);
+    }
+
+    pub(super) fn copy_student_share_url(&self, copied: Mutable<bool>) {
+        clipboard::write_text(&self.student_share_url.get_cloned());
+        ShareAsset::set_copied_mutable(copied);
+    }
+
+    pub(super) fn copy_embed_code(self: &Rc<Self>) {
+        clipboard::write_text(&self.embed_code());
+        ShareAsset::set_copied_mutable(self.copied_embed.clone());
     }
 
     pub fn set_copied_mutable(copied: Mutable<bool>) {

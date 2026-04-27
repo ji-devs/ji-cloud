@@ -79,5 +79,7 @@ pub fn get_jig() -> JigResponse {
         likes: 0,
         plays: 0,
         max_score: 0,
+        share_url: String::new(),
+        student_share_url: String::new(),
     }
 }

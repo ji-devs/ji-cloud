@@ -449,6 +449,8 @@ pub async fn jigs_with_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
                     premium: row.premium,
                 },
                 max_score: row.max_score as u32,
+                share_url: String::new(),
+                student_share_url: String::new(),
             };
 
             Ok(JigWithCodes {

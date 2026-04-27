@@ -438,6 +438,9 @@ pub mod instance {
 
         /// Token that will be passed to confirm a JIG was played all the way through
         pub token: String,
+
+        /// Signed URL for playing the JIG as a student.
+        pub share_url: String,
     }
 
     make_path_parts!(PlayerSessionInstanceCompletePath => "/v1/jig/codes/instance/complete");

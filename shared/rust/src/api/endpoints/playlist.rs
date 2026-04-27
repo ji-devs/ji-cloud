@@ -7,7 +7,8 @@ use crate::{
             PlaylistCreatePath, PlaylistCreateRequest, PlaylistDeletePath, PlaylistGetDraftPath,
             PlaylistGetLivePath, PlaylistId, PlaylistLikePath, PlaylistLikedPath,
             PlaylistLikedResponse, PlaylistPublishPath, PlaylistResponse, PlaylistSearchPath,
-            PlaylistSearchQuery, PlaylistSearchResponse, PlaylistUnlikePath,
+            PlaylistSearchQuery, PlaylistSearchResponse, PlaylistShareUrlPath,
+            PlaylistShareUrlRequest, PlaylistShareUrlResponse, PlaylistUnlikePath,
             PlaylistUpdateAdminDataRequest, PlaylistUpdateDraftDataPath,
             PlaylistUpdateDraftDataRequest, PlaylistViewPath,
         },
@@ -230,6 +231,19 @@ impl ApiEndpoint for View {
     type Res = ();
     type Err = EmptyError;
     const METHOD: Method = Method::Put;
+}
+
+/// Generate a signed play URL for a Playlist.
+///
+/// # Authorization
+/// * None
+pub struct ShareUrl;
+impl ApiEndpoint for ShareUrl {
+    type Req = PlaylistShareUrlRequest;
+    type Res = PlaylistShareUrlResponse;
+    type Path = PlaylistShareUrlPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Post;
 }
 
 /// Update an admin data for a JIG.

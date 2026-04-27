@@ -5,17 +5,18 @@ use dominator::{clone, html, Dom};
 use futures_signals::signal::SignalExt;
 use shared::domain::asset::AssetId;
 use utils::{
-    asset::AssetPlayerOptions,
     events,
     iframe::{AssetPlayerToPlayerPopup, IframeInit},
     prelude::SETTINGS,
-    routes::{AssetPlayRoute, AssetRoute, Route},
     unwrap::UnwrapJiExt,
 };
 
 impl PlayerPopup {
     pub fn render(self: Rc<Self>, slot: Option<&str>) -> Dom {
         let state = self;
+        if state.signed_url.lock_ref().is_none() {
+            state.load_signed_url();
+        }
         html!("player-popup", {
             .prop("size", match state.asset_id {
                 AssetId::JigId(_) => "aspect-ratio",
@@ -41,36 +42,14 @@ impl PlayerPopup {
                     },
                 }
             })))
-            .child_signal(state.open.signal().map(clone!(state => move |open| {
-                match open {
-                    false => None,
-                    true => {
+            .child_signal(state.signed_url.signal_cloned().map(clone!(state => move |signed_url| {
+                match (state.open.get(), signed_url) {
+                    (true, Some(signed_url)) => {
                         Some(html!("iframe", {
                             .style("border", "0")
                             .prop("slot", "iframe")
                             .prop("allow", "autoplay; fullscreen")
-                            .prop("src", {
-                                let url = match (state.asset_id, state.module_id, &state.player_options, state.unit_id) {
-                                    (AssetId::JigId(jig_id), module_id, AssetPlayerOptions::Jig(player_options), _unit_id) => {
-                                        Route::Asset(AssetRoute::Play(AssetPlayRoute::Jig(jig_id, module_id, player_options.clone())))
-                                    },
-                                    (AssetId::PlaylistId(playlist_id), _module_id, AssetPlayerOptions::Playlist(player_options), _unit_id) => {
-                                        Route::Asset(AssetRoute::Play(AssetPlayRoute::Playlist(playlist_id, player_options.clone())))
-                                    },
-                                    (AssetId::CourseId(course_id), _module_id, AssetPlayerOptions::Course(player_options), unit_id, ) => {
-                                        Route::Asset(AssetRoute::Play(AssetPlayRoute::Course(course_id, unit_id, player_options.clone())))
-                                    },
-                                    _ => {
-                                        panic!("Invalid asset id/module id/player_options combinations")
-                                    }
-                                }.to_string();
-
-                                let url = SETTINGS.get()
-                                    .unwrap_ji()
-                                    .remote_target
-                                    .spa_iframe(&url);
-                                url
-                            })
+                            .prop("src", iframe_signed_url(&signed_url))
                             .global_event(clone!(state => move |event: events::Message| {
                                 if let Ok(data) = event.try_serde_data::<IframeInit<AssetPlayerToPlayerPopup>>() {
                                     match data.data {
@@ -85,8 +64,19 @@ impl PlayerPopup {
                             }))
                         }))
                     },
+                    _ => None,
                 }
             })))
         })
+    }
+}
+
+fn iframe_signed_url(signed_url: &str) -> String {
+    let remote_target = &SETTINGS.get().unwrap_ji().remote_target;
+    let pages_url = remote_target.pages_url();
+
+    match signed_url.strip_prefix(&pages_url) {
+        Some(route_path) => remote_target.spa_iframe(route_path),
+        None => signed_url.to_string(),
     }
 }

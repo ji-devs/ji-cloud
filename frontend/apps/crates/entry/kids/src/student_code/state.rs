@@ -24,6 +24,6 @@ impl StudentCode {
 pub(super) struct PlayJig {
     pub id: JigId,
     pub settings: JigPlayerSettings,
-    pub token: String,
+    pub share_url: String,
     pub name: Mutable<Option<String>>,
 }

@@ -351,6 +351,8 @@ from jig_data
             premium: row.premium,
         },
         max_score: row.max_score as u32,
+        share_url: String::new(),
+        student_share_url: String::new(),
     });
 
     Ok(jig)
@@ -573,6 +575,8 @@ order by ord asc
                 premium: jig_row.premium,
             },
             max_score: jig_data_row.max_score as u32,
+            share_url: String::new(),
+            student_share_url: String::new(),
         })
         .collect();
 
@@ -821,6 +825,8 @@ limit $8
                 premium: jig_data_row.premium,
             },
             max_score: jig_data_row.max_score as u32,
+            share_url: String::new(),
+            student_share_url: String::new(),
         })
         .collect();
 
@@ -2064,6 +2070,7 @@ order by coalesce(updated_at, created_at) desc
                 curated: playlist_data_row.curated,
                 premium: playlist_data_row.premium,
             },
+            share_url: String::new(),
         })
         .collect();
 

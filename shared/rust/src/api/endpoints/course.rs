@@ -7,7 +7,8 @@ use crate::{
             CourseBrowsePath, CourseBrowseQuery, CourseBrowseResponse, CourseClonePath,
             CourseCreatePath, CourseCreateRequest, CourseDeletePath, CourseGetDraftPath,
             CourseGetLivePath, CourseId, CoursePlayPath, CoursePublishPath, CourseResponse,
-            CourseSearchPath, CourseSearchQuery, CourseSearchResponse, CourseUpdateDraftDataPath,
+            CourseSearchPath, CourseSearchQuery, CourseSearchResponse, CourseShareUrlPath,
+            CourseShareUrlRequest, CourseShareUrlResponse, CourseUpdateDraftDataPath,
             CourseUpdateDraftDataRequest,
         },
         CreateResponse,
@@ -182,6 +183,19 @@ impl ApiEndpoint for Play {
     type Path = CoursePlayPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Put;
+}
+
+/// Generate a signed play URL for a Course.
+///
+/// # Authorization
+/// * None
+pub struct ShareUrl;
+impl ApiEndpoint for ShareUrl {
+    type Req = CourseShareUrlRequest;
+    type Res = CourseShareUrlResponse;
+    type Path = CourseShareUrlPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Post;
 }
 
 /// Update an admin data for a JIG.

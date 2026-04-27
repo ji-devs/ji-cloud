@@ -181,11 +181,30 @@ pub struct CourseResponse {
 
     /// Admin data for a course
     pub admin_data: CourseAdminData,
+
+    /// Pre-signed share URL for this course.
+    #[serde(default)]
+    pub share_url: String,
 }
 
 make_path_parts!(CourseGetLivePath => "/v1/course/{}/live" => CourseId);
 
 make_path_parts!(CourseGetDraftPath => "/v1/course/{}/draft" => CourseId);
+
+make_path_parts!(CourseShareUrlPath => "/v1/course/{}/share-url" => CourseId);
+
+/// Request for generating a signed play URL for a Course.
+#[derive(Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct CourseShareUrlRequest {}
+
+/// Response containing a signed share URL for a Course.
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct CourseShareUrlResponse {
+    /// The signed share URL.
+    pub share_url: String,
+}
 
 make_path_parts!(CourseUpdateDraftDataPath => "/v1/course/{}" => CourseId);
 

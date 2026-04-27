@@ -43,6 +43,7 @@ pub mod jwk;
 pub mod logger;
 pub(crate) mod more_futures;
 pub mod service;
+pub mod share_url;
 pub mod stripe;
 pub mod token;
 pub mod translate;

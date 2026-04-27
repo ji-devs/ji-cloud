@@ -257,6 +257,7 @@ from course_data
             curated: row.curated,
             premium: row.premium,
         },
+        share_url: String::new(),
     });
 
     Ok(course)
@@ -415,6 +416,7 @@ order by ord asc
                 curated: course_row.curated,
                 premium: course_row.premium,
             },
+            share_url: String::new(),
         })
         .collect();
 
@@ -600,6 +602,7 @@ limit $6
                 curated: course_data_row.curated,
                 premium: course_data_row.premium,
             },
+            share_url: String::new(),
         })
         .collect();
 

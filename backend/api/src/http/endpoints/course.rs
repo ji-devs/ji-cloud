@@ -4,7 +4,7 @@ use actix_web::{
 };
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
-use shared::domain::user::UserScope;
+use shared::domain::{course::CourseShareUrlResponse, user::UserScope};
 use shared::{
     api::{endpoints::course, ApiEndpoint, PathParts},
     domain::{
@@ -25,6 +25,7 @@ use crate::{
     error::{self},
     extractor::TokenUser,
     service::ServiceData,
+    share_url,
 };
 
 pub mod unit;
@@ -76,24 +77,42 @@ async fn create(
 #[instrument(skip_all)]
 async fn get_live(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     path: web::Path<CourseId>,
 ) -> Result<Json<<course::GetLive as ApiEndpoint>::Res>, error::NotFound> {
-    let course_response = db::course::get_one(&db, path.into_inner(), DraftOrLive::Live)
+    let mut course_response = db::course::get_one(&db, path.into_inner(), DraftOrLive::Live)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
+
+    share_url::add_share_url_to_course(&settings, &mut course_response);
 
     Ok(Json(course_response))
 }
 
 async fn get_draft(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     path: web::Path<CourseId>,
 ) -> Result<Json<<course::GetDraft as ApiEndpoint>::Res>, error::NotFound> {
-    let course_response = db::course::get_one(&db, path.into_inner(), DraftOrLive::Draft)
+    let mut course_response = db::course::get_one(&db, path.into_inner(), DraftOrLive::Draft)
         .await?
         .ok_or(error::NotFound::ResourceNotFound)?;
 
+    share_url::add_share_url_to_course(&settings, &mut course_response);
+
     Ok(Json(course_response))
+}
+
+/// Generate a signed share URL for a Course with custom player settings.
+async fn get_share_url(
+    settings: Data<RuntimeSettings>,
+    path: web::Path<CourseId>,
+) -> Json<<course::ShareUrl as ApiEndpoint>::Res> {
+    let course_id = path.into_inner();
+
+    let share_url = share_url::generate_course_share_url(&settings, course_id);
+
+    Json(CourseShareUrlResponse { share_url })
 }
 
 /// Update a Course's draft data.
@@ -147,9 +166,10 @@ async fn delete(
     Ok(HttpResponse::NoContent().finish())
 }
 
-#[instrument(skip(db, claims))]
+#[instrument(skip(db, settings, claims))]
 async fn browse(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: Option<TokenUser>,
     query: Option<Query<<course::Browse as ApiEndpoint>::Req>>,
 ) -> Result<Json<<course::Browse as ApiEndpoint>::Res>, error::Auth> {
@@ -191,8 +211,12 @@ async fn browse(
         resource_types.to_owned(),
     );
 
-    let (courses, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
+    let (mut courses, (total_count, count)) = try_join!(browse_future, total_count_future,)?;
     println!("COURSES {}", courses.len());
+
+    for course in &mut courses {
+        share_url::add_share_url_to_course(&settings, course);
+    }
 
     let pages = (count / (page_limit as u64) + (count % (page_limit as u64) != 0) as u64) as u32;
 
@@ -276,6 +300,7 @@ delete from course_data where id = $1
 #[instrument(skip_all)]
 async fn search(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
     query: Option<Query<<course::Search as ApiEndpoint>::Req>>,
@@ -312,9 +337,13 @@ async fn search(
         .await?
         .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
-    let courses: Vec<_> = db::course::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live)
+    let mut courses: Vec<_> = db::course::get_by_ids(db.as_ref(), &ids, DraftOrLive::Live)
         .await
         .into_anyhow()?;
+
+    for course in &mut courses {
+        share_url::add_share_url_to_course(&settings, course);
+    }
 
     Ok(Json(CourseSearchResponse {
         courses,
@@ -460,6 +489,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <course::Play as ApiEndpoint>::Path::PATH,
         course::Play::METHOD.route().to(play),
+    )
+    .route(
+        <course::ShareUrl as ApiEndpoint>::Path::PATH,
+        course::ShareUrl::METHOD.route().to(get_share_url),
     )
     .route(
         <course::UpdateDraftData as ApiEndpoint>::Path::PATH,

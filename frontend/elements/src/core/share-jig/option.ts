@@ -19,6 +19,11 @@ export class _ extends LitElement {
                 :host(:hover) {
                     background-color: var(--light-blue-1);
                 }
+                :host([disabled]) {
+                    cursor: default;
+                    opacity: 0.5;
+                    pointer-events: none;
+                }
                 .help {
                     height: 20px;
                     width: 20px;
@@ -37,6 +42,9 @@ export class _ extends LitElement {
 
     @property()
     kind: Kind = "code";
+
+    @property({ type: Boolean, reflect: true })
+    disabled: boolean = false;
 
     render() {
 
