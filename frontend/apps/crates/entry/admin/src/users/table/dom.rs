@@ -425,12 +425,13 @@ impl UsersTable {
                                         .prop("value", "switch_to_email")
                                     }))
                                 })
-                                .apply_if(matches!(user.login_type, UserLoginType::Email), |dom| {
+                                .apply_if(matches!(user.login_type, UserLoginType::Email), clone!(user => move |dom| {
                                     dom.child(html!("option", {
                                         .text("Reset password")
                                         .prop("value", "send_password_reset")
+                                        .prop_signal("disabled", user.blocked.signal())
                                     }))
-                                })
+                                }))
                                 .apply_if(user.account_id.is_some(), |dom| {
                                     dom.child(html!("option", {
                                         .text("Clear account")
