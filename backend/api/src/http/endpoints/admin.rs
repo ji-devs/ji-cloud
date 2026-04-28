@@ -4,14 +4,21 @@ use actix_web::{
     HttpResponse,
 };
 use anyhow::anyhow;
+use argon2::{password_hash::SaltString, Argon2, PasswordHasher};
 use chrono::{Duration, Utc};
 use futures::future::join_all;
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
+use rand::{
+    distributions::{Alphanumeric, DistString},
+    thread_rng,
+};
+use sendgrid::v3::Email;
 use serde::{Deserialize, Serialize};
 use shared::api::endpoints::admin::{
-    CreateSchoolName, DeleteUserAccount, GetSchoolNames, ImportSchoolNames, InviteUsers,
-    RemoveUserFromSchool, SearchSchools, SetInternalSchoolName, UpdateSchoolName, VerifySchool,
+    AdminSendPasswordReset, AdminSwitchToBasicAuth, CreateSchoolName, DeleteUserAccount,
+    GetSchoolNames, ImportSchoolNames, InviteUsers, RemoveUserFromSchool, SearchSchools,
+    SetInternalSchoolName, UpdateSchoolName, VerifySchool,
 };
 use shared::domain::admin::{
     InviteFailedReason, InviteSchoolUserFailure, InviteSchoolUsersResponse, SearchSchoolsResponse,
@@ -31,9 +38,12 @@ use shared::{
 use sqlx::PgPool;
 use tracing::instrument;
 
+use uuid::Uuid;
+
 use crate::{
     db, error,
     extractor::{ScopeAdmin, TokenUserNoCsrfWithScope, TokenUserWithScope},
+    service::{mail, ServiceData},
     token::{create_auth_token, SessionMask},
 };
 
@@ -446,6 +456,97 @@ async fn remove_user_from_school(
     Ok(HttpResponse::Ok().finish())
 }
 
+async fn admin_switch_to_basic_auth(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    db: Data<PgPool>,
+    user_id: Path<UserId>,
+) -> Result<HttpResponse, error::UserNotFound> {
+    let user_id = user_id.into_inner();
+
+    let profile = db::user::get_profile(db.as_ref(), &user_id)
+        .await?
+        .ok_or(error::UserNotFound::UserNotFound)?;
+
+    let mut txn = db.begin().await.into_anyhow()?;
+
+    let uuid: Uuid = user_id.into();
+
+    sqlx::query!(r#"delete from "user_auth_google" where user_id = $1"#, &uuid)
+        .execute(&mut *txn)
+        .await?;
+
+    let random_password = Alphanumeric.sample_string(&mut thread_rng(), 16);
+    let pass_hash = actix_web::web::block(move || {
+        let password_hasher = Argon2::default();
+        let salt = SaltString::generate(thread_rng());
+        password_hasher
+            .hash_password(random_password.as_bytes(), &salt.as_salt())
+            .map_err(|it| anyhow::anyhow!("{}", it))
+            .map(|it| it.to_string())
+    })
+    .await
+    .into_anyhow()??;
+
+    sqlx::query!(
+        "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
+        &uuid,
+        profile.email,
+        pass_hash,
+    )
+    .execute(&mut *txn)
+    .await
+    .into_anyhow()?;
+
+    txn.commit().await.into_anyhow()?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+async fn admin_send_password_reset(
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    config: Data<RuntimeSettings>,
+    db: Data<PgPool>,
+    mail: ServiceData<mail::Client>,
+    user_id: Path<UserId>,
+) -> Result<HttpResponse, error::UserNotFound> {
+    let user_id = user_id.into_inner();
+
+    let profile = db::user::get_profile(db.as_ref(), &user_id)
+        .await?
+        .ok_or(error::UserNotFound::UserNotFound)?;
+
+    let mut txn = db.begin().await.into_anyhow()?;
+
+    let session = db::session::create(
+        &mut *txn,
+        user_id,
+        Some(&(Utc::now() + Duration::hours(1))),
+        SessionMask::CHANGE_PASSWORD,
+        None,
+    )
+    .await
+    .into_anyhow()?;
+
+    let first_name = db::user::get_given_name(&mut *txn, user_id)
+        .await
+        .into_anyhow()?;
+
+    let template = mail
+        .password_reset_template()
+        .map_err(|e| anyhow!("{}", e))?;
+
+    let pages_url = config.remote_target().pages_url();
+    let email_link = format!("{}/user/password-reset/{}", pages_url, session);
+
+    mail.send_password_reset(template, Email::new(profile.email), email_link, first_name)
+        .await
+        .map_err(|e| anyhow!("{}", e))?;
+
+    txn.commit().await.into_anyhow()?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <admin::Impersonate as ApiEndpoint>::Path::PATH,
@@ -514,5 +615,17 @@ pub fn configure(cfg: &mut ServiceConfig) {
         RemoveUserFromSchool::METHOD
             .route()
             .to(remove_user_from_school),
+    )
+    .route(
+        <AdminSwitchToBasicAuth as ApiEndpoint>::Path::PATH,
+        AdminSwitchToBasicAuth::METHOD
+            .route()
+            .to(admin_switch_to_basic_auth),
+    )
+    .route(
+        <AdminSendPasswordReset as ApiEndpoint>::Path::PATH,
+        AdminSendPasswordReset::METHOD
+            .route()
+            .to(admin_send_password_reset),
     );
 }

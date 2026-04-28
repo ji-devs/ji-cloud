@@ -159,4 +159,8 @@ make_path_parts!(SetAccountTierOverridePath => "/v1/admin/users/{}/tier-override
 
 make_path_parts!(DeleteUserAccountPath => "/v1/admin/users/{}/account" => UserId);
 
+make_path_parts!(AdminSwitchToBasicAuthPath => "/v1/admin/users/{}/basic-auth" => UserId);
+
+make_path_parts!(AdminSendPasswordResetPath => "/v1/admin/users/{}/password-reset" => UserId);
+
 make_path_parts!(RemoveUserFromSchoolPath => "/v1/admin/schools/{}/users" => SchoolId);

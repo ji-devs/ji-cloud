@@ -1,6 +1,7 @@
 use super::ApiEndpoint;
 use crate::domain::admin::{
-    AdminSchoolAccountPath, AdminSchoolsPath, AdminVerifySchoolPath, DeleteUserAccountPath,
+    AdminSchoolAccountPath, AdminSchoolsPath, AdminSendPasswordResetPath,
+    AdminSwitchToBasicAuthPath, AdminVerifySchoolPath, DeleteUserAccountPath,
     GetAdminSchoolAccountResponse, ImportSchoolNamesPath, InviteSchoolUsersPath,
     InviteSchoolUsersRequest, InviteSchoolUsersResponse, RemoveUserFromSchoolPath, SchoolNamesPath,
     SearchSchoolsParams, SearchSchoolsResponse, SetAccountTierOverridePath,
@@ -180,6 +181,26 @@ impl ApiEndpoint for DeleteUserAccount {
     type Res = ();
     type Err = AccountError;
     const METHOD: Method = Method::Delete;
+}
+
+/// Switch a user from Google auth to basic (email/password) auth
+pub struct AdminSwitchToBasicAuth;
+impl ApiEndpoint for AdminSwitchToBasicAuth {
+    type Path = AdminSwitchToBasicAuthPath;
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Put;
+}
+
+/// Send a password reset email to a user
+pub struct AdminSendPasswordReset;
+impl ApiEndpoint for AdminSendPasswordReset {
+    type Path = AdminSendPasswordResetPath;
+    type Req = ();
+    type Res = ();
+    type Err = EmptyError;
+    const METHOD: Method = Method::Post;
 }
 
 /// Set a school name for a school

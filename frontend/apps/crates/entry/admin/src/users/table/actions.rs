@@ -1,10 +1,14 @@
 use std::rc::Rc;
 
 use dominator::clone;
-use shared::domain::admin::{DeleteUserAccountPath, SetAccountTierOverridePath};
+use shared::domain::admin::{
+    AdminSendPasswordResetPath, AdminSwitchToBasicAuthPath, DeleteUserAccountPath,
+    SetAccountTierOverridePath,
+};
 use shared::domain::billing::{
     AdminUpgradeSubscriptionPlanPath, AdminUpgradeSubscriptionPlanRequest, PlanTier, PlanType,
 };
+use shared::domain::session::ImpersonatePath;
 use shared::domain::UpdateNullable;
 use shared::{
     api::endpoints,
@@ -99,6 +103,53 @@ impl UsersTable {
             .toast_on_err();
 
             state.search_users(state.search_query.get_cloned());
+        }))
+    }
+
+    pub fn impersonate(self: &Rc<Self>, user: &Rc<EditableUser>) {
+        self.loader.load(clone!(user => async move {
+            let res = endpoints::admin::Impersonate::api_with_auth(
+                ImpersonatePath(user.id),
+                None,
+            )
+            .await
+            .toast_on_err();
+
+            if res.is_ok() {
+                let _ = web_sys::window().unwrap_ji().location().set_href("/");
+            }
+        }))
+    }
+
+    pub fn switch_to_basic_auth(self: &Rc<Self>, user: &Rc<EditableUser>) {
+        let state = self;
+        self.loader.load(clone!(state, user => async move {
+            let res = endpoints::admin::AdminSwitchToBasicAuth::api_with_auth(
+                AdminSwitchToBasicAuthPath(user.id),
+                None,
+            )
+            .await
+            .toast_on_err();
+
+            if res.is_ok() {
+                toasts::success("User switched to password login");
+                state.search_users(state.search_query.get_cloned());
+            }
+        }))
+    }
+
+    pub fn send_password_reset(self: &Rc<Self>, user: &Rc<EditableUser>) {
+        self.loader.load(clone!(user => async move {
+            let res = endpoints::admin::AdminSendPasswordReset::api_with_auth(
+                AdminSendPasswordResetPath(user.id),
+                None,
+            )
+            .await
+            .toast_on_err();
+
+            if res.is_ok() {
+                toasts::success("Password reset email sent");
+            }
         }))
     }
 }

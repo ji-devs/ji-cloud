@@ -403,13 +403,80 @@ impl UsersTable {
                         })))
                     }))
                     .child(html!("label", {
-                        .apply_if(user.account_id.is_some(), clone!(state, user => move |dom| {
-                            dom.child(html!("button", {
-                                .text("Clear Account")
-                                .event(clone!(state => move |_: events::Click| {
-                                    state.delete_user_account(&user)
+                        .child(html!("select" => HtmlSelectElement, {
+                            .with_node!(select => {
+                                .child(html!("option", {
+                                    .text("Actions")
+                                    .prop("value", "")
+                                    .prop("selected", true)
+                                    .prop("disabled", true)
                                 }))
-                            }))
+                                .child(html!("option", {
+                                    .text("Impersonate")
+                                    .prop("value", "impersonate")
+                                    .prop_signal("disabled", user.blocked.signal())
+                                }))
+                                .apply_if(matches!(user.login_type, UserLoginType::Google), |dom| {
+                                    dom.child(html!("option", {
+                                        .text("Switch to password")
+                                        .prop("value", "switch_to_email")
+                                    }))
+                                })
+                                .apply_if(matches!(user.login_type, UserLoginType::Email), |dom| {
+                                    dom.child(html!("option", {
+                                        .text("Reset password")
+                                        .prop("value", "send_password_reset")
+                                    }))
+                                })
+                                .apply_if(user.account_id.is_some(), |dom| {
+                                    dom.child(html!("option", {
+                                        .text("Clear account")
+                                        .prop("value", "clear_account")
+                                    }))
+                                })
+                                .event(clone!(state, user, select => move |_: events::Change| {
+                                    let value = select.value();
+                                    match value.as_str() {
+                                        "impersonate" => {
+                                            state.impersonate(&user);
+                                            select.set_value("");
+                                        }
+                                        "switch_to_email" => {
+                                            spawn_local(clone!(state, user, select => async move {
+                                                let confirmed = confirm::Confirm {
+                                                    title: "Switch to password".to_string(),
+                                                    message: "Are you sure you want to switch this user to a password login?".to_string(),
+                                                    confirm_text: "Switch".to_string(),
+                                                    cancel_text: "Cancel".to_string(),
+                                                }.confirm().await;
+                                                if confirmed {
+                                                    state.switch_to_basic_auth(&user);
+                                                }
+                                                select.set_value("");
+                                            }));
+                                        }
+                                        "send_password_reset" => {
+                                            state.send_password_reset(&user);
+                                            select.set_value("");
+                                        }
+                                        "clear_account" => {
+                                            spawn_local(clone!(state, user, select => async move {
+                                                let confirmed = confirm::Confirm {
+                                                    title: "Clear account".to_string(),
+                                                    message: "Are you sure you want to clear this user's account? This action cannot be undone.".to_string(),
+                                                    confirm_text: "Clear account".to_string(),
+                                                    cancel_text: "Cancel".to_string(),
+                                                }.confirm().await;
+                                                if confirmed {
+                                                    state.delete_user_account(&user);
+                                                }
+                                                select.set_value("");
+                                            }));
+                                        }
+                                        _ => {}
+                                    }
+                                }))
+                            })
                         }))
                     }))
                 })
