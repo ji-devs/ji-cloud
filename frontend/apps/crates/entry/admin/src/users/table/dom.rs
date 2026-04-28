@@ -9,7 +9,7 @@ use shared::domain::billing::{PlanTier, PlanType};
 use shared::domain::user::{UserBadge, UserLoginType};
 use std::{rc::Rc, str::FromStr};
 use strum::IntoEnumIterator;
-use utils::{events, routes::AdminUsersRoute, unwrap::UnwrapJiExt};
+use utils::{events, init::user::get_user_id, routes::AdminUsersRoute, unwrap::UnwrapJiExt};
 use wasm_bindgen_futures::spawn_local;
 use web_sys::HtmlSelectElement;
 
@@ -414,7 +414,10 @@ impl UsersTable {
                                 .child(html!("option", {
                                     .text("Impersonate")
                                     .prop("value", "impersonate")
-                                    .prop_signal("disabled", user.blocked.signal())
+                                    .prop_signal("disabled", {
+                                        let is_self = get_user_id().map_or(false, |id| id == user.id);
+                                        user.blocked.signal().map(move |blocked| blocked || is_self)
+                                    })
                                 }))
                                 .apply_if(matches!(user.login_type, UserLoginType::Google), |dom| {
                                     dom.child(html!("option", {

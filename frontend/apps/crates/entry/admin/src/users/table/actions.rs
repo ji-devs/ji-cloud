@@ -15,7 +15,7 @@ use shared::{
     domain::user::{PatchProfileAdminDataPath, PatchProfileAdminDataRequest},
 };
 use utils::{
-    bail_on_err, error_ext::ErrorExt, prelude::ApiEndpointExt, toasts, unwrap::UnwrapJiExt,
+    bail_on_err, error_ext::ErrorExt, prelude::ApiEndpointExt, storage, toasts, unwrap::UnwrapJiExt,
 };
 
 use crate::users::{EditableUser, FetchMode};
@@ -115,7 +115,8 @@ impl UsersTable {
             .await
             .toast_on_err();
 
-            if res.is_ok() {
+            if let Ok(resp) = res {
+                storage::save_csrf_token(&resp.csrf);
                 let _ = web_sys::window().unwrap_ji().location().set_href("/");
             }
         }))
