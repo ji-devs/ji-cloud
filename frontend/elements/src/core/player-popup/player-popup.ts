@@ -28,10 +28,8 @@ export class _ extends LitElement {
                     border: 0;
                     box-shadow: 0 3px 16px 0 rgba(0, 0, 0, 0.16);
                     position: relative;
-                    top: 50%;
-                    transform: translateY(-50%);
                     margin: 0 auto;
-                    max-height: 100dvh;
+                    height: 100%;
                 }
                 :host([size=aspect-ratio]) .iframe-wrapper {
                     aspect-ratio: 16 / 9;
