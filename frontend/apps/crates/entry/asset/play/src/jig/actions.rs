@@ -279,16 +279,21 @@ impl JigPlayer {
     pub fn load_data(self: &Rc<Self>) {
         let state = self;
         // If the user is not a student and they've reached their quota of free plays, show a dialog
+        log::info!("load_data: quota={}, is_student={}", state.quota, state.is_student);
         if state.quota && !state.is_student {
-            if let Some(restricted) = restrictions::play_restricted() {
+            let restricted = restrictions::play_restricted();
+            log::info!("play_restricted: {:?}", restricted);
+            if let Some(restricted) = restricted {
                 match restricted {
                     Restricted::FreeAccountLimit => {
                         paywall::dialog_play(restrictions::FREE_ACCOUNT_LIMIT_MESSAGE);
                     }
                     Restricted::NoAccountLimit => {
+                        log::info!("Showing login popup for unregistered user");
                         self.play_login_popup_shown.set(true);
                     }
                 }
+                return;
             }
         }
 

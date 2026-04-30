@@ -22,12 +22,22 @@ pub enum Restricted {
 }
 
 pub fn play_restricted() -> Option<Restricted> {
-    match is_user_set() {
-        true => (get_plan_tier().is_free()
-            && get_free_played_today_count() >= PLAYED_FREE_ACCOUNT_ALLOWED_DAILY)
-            .then(|| Restricted::FreeAccountLimit),
-        false => (get_played_without_login_count() >= PLAYED_WITHOUT_LOGIN_ALLOWED)
-            .then(|| Restricted::NoAccountLimit),
+    let user_set = is_user_set();
+    log::info!("play_restricted: is_user_set={}", user_set);
+    match user_set {
+        true => {
+            let is_free = get_plan_tier().is_free();
+            let count = get_free_played_today_count();
+            log::info!("play_restricted: is_free={}, free_count={}, limit={}", is_free, count, PLAYED_FREE_ACCOUNT_ALLOWED_DAILY);
+            (is_free && count >= PLAYED_FREE_ACCOUNT_ALLOWED_DAILY)
+                .then(|| Restricted::FreeAccountLimit)
+        }
+        false => {
+            let count = get_played_without_login_count();
+            log::info!("play_restricted: no_login_count={}, limit={}", count, PLAYED_WITHOUT_LOGIN_ALLOWED);
+            (count >= PLAYED_WITHOUT_LOGIN_ALLOWED)
+                .then(|| Restricted::NoAccountLimit)
+        }
     }
 }
 
