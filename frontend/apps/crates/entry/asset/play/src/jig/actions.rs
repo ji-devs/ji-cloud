@@ -293,7 +293,6 @@ impl JigPlayer {
                         self.play_login_popup_shown.set(true);
                     }
                 }
-                return;
             }
         }
 
@@ -350,11 +349,14 @@ impl JigPlayer {
                             Upgrade now for UNLIMITED JIGs and resources.
                         ");
                         return;
-                    } else {
-                        // If the user is a student, then don't increase the play count
-                        if state.quota && !state.is_student && restrictions::play_restricted().is_none() {
-                            restrictions::increase_played_count();
+                    }
+
+                    if state.quota && !state.is_student {
+                        if restrictions::play_restricted().is_some() {
+                            // Prevent loading the JIG altogether
+                            return;
                         }
+                        restrictions::increase_played_count();
                     }
 
                     // state.active_module.set(Some(resp.jig.modules[0].clone()));
