@@ -17,7 +17,7 @@ use utils::js_wrappers::is_iframe;
 use utils::keyboard::KeyEvent;
 use utils::prelude::is_in_iframe;
 use utils::routes::HomeRoute;
-use utils::{dialog, events};
+use utils::events;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
     prelude::SETTINGS,
@@ -457,11 +457,10 @@ impl JigPlayer {
                 match play_login_popup_shown {
                     false => None,
                     true => {
-                        Some(dialog! {
+                        Some(html!("dialog-overlay", {
                             .prop("slot", "dialog")
-                            .event(clone!(state => move |_: events::Cancel| {
-                                state.play_login_popup_shown.set(false);
-                            }))
+                            .prop("open", true)
+                            .prop("autoClose", false)
                             .child(html!("home-login-before-play", {
                                 .apply_if(is_iframe(), clone!(state => move |dom| {
                                     dom.child(html!("fa-button", {
@@ -473,7 +472,7 @@ impl JigPlayer {
                                     }))
                                 }))
                             }))
-                        })
+                        }))
                     },
                 }
             }))
