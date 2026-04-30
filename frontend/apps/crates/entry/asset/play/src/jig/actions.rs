@@ -278,23 +278,6 @@ impl JigPlayer {
 
     pub fn load_data(self: &Rc<Self>) {
         let state = self;
-        // If the user is not a student and they've reached their quota of free plays, show a dialog
-        log::info!("load_data: quota={}, is_student={}", state.quota, state.is_student);
-        if state.quota && !state.is_student {
-            let restricted = restrictions::play_restricted();
-            log::info!("play_restricted: {:?}", restricted);
-            if let Some(restricted) = restricted {
-                match restricted {
-                    Restricted::FreeAccountLimit => {
-                        paywall::dialog_play(restrictions::FREE_ACCOUNT_LIMIT_MESSAGE);
-                    }
-                    Restricted::NoAccountLimit => {
-                        log::info!("Showing login popup for unregistered user");
-                        self.play_login_popup_shown.set(true);
-                    }
-                }
-            }
-        }
 
         state.loader.load(clone!(state => async move {
             state.load_categories().await;
@@ -351,9 +334,17 @@ impl JigPlayer {
                         return;
                     }
 
+                    // Check play restrictions (after premium, so premium takes precedence)
                     if state.quota && !state.is_student {
-                        if restrictions::play_restricted().is_some() {
-                            // Prevent loading the JIG altogether
+                        if let Some(restricted) = restrictions::play_restricted() {
+                            match restricted {
+                                Restricted::FreeAccountLimit => {
+                                    paywall::dialog_play(restrictions::FREE_ACCOUNT_LIMIT_MESSAGE);
+                                }
+                                Restricted::NoAccountLimit => {
+                                    state.play_login_popup_shown.set(true);
+                                }
+                            }
                             return;
                         }
                         restrictions::increase_played_count();
