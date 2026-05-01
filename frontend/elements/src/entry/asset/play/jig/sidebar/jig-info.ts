@@ -17,12 +17,14 @@ export class _ extends LitElement {
                 :host {
                     display: block;
                     width: 400px;
+                    max-width: 100vw;
+                    box-sizing: border-box;
                     font-size: 14px;
                 }
                 .body {
                     padding: 0 24px 24px 24px;
                     overflow-y: auto;
-                    max-height: 496px;
+                    max-height: min(496px, calc(100vh - 120px));
                 }
                 popup-body {
                     border-radius: 16px;
