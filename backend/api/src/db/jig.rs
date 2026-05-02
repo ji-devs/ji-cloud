@@ -1124,12 +1124,12 @@ pub async fn delete(pool: &PgPool, id: JigId) -> Result<(), error::Delete> {
     sqlx::query!(
         //language=SQL
         r#"
-    update user_asset_data 
+    update user_asset_data
     set jig_count = jig_count - 1,
         total_asset_count = total_asset_count - 1
     from jig
     where author_id = user_id and
-          published_at is not null and 
+          published_at is not null and
           id = $1"#,
         id.0
     )
@@ -1510,6 +1510,21 @@ where jig_id = $1;
         )
         .execute(&mut txn)
         .await?;
+
+        // increment daily play count for the logged in user
+        // this is different from jig_play. with this value, if the same jig is played multiple times, the count is still increased.
+        sqlx::query!(
+            // language=SQL
+            r#"
+    insert into user_daily_plays (user_id, play_date, play_count)
+    values ($1, CURRENT_DATE, 1)
+    ON CONFLICT (user_id, play_date) DO UPDATE
+    SET play_count = user_daily_plays.play_count + 1
+                "#,
+            user_id.0
+        )
+        .execute(&mut txn)
+        .await?;
     }
 
     txn.commit().await?;
@@ -1781,7 +1796,6 @@ pub async fn list_liked(
         order by created_at desc
         offset $2
         limit $3
-        
     "#,
         user_id.0,
         (page * page_limit) as i32,
@@ -1822,7 +1836,6 @@ pub async fn list_played(
         order by at desc
         offset $2
         limit $3
-        
     "#,
         user_id.0,
         (page * page_limit) as i32,
@@ -2104,7 +2117,6 @@ pub async fn is_users_code(db: &PgPool, user_id: UserId, code: JigCode) -> Resul
             select exists (
                 select 1 from jig_code where creator_id = $1 and code = $2
             ) as "authed!"
-            
         "#,
         user_id.0,
         code.0
@@ -2174,7 +2186,6 @@ pub async fn jigs_export(db: &sqlx::PgPool) -> anyhow::Result<Vec<AdminJigExport
                  from jig_play_count
                  where jig_play_count.jig_id = jig.id
             )                                                   as "play_count!",
-    
             display_name                                        as "display_name!",
             language                                            as "language!",
             description                                         as "description!",

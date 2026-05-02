@@ -471,9 +471,12 @@ async fn admin_switch_to_basic_auth(
 
     let uuid: Uuid = user_id.into();
 
-    sqlx::query!(r#"delete from "user_auth_google" where user_id = $1"#, &uuid)
-        .execute(&mut *txn)
-        .await?;
+    sqlx::query!(
+        r#"delete from "user_auth_google" where user_id = $1"#,
+        &uuid
+    )
+    .execute(&mut *txn)
+    .await?;
 
     let random_password = Alphanumeric.sample_string(&mut thread_rng(), 16);
     let pass_hash = actix_web::web::block(move || {

@@ -101,6 +101,9 @@ impl JigPlayer {
                     && (*state.played_modules.borrow() + 1 == TRACK_MODULE_COUNT || is_done);
 
                 if should_track {
+                    // We track the play for the current user when we track the JIG play below,
+                    // but we want to ensure that the frontend is always uptodate as well.
+                    restrictions::increase_played_count();
                     state.loader.load(clone!(state => async move {
                         // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
                         // success of this call. The failure should be noted in the server logs.
@@ -279,6 +282,8 @@ impl JigPlayer {
     pub fn load_data(self: &Rc<Self>) {
         let state = self;
 
+        restrictions::init_daily_play_count();
+
         state.loader.load(clone!(state => async move {
             state.load_categories().await;
             state.load_resource_types().await;
@@ -347,7 +352,6 @@ impl JigPlayer {
                             }
                             return;
                         }
-                        restrictions::increase_played_count();
                     }
 
                     // state.active_module.set(Some(resp.jig.modules[0].clone()));

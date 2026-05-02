@@ -81,6 +81,7 @@ select
     course_count      as "course_count!",
     playlist_count      as "playlist_count!",
     total_asset_count      as "total_asset_count!",
+    coalesce(user_daily_plays.play_count, 0) as "daily_jig_play_count!",
     array(select scope from user_scope where user_scope.user_id = "user".id) as "scopes!: Vec<i16>",
     array(select subject_id from user_subject where user_subject.user_id = "user".id) as "subjects!: Vec<Uuid>",
     array(select affiliation_id from user_affiliation where user_affiliation.user_id = "user".id) as "affiliations!: Vec<Uuid>",
@@ -94,6 +95,7 @@ from "user"
     inner join user_profile on "user".id = user_profile.user_id
     inner join user_email using(user_id)
     inner join user_asset_data "uad" on "user".id = uad.user_id
+    left join user_daily_plays on user_daily_plays.user_id = "user".id and user_daily_plays.play_date = CURRENT_DATE
 where id = $1"#,
         id.0
     )
@@ -144,6 +146,7 @@ where id = $1"#,
         course_count: row.course_count as u64,
         playlist_count: row.playlist_count as u64,
         total_asset_count: row.total_asset_count as u64,
+        daily_jig_play_count: row.daily_jig_play_count as u32,
         subjects: row.subjects.into_iter().map(SubjectId).collect(),
         age_ranges: row.age_ranges.into_iter().map(AgeRangeId).collect(),
         affiliations: row.affiliations.into_iter().map(AffiliationId).collect(),

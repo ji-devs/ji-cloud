@@ -289,6 +289,10 @@ pub struct UserProfile {
     #[serde(default)]
     pub total_asset_count: u64,
 
+    /// Daily JIG play count for free account limits
+    #[serde(default)]
+    pub daily_jig_play_count: u32,
+
     /// The user's account summary, if available.
     ///
     /// Note: This is not set when fetching a user profile. It must be explicitly set using a

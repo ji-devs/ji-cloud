@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 use utils::{
-    init::user::get_plan_tier, js_object, prelude::is_user_set, storage, unwrap::UnwrapJiExt,
+    init::user::{get_plan_tier, get_user_mutable},
+    js_object,
+    prelude::is_user_set,
+    storage,
+    unwrap::UnwrapJiExt,
 };
 
 const PLAYED_WITHOUT_LOGIN_ALLOWED: u32 = 3;
@@ -21,6 +25,20 @@ pub enum Restricted {
     FreeAccountLimit,
 }
 
+pub fn init_daily_play_count() {
+    if !is_user_set() || !get_plan_tier().is_free() {
+        return;
+    }
+
+    if let Some(play_count) = get_user_mutable()
+        .lock_ref()
+        .as_ref()
+        .map(|user| user.daily_jig_play_count)
+    {
+        set_free_played_today_count(play_count);
+    }
+}
+
 pub fn play_restricted() -> Option<Restricted> {
     let user_set = is_user_set();
     log::info!("play_restricted: is_user_set={}", user_set);
@@ -28,15 +46,23 @@ pub fn play_restricted() -> Option<Restricted> {
         true => {
             let is_free = get_plan_tier().is_free();
             let count = get_free_played_today_count();
-            log::info!("play_restricted: is_free={}, free_count={}, limit={}", is_free, count, PLAYED_FREE_ACCOUNT_ALLOWED_DAILY);
+            log::info!(
+                "play_restricted: is_free={}, free_count={}, limit={}",
+                is_free,
+                count,
+                PLAYED_FREE_ACCOUNT_ALLOWED_DAILY
+            );
             (is_free && count >= PLAYED_FREE_ACCOUNT_ALLOWED_DAILY)
                 .then(|| Restricted::FreeAccountLimit)
         }
         false => {
             let count = get_played_without_login_count();
-            log::info!("play_restricted: no_login_count={}, limit={}", count, PLAYED_WITHOUT_LOGIN_ALLOWED);
-            (count >= PLAYED_WITHOUT_LOGIN_ALLOWED)
-                .then(|| Restricted::NoAccountLimit)
+            log::info!(
+                "play_restricted: no_login_count={}, limit={}",
+                count,
+                PLAYED_WITHOUT_LOGIN_ALLOWED
+            );
+            (count >= PLAYED_WITHOUT_LOGIN_ALLOWED).then(|| Restricted::NoAccountLimit)
         }
     }
 }

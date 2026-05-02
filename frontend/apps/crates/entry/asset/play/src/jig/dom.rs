@@ -12,12 +12,12 @@ use shared::domain::module::body::ModuleAssistType;
 use shared::domain::{jig::JigResponse, module::ModuleKind};
 use std::collections::HashMap;
 use std::rc::Rc;
+use utils::events;
 use utils::init::analytics;
 use utils::js_wrappers::is_iframe;
 use utils::keyboard::KeyEvent;
 use utils::prelude::is_in_iframe;
 use utils::routes::HomeRoute;
-use utils::events;
 use utils::{
     iframe::{IframeAction, ModuleToJigPlayerMessage},
     prelude::SETTINGS,
