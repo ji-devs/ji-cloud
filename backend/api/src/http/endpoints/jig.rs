@@ -345,11 +345,12 @@ async fn search(
 #[instrument(skip_all)]
 async fn trending(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     claims: Option<TokenUser>,
     algolia: ServiceData<crate::algolia::Client>,
 ) -> Result<Json<<jig::Trending as ApiEndpoint>::Res>, ServiceError> {
     let user_id = claims.map(|c| c.user_id());
-    let ids = trending::get_trending(algolia).await?;
+    let ids = trending::get_trending(algolia, settings.remote_target()).await?;
 
     let jigs = db::jig::get_by_ids(&db, &ids, DraftOrLive::Live, user_id)
         .await
