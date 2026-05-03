@@ -14,6 +14,7 @@ static TRENDING_CACHE: RwLock<TrendingCacheState> = RwLock::new(TrendingCacheSta
 const REFRESH_INTERVAL_SECONDS: i64 = 60 * 60; // 1 hour
 const TRENDING_ITEMS: &str = "trending-items";
 const TRENDING_JIG_COUNT: u32 = 20;
+const MIN_TRENDING_PLAYS: u32 = 25;
 
 #[derive(Clone)]
 enum TrendingCacheState {
@@ -62,7 +63,7 @@ async fn fetch_trending_algolia(
                 "threshold": 0,
                 "maxRecommendations": TRENDING_JIG_COUNT,
                 "queryParameters": {
-                    "filters": "blocked:false"
+                    "filters": format!("blocked:false AND plays >= {}", MIN_TRENDING_PLAYS)
                 }
             }]
         }))

@@ -82,6 +82,7 @@ pub(crate) async fn jig_index(
             FacetAttribute::filter_only(Attribute("resource_types".to_owned())),
             FacetAttribute::filter_only(Attribute("language".to_owned())),
             FacetAttribute::filter_only(Attribute("rating".to_owned())),
+            FacetAttribute::filter_only(Attribute("plays".to_owned())),
         ]),
     };
 
