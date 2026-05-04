@@ -15,6 +15,7 @@ use utils::{
     ages::AgeRangeVecExt,
     asset::{published_at_string, PlaylistPlayerOptions, ResourceContentExt},
     events,
+    iframe::{AssetPlayerToPlayerPopup, IframeInit, IframeMessageExt},
     routes::{AssetPlayRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route},
     unwrap::UnwrapJiExt,
 };
@@ -31,6 +32,18 @@ impl Sidebar {
                 .event(clone!(state => move |_: events::Close| {
                     state.info_popup_active.set(false);
                 }))
+                .future(state.info_popup_active.signal().for_each(|info_popup_active| {
+                    let _ = IframeInit::new(AssetPlayerToPlayerPopup::CloseButtonShown(
+                        !info_popup_active,
+                    ))
+                    .try_post_message_to_parent();
+
+                    async {}
+                }))
+                .after_removed(|_| {
+                    let _ = IframeInit::new(AssetPlayerToPlayerPopup::CloseButtonShown(true))
+                        .try_post_message_to_parent();
+                })
                 .child(html!("empty-fragment", {
                     .style("display", "flex")
                     .event(clone!(state => move |_: events::Click| {
