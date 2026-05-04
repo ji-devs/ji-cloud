@@ -10,18 +10,24 @@ export class _ extends LitElement {
         return [
             css`
                 :host {
+                    display: block;
+                    max-width: calc(100vw - 32px);
                     background-color: #ffffff;
                 }
                 popup-body {
                     border-radius: 16px;
                     box-shadow: rgb(0 0 0 / 25%) 0px 3px 16px 0px;
                     background-color: #ffffff;
+                    max-height: calc(100vh - 32px);
+                    overflow-y: auto;
                 }
                 .body {
                     padding: 0 32px 32px 32px;
                     display: grid;
                     row-gap: 8px;
                     width: 420px;
+                    max-width: 100%;
+                    box-sizing: border-box;
                 }
                 label {
                     display: grid;

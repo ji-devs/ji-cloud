@@ -8,7 +8,10 @@ use shared::{config::JIG_PLAYER_SESSION_VALID_DURATION_SECS, domain::jig::TextDi
 use utils::{
     clipboard,
     component::Component,
-    events, paywall,
+    events,
+    iframe::{AssetPlayerToPlayerPopup, IframeInit, IframeMessageExt},
+    js_wrappers::is_iframe,
+    paywall,
     prelude::SETTINGS,
     routes::{KidsRoute, Route},
     unwrap::UnwrapJiExt,
@@ -49,6 +52,22 @@ impl ShareAsset {
                 .event(clone!(state => move |_: events::Close| {
                     state.active_popup.set(None);
                 }))
+                .future(state.active_popup.signal_ref(|active_popup| active_popup.is_some()).for_each(|active_popup| {
+                    if is_iframe() {
+                        let _ = IframeInit::new(AssetPlayerToPlayerPopup::CloseButtonShown(
+                            !active_popup,
+                        ))
+                        .try_post_message_to_parent();
+                    }
+
+                    async {}
+                }))
+                .after_removed(|_| {
+                    if is_iframe() {
+                        let _ = IframeInit::new(AssetPlayerToPlayerPopup::CloseButtonShown(true))
+                            .try_post_message_to_parent();
+                    }
+                })
                 .child(html!("empty-fragment", {
                     .style("display", "flex")
                     .event(clone!(state => move |_: events::Click| {

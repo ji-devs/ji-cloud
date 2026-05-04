@@ -11,15 +11,21 @@ export class _ extends LitElement {
     static get styles() {
         return [
             css`
+                :host {
+                    display: block;
+                    max-width: calc(100vw - 32px);
+                }
                 popup-body {
                     border-radius: 16px;
                     box-shadow: rgb(0 0 0 / 25%) 0px 3px 16px 0px;
                     background-color: #ffffff;
+                    max-height: calc(100vh - 32px);
+                    overflow-y: auto;
                 }
                 .body {
                     display: grid;
                     width: 305px;
-                    max-width: 100vw;
+                    max-width: 100%;
                     box-sizing: border-box;
                 }
                 .settings {
