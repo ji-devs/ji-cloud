@@ -511,13 +511,19 @@ async fn list_played(
 }
 
 /// Add a play to a jig
-async fn play(
+async fn play(db: Data<PgPool>, path: web::Path<JigId>) -> Result<HttpResponse, error::NotFound> {
+    db::jig::jig_play(&*db, path.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// Track a played jig for the current user
+async fn user_play(
     db: Data<PgPool>,
     path: web::Path<JigId>,
-    claims: Option<TokenUser>,
+    claims: TokenUser,
 ) -> Result<HttpResponse, error::NotFound> {
-    let user_id = get_user_id(&claims);
-    db::jig::jig_play(&*db, path.into_inner(), user_id).await?;
+    db::jig::jig_user_play(&*db, path.into_inner(), claims.user_id()).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -746,6 +752,10 @@ pub fn configure(cfg: &mut ServiceConfig) {
     .route(
         <jig::Play as ApiEndpoint>::Path::PATH,
         jig::Play::METHOD.route().to(play),
+    )
+    .route(
+        <jig::UserPlay as ApiEndpoint>::Path::PATH,
+        jig::UserPlay::METHOD.route().to(user_play),
     )
     .route(
         <jig::Like as ApiEndpoint>::Path::PATH,

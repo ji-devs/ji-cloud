@@ -1462,7 +1462,7 @@ values ($1, 0)
     Ok(new_jig.id)
 }
 
-pub async fn jig_play(db: &PgPool, jig_id: JigId, user_id: Option<UserId>) -> anyhow::Result<()> {
+pub async fn jig_play(db: &PgPool, jig_id: JigId) -> anyhow::Result<()> {
     let mut txn = db.begin().await?;
 
     let jig = sqlx::query!(
@@ -1495,37 +1495,60 @@ where jig_id = $1;
     .execute(&mut txn)
     .await?;
 
-    if let Some(user_id) = user_id {
-        //update Jig play records
-        sqlx::query!(
-            // language=SQL
-            r#"
+    txn.commit().await?;
+
+    Ok(())
+}
+
+pub async fn jig_user_play(db: &PgPool, jig_id: JigId, user_id: UserId) -> anyhow::Result<()> {
+    let mut txn = db.begin().await?;
+
+    let jig = sqlx::query!(
+        // language=SQL
+        r#"
+select published_at  as "published_at?"
+from jig
+where id = $1
+    "#,
+        jig_id.0
+    )
+    .fetch_one(&mut txn)
+    .await?;
+
+    //check if jig has been published and playable
+    if jig.published_at == None {
+        return Err(anyhow::anyhow!("Jig has not been published"));
+    };
+
+    //update Jig play records
+    sqlx::query!(
+        // language=SQL
+        r#"
     insert into jig_play(jig_id, user_id)
     values ($1, $2)
     ON CONFLICT (jig_id, user_id) DO UPDATE
     SET at = now()
                 "#,
-            jig_id.0,
-            user_id.0
-        )
-        .execute(&mut txn)
-        .await?;
+        jig_id.0,
+        user_id.0
+    )
+    .execute(&mut txn)
+    .await?;
 
-        // increment daily play count for the logged in user
-        // this is different from jig_play. with this value, if the same jig is played multiple times, the count is still increased.
-        sqlx::query!(
-            // language=SQL
-            r#"
+    // increment daily play count for the logged in user
+    // this is different from jig_play. with this value, if the same jig is played multiple times, the count is still increased.
+    sqlx::query!(
+        // language=SQL
+        r#"
     insert into user_daily_plays (user_id, play_date, play_count)
     values ($1, CURRENT_DATE, 1)
     ON CONFLICT (user_id, play_date) DO UPDATE
     SET play_count = user_daily_plays.play_count + 1
                 "#,
-            user_id.0
-        )
-        .execute(&mut txn)
-        .await?;
-    }
+        user_id.0
+    )
+    .execute(&mut txn)
+    .await?;
 
     txn.commit().await?;
 

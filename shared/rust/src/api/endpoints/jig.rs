@@ -10,8 +10,9 @@ use crate::{
             JigLikePath, JigLikedPath, JigLikedResponse, JigPlayPath, JigPublishPath, JigResponse,
             JigSearchPath, JigSearchQuery, JigSearchResponse, JigTransferAdminPath,
             JigTrendingPath, JigTrendingResponse, JigUnlikePath, JigUpdateAdminDataRequest,
-            JigUpdateDraftDataPath, JigUpdateDraftDataRequest, ListLikedPath, ListLikedRequest,
-            ListLikedResponse, ListPlayedPath, ListPlayedRequest, ListPlayedResponse,
+            JigUpdateDraftDataPath, JigUpdateDraftDataRequest, JigUserPlayPath, ListLikedPath,
+            ListLikedRequest, ListLikedResponse, ListPlayedPath, ListPlayedRequest,
+            ListPlayedResponse,
         },
         CreateResponse,
     },
@@ -314,6 +315,19 @@ impl ApiEndpoint for Play {
     type Req = ();
     type Res = ();
     type Path = JigPlayPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Put;
+}
+
+/// Track that the current user played a JIG
+///
+/// # Authorization
+/// * Admin, BasicAuth
+pub struct UserPlay;
+impl ApiEndpoint for UserPlay {
+    type Req = ();
+    type Res = ();
+    type Path = JigUserPlayPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Put;
 }

@@ -23,7 +23,7 @@ use shared::{
             },
             player::{ModuleConfig, PlayerNavigationHandler, Seconds},
             AudioBackground, JigGetDraftPath, JigGetLivePath, JigLikedPath, JigPlayPath,
-            TextDirection,
+            JigUserPlayPath, TextDirection,
         },
         meta::GetMetadataPath,
         module::{
@@ -40,7 +40,7 @@ use utils::{
     },
     keyboard::{Key, KeyEvent},
     paywall,
-    prelude::{ApiEndpointExt, SETTINGS},
+    prelude::{is_user_set, ApiEndpointExt, SETTINGS},
     routes::{HomeRoute, Route},
     unwrap::UnwrapJiExt,
 };
@@ -101,13 +101,10 @@ impl JigPlayer {
                     && (*state.played_modules.borrow() + 1 == TRACK_MODULE_COUNT || is_done);
 
                 if should_track {
-                    // We track the play for the current user when we track the JIG play below,
-                    // but we want to ensure that the frontend is always uptodate as well.
-                    restrictions::increase_played_count();
                     state.loader.load(clone!(state => async move {
                         // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
                         // success of this call. The failure should be noted in the server logs.
-                        let _ = jig::Play::api_with_auth(
+                        let _ = jig::Play::api_no_auth(
                             JigPlayPath(state.jig_id),
                             None,
                         ).await;
@@ -580,6 +577,23 @@ impl JigPlayer {
         }
 
         self.navigation_handler.set(Some(config.navigation_handler));
+
+        if !self.draft_or_live.is_draft() && !*self.user_play_tracked.borrow() {
+            restrictions::increase_played_count();
+            *self.user_play_tracked.borrow_mut() = true;
+
+            if is_user_set() {
+                let state = self;
+                self.loader.load(clone!(state => async move {
+                    // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
+                    // success of this call. The failure should be noted in the server logs.
+                    let _ = jig::UserPlay::api_with_auth(
+                        JigUserPlayPath(state.jig_id),
+                        None,
+                    ).await;
+                }));
+            }
+        }
 
         self.started.set_neq(true);
     }

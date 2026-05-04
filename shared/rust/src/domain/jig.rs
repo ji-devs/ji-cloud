@@ -877,6 +877,8 @@ pub struct JigLikedResponse {
 
 make_path_parts!(JigPlayPath => "/v1/jig/{}/play" => JigId);
 
+make_path_parts!(JigUserPlayPath => "/v1/jig/{}/user-play" => JigId);
+
 make_path_parts!(JigAdminDataUpdatePath => "/v1/jig/{}/admin" => JigId);
 
 /// Response list of Playlists that JIG is associated with.

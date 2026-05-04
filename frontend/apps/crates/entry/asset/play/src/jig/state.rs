@@ -31,6 +31,7 @@ pub struct JigPlayer {
     /// Count of modules which have been played
     pub played_modules: RefCell<usize>,
     pub play_tracked: RefCell<bool>,
+    pub user_play_tracked: RefCell<bool>,
     pub start_module_id: Option<ModuleId>,
     pub navigation_handler: Mutable<Option<PlayerNavigationHandler>>,
     pub timer: Mutable<Option<Timer>>,
@@ -91,6 +92,7 @@ impl JigPlayer {
             active_module,
             played_modules: RefCell::new(0),
             play_tracked: RefCell::new(false),
+            user_play_tracked: RefCell::new(false),
             start_module_id: module_id,
             timer: Mutable::new(None),
             navigation_handler: Mutable::new(None),
