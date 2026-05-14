@@ -3,6 +3,9 @@ import { nothing } from "lit-html";
 import { PopupBase } from "./popup-base";
 
 const STR_SCORE = "SCORE";
+const GOLD_CUP_PATH = "entry/jig/play/jig-finish.gif";
+const SILVER_CUP_PATH = "entry/jig/play/jig-finish-silver.gif";
+const BRONZE_CUP_PATH = "entry/jig/play/jig-finish-bronze.gif";
 
 @customElement("jig-play-done-popup")
 export class _ extends PopupBase {
@@ -10,11 +13,14 @@ export class _ extends PopupBase {
         return [
             ...super.styles,
             css`
-                img-ui {
+                .finish-image {
                     height: 60px;
                 }
+                .finish-image img-ui {
+                    height: 100%;
+                }
                 @media (min-width: 1024px) {
-                    img-ui {
+                    .finish-image {
                         height: 350px;
                     }
                 }
@@ -62,20 +68,42 @@ export class _ extends PopupBase {
     @property({ type: Number })
     percentage?: number;
 
+    private finishImagePath(): string | null {
+        if (this.percentage === undefined) {
+            return GOLD_CUP_PATH;
+        }
+        if (this.percentage === 0) {
+            return null;
+        }
+        if (this.percentage <= 33) {
+            return BRONZE_CUP_PATH;
+        }
+        if (this.percentage <= 66) {
+            return SILVER_CUP_PATH;
+        }
+        return GOLD_CUP_PATH;
+    }
+
     render() {
+        const imagePath = this.finishImagePath();
+
         return html`
             ${this.renderBase(() => {
                 return html`
-                    <img-ui path="entry/jig/play/jig-finish.gif"></img-ui>
+                    <div class="finish-image">
+                        ${imagePath === null
+                            ? nothing
+                            : html`<img-ui path="${imagePath}"></img-ui>`}
+                    </div>
                     ${this.score !== undefined
                         ? html`
                             <div class="score-section">
                                 <h3>${STR_SCORE}</h3>
                                 <h2>
                                     ${this.score}
-                                    ${/* this.percentage !== undefined
+                                    ${this.percentage !== undefined
                                         ? html` <span class="percentage">(${this.percentage}%)</span>`
-                                        : nothing */ nothing}
+                                        : nothing}
                                 </h2>
                             </div>
                         ` : nothing}
