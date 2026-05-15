@@ -320,6 +320,7 @@ export class _ extends LitElement {
                     </div>
                 </div>
                 <slot name="dialog"></slot>
+                <!--
                 <div class="rotate-dialog-wrapper">
                     <div class="rotate-dialog">
                         <fa-button class="close" icon="fa-light fa-xmark" @click=${() => this.hideRotatePopup = true}></fa-button>
@@ -328,6 +329,7 @@ export class _ extends LitElement {
                         <h1>Please rotate your device</h1>
                     </div>
                 </div>
+                -->
             </main>
         `;
     }
