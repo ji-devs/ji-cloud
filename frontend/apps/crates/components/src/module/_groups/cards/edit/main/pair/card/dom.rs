@@ -19,8 +19,8 @@ use crate::{
 };
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::module::body::{
-    _groups::cards::{Mode, Step},
     ModeExt,
+    _groups::cards::{Mode, Step},
 };
 
 const STR_CONFIRM_TITLE: &str = "Warning";

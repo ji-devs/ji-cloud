@@ -1,5 +1,5 @@
 use crate::domain::module::{
-    body::{_groups::design::*, Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeId},
+    body::{Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeId, _groups::design::*},
     ModuleKind,
 };
 use serde::{Deserialize, Serialize};

@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use dominator::clone;
 use shared::domain::module::body::{
-    _groups::design::Text as RawText, HoverAnimation, StickerHidden, Transform,
+    HoverAnimation, StickerHidden, Transform, _groups::design::Text as RawText,
 };
 
 use crate::{

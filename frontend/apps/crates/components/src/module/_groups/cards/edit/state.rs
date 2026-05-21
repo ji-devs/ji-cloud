@@ -16,8 +16,8 @@ use shared::domain::{
     jig::JigId,
     module::{
         body::{
-            _groups::cards::{self as raw, BaseContent, Mode, Step},
             Audio, Background, BodyExt, Image, ModuleAssist,
+            _groups::cards::{self as raw, BaseContent, Mode, Step},
         },
         ModuleId, ModuleKind,
     },

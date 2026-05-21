@@ -5,8 +5,8 @@ use futures_signals::{
 };
 
 use shared::domain::module::body::{
-    _groups::design::{Trace as RawTrace, TraceKind},
     Audio,
+    _groups::design::{Trace as RawTrace, TraceKind},
 };
 use std::cell::RefCell;
 use std::rc::Rc;

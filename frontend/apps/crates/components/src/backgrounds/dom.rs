@@ -9,7 +9,7 @@ use futures_signals::{
 };
 
 use super::state::*;
-use shared::domain::module::body::{_groups::design::Backgrounds as RawBackgrounds, Background};
+use shared::domain::module::body::{Background, _groups::design::Backgrounds as RawBackgrounds};
 
 pub fn render_backgrounds(bg: Rc<Backgrounds>, slot: Option<&str>) -> Dom {
     let children = map_ref! {

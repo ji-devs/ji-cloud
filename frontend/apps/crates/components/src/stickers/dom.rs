@@ -18,7 +18,7 @@ use futures_signals::{
     signal_vec::{SignalVec, SignalVecExt},
 };
 use shared::domain::module::body::{
-    _groups::design::Sticker as RawSticker, HoverAnimation, StickerHidden, Transform,
+    HoverAnimation, StickerHidden, Transform, _groups::design::Sticker as RawSticker,
 };
 use std::rc::Rc;
 use utils::{keyboard::KeyEvent, prelude::*};

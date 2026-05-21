@@ -2,7 +2,7 @@ use futures_signals::signal::{Mutable, ReadOnlyMutable};
 
 use super::callbacks::Callbacks;
 use shared::domain::module::body::{
-    _groups::design::Backgrounds as RawBackgrounds, Background, ThemeId,
+    Background, ThemeId, _groups::design::Backgrounds as RawBackgrounds,
 };
 
 pub struct Backgrounds {

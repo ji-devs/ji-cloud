@@ -1,7 +1,7 @@
 use crate::domain::module::{
     body::{
-        _groups::design::{BaseContent, Trace},
         Body, BodyConvert, BodyExt, ModeExt, StepExt, ThemeId,
+        _groups::design::{BaseContent, Trace},
     },
     ModuleKind,
 };
@@ -12,8 +12,8 @@ mod play_settings;
 pub use play_settings::*;
 
 use super::{
-    _groups::design::{Sticker, Text},
     Audio, Transform,
+    _groups::design::{Sticker, Text},
 };
 
 /// The body for [`FindAnswer`](crate::domain::module::ModuleKind::FindAnswer) modules.

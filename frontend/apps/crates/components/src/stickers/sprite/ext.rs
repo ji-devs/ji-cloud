@@ -1,4 +1,4 @@
-use shared::domain::module::body::{_groups::design::Sprite, Image, Transform};
+use shared::domain::module::body::{Image, Transform, _groups::design::Sprite};
 
 pub trait SpriteExt {
     fn new(image: Image) -> Self;

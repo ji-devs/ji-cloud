@@ -1,7 +1,7 @@
 use utils::image_effects::ImageEffect;
 
 use super::state::Sprite;
-use shared::domain::module::body::{_groups::design::SpriteEffect, Image};
+use shared::domain::module::body::{Image, _groups::design::SpriteEffect};
 
 impl Sprite {
     pub fn remove_white(&self) {

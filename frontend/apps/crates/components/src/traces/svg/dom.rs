@@ -14,8 +14,8 @@ use web_sys::SvgElement;
 use super::{super::utils::*, helpers::*, state::*, styles::*};
 
 use shared::domain::module::body::{
-    _groups::design::{PathCommand, Trace, TraceShape},
     Transform,
+    _groups::design::{PathCommand, Trace, TraceShape},
 };
 
 pub fn render_single_trace<S>(
