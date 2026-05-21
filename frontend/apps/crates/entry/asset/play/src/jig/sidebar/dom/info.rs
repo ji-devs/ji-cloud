@@ -40,10 +40,12 @@ impl Sidebar {
 
                     async {}
                 }))
-                .after_removed(|_| {
-                    let _ = IframeInit::new(AssetPlayerToPlayerPopup::CloseButtonShown(true))
-                        .try_post_message_to_parent();
-                })
+                .after_removed(clone!(state => move |_| {
+                    if !state.info_popup_active.get() {
+                        let _ = IframeInit::new(AssetPlayerToPlayerPopup::CloseButtonShown(true))
+                            .try_post_message_to_parent();
+                    }
+                }))
                 .child(html!("empty-fragment", {
                     .style("display", "flex")
                     .event(clone!(state => move |_: events::Click| {
@@ -99,6 +101,9 @@ impl Sidebar {
 
         html!("jig-play-sidebar-jig-info", {
             .prop("slot", "overlay")
+            .event(|evt: events::MouseDown| {
+                evt.stop_propagation();
+            })
             .prop("name", &jig.jig_data.display_name)
             .prop("playedCount", jig.plays as usize)
             .prop("likedCount", jig.likes as usize)
