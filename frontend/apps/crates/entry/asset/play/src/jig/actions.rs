@@ -46,8 +46,6 @@ use utils::{
 };
 use wasm_bindgen_futures::spawn_local;
 
-const TRACK_MODULE_COUNT: usize = 3;
-
 impl JigPlayer {
     pub fn toggle_background_audio(self: &Rc<Self>) {
         let bg_audio_handle = self.bg_audio_handle.borrow();
@@ -92,33 +90,8 @@ impl JigPlayer {
 
             if let Some(module_count) = module_count {
                 let is_done = active_module == module_count - 1;
-                // Track that the JIG has been played if
-                // - The JIG is not a draft;
-                // - The play hasn't been tracked yet;
-                // - Either TRACK_MODULE_COUNT count of modules have been played or the JIG is done.
-                let should_track = !state.draft_or_live.is_draft()
-                    && !*state.play_tracked.borrow()
-                    && (*state.played_modules.borrow() + 1 == TRACK_MODULE_COUNT || is_done);
-
-                if should_track {
-                    state.loader.load(clone!(state => async move {
-                        // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
-                        // success of this call. The failure should be noted in the server logs.
-                        let _ = jig::Play::api_no_auth(
-                            JigPlayPath(state.jig_id),
-                            None,
-                        ).await;
-
-                        // Set the flag to indicate that the play has been tracked for this JIG.
-                        *state.play_tracked.borrow_mut() = true;
-                    }))
-                }
 
                 if !is_done {
-                    // Only increment the played count when navigating to the _next_ module.
-                    let mut played_modules = state.played_modules.borrow_mut();
-                    *played_modules += 1;
-
                     state.navigate_to_index(active_module + 1);
                 } else {
                     state.finish();
@@ -581,6 +554,20 @@ impl JigPlayer {
         if !self.draft_or_live.is_draft() && !*self.user_play_tracked.borrow() {
             restrictions::increase_played_count();
             *self.user_play_tracked.borrow_mut() = true;
+
+            if !*self.play_tracked.borrow() {
+                *self.play_tracked.borrow_mut() = true;
+
+                let state = self;
+                self.loader.load(clone!(state => async move {
+                    // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
+                    // success of this call. The failure should be noted in the server logs.
+                    let _ = jig::Play::api_no_auth(
+                        JigPlayPath(state.jig_id),
+                        None,
+                    ).await;
+                }));
+            }
 
             if is_user_set() {
                 let state = self;

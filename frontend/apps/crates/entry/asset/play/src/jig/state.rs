@@ -28,8 +28,6 @@ pub struct JigPlayer {
     pub jig_liked: Mutable<Option<bool>>,
     pub loader: AsyncLoader,
     pub active_module: Mutable<Option<usize>>,
-    /// Count of modules which have been played
-    pub played_modules: RefCell<usize>,
     pub play_tracked: RefCell<bool>,
     pub user_play_tracked: RefCell<bool>,
     pub start_module_id: Option<ModuleId>,
@@ -90,7 +88,6 @@ impl JigPlayer {
             jig_liked: Mutable::new(None),
             loader: AsyncLoader::new(),
             active_module,
-            played_modules: RefCell::new(0),
             play_tracked: RefCell::new(false),
             user_play_tracked: RefCell::new(false),
             start_module_id: module_id,
