@@ -555,29 +555,33 @@ impl JigPlayer {
             restrictions::increase_played_count();
             *self.user_play_tracked.borrow_mut() = true;
 
-            if !*self.play_tracked.borrow() {
+            let should_track_play = if !*self.play_tracked.borrow() {
                 *self.play_tracked.borrow_mut() = true;
+                true
+            } else {
+                false
+            };
 
+            let should_track_user_play = is_user_set();
+
+            if should_track_play || should_track_user_play {
                 let state = self;
                 self.loader.load(clone!(state => async move {
                     // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
                     // success of this call. The failure should be noted in the server logs.
-                    let _ = jig::Play::api_no_auth(
-                        JigPlayPath(state.jig_id),
-                        None,
-                    ).await;
-                }));
-            }
+                    if should_track_play {
+                        let _ = jig::Play::api_no_auth(
+                            JigPlayPath(state.jig_id),
+                            None,
+                        ).await;
+                    }
 
-            if is_user_set() {
-                let state = self;
-                self.loader.load(clone!(state => async move {
-                    // We don't need to handle an Ok Result; We can ignore Err, nothing is dependent on the
-                    // success of this call. The failure should be noted in the server logs.
-                    let _ = jig::UserPlay::api_with_auth(
-                        JigUserPlayPath(state.jig_id),
-                        None,
-                    ).await;
+                    if should_track_user_play {
+                        let _ = jig::UserPlay::api_with_auth(
+                            JigUserPlayPath(state.jig_id),
+                            None,
+                        ).await;
+                    }
                 }));
             }
         }
