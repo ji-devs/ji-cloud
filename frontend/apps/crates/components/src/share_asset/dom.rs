@@ -156,6 +156,9 @@ impl ShareAsset {
         let state = self;
         html!("share-jig-main", {
             .prop("slot", "overlay")
+            .event(|evt: events::MouseDown| {
+                evt.stop_propagation();
+            })
             .apply_if(state.asset.is_jig(), |dom| {
                 dom.prop("showSettings", true)
                 .child(html!("input-switch-direction", {
@@ -301,6 +304,9 @@ impl ShareAsset {
         let state = self;
         html!("share-jig-students", {
             .prop("slot", "overlay")
+            .event(|evt: events::MouseDown| {
+                evt.stop_propagation();
+            })
             .prop_signal("url", state.student_code.signal_cloned().map(|student_code| {
                 match student_code {
                     None => None,
@@ -402,6 +408,9 @@ impl ShareAsset {
         let state = Rc::clone(self);
         html!("share-jig-embed", {
             .prop("slot", "overlay")
+            .event(|evt: events::MouseDown| {
+                evt.stop_propagation();
+            })
             .prop("assetTypeName", state.asset_type_name())
             .prop("value", state.embed_code())
             .children(&mut [
