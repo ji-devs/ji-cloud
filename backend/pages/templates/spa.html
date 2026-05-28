@@ -5,15 +5,28 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="description" content="Jigzi is a game-creation tool and crowd-sourcing platform which currently holds thousands of educational activities that teach children about Judaism, Hebrew, Israel and their culture in an engaging and interactive way. Educators can use current games, as well as create their own to complement their curriculum at any level and any language. The creation tool includes a huge collection of educational clipart that updates constantly.">
-    <meta name="keywords" content="Jigzi, Judaism, Hebrew, educational, teaching, interactive">
+    <meta name="description" content="{{ page_description }}">
+    <meta name="keywords" content="{{ page_keywords }}">
+    <meta property="og:title" content="{{ page_title }}">
+    <meta property="og:description" content="{{ page_description }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ page_url }}">
+    {% match page_image %}
+    {% when Some with (image) %}
+    <meta property="og:image" content="{{ image }}">
+    <meta name="twitter:image" content="{{ image }}">
+    {% else %}
+    {% endmatch %}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ page_title }}">
+    <meta name="twitter:description" content="{{ page_description }}">
     <link rel="shortcut icon" href="{{ app_favicon|safe }}" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="{{ app_css|safe }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json" />
-    <title>Jigzi</title>
+    <title>{{ page_title }}</title>
 
     {% if is_release -%}
     <!-- Google tag (gtag.js) -->

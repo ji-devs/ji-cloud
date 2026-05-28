@@ -64,3 +64,4 @@ __pycache__
 # Local config
 .editorconfig
 .nvmrc
+.codex/AGENTS.md
