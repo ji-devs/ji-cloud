@@ -90,7 +90,6 @@ const DEFAULT_PAGE_KEYWORDS: &str = "Jigzi, Judaism, Hebrew, educational, teachi
 struct PageMeta {
     title: String,
     description: String,
-    keywords: String,
     image: Option<String>,
 }
 
@@ -99,10 +98,17 @@ impl Default for PageMeta {
         Self {
             title: DEFAULT_PAGE_TITLE.to_string(),
             description: DEFAULT_PAGE_DESCRIPTION.to_string(),
-            keywords: DEFAULT_PAGE_KEYWORDS.to_string(),
             image: None,
         }
     }
+}
+
+fn default_spa_template(
+    settings: &RuntimeSettings,
+    spa: SpaPage,
+    req: &HttpRequest,
+) -> actix_web::Result<HttpResponse> {
+    spa_template(settings, spa, req, PageMeta::default())
 }
 
 fn spa_template(
@@ -130,7 +136,7 @@ fn spa_template(
             .spa_url(&*spa.as_str(), "elements/custom-elements.js"),
         page_title: page_meta.title,
         page_description: page_meta.description,
-        page_keywords: page_meta.keywords,
+        page_keywords: DEFAULT_PAGE_KEYWORDS.to_string(),
         page_url: format!(
             "{}{}",
             settings.remote_target().pages_url(),
@@ -161,42 +167,42 @@ pub async fn home_template(
     settings: Data<RuntimeSettings>,
     req: HttpRequest,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Home, &req, PageMeta::default())
+    default_spa_template(&settings, SpaPage::Home, &req)
 }
 
 pub async fn user_template(
     settings: Data<RuntimeSettings>,
     req: HttpRequest,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::User, &req, PageMeta::default())
+    default_spa_template(&settings, SpaPage::User, &req)
 }
 
 pub async fn community_template(
     settings: Data<RuntimeSettings>,
     req: HttpRequest,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Community, &req, PageMeta::default())
+    default_spa_template(&settings, SpaPage::Community, &req)
 }
 
 pub async fn kids_template(
     settings: Data<RuntimeSettings>,
     req: HttpRequest,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Kids, &req, PageMeta::default())
+    default_spa_template(&settings, SpaPage::Kids, &req)
 }
 
 pub async fn classroom_template(
     settings: Data<RuntimeSettings>,
     req: HttpRequest,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Classroom, &req, PageMeta::default())
+    default_spa_template(&settings, SpaPage::Classroom, &req)
 }
 
 pub async fn admin_template(
     settings: Data<RuntimeSettings>,
     req: HttpRequest,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Admin, &req, PageMeta::default())
+    default_spa_template(&settings, SpaPage::Admin, &req)
 }
 
 pub async fn asset_template(
@@ -218,7 +224,7 @@ pub async fn legacy_template(
     req: HttpRequest,
     _path: Path<String>, // (jig_id)
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::LegacyJig, &req, PageMeta::default())
+    default_spa_template(&settings, SpaPage::LegacyJig, &req)
 }
 
 pub async fn legacy_template_with_module(
@@ -226,7 +232,7 @@ pub async fn legacy_template_with_module(
     req: HttpRequest,
     _path: Path<(String, String)>, // (_jig_id, _module_id)
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::LegacyJig, &req, PageMeta::default())
+    default_spa_template(&settings, SpaPage::LegacyJig, &req)
 }
 
 pub async fn module_template(
@@ -235,12 +241,7 @@ pub async fn module_template(
     path: Path<(String, ModuleAssetPageKind, String)>,
 ) -> actix_web::Result<HttpResponse> {
     let (module_kind, page_kind, _) = path.into_inner();
-    spa_template(
-        &settings,
-        SpaPage::Module(module_kind, page_kind),
-        &req,
-        PageMeta::default(),
-    )
+    default_spa_template(&settings, SpaPage::Module(module_kind, page_kind), &req)
 }
 
 pub async fn dev_template(
@@ -248,12 +249,7 @@ pub async fn dev_template(
     req: HttpRequest,
     path: Path<String>,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(
-        &settings,
-        SpaPage::Dev(path.into_inner()),
-        &req,
-        PageMeta::default(),
-    )
+    default_spa_template(&settings, SpaPage::Dev(path.into_inner()), &req)
 }
 
 async fn load_asset_page_meta(settings: &RuntimeSettings, asset_path: &str) -> PageMeta {
@@ -266,12 +262,12 @@ async fn load_asset_page_meta(settings: &RuntimeSettings, asset_path: &str) -> P
 fn parse_jig_id(asset_path: &str) -> Option<JigId> {
     let mut segments = asset_path.split('/');
 
-    match segments.next() {
-        Some("jig") => segments.next(),
-        Some(id) => Some(id),
-        None => None,
-    }
-    .and_then(|id| JigId::from_str(id).ok())
+    let id = match segments.next()? {
+        "jig" => segments.next()?,
+        id => id,
+    };
+
+    JigId::from_str(id).ok()
 }
 
 async fn load_jig_page_meta(settings: &RuntimeSettings, jig_id: JigId) -> PageMeta {
@@ -345,7 +341,6 @@ fn jig_page_meta(settings: &RuntimeSettings, jig: &JigResponse) -> PageMeta {
     PageMeta {
         title,
         description,
-        keywords: DEFAULT_PAGE_KEYWORDS.to_string(),
         image,
     }
 }
