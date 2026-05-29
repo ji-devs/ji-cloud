@@ -15,6 +15,8 @@ use components::audio::mixer::{AudioPath, AUDIO_MIXER};
 use components::collision::stickers_traces::pixels::{debug_render_hit_trace, get_hit_index};
 use wasm_bindgen_futures::spawn_local;
 
+const DRAG_MOVE_THRESHOLD_PX: i32 = 20;
+
 impl PlayState {
     pub fn set_targets(&self) {
         let items = self.items.iter().filter_map(|item| match item {
@@ -235,6 +237,8 @@ impl InteractiveItem {
     pub fn start_drag(&self, x: i32, y: i32) {
         if !self.completed.get() {
             self.try_play_user_audio();
+            self.drag_moved.set(false);
+            self.drag_movement_px.set((0, 0));
 
             self.drag
                 .set(Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true, ()))));
@@ -244,8 +248,25 @@ impl InteractiveItem {
     pub fn try_move_drag(&self, x: i32, y: i32) {
         if let Some(drag) = self.drag.lock_ref().as_ref() {
             if let Some((_, diff)) = drag.update(x, y) {
+                let (drag_movement_x_px, drag_movement_y_px) = self.drag_movement_px.get();
+                let drag_movement_px = (drag_movement_x_px + diff.x, drag_movement_y_px + diff.y);
+                self.drag_movement_px.set(drag_movement_px);
+
+                // Calculate line distance without sqrt.
+                let moved_px = drag_movement_px.0.pow(2) + drag_movement_px.1.pow(2);
+
+                let movement_px = if self.drag_moved.get() {
+                    (diff.x, diff.y)
+                } else if moved_px >= DRAG_MOVE_THRESHOLD_PX.pow(2) {
+                    self.drag_moved.set(true);
+                    drag_movement_px
+                } else {
+                    return;
+                };
+
                 let resize_info = get_resize_info();
-                let (diff_x, diff_y) = resize_info.get_px_normalized(diff.x as f64, diff.y as f64);
+                let (diff_x, diff_y) =
+                    resize_info.get_px_normalized(movement_px.0 as f64, movement_px.1 as f64);
 
                 self.curr_transform.replace_with(|t| {
                     let mut t = t.clone();
@@ -261,7 +282,7 @@ impl InteractiveItem {
         if self.drag.lock_ref().is_some() {
             let _drag = self.drag.lock_mut().take().unwrap_ji();
             //self.curr_offset.set((0.0, 0.0));
-            true
+            self.drag_moved.get()
         } else {
             false
         }
