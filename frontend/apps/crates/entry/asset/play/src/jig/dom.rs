@@ -585,19 +585,15 @@ impl JigPlayer {
                                         }
                                     });
                                 };
-                                if !state.scoring.get() {
-                                    dom = dom.child(
-                                        html!("jig-play-done-action", {
-                                            .prop("slot", "actions")
-                                            .prop("kind", "replay")
-                                            .event(clone!(state => move |_: events::Click| {
-                                                state.navigate_to_index(
-                                                    0
-                                                );
-                                            }))
-                                        })
-                                    );
-                                }
+                                dom = dom.child(
+                                    html!("jig-play-done-action", {
+                                        .prop("slot", "actions")
+                                        .prop("kind", "replay")
+                                        .event(clone!(state => move |_: events::Click| {
+                                            state.replay_jig();
+                                        }))
+                                    })
+                                );
                                 if !state.is_student {
                                     dom = dom.child_signal(state.jig.signal_cloned().map(|jig| {
                                         jig.map(|jig| {

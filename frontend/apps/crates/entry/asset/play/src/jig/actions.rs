@@ -173,6 +173,14 @@ impl JigPlayer {
         }
     }
 
+    pub fn replay_jig(self: &Rc<Self>) {
+        self.points.set(0);
+        *self.session_info.borrow_mut() = Default::default();
+        self.navigation_handler.set(None);
+        self.set_module_assist(None);
+        self.navigate_to_index(0);
+    }
+
     pub fn set_module_assist(
         self: &Rc<Self>,
         module_assist: Option<(ModuleAssist, ModuleAssistType)>,
