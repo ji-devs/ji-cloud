@@ -4,7 +4,7 @@ use utils::{prelude::*, resize::ResizeInfo};
 
 use futures_signals::signal::Signal;
 
-use shared::domain::module::body::{Transform, _groups::design::TraceKind};
+use shared::domain::module::body::{_groups::design::TraceKind, Transform};
 
 type PlaceholderSignal<T> = futures_signals::signal::Always<T>;
 type PlaceholderTransformSizeSignal = PlaceholderSignal<(Transform, (f64, f64))>;

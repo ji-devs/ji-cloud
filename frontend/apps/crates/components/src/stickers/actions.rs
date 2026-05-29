@@ -9,10 +9,10 @@ use super::{
 use dominator::clone;
 use futures_signals::signal_vec::VecDiff;
 use shared::domain::module::body::{
-    Image,
     _groups::design::{
         Embed as RawEmbed, EmbedHost, Sprite as RawSprite, Sticker as RawSticker, Text as RawText,
     },
+    Image,
 };
 use std::rc::Rc;
 use utils::prelude::*;
