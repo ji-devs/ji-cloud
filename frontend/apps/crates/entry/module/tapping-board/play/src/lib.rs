@@ -1,6 +1,3 @@
-#![feature(type_alias_impl_trait)]
-//see: https://github.com/rust-lang/cargo/issues/8010
-
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
