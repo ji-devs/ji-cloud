@@ -4,8 +4,10 @@
 
 FROM clux/muslrust:nightly AS pages-builder
 
-# Add our source code.
+# Use crates.io sparse protocol
+ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
 
+# Add our source code.
 RUN mkdir -p /workspace/backend/pages
 COPY ./shared /workspace/shared
 COPY ./backend/ji_core /workspace/backend/ji_core

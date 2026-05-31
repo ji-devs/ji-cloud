@@ -368,7 +368,6 @@ impl Manager {
                 }
                 Err(e) => {
                     log::error!("{:?}", e);
-                    sentry::integrations::anyhow::capture_anyhow(&e);
                 }
             }
         }

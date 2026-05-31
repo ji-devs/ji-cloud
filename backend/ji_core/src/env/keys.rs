@@ -172,10 +172,6 @@ pub const TOKEN_SECRET: &str = "TOKEN_SECRET";
 /// This environment variable is optional, if missing it will use the server's compiled default (an indeterminate but reasonable amount of time)
 pub const LOGIN_TOKEN_VALID_DURATION: &str = "LOGIN_TOKEN_VALID_DURATION";
 
-pub const SENTRY_DSN_API: &str = "SENTRY_DSN_API";
-pub const SENTRY_DSN_PAGES: &str = "SENTRY_DSN_PAGES";
-pub const SENTRY_SAMPLE_RATE: &str = "SENTRY_SAMPLE_RATE";
-
 pub const PIXABAY_SEARCH_KEY: &str = "PIXABAY_SEARCH_KEY";
 
 /// ID of the google oauth client.

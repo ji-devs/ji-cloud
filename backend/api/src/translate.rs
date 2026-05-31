@@ -166,7 +166,6 @@ impl GoogleTranslate {
                 }
                 Err(e) => {
                     log::error!("{:?}", e);
-                    sentry::integrations::anyhow::capture_anyhow(&e);
                 }
             }
         }

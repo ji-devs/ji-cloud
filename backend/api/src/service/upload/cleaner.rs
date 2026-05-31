@@ -84,7 +84,6 @@ impl UploadCleaner {
                 Ok(_) => {}
                 Err(e) => {
                     log::error!("{:?}", e);
-                    sentry::integrations::anyhow::capture_anyhow(&e);
                 }
             }
         }

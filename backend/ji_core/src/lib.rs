@@ -14,8 +14,5 @@ pub mod http;
 /// Keeps track of settings.
 pub mod settings;
 
-/// Sentry integration.
-pub mod sentry;
-
 /// Const config values.
 pub mod config;

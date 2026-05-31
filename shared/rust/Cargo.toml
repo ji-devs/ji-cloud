@@ -46,7 +46,7 @@ const_format = "0.2.31"
 version = "0.6.3"
 default-features = false
 features = [
-    "runtime-tokio-native-tls",
+    "runtime-tokio-rustls",
     "macros",
     "postgres",
     "uuid",

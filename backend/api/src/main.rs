@@ -19,7 +19,6 @@ use ji_core::{
     env::env_bool,
     settings::{self, SettingsManager},
 };
-use sentry_tracing::EventFilter;
 use tracing_subscriber::{fmt::format::FmtSpan, layer::SubscriberExt, EnvFilter, Registry};
 
 #[tokio::main]
@@ -47,19 +46,6 @@ async fn main() -> anyhow::Result<()> {
         let remote_target = settings::read_remote_target()?;
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
 
-        // // `guard` needs to remain in scope so that we don't lose our Sentry config.
-        // let guard = ji_core::sentry::init(
-        //     settings.sentry_api_key().await?.as_deref(),
-        //     remote_target,
-        //     settings.sentry_sample_rate().await?,
-        // )?;
-
-        // Sentry is weird. By default info! and below events are used as breadcrumbs. I don't want
-        // this, I want insight into the actual functioning of the system, not just errors.
-        let sentry_layer = sentry_tracing::layer()
-            .event_filter(|_md| EventFilter::Event)
-            .span_filter(|_md| true);
-
         let fmt_layer = tracing_subscriber::fmt::layer()
             .with_span_events(FmtSpan::CLOSE)
             .pretty();
@@ -68,7 +54,7 @@ async fn main() -> anyhow::Result<()> {
         let env_filter =
             EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
 
-        let tracing_subscriber = Registry::default().with(env_filter).with(sentry_layer);
+        let tracing_subscriber = Registry::default().with(env_filter);
 
         if env_bool("ENABLE_TRACING_LOGS") {
             tracing::subscriber::set_global_default(tracing_subscriber.with(fmt_layer))

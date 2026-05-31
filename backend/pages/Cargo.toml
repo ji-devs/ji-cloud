@@ -24,13 +24,13 @@ shared = { path = "../../shared/rust", features = ["backend"] }
 futures = "0.3.23"
 regex = "1.6.0"
 cached = "0.43.0"
-reqwest = "0.11.17"
+reqwest = { version = "0.11.17", default-features = false, features = ["rustls-tls"] }
 actix-web-httpauth = "0.8.2"
 
 [dependencies.sqlx]
 default-features = false
 features = [
-    "runtime-tokio-native-tls",
+    "runtime-tokio-rustls",
     "macros",
     "postgres",
     "uuid",
@@ -46,12 +46,3 @@ default = ["listenfd", "ji_core/listenfd"]
 [dependencies.serde]
 version = "1.0.130"
 features = ["derive"]
-
-[dependencies.sentry]
-version = "0.25.0"
-default-features = false
-features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
-
-# we use native-tls but this ensures we have a stable version of OpenSSL on *nix
-[target.'cfg(unix)'.dependencies]
-openssl = { version = "0.10.36", features = ["vendored"] }

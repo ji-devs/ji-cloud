@@ -16,12 +16,12 @@ chrono = "0.4.22"
 hex = "0.4.3"
 listenfd = { version = "0.3.5", optional = true }
 log = "0.4.14"
-reqwest = { version = "0.11.4", features = ["json"] }
+reqwest = { version = "0.11.4", default-features = false, features = ["json", "rustls-tls"] }
 serde = { version = "1.0.193", features = ["derive"] }
 shared = { path = "../../shared/rust", features = ["backend"] }
 sqlx = { version = "0.6.3", default-features = false, features = [
   "postgres",
-  "runtime-tokio-native-tls",
+  "runtime-tokio-rustls",
 ], optional = true }
 yup-oauth2 = "7.0.1"
 tracing = "0.1.31"
@@ -29,7 +29,3 @@ time = "0.3.37"
 
 [features]
 db = ["sqlx"]
-
-[dependencies.sentry]
-features = ["anyhow", "backtrace", "contexts", "panic", "transport"]
-version = "0.25.0"

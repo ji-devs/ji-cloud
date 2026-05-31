@@ -37,9 +37,6 @@ fn log_ise<B: MessageBody, T>(
 where
     T: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
 {
-    let uri: serde_json::Value = request.uri().to_string().into();
-    let method: serde_json::Value = request.method().to_string().into();
-
     let future = srv.call(request);
     async {
         let mut result = future.await?;
@@ -48,19 +45,6 @@ where
 
             if let Some(err) = response.extensions_mut().remove::<anyhow::Error>() {
                 log::error!("ISE while responding to request: {:?}", err);
-                sentry::add_breadcrumb(sentry::Breadcrumb {
-                    ty: "http".to_owned(),
-                    category: Some("request".into()),
-                    data: {
-                        let mut map = sentry::protocol::Map::new();
-                        map.insert("url".to_owned(), uri);
-                        map.insert("method".to_owned(), method);
-                        map
-                    },
-                    ..Default::default()
-                });
-
-                sentry::integrations::anyhow::capture_anyhow(&err);
             }
         }
 

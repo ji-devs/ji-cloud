@@ -46,18 +46,11 @@ async fn main() -> anyhow::Result<()> {
 
     logger::init()?;
 
-    let (s3, gcp_key_store, event_arc, notifications, db_pool, runtime_settings, _sentry_guard) = {
+    let (s3, gcp_key_store, event_arc, notifications, db_pool, runtime_settings) = {
         log::trace!("initializing settings and processes");
         let remote_target = settings::read_remote_target()?;
 
         let settings: SettingsManager = SettingsManager::new(remote_target).await?;
-
-        // FIXME use a sentry DSN for a media-watch specific project
-        let sentry_guard = ji_core::sentry::init(
-            settings.sentry_api_key().await?.as_deref(),
-            remote_target,
-            settings.sentry_sample_rate().await?,
-        )?;
 
         let db_pool = db::get_pool(
             settings
@@ -99,7 +92,6 @@ async fn main() -> anyhow::Result<()> {
             notifications,
             db_pool,
             runtime_settings,
-            sentry_guard,
         )
     };
 

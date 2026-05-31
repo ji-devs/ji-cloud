@@ -22,7 +22,6 @@ use ji_core::{
     settings::RuntimeSettings,
 };
 use regex::Regex;
-use sentry::types::protocol::v7::value::Value as JsonValue;
 use shared::config::RemoteTarget;
 use sqlx::PgPool;
 
@@ -36,9 +35,6 @@ fn log_ise<B: MessageBody, T>(
 where
     T: Service<ServiceRequest, Response = ServiceResponse<B>, Error = actix_web::Error>,
 {
-    let uri: JsonValue = req.uri().to_string().into();
-    let method: JsonValue = req.method().to_string().into();
-
     let fut = srv.call(req);
     async {
         let mut res = fut.await?;
@@ -47,19 +43,6 @@ where
 
             if let Some(err) = resp.extensions_mut().remove::<anyhow::Error>() {
                 log::error!("ISE while responding to request: {:?}", err);
-                sentry::add_breadcrumb(sentry::Breadcrumb {
-                    ty: "http".to_owned(),
-                    category: Some("request".into()),
-                    data: {
-                        let mut map = sentry::protocol::Map::new();
-                        map.insert("url".to_owned(), uri);
-                        map.insert("method".to_owned(), method);
-                        map
-                    },
-                    ..Default::default()
-                });
-
-                sentry::integrations::anyhow::capture_anyhow(&err);
             }
         }
 

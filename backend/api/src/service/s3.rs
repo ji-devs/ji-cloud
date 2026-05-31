@@ -118,23 +118,6 @@ impl Client {
         let key = media_key(library, id, file);
         if let Err(err) = self.try_delete(key.clone()).await {
             log::warn!("failed to delete {} from s3: {}", key, err);
-
-            sentry::with_scope(
-                |scope| scope.set_level(Some(sentry::Level::Warning)),
-                || {
-                    sentry::add_breadcrumb(sentry::Breadcrumb {
-                        ty: "info".to_owned(),
-                        data: {
-                            let mut map = sentry::protocol::Map::new();
-                            map.insert("key".to_owned(), key.clone().into());
-                            map
-                        },
-                        ..Default::default()
-                    });
-
-                    sentry::integrations::anyhow::capture_anyhow(&err);
-                },
-            );
         }
     }
 

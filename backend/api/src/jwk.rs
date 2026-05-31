@@ -267,7 +267,6 @@ pub fn run_task(verifier: Arc<JwkVerifier>) -> JoinHandle<()> {
 
                 Err(e) => {
                     log::error!("{:?}", e);
-                    sentry::integrations::anyhow::capture_anyhow(&e);
                     tokio::time::sleep(Duration::from_secs(5)).await;
                 }
             };

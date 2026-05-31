@@ -18,7 +18,7 @@ actix-web = "4.1.0"
 actix-web-httpauth = "0.8.0"
 tracing-actix-web = { version = "0.6.0", default-features = false }
 
-algolia = { git = "https://github.com/RickyLB/algolia-rs", branch = "main" }
+algolia = { git = "https://github.com/johnnynotsolucky/algolia-rs", branch = "main" }
 anyhow = "1.0.64"
 argon2 = "0.4.1"
 base64 = "0.13.0"
@@ -36,16 +36,15 @@ jsonwebtoken = "7.2.0"
 listenfd = { version = "0.3.5", optional = true }
 log = "0.4.14"
 mp3-metadata = "0.3.3"
-paseto = "2.0.2"
+paseto = { version = "2.0.2", default-features = false, features = ["v2", "easy_tokens_chrono"] }
 percent-encoding = "2.1.0"
 pin-project = "1.0.8"
 rand = "0.8.4"
-reqwest = { version = "0.11.6", features = ["cookies", "json", "stream"] }
+reqwest = { version = "0.11.6", default-features = false, features = ["cookies", "json", "rustls-tls", "stream"] }
 rgb = "0.8.27"
-rusoto_core = "0.47.0"
-rusoto_s3 = "0.47.0"
+rusoto_core = { version = "0.47.0", default-features = false, features = ["rustls"] }
+rusoto_s3 = { version = "0.47.0", default-features = false, features = ["rustls"] }
 rusoto_signature = "0.47.0"
-sentry-tracing = "0.25.0"
 serde = { version = "1.0.193", features = ["derive"] }
 serde_json = { version = "1.0.85", features = ["preserve_order"] }
 serde_urlencoded = "0.7.1"
@@ -70,18 +69,13 @@ macros = { path = "../../shared/macros" }
 
 [dependencies.sendgrid]
 default-features = false
-features = ["native-tls", "async"]
+features = ["rustls", "async"]
 version = "0.17.4"
-
-[dependencies.sentry]
-features = ["anyhow", "backtrace", "contexts", "panic", "tracing", "transport"]
-version = "0.25.0"
-
 
 [dependencies.sqlx]
 default-features = false
 features = [
-  "runtime-tokio-native-tls",
+  "runtime-tokio-rustls",
   "macros",
   "postgres",
   "uuid",
@@ -100,10 +94,6 @@ version = "0.3.9"
 
 [features]
 default = ["listenfd", "ji_core/listenfd"]
-
-# we use native-tls but this ensures we have a stable version of OpenSSL on *nix
-[target.'cfg(unix)'.dependencies]
-openssl = { version = "0.10.36", features = ["vendored"] }
 
 # argon2 *needs* perf
 [profile.dev.package.argon2]
