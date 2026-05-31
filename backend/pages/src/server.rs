@@ -24,6 +24,7 @@ use ji_core::{
 use regex::Regex;
 use sentry::types::protocol::v7::value::Value as JsonValue;
 use shared::config::RemoteTarget;
+use sqlx::PgPool;
 
 const SANDBOX_USERNAME: &str = "jigzi";
 
@@ -77,13 +78,14 @@ async fn sandbox_auth(
     }
 }
 
-pub async fn run(settings: RuntimeSettings) -> anyhow::Result<()> {
+pub async fn run(settings: RuntimeSettings, db_pool: PgPool) -> anyhow::Result<()> {
     let local_insecure = settings.is_local();
     let pages_port = settings.pages_port;
     let is_sandbox = matches!(settings.remote_target(), RemoteTarget::Sandbox);
     let server = actix_web::HttpServer::new(move || {
         actix_web::App::new()
             .app_data(Data::new(settings.clone()))
+            .app_data(Data::new(db_pool.clone()))
             .wrap_fn(|req, srv| {
                 // Check whether the request originates from www.<host>. If it does, return a redirect response with the
                 // correct URL in the Location header.

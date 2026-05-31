@@ -10,12 +10,12 @@ publish = false
 
 [dependencies]
 actix-cors = "0.6.2"
-actix-files = "0.6.0-beta.7"
-actix-web = "4.0.0-beta.9"
+actix-files = "0.6.2"
+actix-web = "4.1.0"
 
 anyhow = "1.0.64"
 askama = "0.10.5"
-ji_core = { path = "../ji_core" }
+ji_core = { path = "../ji_core", features = ["db"] }
 dotenv = "0.15.0"
 env_logger = "0.9.0"
 listenfd = { version = "0.3.5", optional = true }
@@ -25,7 +25,20 @@ futures = "0.3.23"
 regex = "1.6.0"
 cached = "0.43.0"
 reqwest = "0.11.17"
-actix-web-httpauth = "0.8.0"
+actix-web-httpauth = "0.8.2"
+
+[dependencies.sqlx]
+default-features = false
+features = [
+    "runtime-tokio-native-tls",
+    "macros",
+    "postgres",
+    "uuid",
+    "json",
+    "chrono",
+    "offline",
+]
+version = "0.6.3"
 
 [features]
 default = ["listenfd", "ji_core/listenfd"]

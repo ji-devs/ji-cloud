@@ -1,5 +1,6 @@
 use ji_core::settings::{self, SettingsManager};
 
+mod db;
 mod logger;
 mod server;
 mod templates;
@@ -12,7 +13,7 @@ async fn main() -> anyhow::Result<()> {
 
     let remote_target = settings::read_remote_target()?;
 
-    let (_guard, settings) = {
+    let (_guard, settings, db_pool) = {
         let settings = SettingsManager::new(remote_target).await?;
 
         let guard = ji_core::sentry::init(
@@ -21,8 +22,16 @@ async fn main() -> anyhow::Result<()> {
             settings.sentry_sample_rate().await?,
         )?;
 
-        (guard, settings.runtime_settings().await?)
+        let runtime_settings = settings.runtime_settings().await?;
+        let db_pool = db::get_pool(
+            settings
+                .db_connect_options(settings::read_sql_proxy())
+                .await?,
+        )
+        .await?;
+
+        (guard, runtime_settings, db_pool)
     };
 
-    server::run(settings).await
+    server::run(settings, db_pool).await
 }

@@ -1,0 +1,117 @@
+{
+  "db": "PostgreSQL",
+  "4cc93cbfcd6f526fdde897a4c2fa6fd2cd791efe28e338daf1f7b34d36bfbb1b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "display_name!",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "cover_module_id?: ModuleId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            select\n                playlist_data.display_name as \"display_name!\",\n                playlist_data.description as \"description!\",\n                playlist_data.other_keywords as \"other_keywords!\",\n                (\n                    select id\n                    from playlist_data_module\n                    where playlist_data_id = playlist_data.id\n                    order by \"index\"\n                    limit 1\n                ) as \"cover_module_id?: ModuleId\"\n            from playlist\n                inner join playlist_data on playlist_data.id = coalesce(playlist.live_id, playlist.draft_id)\n            where playlist.id = $1\n        "
+  },
+  "acfd0e04c36f86b84c2618c671c395b15be452caae521c41a7982cc3da8d83a0": {
+    "describe": {
+      "columns": [
+        {
+          "name": "display_name!",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "cover_module_id?: ModuleId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            select\n                course_data.display_name as \"display_name!\",\n                course_data.description as \"description!\",\n                course_data.other_keywords as \"other_keywords!\",\n                (\n                    select id\n                    from course_data_module\n                    where course_data_id = course_data.id\n                    order by \"index\"\n                    limit 1\n                ) as \"cover_module_id?: ModuleId\"\n            from course\n                inner join course_data on course_data.id = coalesce(course.live_id, course.draft_id)\n            where course.id = $1\n        "
+  },
+  "ad37ecd3e4c4819634675daeb60993655c70c0cfa964cfb053cbb0904d45b38d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "display_name!",
+          "ordinal": 0,
+          "type_info": "Text"
+        },
+        {
+          "name": "description!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "other_keywords!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "cover_module_id?: ModuleId",
+          "ordinal": 3,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            select\n                jig_data.display_name as \"display_name!\",\n                jig_data.description as \"description!\",\n                jig_data.other_keywords as \"other_keywords!\",\n                (\n                    select id\n                    from jig_data_module\n                    where jig_data_id = jig_data.id\n                    order by \"index\"\n                    limit 1\n                ) as \"cover_module_id?: ModuleId\"\n            from jig\n                inner join jig_data on jig_data.id = coalesce(jig.live_id, jig.draft_id)\n            where jig.id = $1\n        "
+  }
+}

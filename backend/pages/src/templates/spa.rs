@@ -1,13 +1,22 @@
+use crate::db::{get_course_metadata, get_jig_metadata, get_playlist_metadata, AssetMetadata};
 use actix_web::{
     error::ErrorInternalServerError,
     web::{Data, Path},
-    HttpResponse,
+    HttpRequest, HttpResponse,
 };
 use ji_core::settings::RuntimeSettings;
-use shared::config::RemoteTarget;
+use shared::{
+    config::RemoteTarget,
+    domain::{asset::AssetId, course::CourseId, jig::JigId, playlist::PlaylistId},
+};
+use sqlx::PgPool;
 use std::borrow::Cow;
+use std::str::FromStr;
 
 use askama::Template;
+
+const DEFAULT_DESCRIPTION: &str = "Jigzi is a game-creation tool and crowd-sourcing platform which currently holds thousands of educational activities that teach children about Judaism, Hebrew, Israel and their culture in an engaging and interactive way. Educators can use current games, as well as create their own to complement their curriculum at any level and any language. The creation tool includes a huge collection of educational clipart that updates constantly.";
+const DEFAULT_KEYWORDS: &str = "Jigzi, Judaism, Hebrew, educational, teaching, interactive";
 
 #[derive(Debug, Clone, PartialEq, Copy, Eq, serde::Deserialize)]
 #[serde(rename_all = "kebab-case")]
@@ -65,6 +74,7 @@ struct SpaPageInfo {
     app_css: String,
     app_favicon: String,
     app_custom_elements_js: String,
+    metadata: Option<Metadata>,
     firebase: bool,
     google_maps_url: Option<String>,
     local_dev: bool,
@@ -72,7 +82,19 @@ struct SpaPageInfo {
     is_release: bool,
 }
 
-fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<HttpResponse> {
+pub struct Metadata {
+    title: String,
+    description: String,
+    keywords: String,
+    url: String,
+    image_url: Option<String>,
+}
+
+fn spa_template(
+    settings: &RuntimeSettings,
+    spa: SpaPage,
+    metadata: Option<Metadata>,
+) -> actix_web::Result<HttpResponse> {
     let google_maps_url = match spa {
         // todo: `Cow::borrowed` ('static)
         SpaPage::User | SpaPage::Community => {
@@ -90,6 +112,7 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
         app_custom_elements_js: settings
             .remote_target()
             .spa_url(&*spa.as_str(), "elements/custom-elements.js"),
+        metadata,
         firebase: matches!(spa, SpaPage::User),
         google_maps_url,
         local_dev: settings.is_local(),
@@ -108,53 +131,57 @@ fn spa_template(settings: &RuntimeSettings, spa: SpaPage) -> actix_web::Result<H
 }
 
 pub async fn home_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Home)
+    spa_template(&settings, SpaPage::Home, None)
 }
 
 pub async fn user_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::User)
+    spa_template(&settings, SpaPage::User, None)
 }
 
 pub async fn community_template(
     settings: Data<RuntimeSettings>,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Community)
+    spa_template(&settings, SpaPage::Community, None)
 }
 
 pub async fn kids_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Kids)
+    spa_template(&settings, SpaPage::Kids, None)
 }
 
 pub async fn classroom_template(
     settings: Data<RuntimeSettings>,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Classroom)
+    spa_template(&settings, SpaPage::Classroom, None)
 }
 
 pub async fn admin_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Admin)
+    spa_template(&settings, SpaPage::Admin, None)
 }
 
 pub async fn asset_template(
     settings: Data<RuntimeSettings>,
+    db: Data<PgPool>,
+    req: HttpRequest,
     path: Path<(ModuleAssetPageKind, String)>,
 ) -> actix_web::Result<HttpResponse> {
-    let (page_kind, _asset_kind) = path.into_inner();
-    spa_template(&settings, SpaPage::Asset(page_kind))
+    let (page_kind, asset_path) = path.into_inner();
+    let metadata = load_asset_spa_metadata(&settings, &db, &req, page_kind, &asset_path).await;
+
+    spa_template(&settings, SpaPage::Asset(page_kind), metadata)
 }
 
 pub async fn legacy_template(
     settings: Data<RuntimeSettings>,
     _path: Path<String>, // (jig_id)
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::LegacyJig)
+    spa_template(&settings, SpaPage::LegacyJig, None)
 }
 
 pub async fn legacy_template_with_module(
     settings: Data<RuntimeSettings>,
     _path: Path<(String, String)>, // (_jig_id, _module_id)
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::LegacyJig)
+    spa_template(&settings, SpaPage::LegacyJig, None)
 }
 
 pub async fn module_template(
@@ -162,12 +189,82 @@ pub async fn module_template(
     path: Path<(String, ModuleAssetPageKind, String)>,
 ) -> actix_web::Result<HttpResponse> {
     let (module_kind, page_kind, _) = path.into_inner();
-    spa_template(&settings, SpaPage::Module(module_kind, page_kind))
+    spa_template(&settings, SpaPage::Module(module_kind, page_kind), None)
 }
 
 pub async fn dev_template(
     settings: Data<RuntimeSettings>,
     path: Path<String>,
 ) -> actix_web::Result<HttpResponse> {
-    spa_template(&settings, SpaPage::Dev(path.into_inner()))
+    spa_template(&settings, SpaPage::Dev(path.into_inner()), None)
+}
+
+async fn load_asset_spa_metadata(
+    settings: &RuntimeSettings,
+    db: &PgPool,
+    req: &HttpRequest,
+    page_kind: ModuleAssetPageKind,
+    asset_path: &str,
+) -> Option<Metadata> {
+    if page_kind != ModuleAssetPageKind::Play {
+        return None;
+    }
+
+    let asset_id = asset_id_from_asset_path(asset_path)?;
+    let metadata = match load_asset_metadata(db, asset_id).await {
+        Ok(Some(metadata)) => metadata,
+        Ok(None) => return None,
+        Err(err) => {
+            log::warn!("failed to load asset metadata for {:?}: {}", asset_id, err);
+            return None;
+        }
+    };
+
+    Some(Metadata {
+        title: metadata.display_name,
+        description: match metadata.description.trim() {
+            "" => DEFAULT_DESCRIPTION.to_owned(),
+            description => description.to_owned(),
+        },
+        keywords: match metadata.other_keywords.trim() {
+            "" => DEFAULT_KEYWORDS.to_owned(),
+            keywords => format!("{DEFAULT_KEYWORDS}, {keywords}"),
+        },
+        url: format!("{}{}", settings.remote_target().pages_url(), req.uri()),
+        image_url: metadata.cover_module_id.map(|module_id| {
+            format!(
+                "{}/screenshot/{}/{}/full.jpg",
+                settings.remote_target().uploads_url(),
+                asset_id.uuid(),
+                module_id,
+            )
+        }),
+    })
+}
+
+fn asset_id_from_asset_path(asset_path: &str) -> Option<AssetId> {
+    let mut parts = asset_path.split('/');
+
+    match (parts.next(), parts.next()) {
+        (Some("jig"), Some(jig_id)) => JigId::from_str(jig_id).ok().map(AssetId::JigId),
+        (Some("playlist"), Some(playlist_id)) => PlaylistId::from_str(playlist_id)
+            .ok()
+            .map(AssetId::PlaylistId),
+        (Some("course"), Some(course_id)) => {
+            CourseId::from_str(course_id).ok().map(AssetId::CourseId)
+        }
+        _ => None,
+    }
+}
+
+async fn load_asset_metadata(
+    db: &PgPool,
+    asset_id: AssetId,
+) -> sqlx::Result<Option<AssetMetadata>> {
+    match asset_id {
+        AssetId::JigId(jig_id) => get_jig_metadata(db, jig_id).await,
+        AssetId::PlaylistId(playlist_id) => get_playlist_metadata(db, playlist_id).await,
+        AssetId::CourseId(course_id) => get_course_metadata(db, course_id).await,
+        AssetId::ResourceId(_) => Ok(None),
+    }
 }
