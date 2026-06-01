@@ -54,7 +54,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: stable
+          toolchain: nightly
 
       - uses: davidB/rust-cargo-make@main
 
