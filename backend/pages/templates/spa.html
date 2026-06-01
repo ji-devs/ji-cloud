@@ -7,14 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     {% match metadata %}
     {% when Some with (metadata) %}
-    <title>{{ metadata.title }}</title>
-    <meta name="title" content="{{ metadata.title }}">
+    <title>{{ metadata.title }} | Jigzi</title>
+    <meta name="title" content="{{ metadata.title }} | Jigzi">
     <meta name="description" content="{{ metadata.description }}">
     <meta name="keywords" content="{{ metadata.keywords }}">
     <link rel="canonical" href="{{ metadata.url }}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Jigzi">
-    <meta property="og:title" content="{{ metadata.title }}">
+    <meta property="og:title" content="{{ metadata.title }} | Jigzi">
     <meta property="og:description" content="{{ metadata.description }}">
     <meta property="og:url" content="{{ metadata.url }}">
     {% match metadata.image_url %}
@@ -22,14 +22,14 @@
     <meta property="og:image" content="{{ image_url }}">
     <meta property="og:image:secure_url" content="{{ image_url }}">
     <meta property="og:image:type" content="image/jpeg">
-    <meta property="og:image:alt" content="{{ metadata.title }}">
+    <meta property="og:image:alt" content="{{ metadata.title }} | Jigzi">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="{{ image_url }}">
-    <meta name="twitter:image:alt" content="{{ metadata.title }}">
+    <meta name="twitter:image:alt" content="{{ metadata.title }} | Jigzi">
     {% when None %}
     <meta name="twitter:card" content="summary">
     {% endmatch %}
-    <meta name="twitter:title" content="{{ metadata.title }}">
+    <meta name="twitter:title" content="{{ metadata.title }} | Jigzi">
     <meta name="twitter:description" content="{{ metadata.description }}">
     {% when None %}
     <meta name="description" content="Jigzi is a game-creation tool and crowd-sourcing platform which currently holds thousands of educational activities that teach children about Judaism, Hebrew, Israel and their culture in an engaging and interactive way. Educators can use current games, as well as create their own to complement their curriculum at any level and any language. The creation tool includes a huge collection of educational clipart that updates constantly.">
