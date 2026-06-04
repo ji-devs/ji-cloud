@@ -1,22 +1,15 @@
 use anyhow::Context;
+use aws_credential_types::Credentials;
+use aws_sdk_s3::{config::Region, primitives::ByteStream, Client as S3Client};
 use ji_core::settings::S3Settings;
-use rusoto_core::{
-    credential::{AwsCredentials, StaticProvider},
-    HttpClient, Region, RusotoError,
-};
-use rusoto_s3::{
-    CopyObjectRequest, DeleteObjectRequest, GetObjectError, GetObjectRequest, PutObjectRequest, S3,
-};
 use shared::media::{self, media_key, FileKind, MediaLibrary, PngImageFile};
-use tokio::io::AsyncReadExt;
 use tracing::instrument;
 use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct Client {
     media_bucket: String,
-    processing_bucket: String,
-    client: rusoto_s3::S3Client,
+    client: S3Client,
 }
 
 impl Client {
@@ -24,82 +17,26 @@ impl Client {
         let S3Settings {
             endpoint,
             media_bucket,
-            processing_bucket,
             access_key_id,
             secret_access_key,
+            ..
         } = s3_settings;
 
-        let region = Region::Custom {
-            name: "auto".to_owned(),
-            endpoint,
-        };
+        let credentials = Credentials::new(access_key_id, secret_access_key, None, None, "static");
 
-        let credentials_provider = StaticProvider::from(AwsCredentials::new(
-            access_key_id,
-            secret_access_key,
-            None,
-            None,
-        ));
+        let config = aws_sdk_s3::config::Builder::new()
+            .region(Region::new("auto"))
+            .endpoint_url(endpoint)
+            .credentials_provider(credentials)
+            .force_path_style(true)
+            .build();
 
-        let client = rusoto_s3::S3Client::new_with(
-            HttpClient::new()?,
-            credentials_provider.clone(),
-            region.clone(),
-        );
+        let client = S3Client::from_conf(config);
 
         Ok(Self {
             media_bucket,
-            processing_bucket,
             client,
         })
-    }
-
-    pub fn media_bucket(&self) -> &str {
-        &self.media_bucket
-    }
-
-    pub fn processing_bucket(&self) -> &str {
-        &self.processing_bucket
-    }
-
-    pub async fn upload_png_images_copy_original(
-        &self,
-        library: MediaLibrary,
-        image: Uuid,
-        resized: Vec<u8>,
-        thumbnail: Vec<u8>,
-    ) -> anyhow::Result<()> {
-        futures::future::try_join(
-            self.copy_processed_file(library, image, FileKind::ImagePng(PngImageFile::Original)),
-            self.upload_png_images_resized_thumb(library, image, resized, thumbnail),
-        )
-        .await
-        .map(drop)
-    }
-
-    pub async fn upload_png_images_resized_thumb(
-        &self,
-        library: MediaLibrary,
-        image: Uuid,
-        resized: Vec<u8>,
-        thumbnail: Vec<u8>,
-    ) -> anyhow::Result<()> {
-        self.upload_media(
-            resized,
-            library,
-            image,
-            FileKind::ImagePng(PngImageFile::Resized),
-        )
-        .await?;
-        self.upload_media(
-            thumbnail,
-            library,
-            image,
-            FileKind::ImagePng(PngImageFile::Thumbnail),
-        )
-        .await?;
-
-        Ok(())
     }
 
     #[instrument(skip(self, library, original, resized, thumbnail))]
@@ -146,11 +83,10 @@ impl Client {
     // note: does nothing if object doesn't exist.
     async fn try_delete(&self, key: String) -> anyhow::Result<()> {
         self.client
-            .delete_object(DeleteObjectRequest {
-                key,
-                bucket: self.media_bucket.clone(),
-                ..DeleteObjectRequest::default()
-            })
+            .delete_object()
+            .bucket(&self.media_bucket)
+            .key(key)
+            .send()
             .await
             .context("failed to delete object from s3")?;
 
@@ -168,15 +104,15 @@ impl Client {
         let content_length = data.len() as i64;
 
         self.client
-            .put_object(PutObjectRequest {
-                bucket,
-                key: media::media_key(library, id, file_kind),
-                content_length: Some(content_length),
-                content_type: Some(file_kind.content_type().to_owned()),
-                body: Some(data.into()),
-                ..PutObjectRequest::default()
-            })
-            .await?;
+            .put_object()
+            .bucket(bucket)
+            .key(media::media_key(library, id, file_kind))
+            .content_length(content_length)
+            .content_type(file_kind.content_type())
+            .body(ByteStream::from(data))
+            .send()
+            .await
+            .context("failed to upload object to s3")?;
 
         Ok(())
     }
@@ -190,109 +126,5 @@ impl Client {
     ) -> anyhow::Result<()> {
         self.upload_media_to_bucket(data, library, id, file_kind, self.media_bucket.clone())
             .await
-    }
-
-    pub async fn upload_media_for_processing(
-        &self,
-        data: Vec<u8>,
-        library: MediaLibrary,
-        id: Uuid,
-        file_kind: FileKind,
-    ) -> anyhow::Result<()> {
-        self.upload_media_to_bucket(data, library, id, file_kind, self.processing_bucket.clone())
-            .await
-    }
-
-    pub async fn download_media_for_processing(
-        &self,
-        library: MediaLibrary,
-        id: Uuid,
-        file_kind: FileKind,
-    ) -> anyhow::Result<Option<Vec<u8>>> {
-        self.download_media_file_from_bucket(self.processing_bucket.clone(), library, id, file_kind)
-            .await
-    }
-
-    pub async fn download_media_file(
-        &self,
-        library: MediaLibrary,
-        id: Uuid,
-        file_kind: FileKind,
-    ) -> anyhow::Result<Option<Vec<u8>>> {
-        self.download_media_file_from_bucket(self.media_bucket.clone(), library, id, file_kind)
-            .await
-    }
-
-    pub async fn copy_processed_file(
-        &self,
-        library: MediaLibrary,
-        id: Uuid,
-        file_kind: FileKind,
-    ) -> anyhow::Result<()> {
-        let key = media::media_key(library, id, file_kind);
-        self.client
-            .copy_object(CopyObjectRequest {
-                bucket: self.media_bucket.clone(),
-                content_type: Some(file_kind.content_type().to_owned()),
-                copy_source: format!("{}/{}", self.processing_bucket, key),
-                key: key.clone(),
-                ..CopyObjectRequest::default()
-            })
-            .await?;
-
-        Ok(())
-    }
-
-    pub async fn back_copy_unprocessed_file(
-        &self,
-        library: MediaLibrary,
-        id: Uuid,
-        file_kind: FileKind,
-    ) -> anyhow::Result<()> {
-        let key = media::media_key(library, id, file_kind);
-        self.client
-            .copy_object(CopyObjectRequest {
-                bucket: self.processing_bucket.clone(),
-                content_type: Some(file_kind.content_type().to_owned()),
-                copy_source: format!("{}/{}", self.media_bucket, key),
-                key: key.clone(),
-                ..CopyObjectRequest::default()
-            })
-            .await?;
-
-        Ok(())
-    }
-
-    async fn download_media_file_from_bucket(
-        &self,
-        bucket: String,
-        library: MediaLibrary,
-        id: Uuid,
-        file_kind: FileKind,
-    ) -> anyhow::Result<Option<Vec<u8>>> {
-        let resp = self
-            .client
-            .get_object(GetObjectRequest {
-                bucket,
-                key: media::media_key(library, id, file_kind),
-                ..GetObjectRequest::default()
-            })
-            .await;
-
-        let resp = match resp {
-            Ok(resp) => resp,
-            Err(RusotoError::Service(GetObjectError::NoSuchKey(_))) => return Ok(None),
-            Err(e) => return Err(e.into()),
-        };
-
-        let mut body = vec![];
-
-        resp.body
-            .ok_or_else(|| anyhow::anyhow!("missing response"))?
-            .into_async_read()
-            .read_to_end(&mut body)
-            .await?;
-
-        Ok(Some(body))
     }
 }
