@@ -41,9 +41,9 @@ pin-project = "1.0.8"
 rand = "0.8.4"
 reqwest = { version = "0.11.6", default-features = false, features = ["cookies", "json", "rustls-tls", "stream"] }
 rgb = "0.8.27"
-rusoto_core = { version = "0.47.0", default-features = false, features = ["rustls"] }
-rusoto_s3 = { version = "0.47.0", default-features = false, features = ["rustls"] }
-rusoto_signature = "0.47.0"
+rusoto_core = { version = "0.48.0", default-features = false, features = ["rustls"] }
+rusoto_s3 = { version = "0.48.0", default-features = false, features = ["rustls"] }
+rusoto_signature = "0.48.0"
 serde = { version = "1.0.193", features = ["derive"] }
 serde_json = { version = "1.0.85", features = ["preserve_order"] }
 serde_urlencoded = "0.7.1"
