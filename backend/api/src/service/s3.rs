@@ -84,12 +84,20 @@ impl Client {
         resized: Vec<u8>,
         thumbnail: Vec<u8>,
     ) -> anyhow::Result<()> {
-        let upload = |data, file| self.upload_media(data, library, image, FileKind::ImagePng(file));
-
-        let resized = upload(resized, PngImageFile::Resized);
-        let thumbnail = upload(thumbnail, PngImageFile::Thumbnail);
-
-        futures::future::try_join(resized, thumbnail).await?;
+        self.upload_media(
+            resized,
+            library,
+            image,
+            FileKind::ImagePng(PngImageFile::Resized),
+        )
+        .await?;
+        self.upload_media(
+            thumbnail,
+            library,
+            image,
+            FileKind::ImagePng(PngImageFile::Thumbnail),
+        )
+        .await?;
 
         Ok(())
     }
@@ -103,13 +111,27 @@ impl Client {
         resized: Vec<u8>,
         thumbnail: Vec<u8>,
     ) -> anyhow::Result<()> {
-        let upload = |data, file| self.upload_media(data, library, image, FileKind::ImagePng(file));
-
-        let original = upload(original, PngImageFile::Original);
-        let resized = upload(resized, PngImageFile::Resized);
-        let thumbnail = upload(thumbnail, PngImageFile::Thumbnail);
-
-        futures::future::try_join3(original, resized, thumbnail).await?;
+        self.upload_media(
+            original,
+            library,
+            image,
+            FileKind::ImagePng(PngImageFile::Original),
+        )
+        .await?;
+        self.upload_media(
+            resized,
+            library,
+            image,
+            FileKind::ImagePng(PngImageFile::Resized),
+        )
+        .await?;
+        self.upload_media(
+            thumbnail,
+            library,
+            image,
+            FileKind::ImagePng(PngImageFile::Thumbnail),
+        )
+        .await?;
 
         Ok(())
     }
@@ -143,10 +165,13 @@ impl Client {
         file_kind: FileKind,
         bucket: String,
     ) -> anyhow::Result<()> {
+        let content_length = data.len() as i64;
+
         self.client
             .put_object(PutObjectRequest {
                 bucket,
                 key: media::media_key(library, id, file_kind),
+                content_length: Some(content_length),
                 content_type: Some(file_kind.content_type().to_owned()),
                 body: Some(data.into()),
                 ..PutObjectRequest::default()
