@@ -97,15 +97,15 @@ pub async fn initialize_server_and_get_db(
             .expect("failed to execute fixture");
     }
 
-    let (mail, s3, gcs, algolia) = match services.is_empty() {
-        true => (None, None, None, None),
+    let (mail, s3, algolia) = match services.is_empty() {
+        true => (None, None, None),
         false => {
             let settings = TestServicesSettings::new().await;
             match settings {
                 Ok(s) => s.init_services(services).await,
                 Err(e) => {
                     log::info!("Error while reading test service settings: {:?}", e);
-                    (None, None, None, None)
+                    (None, None, None)
                 }
             }
         }
@@ -131,7 +131,6 @@ pub async fn initialize_server_and_get_db(
         settings,
         s3,
         None, // TODO add test
-        gcs,
         algolia,
         None,
         jwk_verifier,

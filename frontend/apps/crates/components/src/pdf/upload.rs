@@ -1,10 +1,11 @@
 /// TODO - use macros to keep it DRY, handle image uploading in the same basic functions
-use crate::firebase;
 use awsm_web::loaders::helpers::AbortController;
 use shared::{
-    api::endpoints,
-    domain::pdf::{user::*, *},
-    media::MediaLibrary,
+    api::{Method, PathParts},
+    domain::{
+        pdf::{user::*, *},
+        CreateResponse,
+    },
 };
 use thiserror::Error;
 use utils::prelude::*;
@@ -52,83 +53,39 @@ impl UploadError {
  */
 
 pub async fn upload_pdf(
-    id: PdfId,
-    lib: MediaLibrary,
     file: &File,
     abort_controller: Option<&AbortController>,
-) -> Result<(), UploadError> {
-    let session_uri = {
-        match lib {
-            MediaLibrary::User => {
-                let req = UserPdfUploadRequest {
-                    file_size: file.size() as usize,
-                };
-
-                let resp = endpoints::pdf::user::Upload::api_with_auth_status_abortable(
-                    abort_controller,
-                    UserPdfUploadPath(id.clone()),
-                    Some(req),
-                )
-                .await
-                .map_err(|aborted| {
-                    if aborted {
-                        UploadError::Aborted
-                    } else {
-                        UploadError::Other(awsm_web::errors::Error::Empty)
-                    }
-                });
-
-                if let Ok((_, status)) = resp {
-                    side_effect_status_code(status).await;
-                }
-
-                let resp = resp.and_then(|(resp, status)| {
-                    if status == 413 {
-                        let _ = web_sys::window()
-                            .unwrap_ji()
-                            .alert_with_message(STR_PDF_IS_TOO_LARGE);
-                        Err(UploadError::TooLarge)
-                    } else {
-                        resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
-                    }
-                })?;
-
-                let UserPdfUploadResponse { session_uri } = resp;
-                session_uri
-            }
-
-            _ => panic!("Cannot upload PDFs other than to user library!"),
+) -> Result<PdfId, UploadError> {
+    let resp = api_upload_file_with_auth_abortable::<CreateResponse<PdfId>, ()>(
+        &UserPdfCreatePath().get_filled(),
+        Method::Post,
+        file,
+        None,
+        abort_controller,
+    )
+    .await
+    .map_err(|aborted| {
+        if aborted {
+            UploadError::Aborted
+        } else {
+            UploadError::Other(awsm_web::errors::Error::Empty)
         }
-    };
+    });
 
-    //upload to GCS
-    upload_file_gcs(&session_uri, file, abort_controller)
-        .await
-        .map_err(|err| {
-            if err.is_abort() {
-                UploadError::Aborted
-            } else {
-                UploadError::Other(err)
-            }
-        })?;
-
-    log::info!(
-        "{} uploaded, waiting for processing to start...",
-        id.0.to_string()
-    );
-
-    if firebase::wait_for_upload_ready(&id.0, lib, abort_controller).await {
-        Ok(())
-    } else {
-        match abort_controller {
-            Some(a) => {
-                if a.signal().aborted() {
-                    Err(UploadError::Aborted)
-                } else {
-                    Err(UploadError::Other(awsm_web::errors::Error::Empty))
-                }
-            }
-            None => Err(UploadError::Other(awsm_web::errors::Error::Empty)),
-        }
+    if let Ok((_, status)) = resp {
+        side_effect_status_code(status).await;
     }
+
+    let resp = resp.and_then(|(resp, status)| {
+        if status == 413 {
+            let _ = web_sys::window()
+                .unwrap_ji()
+                .alert_with_message(STR_PDF_IS_TOO_LARGE);
+            Err(UploadError::TooLarge)
+        } else {
+            resp.map_err(UploadError::Other)
+        }
+    })?;
+
+    Ok(resp.id)
 }

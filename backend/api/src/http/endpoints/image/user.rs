@@ -1,5 +1,5 @@
 use actix_web::{
-    web::{Data, Json, Path, Query},
+    web::{Data, Json, Path, Payload, Query},
     HttpResponse,
 };
 use futures::TryStreamExt;
@@ -7,8 +7,8 @@ use shared::{
     api::{endpoints, ApiEndpoint},
     domain::{
         image::{
-            user::{UserImage, UserImageListResponse, UserImageResponse, UserImageUploadResponse},
-            ImageId,
+            user::{UserImage, UserImageListResponse, UserImageResponse},
+            ImageId, ImageSize,
         },
         CreateResponse,
     },
@@ -18,21 +18,30 @@ use sqlx::PgPool;
 
 use crate::{
     db, error,
-    extractor::{RequestOrigin, TokenUser},
-    service::{s3, storage, GcpAccessKeyStore, ServiceData},
+    extractor::TokenUser,
+    service::{s3, upload as upload_service, ServiceData},
 };
 
 /// Create a image in the user's image library.
 pub(super) async fn create(
     db: Data<PgPool>,
+    s3: ServiceData<s3::Client>,
     claims: TokenUser,
-    query: Json<<endpoints::image::user::Create as ApiEndpoint>::Req>,
-) -> Result<HttpResponse, error::Server> {
+    query: Query<<endpoints::image::user::Create as ApiEndpoint>::Req>,
+    payload: Payload,
+) -> Result<HttpResponse, error::Upload> {
+    let file =
+        super::super::read_limited_payload(payload, FileKind::ImagePng(PngImageFile::Original))
+            .await?;
     let size = query.size;
 
     let user_id = claims.user_id();
 
     let id = db::image::user::create(db.as_ref(), &user_id, size).await?;
+
+    let mut txn = db.begin().await?;
+    upload_service::process_user_image_bytes(&mut txn, &s3, id.0, size, file).await?;
+    txn.commit().await?;
 
     Ok(HttpResponse::Created().json(CreateResponse { id }))
 }
@@ -40,50 +49,34 @@ pub(super) async fn create(
 /// Upload an image to the user's image library.
 pub(super) async fn upload(
     db: Data<PgPool>,
-    gcp_key_store: ServiceData<GcpAccessKeyStore>,
-    gcs: ServiceData<storage::Client>,
+    s3: ServiceData<s3::Client>,
     claims: TokenUser,
     path: Path<ImageId>,
-    origin: RequestOrigin,
-    req: Json<<endpoints::image::user::Upload as ApiEndpoint>::Req>,
-) -> Result<Json<<endpoints::image::user::Upload as ApiEndpoint>::Res>, error::Upload> {
+    payload: Payload,
+) -> Result<HttpResponse, error::Upload> {
     let id = path.into_inner();
     let user_id = claims.user_id();
     let mut txn = db.begin().await?;
 
     db::image::user::auth_user_image(&mut txn, &user_id, &id).await?;
 
-    let upload_content_length = req.into_inner().file_size;
+    let size = sqlx::query!(
+        r#"select size as "size: ImageSize" from user_image_library where id = $1"#,
+        id.0
+    )
+    .fetch_one(&mut txn)
+    .await?
+    .size;
 
-    if let Some(file_limit) = gcs.file_size_limit(&FileKind::ImagePng(PngImageFile::Original)) {
-        if file_limit < upload_content_length {
-            return Err(error::Upload::FileTooLarge);
-        }
-    }
+    let file =
+        super::super::read_limited_payload(payload, FileKind::ImagePng(PngImageFile::Original))
+            .await?;
 
-    let access_token = gcp_key_store.fetch_token().await?;
-
-    let resp = gcs
-        .get_url_for_resumable_upload_for_processing(
-            &access_token,
-            upload_content_length,
-            MediaLibrary::User,
-            id.0,
-            FileKind::ImagePng(PngImageFile::Original),
-            origin,
-        )
-        .await?;
-
-    sqlx::query!(
-            "update user_image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
-            id.0
-        )
-        .execute(&mut txn)
-        .await?;
+    upload_service::process_user_image_bytes(&mut txn, &s3, id.0, size, file).await?;
 
     txn.commit().await?;
 
-    Ok(Json(UserImageUploadResponse { session_uri: resp }))
+    Ok(HttpResponse::Ok().finish())
 }
 
 /// Delete an image from the user's image library.

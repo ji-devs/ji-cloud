@@ -1,16 +1,12 @@
 use anyhow::anyhow;
-use components::image::upload::upload_image;
+use components::image::upload::upload_user_image;
 use dominator::clone;
 use shared::{
     api::endpoints,
     domain::{
         billing::{SchoolAccountPath, UpdateSchoolAccountRequest},
-        image::{
-            user::{UserImageCreatePath, UserImageCreateRequest},
-            ImageId, ImageSize,
-        },
+        image::{ImageId, ImageSize},
     },
-    media::MediaLibrary,
 };
 
 use utils::{
@@ -46,18 +42,7 @@ impl SchoolEnd {
 }
 
 async fn upload_logo(file: File) -> anyhow::Result<ImageId> {
-    let req = UserImageCreateRequest {
-        size: ImageSize::UserProfile,
-    };
-
-    let image_id = endpoints::image::user::Create::api_with_auth(UserImageCreatePath(), Some(req))
+    upload_user_image(ImageSize::UserProfile, &file, None)
         .await
-        .map_err(|_err| anyhow!("Error creating image in db"))?
-        .id;
-
-    upload_image(image_id, MediaLibrary::User, &file, None)
-        .await
-        .map_err(|_err| anyhow!("Error uploading image)"))?;
-
-    Ok(image_id)
+        .map_err(|_err| anyhow!("Error uploading image"))
 }

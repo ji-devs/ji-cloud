@@ -158,18 +158,4 @@ pub struct AnimationCreateRequest {
 
 make_path_parts!(AnimationUploadPath => "/v1/animation/{}/raw" => AnimationId);
 
-/// Request to indicate the size of an user library image for upload.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AnimationUploadRequest {
-    /// The size of the image to be uploaded in bytes.
-    pub file_size: usize,
-}
-
-/// URL to upload an user library image, supports resumable uploading.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct AnimationUploadResponse {
-    /// The session URI used for uploading, including the query for uploader ID
-    pub session_uri: String,
-}
-
 make_path_parts!(AnimationDeletePath => "/v1/animation/{}" => AnimationId);

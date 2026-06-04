@@ -324,22 +324,6 @@ pub struct GoogleCloudStorageSettings {
     pub processing_bucket: String,
 }
 
-/// Settings for handling Google EventArc triggers
-#[derive(Clone, Debug)]
-pub struct GoogleCloudEventArcSettings {
-    /// Service name for Google Cloud storage
-    pub storage_service_name: String,
-
-    /// ID of the GCP project
-    pub project_id: String,
-
-    /// Topic name for raw media upload event
-    pub media_uploaded_topic: String,
-
-    /// Topic name for completed media processing event
-    pub media_processed_topic: String,
-}
-
 /// Firebase client, for Firestore
 #[derive(Clone, Debug)]
 pub struct FirebaseSettings {
@@ -715,52 +699,6 @@ impl SettingsManager {
             })),
 
             _ => return Ok(None),
-        }
-    }
-
-    /// Load the Google Cloud EventArc settings
-    pub async fn google_cloud_eventarc_settings(
-        &self,
-    ) -> anyhow::Result<Option<GoogleCloudEventArcSettings>> {
-        let project_id = Some(self.project_id.clone());
-
-        let storage_service_name = Some(EVENTARC_AUDITLOG_SERVICE_NAME.to_owned());
-
-        let media_uploaded_topic = match self.remote_target.google_eventarc_media_uploaded_topic() {
-            Some(endpoint) => Some(endpoint.to_string()),
-            None => {
-                self.get_varying_secret(keys::event_arc::MEDIA_UPLOADED_TOPIC)
-                    .await?
-            }
-        };
-
-        let media_processed_topic = match self.remote_target.google_eventarc_media_processed_topic()
-        {
-            Some(endpoint) => Some(endpoint.to_string()),
-            None => {
-                self.get_varying_secret(keys::event_arc::MEDIA_PROCESSED_TOPIC)
-                    .await?
-            }
-        };
-
-        match (
-            project_id,
-            storage_service_name,
-            media_uploaded_topic,
-            media_processed_topic,
-        ) {
-            (
-                Some(project_id),
-                Some(storage_service_name),
-                Some(media_uploaded_topic),
-                Some(media_processed_topic),
-            ) => Ok(Some(GoogleCloudEventArcSettings {
-                media_uploaded_topic,
-                media_processed_topic,
-                storage_service_name,
-                project_id,
-            })),
-            _ => Ok(None),
         }
     }
 

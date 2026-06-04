@@ -14,9 +14,7 @@ use shared::error::{ServiceError, ServiceKindError};
 use self::translate::GoogleTranslate;
 use self::upload::cleaner::UploadCleaner;
 
-pub mod event_arc;
 pub mod mail;
-pub mod notifications;
 pub mod s3;
 pub mod storage;
 pub mod upload;
@@ -36,18 +34,6 @@ impl Service for algolia::SearchKeyStore {
 
 impl Service for s3::Client {
     const DISABLED_ERROR: ServiceKindError = ServiceKindError::S3;
-}
-
-impl Service for storage::Client {
-    const DISABLED_ERROR: ServiceKindError = ServiceKindError::GoogleCloudStorage;
-}
-
-impl Service for crate::service::event_arc::Client {
-    const DISABLED_ERROR: ServiceKindError = ServiceKindError::GoogleCloudEventArc;
-}
-
-impl Service for crate::service::notifications::Client {
-    const DISABLED_ERROR: ServiceKindError = ServiceKindError::FirebaseCloudMessaging;
 }
 
 impl Service for GcpAccessKeyStore {

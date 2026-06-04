@@ -1,20 +1,13 @@
 use std::rc::Rc;
 
 use components::{audio, image, pdf};
-use shared::{
-    api::endpoints,
-    domain::{
-        audio::{user::UserAudioCreatePath, AudioId},
-        course::unit::CourseUnitValue,
-        image::{
-            user::{UserImageCreatePath, UserImageCreateRequest},
-            ImageId, ImageSize,
-        },
-        pdf::{user::UserPdfCreatePath, PdfId},
-    },
-    media::MediaLibrary,
+use shared::domain::{
+    audio::AudioId,
+    course::unit::CourseUnitValue,
+    image::{ImageId, ImageSize},
+    pdf::PdfId,
 };
-use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
+use utils::unwrap::UnwrapJiExt;
 use web_sys::{Blob, File};
 
 use crate::edit::course::unit_editor::UnitValue;
@@ -71,44 +64,19 @@ pub async fn upload_file(file: &File) -> Result<CourseUnitValue, anyhow::Error> 
 }
 
 async fn upload_image(file: &File) -> Result<ImageId, anyhow::Error> {
-    let req = UserImageCreateRequest {
-        size: ImageSize::Sticker,
-    };
-
-    let image_id = endpoints::image::user::Create::api_with_auth(UserImageCreatePath(), Some(req))
+    image::upload::upload_user_image(ImageSize::Sticker, file, None)
         .await
-        .map_err(|_| anyhow::Error::msg("Error creating image in db"))?
-        .id;
-
-    image::upload::upload_image(image_id, MediaLibrary::User, file, None)
-        .await
-        .map_err(|e| anyhow::Error::msg(e.to_string()))?;
-
-    Ok(image_id)
+        .map_err(|e| anyhow::Error::msg(e.to_string()))
 }
 
 async fn upload_audio(file: &File) -> anyhow::Result<AudioId> {
-    let audio_id = endpoints::audio::user::Create::api_with_auth(UserAudioCreatePath(), None)
+    audio::upload::upload_audio(file, None)
         .await
-        .map_err(|_| anyhow::Error::msg("Error creating audio in db"))?
-        .id;
-
-    audio::upload::upload_audio(audio_id, MediaLibrary::User, file, None)
-        .await
-        .map_err(|e| anyhow::Error::msg(e.to_string()))?;
-
-    Ok(audio_id)
+        .map_err(|e| anyhow::Error::msg(e.to_string()))
 }
 
 async fn upload_pdf(file: &File) -> Result<PdfId, anyhow::Error> {
-    let pdf_id = endpoints::pdf::user::Create::api_with_auth(UserPdfCreatePath(), None)
+    pdf::upload::upload_pdf(file, None)
         .await
-        .map_err(|_| anyhow::Error::msg("Error creating pdf in db"))?
-        .id;
-
-    pdf::upload::upload_pdf(pdf_id, MediaLibrary::User, file, None)
-        .await
-        .map_err(|e| anyhow::Error::msg(e.to_string()))?;
-
-    Ok(pdf_id)
+        .map_err(|e| anyhow::Error::msg(e.to_string()))
 }

@@ -1,12 +1,8 @@
 use super::{
-    super::upload::{upload_audio, UploadError},
+    super::upload::upload_audio,
     state::{AudioInput, AudioInputMode},
 };
-use shared::{
-    api::endpoints,
-    domain::{audio::user::UserAudioCreatePath, module::body::Audio, CreateResponse},
-    media::MediaLibrary,
-};
+use shared::{domain::module::body::Audio, media::MediaLibrary};
 use std::rc::Rc;
 use utils::prelude::*;
 use web_sys::File;
@@ -67,33 +63,11 @@ pub async fn file_change(state: Rc<AudioInput>, file: File) {
 
     let lib = MediaLibrary::User;
 
-    let err = {
-        match endpoints::audio::user::Create::api_with_auth_abortable(
-            Some(&*state.aborter.borrow()),
-            UserAudioCreatePath(),
-            None,
-        )
-        .await
-        {
-            Ok(Ok(resp)) => {
-                let CreateResponse { id } = resp;
-                match upload_audio(id, lib, &file, Some(&*state.aborter.borrow())).await {
-                    Err(err) => Some(err),
-                    Ok(_) => {
-                        state.set_audio(Some(Audio { id, lib }));
-                        None
-                    }
-                }
-            }
-            Err(true) => {
-                // Not really and error, it's an abort
-                log::info!("Cancelled uploading audio file");
-                Some(UploadError::Other(awsm_web::errors::Error::Empty))
-            }
-            _ => {
-                log::error!("Error uploading audio file");
-                Some(UploadError::Other(awsm_web::errors::Error::Empty))
-            }
+    let err = match upload_audio(&file, Some(&*state.aborter.borrow())).await {
+        Err(err) => Some(err),
+        Ok(id) => {
+            state.set_audio(Some(Audio { id, lib }));
+            None
         }
     };
 

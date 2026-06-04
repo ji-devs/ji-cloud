@@ -43,21 +43,6 @@ pub mod user {
 
     make_path_parts!(UserPdfUploadPath => "/v1/user/me/pdf/{}/raw" => PdfId);
 
-    /// Request indicating the size of an image for upload.
-    #[derive(Serialize, Deserialize, Debug)]
-    pub struct UserPdfUploadRequest {
-        /// The size of the Pdf to be uploaded in bytes. Allows the API server to check that the file size is
-        /// within limits and as a verification at GCS that the entire file was uploaded
-        pub file_size: usize,
-    }
-
-    /// URL to upload an Pdf. Supports resumable uploading.
-    #[derive(Serialize, Deserialize, Debug)]
-    pub struct UserPdfUploadResponse {
-        /// The session URI used for uploading, including the query for uploader ID
-        pub session_uri: String,
-    }
-
     make_path_parts!(UserPdfDeletePath => "/v1/user/me/pdf/{}" => PdfId);
 }
 

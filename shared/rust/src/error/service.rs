@@ -55,16 +55,12 @@ pub enum ServiceKindError {
     S3,
     #[strum(serialize = "Google Cloud Storage")]
     GoogleCloudStorage,
-    #[strum(serialize = "Google Cloud EventArc")]
-    GoogleCloudEventArc,
     #[strum(serialize = "Google OAuth")]
     GoogleOAuth,
     #[strum(serialize = "Google Cloud Access Key Store")]
     GoogleCloudAccessKeyStore,
     #[strum(serialize = "Sendgrid Mail")]
     Mail,
-    #[strum(serialize = "Firebase Cloud Messaging")]
-    FirebaseCloudMessaging,
     #[strum(serialize = "Media Upload Cleaner")]
     UploadCleaner,
     #[strum(serialize = "Google Translate")]

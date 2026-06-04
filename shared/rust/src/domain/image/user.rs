@@ -56,18 +56,4 @@ pub struct UserImage {
 
 make_path_parts!(UserImageUploadPath => "/v1/user/me/image/{}/raw" => ImageId);
 
-/// Request to indicate the size of an user library image for upload.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UserImageUploadRequest {
-    /// The size of the image to be uploaded in bytes.
-    pub file_size: usize,
-}
-
-/// URL to upload an user library image, supports resumable uploading.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct UserImageUploadResponse {
-    /// The session URI used for uploading, including the query for uploader ID
-    pub session_uri: String,
-}
-
 make_path_parts!(UserImageDeletePath => "/v1/user/me/image/{}" => ImageId);

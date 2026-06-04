@@ -338,33 +338,6 @@ pub struct ImageResponse {
 }
 
 make_path_parts!(ImageUploadPath => "/v1/image/{}/raw" => ImageId);
-// #[allow(missing_docs)]
-// #[derive(Clone, Debug)]
-// pub struct ImageUploadPath<'a>(&'a ImageId);
-
-// impl crate::api::endpoints::PathParts for ImageUploadPath<'_> {
-//     const PATH: &'static str = "/v1/image/{ImageId}/raw";
-//     fn get_filled(&self) -> String {
-//         let mut src = String::from(Self::PATH);
-//         src = src.replace(<ImageId>::PLACEHOLDER, &self.0.get_path_string());
-//         src
-//     }
-// }
-
-/// Request to indicate the size of an image for upload.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ImageUploadRequest {
-    /// The size of the image to be uploaded in bytes. Allows the API server to check that the file size is
-    /// within limits and as a verification at GCS that the entire file was uploaded
-    pub file_size: usize,
-}
-
-/// URL to upload an image. Supports resumable uploading.
-#[derive(Serialize, Deserialize, Debug)]
-pub struct ImageUploadResponse {
-    /// The session URI used for uploading, including the query for uploader ID
-    pub session_uri: String,
-}
 
 /// Over the wire representation of an image's metadata.
 #[derive(Serialize, Deserialize, Clone, Debug)]

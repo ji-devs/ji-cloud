@@ -26,9 +26,10 @@ use shared::{api::ApiEndpoint, domain::auth::CSRF_HEADER_NAME};
 use super::init::settings::SETTINGS;
 use async_trait::async_trait;
 use awsm_web::loaders::fetch::{
-    fetch_upload_file_abortable, fetch_upload_file_with_headers, fetch_with_data,
-    fetch_with_headers_and_data, fetch_with_headers_and_data_abortable, Response,
+    fetch_with_data, fetch_with_headers_and_data, fetch_with_headers_and_data_abortable, Response,
 };
+use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::JsFuture;
 use web_sys::File;
 
 pub use awsm_web::loaders::helpers::{spawn_handle, AbortController, FutureHandle};
@@ -384,77 +385,85 @@ impl<T: ApiEndpoint> ApiEndpointExt for T {
 // but not all (e.g. file uploading to GCS)
 /////////////////////////////////////////////////////////
 
-/**** FILE UPLOADING ****/
-//https://cloud.google.com/storage/docs/performing-resumable-uploads#resume-upload
-//TODO - resumeable uploads
-pub async fn upload_file_gcs(
-    url: &str,
-    file: &File,
-    abort_controller: Option<&AbortController>,
-) -> result::Result<(), awsm_web::errors::Error> {
-    let (resp, status) = upload_file_gcs_status(url, file, abort_controller).await;
-
-    side_effect_status_code(status).await;
-
-    resp
-}
-
-pub async fn upload_file_gcs_status(
-    url: &str,
-    file: &File,
-    abort_controller: Option<&AbortController>,
-) -> (result::Result<(), awsm_web::errors::Error>, u16) {
-    match fetch_upload_file_abortable(url, file, Method::Put.as_str(), abort_controller).await {
-        Ok(res) => {
-            let status = res.status();
-
-            if res.ok() {
-                (Ok(()), status)
-            } else {
-                (Err(awsm_web::errors::Error::Empty), status)
-            }
-        }
-        Err(err) => (Err(err), 0),
-    }
-}
-
-//TODO - deprecate! All uploads should go through GCS signed urls
-pub async fn api_upload_file(
+pub async fn api_upload_file_with_auth_abortable<T, Q>(
     endpoint: &str,
-    file: &File,
     method: Method,
-) -> result::Result<(), ()> {
-    let (resp, status) = api_upload_file_status(endpoint, file, method).await;
-
-    side_effect_status_code(status).await;
-
-    resp
-}
-
-pub async fn api_upload_file_status(
-    endpoint: &str,
     file: &File,
-    method: Method,
-) -> (result::Result<(), ()>, u16) {
-    let (url, _) = api_get_query::<()>(endpoint, method, None);
-
-    let csrf = load_csrf_token().unwrap_or_default();
-    let res = fetch_upload_file_with_headers(
-        &url,
-        file,
-        method.as_str(),
-        true,
-        &[(CSRF_HEADER_NAME, &csrf)],
-    )
-    .await
-    .unwrap_ji();
-
-    let status = res.status();
-
-    if res.ok() {
-        (Ok(()), status)
+    query: Option<Q>,
+    abort_controller: Option<&AbortController>,
+) -> Result<(result::Result<T, awsm_web::errors::Error>, u16), IsAborted>
+where
+    T: DeserializeOwned + 'static,
+    Q: Serialize,
+{
+    let (url, _) = api_get_query(endpoint, Method::Get, query);
+    let url = if method == Method::Get {
+        url
+    } else if let Some(query_start) = url.find('?') {
+        format!("{}?{}", &url[..query_start], &url[query_start + 1..])
     } else {
-        (Err(()), status)
+        url
+    };
+
+    let auth_override = env_var("LOCAL_API_AUTH_OVERRIDE").ok();
+    let csrf = load_csrf_token().unwrap_or_default();
+
+    let opts = web_sys::RequestInit::new();
+    opts.set_method(method.as_str());
+    opts.set_credentials(web_sys::RequestCredentials::Include);
+    opts.set_body(file.as_ref());
+
+    if let Some(abort_controller) = abort_controller {
+        opts.set_signal(Some(&abort_controller.signal()));
+    }
+
+    let request = web_sys::Request::new_with_str_and_init(&url, &opts).unwrap_ji();
+    if let Some(token) = auth_override {
+        request
+            .headers()
+            .set("Authorization", &format!("Bearer {token}"))
+            .unwrap_ji();
+    } else {
+        request.headers().set(CSRF_HEADER_NAME, &csrf).unwrap_ji();
+    }
+
+    let content_type = file.type_();
+    if !content_type.is_empty() {
+        request
+            .headers()
+            .set("Content-Type", &content_type)
+            .unwrap_ji();
+    }
+
+    let window = web_sys::window().unwrap_ji();
+    let resp = JsFuture::from(window.fetch_with_request(&request)).await;
+
+    let resp = match resp {
+        Ok(resp) => resp.dyn_into::<web_sys::Response>().unwrap_ji(),
+        Err(_) => {
+            if abort_controller.map_or(false, |it| it.signal().aborted()) {
+                return Err(true);
+            }
+            return Ok((Err(awsm_web::errors::Error::Empty), 0));
+        }
+    };
+
+    let status = resp.status();
+
+    if resp.ok() {
+        let text = match JsFuture::from(resp.text().unwrap_ji()).await {
+            Ok(text) => text.as_string().unwrap_or_default(),
+            Err(_) => return Ok((Err(awsm_web::errors::Error::Empty), status)),
+        };
+        let text = if TypeId::of::<T>() == TypeId::of::<()>() && text.is_empty() {
+            String::from("null")
+        } else {
+            text
+        };
+        let resp = serde_json::from_str(&text).map_err(|_| awsm_web::errors::Error::Empty);
+        Ok((resp, status))
+    } else {
+        Ok((Err(awsm_web::errors::Error::Empty), status))
     }
 }
 

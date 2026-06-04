@@ -41,47 +41,6 @@ export function _init(target) {
     console.log("firebase initialized! target:", target);
 }
 
-//Abortable Promise example: https://codepen.io/dakom/pen/LYyOvwV?editors=1111
-export function waitForUploadReady(mediaId, libId, abortController) {
-    return new Promise((resolve, reject) => {
-        const ref = doc(db, "uploads", "media", libId, mediaId);
-
-        if (abortController != null) {
-            abortController.signal.onabort = () => {
-                reject();
-            };
-        }
-
-        let hasBeenNotReady = false;
-
-        onSnapshot(ref, (doc) => {
-            if (abortController == null || !abortController.signal.aborted) {
-                const data = doc.data();
-                const status =
-                    data == null
-                        ? {
-                              ready: false,
-                              processing: false,
-                          }
-                        : {
-                              ready: data.ready === true,
-                              processing: data.processing === true,
-                          };
-
-                if (status.ready) {
-                    if (hasBeenNotReady) {
-                        resolve();
-                    } else {
-                        //console.log("technically ready but never wasn't, waiting for next ready");
-                    }
-                } else {
-                    hasBeenNotReady = true;
-                }
-            }
-        });
-    });
-}
-
 //This set is used to ignore dropped listeners
 //Clear is called via Drop on the Rust side
 let activeScreenshotListeners = new Set();

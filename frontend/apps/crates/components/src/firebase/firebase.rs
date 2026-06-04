@@ -1,36 +1,6 @@
-use awsm_web::loaders::helpers::AbortController;
-use js_sys::Promise;
-use shared::{
-    domain::{asset::AssetId, module::ModuleId},
-    media::MediaLibrary,
-};
-use std::future::Future;
+use shared::domain::{asset::AssetId, module::ModuleId};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use uuid::Uuid;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::JsFuture;
-
-// If an AbortController is provided, then dropping it will cause the JS promise to reject and this
-// future will resolve with false
-// In all cases, when upload is completed, the Future will resolve with true
-pub fn wait_for_upload_ready(
-    media_id: &Uuid,
-    library: MediaLibrary,
-    abort_controller: Option<&AbortController>,
-) -> impl Future<Output = bool> {
-    init();
-
-    let promise = match abort_controller.as_ref() {
-        Some(abort_controller) => waitForUploadReady(
-            &media_id.to_string(),
-            library.to_str(),
-            Some(*abort_controller),
-        ),
-        None => waitForUploadReady(&media_id.to_string(), library.to_str(), None),
-    };
-
-    async move { JsFuture::from(promise).await.is_ok() }
-}
 
 static GLOBAL_SCREENSHOT_LISTENER_COUNT: AtomicUsize = AtomicUsize::new(0);
 
@@ -91,11 +61,6 @@ cfg_if::cfg_if! {
 #[wasm_bindgen(module = "/js/firebase.js")]
 extern "C" {
     fn _init(remote_target: &str);
-    fn waitForUploadReady(
-        media_id: &str,
-        lib_id: &str,
-        abort_controller: Option<&web_sys::AbortController>,
-    ) -> Promise;
 
     fn listenForScreenshotUpdates(
         jig_id: &str,

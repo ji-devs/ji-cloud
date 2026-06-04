@@ -1,20 +1,20 @@
 use actix_web::{
-    web::{Data, Json, Path, ServiceConfig},
+    web::{Data, Json, Path, Payload, ServiceConfig},
     HttpResponse,
 };
 use chrono::{DateTime, Utc};
 use shared::{
     api::{endpoints::animation, ApiEndpoint, PathParts},
     domain::{
-        animation::{AnimationId, AnimationKind, AnimationResponse, AnimationUploadResponse},
+        animation::{AnimationId, AnimationKind, AnimationResponse},
         CreateResponse,
     },
     media::{FileKind, MediaLibrary},
 };
 use sqlx::{postgres::PgDatabaseError, PgPool};
 
-use crate::extractor::{RequestOrigin, ScopeManageAnimation, TokenUser, TokenUserWithScope};
-use crate::service::{s3, storage, GcpAccessKeyStore, ServiceData};
+use crate::extractor::{ScopeManageAnimation, TokenUser, TokenUserWithScope};
+use crate::service::{s3, upload as upload_service, ServiceData};
 use crate::{db, error};
 
 fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
@@ -92,13 +92,12 @@ async fn create(
 /// Upload an animation to the global animation library.
 async fn upload(
     db: Data<PgPool>,
-    gcp_key_store: ServiceData<GcpAccessKeyStore>,
-    gcs: ServiceData<storage::Client>,
+    s3: ServiceData<s3::Client>,
     _claims: TokenUserWithScope<ScopeManageAnimation>,
     path: Path<AnimationId>,
-    origin: RequestOrigin,
-    req: Json<<animation::Upload as ApiEndpoint>::Req>,
-) -> Result<Json<<animation::Upload as ApiEndpoint>::Res>, error::Upload> {
+    payload: Payload,
+) -> Result<HttpResponse, error::Upload> {
+    let file = super::read_limited_payload(payload, FileKind::AnimationGif).await?;
     let mut txn = db.begin().await?;
 
     let id = path.into_inner();
@@ -114,37 +113,11 @@ async fn upload(
         return Err(error::Upload::ResourceNotFound);
     }
 
-    let upload_content_length = req.into_inner().file_size;
-
-    if let Some(file_limit) = gcs.file_size_limit(&FileKind::AnimationGif) {
-        if file_limit < upload_content_length {
-            return Err(error::Upload::FileTooLarge);
-        }
-    }
-
-    let access_token = gcp_key_store.fetch_token().await?;
-
-    let resp = gcs
-        .get_url_for_resumable_upload_for_processing(
-            &access_token,
-            upload_content_length,
-            MediaLibrary::Global,
-            id.0,
-            FileKind::AnimationGif,
-            origin,
-        )
-        .await?;
-
-    sqlx::query!(
-        "update global_animation_upload set uploaded_at = now(), processing_result = null where animation_id = $1",
-        id.0
-    )
-    .execute(&mut txn)
-    .await?;
+    upload_service::process_animation_bytes(&mut txn, &s3, id.0, file).await?;
 
     txn.commit().await?;
 
-    Ok(Json(AnimationUploadResponse { session_uri: resp }))
+    Ok(HttpResponse::Ok().finish())
 }
 
 /// Get an animation from the global animation library.

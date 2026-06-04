@@ -107,7 +107,6 @@ pub async fn build_and_run(
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
     gcp_key_store: Option<service::GcpAccessKeyStore>,
-    gcs: Option<service::storage::Client>,
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
@@ -121,7 +120,6 @@ pub async fn build_and_run(
         settings,
         s3,
         gcp_key_store,
-        gcs,
         algolia,
         algolia_key_store,
         jwk_verifier,
@@ -140,7 +138,6 @@ pub fn build(
     settings: RuntimeSettings,
     s3: Option<s3::Client>,
     gcp_key_store: Option<service::GcpAccessKeyStore>,
-    gcs: Option<service::storage::Client>,
     algolia: Option<crate::algolia::Client>,
     algolia_key_store: Option<crate::algolia::SearchKeyStore>,
     jwk_verifier: Arc<crate::jwk::JwkVerifier>,
@@ -154,7 +151,6 @@ pub fn build(
 
     let s3 = s3.map(ServiceData::new);
     let gcp_key_store = gcp_key_store.map(ServiceData::new);
-    let gcs = gcs.map(ServiceData::new);
     let algolia = algolia.map(ServiceData::new);
     let algolia_key_store = algolia_key_store.map(ServiceData::new);
     let mail_client = mail_client.map(ServiceData::new);
@@ -174,11 +170,6 @@ pub fn build(
 
         let app = match gcp_key_store.clone() {
             Some(gcp_key_store) => app.app_data(gcp_key_store),
-            None => app,
-        };
-
-        let app = match gcs.clone() {
-            Some(gcs) => app.app_data(gcs),
             None => app,
         };
 

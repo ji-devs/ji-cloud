@@ -1,19 +1,14 @@
-use crate::firebase::wait_for_upload_ready;
 use crate::image::search::state::{ImageSearchKind, NextPage, SearchMode, RECENT_COUNT};
 use crate::image::tag::ImageTag;
 
-use super::super::upload::upload_image;
+use super::super::upload::upload_user_image;
 use super::state::{ImageSearch, PremiumableImage};
 use dominator::clone;
 use futures::future::join;
 use futures_signals::signal_vec::MutableVec;
 use shared::api::endpoints::image;
 use shared::domain::image::recent::{UserRecentImageListPath, UserRecentImageUpsertPath};
-use shared::domain::image::user::UserImageCreatePath;
-use shared::domain::image::{
-    recent::{UserRecentImageListRequest, UserRecentImageUpsertRequest},
-    user::UserImageCreateRequest,
-};
+use shared::domain::image::recent::{UserRecentImageListRequest, UserRecentImageUpsertRequest};
 use shared::domain::image::{ImageId, ImageSearchPath};
 use shared::domain::media::{MediaCreatePath, WebMediaUrlCreateRequest};
 use shared::domain::meta::{GetMetadataPath, ImageTagIndex};
@@ -23,7 +18,7 @@ use shared::media::MediaKind;
 use shared::{
     api::endpoints,
     domain::{
-        image::{CreateResponse, ImageSearchQuery, ImageSize},
+        image::{ImageSearchQuery, ImageSize},
         meta::ImageStyle,
         module::body::Image,
     },
@@ -44,8 +39,6 @@ pub async fn web_to_image(url: Url) -> Result<Image, ()> {
     if !matches!(res.kind, MediaKind::Image) {
         unreachable!("Only images here but found: {:?}", res.kind);
     }
-
-    wait_for_upload_ready(&res.id, MediaLibrary::Web, None).await;
 
     Ok(Image {
         id: ImageId(res.id),
@@ -307,33 +300,19 @@ impl ImageSearch {
     }
 
     pub async fn upload_file(self: &Rc<Self>, file: File) {
-        let req = UserImageCreateRequest {
-            size: ImageSize::Sticker,
-        };
-
-        match endpoints::image::user::Create::api_with_auth(UserImageCreatePath(), Some(req)).await
-        {
-            Ok(resp) => {
-                let CreateResponse { id } = resp;
-
-                match upload_image(id, MediaLibrary::User, &file, None).await {
-                    Ok(_) => {
-                        self.set_selected(Image {
-                            id,
-                            lib: MediaLibrary::User,
-                        });
-                    }
-                    Err(err) => {
-                        if err.is_abort() {
-                            log::info!("aborted!");
-                        } else {
-                            log::error!("got error! {:?}", err);
-                        }
-                    }
-                }
+        match upload_user_image(ImageSize::Sticker, &file, None).await {
+            Ok(id) => {
+                self.set_selected(Image {
+                    id,
+                    lib: MediaLibrary::User,
+                });
             }
-            Err(_) => {
-                log::error!("error creating image db!")
+            Err(err) => {
+                if err.is_abort() {
+                    log::info!("aborted!");
+                } else {
+                    log::error!("got error! {:?}", err);
+                }
             }
         }
     }

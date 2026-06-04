@@ -15,7 +15,7 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 
 pub mod user {
     use actix_web::{
-        web::{Data, Json, Path},
+        web::{Data, Json, Path, Payload},
         HttpResponse,
     };
     use futures::TryStreamExt;
@@ -23,9 +23,7 @@ pub mod user {
         api::{endpoints, ApiEndpoint},
         domain::{
             audio::{
-                user::{
-                    UserAudio, UserAudioListResponse, UserAudioResponse, UserAudioUploadResponse,
-                },
+                user::{UserAudio, UserAudioListResponse, UserAudioResponse},
                 AudioId,
             },
             CreateResponse,
@@ -36,29 +34,35 @@ pub mod user {
 
     use crate::{
         db, error,
-        extractor::{RequestOrigin, TokenUser},
-        service::{s3, storage, GcpAccessKeyStore, ServiceData},
+        extractor::TokenUser,
+        service::{s3, upload as upload_service, ServiceData},
     };
 
     /// Create a audio file in the user's audio library.
     pub(super) async fn create(
         db: Data<PgPool>,
+        s3: ServiceData<s3::Client>,
         _claims: TokenUser,
-    ) -> Result<HttpResponse, error::NotFound> {
+        payload: Payload,
+    ) -> Result<HttpResponse, error::Upload> {
+        let file = super::super::read_limited_payload(payload, FileKind::AudioMp3).await?;
         let id = db::audio::user::create(db.as_ref()).await?;
+
+        let mut txn = db.begin().await?;
+        upload_service::process_user_audio_bytes(&mut txn, &s3, id.0, file).await?;
+        txn.commit().await?;
+
         Ok(HttpResponse::Created().json(CreateResponse { id }))
     }
 
     /// upload a audio file to the user's audio library.
     pub(super) async fn upload(
         db: Data<PgPool>,
-        gcp_key_store: ServiceData<GcpAccessKeyStore>,
-        gcs: ServiceData<storage::Client>,
+        s3: ServiceData<s3::Client>,
         _claims: TokenUser,
         id: Path<AudioId>,
-        origin: RequestOrigin,
-        req: Json<<endpoints::audio::user::Upload as ApiEndpoint>::Req>,
-    ) -> Result<Json<<endpoints::audio::user::Upload as ApiEndpoint>::Res>, error::Upload> {
+        payload: Payload,
+    ) -> Result<HttpResponse, error::Upload> {
         let id = id.into_inner();
 
         let mut txn = db.begin().await?;
@@ -74,37 +78,13 @@ pub mod user {
             return Err(error::Upload::ResourceNotFound);
         }
 
-        let upload_content_length = req.into_inner().file_size;
+        let file = super::super::read_limited_payload(payload, FileKind::AudioMp3).await?;
 
-        if let Some(file_limit) = gcs.file_size_limit(&FileKind::AudioMp3) {
-            if file_limit < upload_content_length {
-                return Err(error::Upload::FileTooLarge);
-            }
-        }
-
-        let access_token = gcp_key_store.fetch_token().await?.to_owned();
-
-        let resp = gcs
-            .get_url_for_resumable_upload_for_processing(
-                &access_token,
-                upload_content_length,
-                MediaLibrary::User,
-                id.0,
-                FileKind::AudioMp3,
-                origin,
-            )
-            .await?;
-
-        sqlx::query!(
-        "update user_audio_upload set uploaded_at = now(), processing_result = null where audio_id = $1",
-        id.0
-    )
-        .execute(&mut txn)
-        .await?;
+        upload_service::process_user_audio_bytes(&mut txn, &s3, id.0, file).await?;
 
         txn.commit().await?;
 
-        Ok(Json(UserAudioUploadResponse { session_uri: resp }))
+        Ok(HttpResponse::Ok().finish())
     }
 
     /// Delete a audio file from the user's audio library.

@@ -6,8 +6,7 @@ pub mod user {
             pdf::{
                 user::{
                     UserPdfCreatePath, UserPdfDeletePath, UserPdfGetPath, UserPdfListPath,
-                    UserPdfListResponse, UserPdfResponse, UserPdfUploadPath, UserPdfUploadRequest,
-                    UserPdfUploadResponse,
+                    UserPdfListResponse, UserPdfResponse, UserPdfUploadPath,
                 },
                 PdfId,
             },
@@ -46,16 +45,12 @@ pub mod user {
         const METHOD: Method = Method::Post;
     }
 
-    /// Upload a pdf file. Returns a pre-signed URL for upload to Google Cloud Storage.
-    ///
-    /// Notes:
-    /// * can be used to update the raw data associated with the pdf file.
+    /// Upload raw pdf bytes.
     pub struct Upload;
     impl ApiEndpoint for Upload {
         type Path = UserPdfUploadPath;
-        // raw bytes
-        type Req = UserPdfUploadRequest;
-        type Res = UserPdfUploadResponse;
+        type Req = ();
+        type Res = ();
         type Err = EmptyError;
         const METHOD: Method = Method::Put;
     }

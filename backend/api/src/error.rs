@@ -16,16 +16,10 @@ use crate::db::meta::MetaWrapperError;
 mod oauth;
 pub use oauth::{GoogleOAuth, OAuth};
 
-mod storage;
-pub use storage::Storage;
-
 mod user;
 pub use user::{
     Email, NotFound as UserNotFound, Register, Update as UserUpdate, Username, VerifyEmail,
 };
-
-pub mod event_arc;
-pub use event_arc::EventArc;
 
 use shared::domain::meta::MetaKind;
 
@@ -332,7 +326,6 @@ pub enum Upload {
     ResourceNotFound,
     InvalidMedia,
     FileTooLarge,
-    StorageClient(Storage),
     InternalServerError(anyhow::Error),
 }
 
@@ -360,18 +353,7 @@ impl Into<actix_web::Error> for Upload {
                 "File Exceeds Upload Limit".to_owned(),
             )
             .into(),
-            Self::StorageClient(e) => e.into(),
             Self::InternalServerError(e) => ise(e),
-        }
-    }
-}
-
-impl From<Storage> for Upload {
-    fn from(e: Storage) -> Self {
-        match e {
-            Storage::FileTooLarge => Upload::FileTooLarge,
-            Storage::InternalServerError(e) => Upload::InternalServerError(e),
-            e => Upload::StorageClient(e),
         }
     }
 }
@@ -637,7 +619,6 @@ impl Into<actix_web::Error> for CloneDraft {
 
 pub enum MediaProcessing {
     InternalServerError(anyhow::Error),
-    EventArc(EventArc),
     ResourceNotFound,
 }
 
@@ -651,8 +632,6 @@ impl Into<actix_web::Error> for MediaProcessing {
     fn into(self) -> actix_web::Error {
         match self {
             Self::InternalServerError(e) => ise(e),
-
-            Self::EventArc(e) => e.into(),
 
             Self::ResourceNotFound => BasicError::with_message(
                 http::StatusCode::NOT_FOUND,

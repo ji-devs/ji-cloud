@@ -1,9 +1,11 @@
 /// TODO - use macros to keep it DRY, handle audio uploading in the same basic functions
-use crate::firebase;
 use awsm_web::loaders::helpers::AbortController;
 use shared::{
-    api::endpoints,
-    domain::image::{user::*, *},
+    api::{Method, PathParts},
+    domain::{
+        image::{user::*, *},
+        CreateResponse,
+    },
     media::MediaLibrary,
 };
 use thiserror::Error;
@@ -57,116 +59,80 @@ pub async fn upload_image(
     file: &File,
     abort_controller: Option<&AbortController>,
 ) -> Result<(), UploadError> {
-    let session_uri = {
-        match lib {
-            MediaLibrary::Global => {
-                let req = ImageUploadRequest {
-                    file_size: file.size() as usize,
-                };
-
-                let resp = endpoints::image::Upload::api_with_auth_status_abortable(
-                    abort_controller,
-                    ImageUploadPath(id.clone()),
-                    Some(req),
-                )
-                .await
-                .map_err(|aborted| {
-                    if aborted {
-                        UploadError::Aborted
-                    } else {
-                        UploadError::Other(awsm_web::errors::Error::Empty)
-                    }
-                });
-
-                if let Ok((_, status)) = resp {
-                    side_effect_status_code(status).await;
-                }
-
-                let resp = resp.and_then(|(resp, status)| {
-                    if status == 413 {
-                        let _ = web_sys::window()
-                            .unwrap_ji()
-                            .alert_with_message(STR_IMAGE_TOO_LARGE);
-                        Err(UploadError::TooLarge)
-                    } else {
-                        resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
-                    }
-                })?;
-
-                let ImageUploadResponse { session_uri } = resp;
-                session_uri
-            }
-
-            MediaLibrary::User => {
-                let req = UserImageUploadRequest {
-                    file_size: file.size() as usize,
-                };
-
-                let resp = endpoints::image::user::Upload::api_with_auth_status_abortable(
-                    abort_controller,
-                    UserImageUploadPath(id.clone()),
-                    Some(req),
-                )
-                .await
-                .map_err(|aborted| {
-                    if aborted {
-                        UploadError::Aborted
-                    } else {
-                        UploadError::Other(awsm_web::errors::Error::Empty)
-                    }
-                });
-
-                if let Ok((_, status)) = resp {
-                    side_effect_status_code(status).await;
-                }
-
-                let resp = resp.and_then(|(resp, status)| {
-                    if status == 413 {
-                        let _ = web_sys::window()
-                            .unwrap_ji()
-                            .alert_with_message(STR_IMAGE_TOO_LARGE);
-                        Err(UploadError::TooLarge)
-                    } else {
-                        resp.map_err(|_| UploadError::Other(awsm_web::errors::Error::Empty))
-                    }
-                })?;
-
-                let UserImageUploadResponse { session_uri } = resp;
-                session_uri
-            }
-
-            _ => panic!("Cannot upload images other than to global or user library!"),
-        }
+    let endpoint = match lib {
+        MediaLibrary::Global => ImageUploadPath(id.clone()).get_filled(),
+        MediaLibrary::User => UserImageUploadPath(id.clone()).get_filled(),
+        _ => panic!("Cannot upload images other than to global or user library!"),
     };
 
-    //upload to GCS
-    upload_file_gcs(&session_uri, file, abort_controller)
-        .await
-        .map_err(|err| {
-            if err.is_abort() {
-                UploadError::Aborted
-            } else {
-                UploadError::Other(err)
-            }
-        })?;
-
-    log::info!(
-        "{} uploaded, waiting for processing to start...",
-        id.0.to_string()
-    );
-
-    if firebase::wait_for_upload_ready(&id.0, lib, abort_controller).await {
-        Ok(())
-    } else {
-        match abort_controller {
-            Some(a) => {
-                if a.signal().aborted() {
-                    Err(UploadError::Aborted)
-                } else {
-                    Err(UploadError::Other(awsm_web::errors::Error::Empty))
-                }
-            }
-            None => Err(UploadError::Other(awsm_web::errors::Error::Empty)),
+    let resp = api_upload_file_with_auth_abortable::<(), ()>(
+        &endpoint,
+        Method::Put,
+        file,
+        None,
+        abort_controller,
+    )
+    .await
+    .map_err(|aborted| {
+        if aborted {
+            UploadError::Aborted
+        } else {
+            UploadError::Other(awsm_web::errors::Error::Empty)
         }
+    });
+
+    if let Ok((_, status)) = resp {
+        side_effect_status_code(status).await;
     }
+
+    resp.and_then(|(resp, status)| {
+        if status == 413 {
+            let _ = web_sys::window()
+                .unwrap_ji()
+                .alert_with_message(STR_IMAGE_TOO_LARGE);
+            Err(UploadError::TooLarge)
+        } else {
+            resp.map_err(UploadError::Other)
+        }
+    })
+}
+
+pub async fn upload_user_image(
+    size: ImageSize,
+    file: &File,
+    abort_controller: Option<&AbortController>,
+) -> Result<ImageId, UploadError> {
+    let req = UserImageCreateRequest { size };
+    let resp = api_upload_file_with_auth_abortable::<CreateResponse<ImageId>, _>(
+        &UserImageCreatePath().get_filled(),
+        Method::Post,
+        file,
+        Some(req),
+        abort_controller,
+    )
+    .await
+    .map_err(|aborted| {
+        if aborted {
+            UploadError::Aborted
+        } else {
+            UploadError::Other(awsm_web::errors::Error::Empty)
+        }
+    });
+
+    if let Ok((_, status)) = resp {
+        side_effect_status_code(status).await;
+    }
+
+    let resp = resp.and_then(|(resp, status)| {
+        if status == 413 {
+            let _ = web_sys::window()
+                .unwrap_ji()
+                .alert_with_message(STR_IMAGE_TOO_LARGE);
+            Err(UploadError::TooLarge)
+        } else {
+            resp.map_err(UploadError::Other)
+        }
+    })?;
+
+    Ok(resp.id)
 }

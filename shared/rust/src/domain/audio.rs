@@ -45,21 +45,6 @@ pub mod user {
 
     make_path_parts!(UserAudioUploadPath => "/v1/user/me/audio/{}/raw" => AudioId);
 
-    /// Request indicating the size of an image for upload.
-    #[derive(Serialize, Deserialize, Debug)]
-    pub struct UserAudioUploadRequest {
-        /// The size of the audio to be uploaded in bytes. Allows the API server to check that the file size is
-        /// within limits and as a verification at GCS that the entire file was uploaded
-        pub file_size: usize,
-    }
-
-    /// URL to upload an audio. Supports resumable uploading.
-    #[derive(Serialize, Deserialize, Debug)]
-    pub struct UserAudioUploadResponse {
-        /// The session URI used for uploading, including the query for uploader ID
-        pub session_uri: String,
-    }
-
     make_path_parts!(UserAudioDeletePath => "/v1/user/me/audio/{}" => AudioId);
 }
 

@@ -1,12 +1,13 @@
-use std::sync::Arc;
-
 use crate::image_ops::MediaKind;
 use crate::service::{s3, ServiceData};
 use actix_web::{http::StatusCode, web::Bytes};
 use anyhow::Context;
 use ji_core::config::{ANIMATION_BODY_SIZE_LIMIT, IMAGE_BODY_SIZE_LIMIT};
 use sha2::Digest;
-use shared::media::{FileKind, MediaLibrary, PngImageFile};
+use shared::{
+    domain::image::ImageSize,
+    media::{FileKind, MediaLibrary},
+};
 use sqlx::{PgConnection, PgPool};
 use uuid::Uuid;
 
@@ -58,8 +59,6 @@ where media_url = $1"#,
 
     // insert row for uploads
 
-    let data = Arc::new(data);
-
     let kind = actix_web::web::block({
         let data = data.clone();
         move || crate::image_ops::detect_image_kind(&data)
@@ -85,6 +84,10 @@ where media_url = $1"#,
     .execute(&mut txn)
     .await?;
 
+    process_web_media_bytes(s3, id, kind, data)
+        .await
+        .context("failed to process web media")?;
+
     sqlx::query!(
         "insert into web_media_upload (media_id, uploaded_at) values ($1, now())",
         id,
@@ -92,19 +95,43 @@ where media_url = $1"#,
     .execute(&mut txn)
     .await?;
 
+    sqlx::query!(
+        "update web_media_upload set processed_at = now(), processing_result = true where media_id = $1",
+        id
+    )
+    .execute(&mut txn)
+    .await?;
+
     txn.commit().await?;
 
-    // upload to media processing bucket
-    s3.upload_media_for_processing(
-        data.to_vec(),
-        MediaLibrary::Web,
-        id,
-        FileKind::ImagePng(PngImageFile::Original),
-    )
-    .await
-    .context("failed to upload media for processing")?;
-
     Ok((id, kind, StatusCode::CREATED))
+}
+
+async fn process_web_media_bytes(
+    s3: &s3::Client,
+    id: Uuid,
+    kind: MediaKind,
+    data: Vec<u8>,
+) -> anyhow::Result<()> {
+    match kind {
+        MediaKind::GifAnimation => {
+            s3.upload_media(data, MediaLibrary::Web, id, FileKind::AnimationGif)
+                .await?;
+        }
+        MediaKind::PngStickerImage => {
+            let (original, resized, thumbnail) = actix_web::web::block(move || {
+                let original = image::load_from_memory(&data)?;
+                crate::image_ops::generate_images(&original, ImageSize::Sticker)
+            })
+            .await??;
+
+            s3.upload_png_images(MediaLibrary::Web, id, original, resized, thumbnail)
+                .await?;
+        }
+        kind => return Err(anyhow::anyhow!("unsupported media kind {:?}", kind)),
+    }
+
+    Ok(())
 }
 
 async fn download_media_file(url_string: &str) -> anyhow::Result<Vec<u8>> {

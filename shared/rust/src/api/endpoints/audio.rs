@@ -7,7 +7,6 @@ pub mod user {
                 user::{
                     UserAudioCreatePath, UserAudioDeletePath, UserAudioGetPath, UserAudioListPath,
                     UserAudioListResponse, UserAudioResponse, UserAudioUploadPath,
-                    UserAudioUploadRequest, UserAudioUploadResponse,
                 },
                 AudioId,
             },
@@ -45,16 +44,12 @@ pub mod user {
         const METHOD: Method = Method::Post;
     }
 
-    /// Upload an audio file. Returns a pre-signed URL for upload to Google Cloud Storage.
-    ///
-    /// Notes:
-    /// * can be used to update the raw data associated with the audio file.
+    /// Upload raw audio bytes.
     pub struct Upload;
     impl ApiEndpoint for Upload {
-        // raw bytes
         type Path = UserAudioUploadPath;
-        type Req = UserAudioUploadRequest;
-        type Res = UserAudioUploadResponse;
+        type Req = ();
+        type Res = ();
         type Err = EmptyError;
         const METHOD: Method = Method::Put;
     }

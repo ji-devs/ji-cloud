@@ -84,7 +84,6 @@ impl TestServicesSettings {
     ) -> (
         Option<mail::Client>,
         Option<s3::Client>,
-        Option<storage::Client>,
         Option<ji_cloud_api::algolia::Client>,
     ) {
         println!("init_services");
@@ -95,14 +94,9 @@ impl TestServicesSettings {
             false => None,
         };
 
-        let gcs = match services.contains(&Service::GoogleCloudStorage) {
-            true => self.create_test_gcs_client(),
-            false => None,
-        };
-
         // todo: other clients
 
-        (mail, None, gcs, None)
+        (mail, None, None)
     }
 
     pub async fn create_test_mail_client(&self) -> Option<mail::Client> {
@@ -241,24 +235,5 @@ impl TestServicesSettings {
             secret_name,
         )
         .await
-    }
-
-    fn create_test_gcs_client(&self) -> Option<storage::Client> {
-        return None;
-
-        // let settings = GoogleCloudStorageSettings {
-        //     oauth2_token: "redacted".to_owned(),
-        //     processing_bucket: RemoteTarget::Local
-        //         .s3_processing_bucket()
-        //         .unwrap()
-        //         .to_owned(),
-        //     media_bucket: RemoteTarget::Local.s3_bucket().unwrap().to_owned(),
-        // };
-        //
-        // let client = storage::Client::new(settings);
-        //
-        // log::info!("Test GCS client created successfully");
-        //
-        // client.ok()
     }
 }

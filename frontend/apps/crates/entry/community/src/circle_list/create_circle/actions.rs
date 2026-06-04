@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use components::image::upload::upload_image;
+use components::image::upload::upload_user_image;
 use dominator::clone;
 use futures::join;
 use shared::{
@@ -9,12 +9,8 @@ use shared::{
         circle::{
             Circle, CircleCreatePath, CircleCreateRequest, CircleGetPath, CircleId, JoinCirclePath,
         },
-        image::{
-            user::{UserImageCreatePath, UserImageCreateRequest},
-            ImageId, ImageSize,
-        },
+        image::{ImageId, ImageSize},
     },
-    media::MediaLibrary,
 };
 use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
 use web_sys::File;
@@ -63,20 +59,9 @@ impl CreateCircle {
 }
 
 async fn upload_circle_image(file: File) -> anyhow::Result<ImageId> {
-    let req = UserImageCreateRequest {
-        size: ImageSize::UserProfile,
-    };
-
-    let image_id = endpoints::image::user::Create::api_with_auth(UserImageCreatePath(), Some(req))
+    upload_user_image(ImageSize::UserProfile, &file, None)
         .await
-        .map_err(|_err| anyhow::anyhow!("Error creating image in db"))?
-        .id;
-
-    upload_image(image_id, MediaLibrary::User, &file, None)
-        .await
-        .map_err(|_err| anyhow::anyhow!("Error uploading image"))?;
-
-    Ok(image_id)
+        .map_err(|_err| anyhow::anyhow!("Error uploading image"))
 }
 
 async fn get_circle(circle_id: &CircleId) -> anyhow::Result<Circle> {

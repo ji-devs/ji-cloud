@@ -15,7 +15,7 @@ fn check_conflict_delete(err: sqlx::Error) -> error::Delete {
 
 pub mod user {
     use actix_web::{
-        web::{Data, Json, Path},
+        web::{Data, Json, Path, Payload},
         HttpResponse,
     };
     use futures::TryStreamExt;
@@ -23,7 +23,7 @@ pub mod user {
         api::{endpoints, ApiEndpoint},
         domain::{
             pdf::{
-                user::{UserPdf, UserPdfListResponse, UserPdfResponse, UserPdfUploadResponse},
+                user::{UserPdf, UserPdfListResponse, UserPdfResponse},
                 PdfId,
             },
             CreateResponse,
@@ -34,29 +34,35 @@ pub mod user {
 
     use crate::{
         db, error,
-        extractor::{RequestOrigin, TokenUser},
-        service::{s3, storage, GcpAccessKeyStore, ServiceData},
+        extractor::TokenUser,
+        service::{s3, upload as upload_service, ServiceData},
     };
 
     /// Create a pdf file in the user's pdf library.
     pub(super) async fn create(
         db: Data<PgPool>,
+        s3: ServiceData<s3::Client>,
         claims: TokenUser,
-    ) -> Result<HttpResponse, error::NotFound> {
+        payload: Payload,
+    ) -> Result<HttpResponse, error::Upload> {
+        let file = super::super::read_limited_payload(payload, FileKind::DocumentPdf).await?;
         let id = db::pdf::user::create(db.as_ref(), claims.0.user_id).await?;
+
+        let mut txn = db.begin().await?;
+        upload_service::process_user_pdf_bytes(&mut txn, &s3, id.0, file).await?;
+        txn.commit().await?;
+
         Ok(HttpResponse::Created().json(CreateResponse { id }))
     }
 
     /// upload a pdf file to the user's pdf library.
     pub(super) async fn upload(
         db: Data<PgPool>,
-        gcp_key_store: ServiceData<GcpAccessKeyStore>,
-        gcs: ServiceData<storage::Client>,
+        s3: ServiceData<s3::Client>,
         _claims: TokenUser,
         id: Path<PdfId>,
-        origin: RequestOrigin,
-        req: Json<<endpoints::pdf::user::Upload as ApiEndpoint>::Req>,
-    ) -> Result<Json<<endpoints::pdf::user::Upload as ApiEndpoint>::Res>, error::Upload> {
+        payload: Payload,
+    ) -> Result<HttpResponse, error::Upload> {
         let id = id.into_inner();
 
         let mut txn = db.begin().await?;
@@ -72,37 +78,13 @@ pub mod user {
             return Err(error::Upload::ResourceNotFound);
         }
 
-        let upload_content_length = req.into_inner().file_size;
+        let file = super::super::read_limited_payload(payload, FileKind::DocumentPdf).await?;
 
-        if let Some(file_limit) = gcs.file_size_limit(&FileKind::DocumentPdf) {
-            if file_limit < upload_content_length {
-                return Err(error::Upload::FileTooLarge);
-            }
-        }
-
-        let access_token = gcp_key_store.fetch_token().await?.to_owned();
-
-        let resp = gcs
-            .get_url_for_resumable_upload_for_processing(
-                &access_token,
-                upload_content_length,
-                MediaLibrary::User,
-                id.0,
-                FileKind::DocumentPdf,
-                origin,
-            )
-            .await?;
-
-        sqlx::query!(
-        "update user_pdf_upload set uploaded_at = now(), processing_result = null where pdf_id = $1",
-        id.0
-    )
-        .execute(&mut txn)
-        .await?;
+        upload_service::process_user_pdf_bytes(&mut txn, &s3, id.0, file).await?;
 
         txn.commit().await?;
 
-        Ok(Json(UserPdfUploadResponse { session_uri: resp }))
+        Ok(HttpResponse::Ok().finish())
     }
 
     /// Delete a pdf file from the user's pdf library.

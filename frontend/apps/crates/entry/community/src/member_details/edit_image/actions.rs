@@ -1,16 +1,9 @@
 use std::rc::Rc;
 
-use components::image::upload::upload_image;
+use components::image::upload::upload_user_image;
 use dominator::clone;
-use shared::{
-    api::endpoints,
-    domain::image::{
-        user::{UserImageCreatePath, UserImageCreateRequest},
-        ImageId, ImageSize,
-    },
-    media::MediaLibrary,
-};
-use utils::{prelude::ApiEndpointExt, unwrap::UnwrapJiExt};
+use shared::domain::image::{ImageId, ImageSize};
+use utils::unwrap::UnwrapJiExt;
 use web_sys::File;
 
 use super::{EditImage, ImageIfOrFile};
@@ -35,16 +28,7 @@ impl EditImage {
 }
 
 async fn upload_profile_image(file: File) -> Result<ImageId, Box<dyn std::error::Error>> {
-    let req = UserImageCreateRequest {
-        size: ImageSize::UserProfile,
-    };
-
-    let image_id = endpoints::image::user::Create::api_with_auth(UserImageCreatePath(), Some(req))
-        .await
-        .map_err(|_err| "Error creating image in db")?
-        .id;
-
-    upload_image(image_id, MediaLibrary::User, &file, None)
+    let image_id = upload_user_image(ImageSize::UserProfile, &file, None)
         .await
         .map_err(|_err| "Error uploading image")?;
 

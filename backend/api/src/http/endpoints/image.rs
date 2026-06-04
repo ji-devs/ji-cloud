@@ -1,5 +1,5 @@
 use actix_web::{
-    web::{Data, Json, Path, Query, ServiceConfig},
+    web::{Data, Json, Path, Payload, Query, ServiceConfig},
     HttpResponse,
 };
 use chrono::{DateTime, Utc};
@@ -8,7 +8,7 @@ use shared::{
     api::{endpoints, ApiEndpoint, PathParts},
     domain::image::{
         CreateResponse, ImageBrowseResponse, ImageId, ImageMetadata, ImageResponse,
-        ImageSearchResponse, ImageUpdateRequest, ImageUploadResponse,
+        ImageSearchResponse, ImageSize, ImageUpdateRequest,
     },
     error::{ServiceError, ServiceKindError},
     media::{FileKind, MediaLibrary, PngImageFile},
@@ -18,8 +18,8 @@ use sqlx::{postgres::PgDatabaseError, PgPool};
 use crate::{
     db::{self, meta::handle_metadata_err, nul_if_empty},
     error::{self},
-    extractor::{RequestOrigin, ScopeManageImage, TokenUser, TokenUserWithScope},
-    service::{self, s3, ServiceData},
+    extractor::{ScopeManageImage, TokenUser, TokenUserWithScope},
+    service::{s3, upload as upload_service, ServiceData},
 };
 
 pub mod recent;
@@ -68,59 +68,39 @@ async fn create(
 /// Upload an image to the global image library.
 async fn upload(
     db: Data<PgPool>,
-    gcp_key_store: ServiceData<service::GcpAccessKeyStore>,
-    gcs: ServiceData<service::storage::Client>,
+    s3: ServiceData<s3::Client>,
     _claims: TokenUserWithScope<ScopeManageImage>,
     path: Path<ImageId>,
-    origin: RequestOrigin,
-    req: Json<<endpoints::image::Upload as ApiEndpoint>::Req>,
-) -> Result<Json<<endpoints::image::Upload as ApiEndpoint>::Res>, error::Upload> {
+    payload: Payload,
+) -> Result<HttpResponse, error::Upload> {
+    let id = path.into_inner();
     let mut txn = db.begin().await?;
 
-    let id = path.into_inner();
-
-    let exists = sqlx::query!(
-        r#"select exists(select 1 from image_upload where image_id = $1 for no key update) as "exists!""#,
+    let size = sqlx::query!(
+        r#"
+select size as "size: ImageSize"
+from image_metadata
+inner join image_upload on image_metadata.id = image_upload.image_id
+where image_id = $1
+for no key update of image_upload
+for share of image_metadata
+        "#,
         id.0
     )
-    .fetch_one(&mut txn)
-    .await?.exists;
+    .fetch_optional(&mut txn)
+    .await?
+    .map(|it| it.size);
 
-    if !exists {
-        return Err(error::Upload::ResourceNotFound);
-    }
+    let size = size.ok_or(error::Upload::ResourceNotFound)?;
 
-    let upload_content_length = req.into_inner().file_size;
+    let file =
+        super::read_limited_payload(payload, FileKind::ImagePng(PngImageFile::Original)).await?;
 
-    if let Some(file_limit) = gcs.file_size_limit(&FileKind::ImagePng(PngImageFile::Original)) {
-        if file_limit < upload_content_length {
-            return Err(error::Upload::FileTooLarge);
-        }
-    }
-
-    let access_token = gcp_key_store.fetch_token().await?.to_owned();
-
-    let resp = gcs
-        .get_url_for_resumable_upload_for_processing(
-            &access_token,
-            upload_content_length,
-            MediaLibrary::Global,
-            id.0,
-            FileKind::ImagePng(PngImageFile::Original),
-            origin,
-        )
-        .await?;
-
-    sqlx::query!(
-        "update image_upload set uploaded_at = now(), processing_result = null where image_id = $1",
-        id.0
-    )
-    .execute(&mut txn)
-    .await?;
+    upload_service::process_image_bytes(&mut txn, &s3, id.0, size, file).await?;
 
     txn.commit().await?;
 
-    Ok(Json(ImageUploadResponse { session_uri: resp }))
+    Ok(HttpResponse::Ok().finish())
 }
 
 /// Get an image from the global image library.

@@ -947,6 +947,26 @@
     },
     "query": "\ninsert into resource_data_module (resource_data_id, kind, contents, index, is_complete)\nvalues ($1, $2, $3, (select count(*) from resource_data_module where resource_data_id = $1), $4)\nreturning id, stable_id, \"index\"\n"
   },
+  "10994a52fc088ec407cdf33c8115d3213696aa7b4ecdfb63930425af46ca0a35": {
+    "describe": {
+      "columns": [
+        {
+          "name": "size: ImageSize",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nselect size as \"size: ImageSize\"\nfrom image_metadata\ninner join image_upload on image_metadata.id = image_upload.image_id\nwhere image_id = $1\nfor no key update of image_upload\nfor share of image_metadata\n        "
+  },
   "11623dd925dc935401e7c2ef73941a1a46d253df579b98af410e69d1e578850d": {
     "describe": {
       "columns": [],
@@ -1133,18 +1153,6 @@
       }
     },
     "query": "\n        update jig_curation_data\n        set additional_resources = $2\n        where jig_id = $1 and $2 is distinct from additional_resources\n                    "
-  },
-  "145cde06bc00df1855bd4307423b6f6f7f36a4560ed6e354a127f166d0d21011": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update user_audio_upload set uploaded_at = now(), processing_result = null where audio_id = $1"
   },
   "14f012bfa5f6e21f23b17bc3d4a56b40dcffe39be966cd8b6af3aba87631968a": {
     "describe": {
@@ -2073,6 +2081,18 @@
     },
     "query": "\nupdate course_data_unit\nset display_name    = coalesce($3, display_name),\n    description     = coalesce($4, description)\nwhere course_data_id = $1\n  and index = $2\n"
   },
+  "25d7c8f073779b2521585bf469b5d5809549a5d03cca2c08c38edd37b913782d": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "update user_audio_upload set uploaded_at = now(), processed_at = now(), processing_result = true where audio_id = $1"
+  },
   "262b13911165728439f387888fd7af894d88affed22585d8dd8bbd396c7531a4": {
     "describe": {
       "columns": [
@@ -2893,6 +2913,26 @@
     },
     "query": "\n        update resource_curation_data\n        set updated_at = now()\n        where resource_id = $1\n    "
   },
+  "2ec89c17ce62c13d72039dcd9d769f7c9ad977c45e36d91e3117031cba509d78": {
+    "describe": {
+      "columns": [
+        {
+          "name": "size: ImageSize",
+          "ordinal": 0,
+          "type_info": "Int2"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "select size as \"size: ImageSize\" from user_image_library where id = $1"
+  },
   "2ec95b3f7213532d7d6813c840997e1de03f9b9fba6d0f9cec07873630a1fe23": {
     "describe": {
       "columns": [],
@@ -3025,6 +3065,18 @@
       }
     },
     "query": "\nupdate jig_data\nset language         = coalesce($2, language),\n    theme            = coalesce($3, theme),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from language) or\n       ($3::smallint is not null and $3 is distinct from theme))\n"
+  },
+  "349b494decf473417831c920c9464059a02b72132f57ab662396adcb07397c37": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "update image_upload set uploaded_at = now(), processed_at = now(), processing_result = true where image_id = $1"
   },
   "34b1dd32f76952aba5206b08017300b1a6bc63f329481d1fc5858d0a87fad235": {
     "describe": {
@@ -6432,18 +6484,6 @@
     },
     "query": "\ninsert into playlist_data_age_range(playlist_data_id, age_range_id)\nselect $2, age_range_id\nfrom playlist_data_age_range\nwhere playlist_data_id = $1\n        "
   },
-  "6a2fcbea5b62e0a5c0eb65c28769c1b3e70e3376f664d5ad84c864aaef8f0548": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update global_animation_upload set uploaded_at = now(), processing_result = null where animation_id = $1"
-  },
   "6accac3a867ccf3a5c988181e3dadc39c6b5406e8cb47160d60d3d0303382862": {
     "describe": {
       "columns": [
@@ -6916,18 +6956,6 @@
       }
     },
     "query": "select stripe_subscription_id as \"id: StripeSubscriptionId\" from subscription where latest_invoice_id = $1"
-  },
-  "72b024e92b7f83b7e9fbb725e9955b62d22c676d62a8bbe2ce46be9cb163a991": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update image_upload set uploaded_at = now(), processing_result = null where image_id = $1"
   },
   "72e3aca05740c8e1615e5e90644ce5edcf661280ab2b72b5f6af4932618ce5ab": {
     "describe": {
@@ -8884,18 +8912,6 @@
     },
     "query": "\nselect size as \"size: ImageSize\"\nfrom image_metadata\ninner join image_upload on image_metadata.id = image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of image_upload\nfor share of image_metadata\nskip locked\n        "
   },
-  "82fb52aa41cccc3af1b68d0266aa291db61b2b33adf95590022f86ac1a56f7fa": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update user_pdf_upload set uploaded_at = now(), processing_result = null where pdf_id = $1"
-  },
   "8313a67bf42c71861a5f4935f1cd53fda46e3da275e46cdaa266a785595b8cd1": {
     "describe": {
       "columns": [
@@ -10073,6 +10089,18 @@
     },
     "query": "\n        update user_asset_data \n        set course_count = course_count - 1,\n        total_asset_count = total_asset_count - 1\n        from course\n        where author_id = user_id and\n              published_at is not null and \n              id = $1"
   },
+  "950e0bf245b5112575b300e03d603731df659820819b36e95b6dc45a5bd423a3": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "update user_image_upload set uploaded_at = now(), processed_at = now(), processing_result = true where image_id = $1"
+  },
   "9532ae58ce1c2ac56c8ef079148fed881571b9efceb087e4723e2248ef13d82e": {
     "describe": {
       "columns": [
@@ -11148,26 +11176,6 @@
     },
     "query": "\ninsert into resource_curation_comment (resource_id, comment, author_id)\nvalues ($1, $2, $3)\nreturning id as \"id!: CommId\"\n        "
   },
-  "a16036b8f5f8431ae1f10fb2ce15ff302ff8667c9bf5d9a769905a3fad069498": {
-    "describe": {
-      "columns": [
-        {
-          "name": "exists!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "select exists(select 1 from image_upload where image_id = $1 for no key update) as \"exists!\""
-  },
   "a293497e635f9a60d77be04ce0babce3020ea53f4a0e230ba5725914125e9120": {
     "describe": {
       "columns": [
@@ -11514,6 +11522,18 @@
       }
     },
     "query": "\nselect exists(select 1 from user_recent_image where user_id = $1 and image_id = $2) as \"exists!\"\n            "
+  },
+  "a95c325282721238520f0821a1bb21e18862ae861d8566ad72d6ce9495cba316": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "update global_animation_upload set uploaded_at = now(), processed_at = now(), processing_result = true where animation_id = $1"
   },
   "a95c82700ac3e26541f6804f22e6181a393178945fec8c8b4825f771bf0500d4": {
     "describe": {
@@ -15237,18 +15257,6 @@
     },
     "query": "update image_upload set processed_at = now(), processing_result = true where image_id = $1"
   },
-  "e418a5ae9bbbbfa0526d7d90d699ae1e4d2edb798ecf3434a1ed4529770c8faf": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update user_image_upload set uploaded_at = now(), processing_result = null where image_id = $1"
-  },
   "e476295de7bbf205eb11c2a4046c46c9352f30eb4c32bad44714b9053841fd58": {
     "describe": {
       "columns": [],
@@ -17140,6 +17148,18 @@
       }
     },
     "query": "\ninsert into user_auth_basic (user_id, email, password)\nvalues ($1, $2::text, $3)\n"
+  },
+  "fedba4f80f775f4439219539f5728a0d601dfb8b906916c9e804e40f02824f33": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "update user_pdf_upload set uploaded_at = now(), processed_at = now(), processing_result = true where pdf_id = $1"
   },
   "ffd793dbff26e7439ca5605f55003b32eadf58a3fda664b20ab2af33aa832bc2": {
     "describe": {
