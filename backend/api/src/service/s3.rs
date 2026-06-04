@@ -25,6 +25,7 @@ impl Client {
         let credentials = Credentials::new(access_key_id, secret_access_key, None, None, "static");
 
         let config = aws_sdk_s3::config::Builder::new()
+            .behavior_version_latest()
             .region(Region::new("auto"))
             .endpoint_url(endpoint)
             .credentials_provider(credentials)
