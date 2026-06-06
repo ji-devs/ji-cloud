@@ -115,7 +115,7 @@ export class _ extends LitElement {
                 <div class="side-head collapsing-phase">
                     <slot name="side-head"></slot>
                 </div>
-                <div style="position: relative; overflow-y: auto; overlfow-x: hidden;">
+                <div style="position: relative; overflow-y: auto; overflow-x: hidden;">
                 <section class="collapsing-phase">
                     <div class="cover-module collapsing-phase" style="margin-top: ${coverModuleMarginTop}">
                         <slot name="cover-module"></slot>
