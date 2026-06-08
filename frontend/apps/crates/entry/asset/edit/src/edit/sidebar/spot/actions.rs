@@ -12,10 +12,8 @@ use crate::edit::sidebar::{
 use dominator::clone;
 use shared::domain::asset::Asset;
 use shared::domain::module::ModuleKind;
-use std::collections::HashMap;
 use std::rc::Rc;
 use std::str::FromStr;
-use utils::init::analytics;
 use utils::prelude::*;
 
 #[allow(dead_code)] // this should be removed eventually
@@ -131,18 +129,15 @@ pub fn delete(state: Rc<SpotState>) {
 pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
     log::info!("data: {}", data);
     state.sidebar.loader.load(clone!(state => async move {
+        log::info!("spot {:?}", state.spot);
         if state.spot.item.is_none() {
             let spot = if let Ok(kind) = ModuleKind::from_str(&data) {
-                let mut properties = HashMap::new();
-                properties.insert("Activity Kind", data.to_owned());
-                analytics::event("Jig Edit Add Activity", Some(properties));
+                log::info!("is kind {:?}", kind);
 
                 jig_spot_actions::assign_module_to_empty_spot( &state, kind)
                     .await
             } else if let Ok(asset) = serde_json::from_str::<Asset>(&data) {
-                let mut properties = HashMap::new();
-                properties.insert("Activity Kind", format!("Added asset {}", asset.display_name()));
-                analytics::event("Playlist Edit Add Activity", Some(properties));
+                log::info!("is asset {:?}", asset);
 
                 Some(
                     playlist_spot_actions::assign_asset_to_empty_spot(
@@ -164,6 +159,7 @@ pub fn assign_to_empty_spot(state: &Rc<SpotState>, data: String) {
             //     )
             // }
             else {
+                log::info!("is none");
                 None
             };
 
