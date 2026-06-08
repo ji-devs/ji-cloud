@@ -43,7 +43,7 @@ pub fn submit(state: Rc<State>) {
         language_app: String::from("en"),
         language_emails: step_2.language.clone(),
         languages_spoken: vec![step_2.language],
-        timezone: chrono_tz::Tz::Asia__Jerusalem,
+        timezone: chrono_tz::Asia::Jerusalem,
         opt_into_edu_resources: step_2.marketing,
         organization: step_2.organization,
         persona: step_2.persona,

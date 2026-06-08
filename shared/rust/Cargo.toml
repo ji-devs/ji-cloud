@@ -14,8 +14,8 @@ publish = false
 anyhow = "1.0.64"
 base64 = "0.13.0"
 cfg-if = "1.0.0"
-chrono = { version = "0.4.19", features = ["serde"] }
-chrono-tz = { version = "0.6.0", features = ["serde"] }
+chrono = { version = "0.4.45", features = ["serde"] }
+chrono-tz = { version = "0.10.4", features = ["serde"] }
 csv = "1.1.6"
 http = "0.2.5"
 rgb = { version = "0.8.27", features = ["serde"] }

@@ -45,7 +45,7 @@ members = [
 [workspace.dependencies]
 shared = { path = "../../../../shared/rust", features = ["wasm"] }
 components = { path = "../../../../components" }
-chrono = { version = "0.4.19", features = ["wasmbind"] }
+chrono = { version = "0.4.45", features = ["wasmbind", "serde"] }
 thiserror = "1.0.30"
 futures = "0.3.17"
 itertools = "0.10.1"
@@ -94,7 +94,7 @@ lazy_static = "1.4.0"
 wee_alloc = { version = "0.4.5" }
 regex = "1.5.4"
 rand = "0.8.4"
-chrono-tz = { version = "0.6.0", features = ["serde"] }
+chrono-tz = { version = "0.10.4", features = ["serde"] }
 convert_case = "0.6.0"
 zxcvbn = "2.1.2"
 const_format = "0.2.5"

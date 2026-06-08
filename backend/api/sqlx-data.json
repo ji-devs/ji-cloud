@@ -491,32 +491,6 @@
     },
     "query": "insert into user_auth_google (user_id, google_id, unverified_email) values ($1, $2, lower($3::text))"
   },
-  "0db02aca55bd8f7c7ecdf168ac6d80c6a556ebf2efc5cdafe0afee57a49aeff1": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "kind: AnimationKind",
-          "ordinal": 1,
-          "type_info": "Int2"
-        }
-      ],
-      "nullable": [
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect id,  kind as \"kind: AnimationKind\"\nfrom animation_metadata\ninner join global_animation_upload on animation_metadata.id = global_animation_upload.animation_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of global_animation_upload\nfor share of animation_metadata\nskip locked\n"
-  },
   "0e1b634064472c2a561c10537567da0c0972ee53bf78607152231c742a1c3654": {
     "describe": {
       "columns": [],
@@ -4189,18 +4163,6 @@
     },
     "query": "\nupdate jig_data_module\nset contents    = coalesce($3, contents),\n    kind        = coalesce($4, kind),\n    is_complete = coalesce($5, is_complete)\nwhere jig_data_id = $1\n  and index = $2\n"
   },
-  "4783cc4d1b317c1b58f392738ab9399d63ec4926354e35348c91fa13564f016d": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update user_audio_upload set processed_at = now(), processing_result = true where audio_id = $1"
-  },
   "47f87006d700bed96cbf873d8addacbd9c160cf71e5cd0a4543b1fd7754d563d": {
     "describe": {
       "columns": [],
@@ -4473,18 +4435,6 @@
       }
     },
     "query": "\nselect exists(\n        select 1\n        from user_font\n        where user_id = $1\n            and index = $2\n        for update\n) as \"exists!\"\n        "
-  },
-  "4ce0b3cd3acb70b250136f3b5d951fb79e8cfec345f875c95582f5b276cbca72": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update user_audio_upload set processed_at = now(), processing_result = false where audio_id = $1"
   },
   "4d327320e1810b7c419009172dc1137243a3d1d67ec65c614afb0101e374c4fc": {
     "describe": {
@@ -5208,18 +5158,6 @@
       }
     },
     "query": "delete from user_audio_library where id = $1"
-  },
-  "584c1a6c3683272dc4cb0785bdb9ee07ca772df2c04a8ce0cbe406a3d1487016": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update user_pdf_upload set processed_at = now(), processing_result = false where pdf_id = $1"
   },
   "58ed84397822e7790a3c721f37579e8cbe5aa2e6836c533323229873e88e247d": {
     "describe": {
@@ -6713,26 +6651,6 @@
       }
     },
     "query": "select account_id as \"account_id!: AccountId\" from user_account where user_id = $1"
-  },
-  "6cd2ae3f3a7df867e81bc9018b79dd4e1d64f4729ba071f42a70651492b89a8c": {
-    "describe": {
-      "columns": [
-        {
-          "name": "size: ImageSize",
-          "ordinal": 0,
-          "type_info": "Int2"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect size as \"size: ImageSize\"\nfrom user_image_library\ninner join user_image_upload on user_image_library.id = user_image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_image_upload\nfor share of user_image_library\nskip locked\n        "
   },
   "6d0a676d59147de71ebc2ac7104d4eb12413d0d2ffe551119ce34c3b0257c48b": {
     "describe": {
@@ -8880,38 +8798,6 @@
     },
     "query": "\nupdate course_admin_data\nset\n    rating = coalesce($2, rating),\n    blocked = coalesce($3, blocked),\n    curated = coalesce($4, curated),\n    is_premium = coalesce($5, is_premium)\nwhere course_id = $1\n"
   },
-  "81d346d41686f94b2bbb1477d0e7e407d67e12bb2c2cccfb474c536ddd8f0eeb": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update user_image_upload set processed_at = now(), processing_result = false where image_id = $1"
-  },
-  "82d3b6f6a8a0e2efe1185cccb068899bb2a86cd873c3b473318e4c2946de637f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "size: ImageSize",
-          "ordinal": 0,
-          "type_info": "Int2"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect size as \"size: ImageSize\"\nfrom image_metadata\ninner join image_upload on image_metadata.id = image_upload.image_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of image_upload\nfor share of image_metadata\nskip locked\n        "
-  },
   "8313a67bf42c71861a5f4935f1cd53fda46e3da275e46cdaa266a785595b8cd1": {
     "describe": {
       "columns": [
@@ -10683,26 +10569,6 @@
     },
     "query": "\ninsert into jig (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom jig\nwhere id = $1\nreturning id as \"id!: JigId\"\n"
   },
-  "9b861485e86da04aaa69d4863da15659c65606df112805e833c162510b8aad6d": {
-    "describe": {
-      "columns": [
-        {
-          "name": "exists!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect exists(select 1\nfrom user_audio_library\ninner join user_audio_upload on user_audio_library.id = user_audio_upload.audio_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_audio_upload\nfor share of user_audio_library\nskip locked\n) as \"exists!\"\n        "
-  },
   "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
     "describe": {
       "columns": [
@@ -10761,26 +10627,6 @@
       }
     },
     "query": "\n    update resource_curation_data\n    set age_ranges = $2\n    where resource_id = $1 and $2 is distinct from age_ranges\n                "
-  },
-  "9d077a763e28dfcec303320f15227adb9d5786148dbfafe30b79c5b5e8ecc8d8": {
-    "describe": {
-      "columns": [
-        {
-          "name": "exists!",
-          "ordinal": 0,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect exists(select 1\nfrom user_pdf_library\ninner join user_pdf_upload on user_pdf_library.id = user_pdf_upload.pdf_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of user_pdf_upload\nfor share of user_pdf_library\nskip locked\n) as \"exists!\"\n        "
   },
   "9d166e1174a30bbd4c9c87544cf9c8403e5fb1dfc00fb312db75c795436f9ea3": {
     "describe": {
@@ -10999,18 +10845,6 @@
       }
     },
     "query": "\nwith del_data as (\n    delete from playlist_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom playlist\nwhere id is not distinct from $3\n\n"
-  },
-  "9fc35349eacb6647e398e2756c8229e73c6b7fbef00988de47589866241487db": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update image_upload set processed_at = now(), processing_result = false where image_id = $1"
   },
   "a09368031834cc824df617fc4b42aa396c802bcbc5a0d4aac274413e8151c554": {
     "describe": {
@@ -11467,18 +11301,6 @@
       }
     },
     "query": "\nupdate user_color\nset index = index - 1\nwhere index > $2 and user_id = $1\n"
-  },
-  "a88c0449faed385cbc111b4e25068a8dd76a2118de2b5615e6315af23f8ce946": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update global_animation_upload set processed_at = now(), processing_result = false where animation_id = $1"
   },
   "a8fa6e4cd0a54bddeb7aae6e2ab852fb0045ef4fd482cbfd1bf083ad069a4b2f": {
     "describe": {
@@ -12254,18 +12076,6 @@
       }
     },
     "query": "update school set verified = $2 where school_id = $1"
-  },
-  "b4f3858831e1685ac7bf663ebddc340a804437258fce9803fd079c084b38e470": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update global_animation_upload set processed_at = now(), processing_result = true where animation_id = $1"
   },
   "b514fa6df789975af088fb72130c9b5b9bb1da02a5e9dba04e49849682d675a1": {
     "describe": {
@@ -13751,26 +13561,6 @@
     },
     "query": "\ninsert into playlist (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom playlist\nwhere id = $1\nreturning id as \"id!: PlaylistId\"\n"
   },
-  "c877be5757f8787c2da80469a4fc50641fb63358e6516d05c7159d9c8060ac52": {
-    "describe": {
-      "columns": [
-        {
-          "name": "kind: MediaKind",
-          "ordinal": 0,
-          "type_info": "Int2"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "\nselect kind as \"kind: MediaKind\"\nfrom web_media_library\ninner join web_media_upload on web_media_library.id = web_media_upload.media_id\nwhere (id = $1 and uploaded_at is not null and processed_at >= uploaded_at is not true)\nfor no key update of web_media_upload\nfor share of web_media_library\nskip locked\n        "
-  },
   "c8aa7ba73a7d161cdd0aa9f09d98b14aa833756faeefac1ef8d15aa5cd9d3c23": {
     "describe": {
       "columns": [
@@ -15245,18 +15035,6 @@
     },
     "query": "insert into account (account_type) values ($1) returning account_id as \"account_id!: AccountId\""
   },
-  "e3ee149ba3066bd72758e68b8e0437b9a3e3e1dfa3e8b1d940ae002d4b285805": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update image_upload set processed_at = now(), processing_result = true where image_id = $1"
-  },
   "e476295de7bbf205eb11c2a4046c46c9352f30eb4c32bad44714b9053841fd58": {
     "describe": {
       "columns": [],
@@ -15268,18 +15046,6 @@
       }
     },
     "query": "delete from \"user\" where id = $1"
-  },
-  "e57b7c587be57d904c82ee82ea48df2b8e02a38dd1a4c1c7fee015385d66d155": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update user_pdf_upload set processed_at = now(), processing_result = true where pdf_id = $1"
   },
   "e5ce362b6edf11adff2f1261b9b1c92c6bf77ae823f8dd2b58befb23761f0254": {
     "describe": {
@@ -16399,18 +16165,6 @@
       }
     },
     "query": "\nselect exists (\n    select 1 from resource where id = $1\n) as \"authed!\"\n"
-  },
-  "f4d6632fc60abf4351be966b89b2490a3c3aef6f9f59d9ab4ea2eecc68d8cb72": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update user_image_upload set processed_at = now(), processing_result = true where image_id = $1"
   },
   "f55a9526260e5ef3f00f611d56ba13b2636cae8ef21754125cf378f88582333b": {
     "describe": {
