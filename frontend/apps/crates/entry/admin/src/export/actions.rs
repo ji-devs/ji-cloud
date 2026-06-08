@@ -11,7 +11,8 @@ impl Export {
         let datetime = NaiveDateTime::parse_from_str(
             &js_date.to_iso_string().as_string().unwrap_ji(),
             "%Y-%m-%dT%H:%M:%S%Z",
-        ).and_then(|date| Ok(date.and_utc()));
+        )
+        .and_then(|date| Ok(date.and_utc()));
         if let Ok(datetime) = datetime {
             date.set(Some(datetime));
         }
