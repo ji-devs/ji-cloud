@@ -65,18 +65,23 @@ export class _ extends LitElement {
                     margin-top: 7px;
                     transition-property: margin-top;
                     height: 100%;
-                    scrollbar-width: thin;
-                    scrollbar-color: #d3d4dd transparent;
                 }
-                section::-webkit-scrollbar-track {
+                .modules-container {
+                    position: relative;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    scrollbar-width: thin;
+                    scrollbar-color: var(--light-gray-1) transparent;
+                }
+                .modules-container::-webkit-scrollbar-track {
                     background-color: #fff;
                 }
-                section::-webkit-scrollbar {
+                .modules-container::-webkit-scrollbar {
                     width: 6px;
                 }
-                section::-webkit-scrollbar-thumb {
-                    border-radius: 3px;
-                    background-color: #d3d4dd;
+                .modules-container::-webkit-scrollbar-thumb {
+                    border-radius: 4px;
+                    background-color: var(--light-gray-1);
                 }
                 :host([collapsed]) section {
                     margin-top: 100px;
@@ -115,18 +120,18 @@ export class _ extends LitElement {
                 <div class="side-head collapsing-phase">
                     <slot name="side-head"></slot>
                 </div>
-                <div style="position: relative; overflow-y: auto; overflow-x: hidden;">
-                <section class="collapsing-phase">
-                    <div class="cover-module collapsing-phase" style="margin-top: ${coverModuleMarginTop}">
-                        <slot name="cover-module"></slot>
-                    </div>
-                    <div class="modules">
-                        <slot name="modules"></slot>
-                    </div>
-                    <div class="publish">
-                        <slot name="publish"></slot>
-                    </div>
-                </section>
+                <div class="modules-container">
+                    <section class="collapsing-phase">
+                        <div class="cover-module collapsing-phase" style="margin-top: ${coverModuleMarginTop}">
+                            <slot name="cover-module"></slot>
+                        </div>
+                        <div class="modules">
+                            <slot name="modules"></slot>
+                        </div>
+                        <div class="publish">
+                            <slot name="publish"></slot>
+                        </div>
+                    </section>
                 </div>
             </div>
         `;
