@@ -187,9 +187,8 @@ pub async fn delete(pool: &PgPool, jig_id: JigId, id: AdditionalResourceId) -> a
         r#"
 delete
 from jig_data_additional_resource
-where jig_data_id = $1
-   or jig_data_id = $2
-    and id = $3
+where (jig_data_id = $1 or jig_data_id = $2)
+  and id = $3
         "#,
         draft_id,
         live_id,

@@ -191,9 +191,8 @@ pub async fn delete(
         r#"
 delete
 from course_data_resource
-where course_data_id = $1
-   or course_data_id = $2
-    and id = $3
+where (course_data_id = $1 or course_data_id = $2)
+  and id = $3
         "#,
         draft_id,
         live_id,

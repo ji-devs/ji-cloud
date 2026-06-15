@@ -197,9 +197,8 @@ pub async fn delete(
         r#"
 delete
 from playlist_data_resource
-where playlist_data_id = $1
-   or playlist_data_id = $2
-    and id = $3
+where (playlist_data_id = $1 or playlist_data_id = $2)
+  and id = $3
         "#,
         draft_id,
         live_id,
