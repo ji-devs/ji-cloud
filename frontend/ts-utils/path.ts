@@ -14,6 +14,7 @@ const mediaUploads = (path: string): string => `${MEDIA_UPLOADS}/${path}`;
 
 export type MediaLibOptions = "global" | "user" | "web" | "screenshot" | "mock";
 export type MediaSizeOptions = "original" | "full" | "thumb";
+export type MediaKindOptions = "png" | "gif";
 
 const imagePrefix = (lib: MediaLibOptions): string => {
     switch (lib) {
@@ -83,14 +84,20 @@ export const imageLib = ({
     lib,
     size,
     id,
+    kind = "png",
 }: {
     lib: MediaLibOptions;
     size: MediaSizeOptions;
     id: string;
+    kind?: MediaKindOptions;
 }) => {
     const prefix = imagePrefix(lib);
     const suffix = imageSuffix(lib, size);
     const variant = sizeVariant(lib, size);
+
+    if (kind === "gif") {
+        return mediaUploads(`${prefix}/${id}/animation.gif`);
+    }
 
     return lib === "mock"
         ? mediaUi(`${prefix}/${variant}/${id}`)

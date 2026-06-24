@@ -94,10 +94,11 @@ pub(super) async fn delete(
         .map_err(super::check_conflict_delete)?;
 
     let delete = |kind| s3.delete_media(MediaLibrary::User, FileKind::ImagePng(kind), id.0);
-    let ((), (), ()) = futures::future::join3(
+    let ((), (), (), ()) = futures::future::join4(
         delete(PngImageFile::Original),
         delete(PngImageFile::Resized),
         delete(PngImageFile::Thumbnail),
+        s3.delete_media(MediaLibrary::User, FileKind::AnimationGif, id.0),
     )
     .await;
 

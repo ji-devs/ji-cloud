@@ -11,6 +11,7 @@ impl ImageExt for Image {
         html!("img-ji", {
             .prop("id", self.id.0.to_string())
             .prop("lib", self.lib.to_str())
+            .prop("kind", self.kind.to_str())
             .apply_if(slot.is_some(), |dom| {
                 dom.prop("slot", slot.unwrap_ji())
             })

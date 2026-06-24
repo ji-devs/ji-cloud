@@ -266,10 +266,11 @@ async fn delete(
     // todo: 501 when algolia is disabled.
 
     let delete = |kind| s3.delete_media(MediaLibrary::Global, FileKind::ImagePng(kind), image.0);
-    let ((), (), (), ()) = futures::future::join4(
+    let ((), (), (), (), ()) = futures::future::join5(
         delete(PngImageFile::Original),
         delete(PngImageFile::Resized),
         delete(PngImageFile::Thumbnail),
+        s3.delete_media(MediaLibrary::Global, FileKind::AnimationGif, image.0),
         algolia.delete_image(image),
     )
     .await;

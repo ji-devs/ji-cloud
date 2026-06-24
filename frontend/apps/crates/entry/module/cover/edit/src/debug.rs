@@ -74,6 +74,7 @@ impl DebugSettings {
                                     InitSticker::Sprite => Sticker::Sprite(Sprite::new(Image {
                                         id: ImageId(Uuid::parse_str(IMAGE_UUID).unwrap_ji()),
                                         lib: MediaLibrary::Global,
+                                        kind: Default::default(),
                                     })),
                                 })
                                 .collect(),

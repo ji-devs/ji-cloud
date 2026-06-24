@@ -334,6 +334,7 @@ pub fn render<RawData: RawDataExt, E: ExtraExt>(state: Rc<MainCard<RawData, E>>)
                                         .prop("size", "full")
                                         .prop("id", image.id.0.to_string())
                                         .prop("lib", image.lib.to_str())
+                                        .prop("kind", image.kind.to_str())
                                     })
                                 }
                             })

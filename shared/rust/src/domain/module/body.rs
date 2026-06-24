@@ -2,7 +2,10 @@
 
 use super::ModuleKind;
 use crate::{
-    domain::{audio::AudioId, image::ImageId},
+    domain::{
+        audio::AudioId,
+        image::{ImageFileKind, ImageId},
+    },
     media::MediaLibrary,
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -526,6 +529,9 @@ pub struct Image {
     pub id: ImageId,
     /// The MediaLibrary
     pub lib: MediaLibrary,
+    /// The stored file kind. Defaults to PNG for older module data.
+    #[serde(default)]
+    pub kind: ImageFileKind,
 }
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug, PartialEq)]

@@ -1,5 +1,5 @@
 import { LitElement, html, css, customElement, property } from "lit-element";
-import { imageLib, MediaLibOptions, MediaSizeOptions } from "@utils/path";
+import { imageLib, MediaKindOptions, MediaLibOptions, MediaSizeOptions } from "@utils/path";
 import { sameOrigin } from "@utils/image";
 import { nothing } from "lit-html";
 
@@ -76,6 +76,9 @@ export class _ extends LitElement {
     @property({ type: Boolean })
     premium: boolean = false;
 
+    @property()
+    kind: MediaKindOptions = "png";
+
     firstUpdated() {
         this.style.setProperty('--border-radius', this.borderRadius);
     }
@@ -83,6 +86,9 @@ export class _ extends LitElement {
     updated(changedProperties: Map<string | number | symbol, unknown>) {
         if (changedProperties.has('borderRadius')) {
             this.style.setProperty('--border-radius', this.borderRadius);
+        }
+        if (changedProperties.has('id') || changedProperties.has('lib') || changedProperties.has('size') || changedProperties.has('kind')) {
+            this.fallbackVisible = false;
         }
     }
 
@@ -112,9 +118,9 @@ export class _ extends LitElement {
     }
 
     render_image() {
-        const { lib, size, id, fallbackVisible, cacheBust, draggable } = this;
+        const { lib, size, id, kind, fallbackVisible, cacheBust, draggable } = this;
 
-        let src = imageLib({ lib, size, id });
+        let src = imageLib({ lib, size, id, kind });
 
         if (cacheBust) {
             src += `?cb=${Date.now()}`;

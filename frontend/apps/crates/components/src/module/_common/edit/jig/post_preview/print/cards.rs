@@ -10,7 +10,7 @@ use shared::{
     },
     media::PngImageFile,
 };
-use utils::{path::image_lib_url, themes::ThemeIdExt, unwrap::UnwrapJiExt};
+use utils::{path::module_image_url, themes::ThemeIdExt, unwrap::UnwrapJiExt};
 use wasm_bindgen::JsValue;
 
 pub fn print<RawData, Mode, Step>(raw_data: &RawData) -> anyhow::Result<()>
@@ -114,7 +114,9 @@ fn get_attributes_for_card_elements(card: &CardContent, attr_postfix: &str) -> S
         CardContent::Image(image) => {
             let url = image
                 .as_ref()
-                .map(|image| image_lib_url(image.lib, PngImageFile::Resized, image.id))
+                .map(|image| {
+                    module_image_url(image.lib, image.kind, PngImageFile::Resized, image.id)
+                })
                 .unwrap_or_default();
             format!("card{attr_postfix}='{url}' kind{attr_postfix}='image'")
         }

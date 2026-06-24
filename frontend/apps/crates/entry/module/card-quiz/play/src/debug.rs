@@ -68,6 +68,7 @@ impl DebugSettings {
                                                         Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
                                                     ),
                                                     lib: MediaLibrary::User,
+                                                    kind: Default::default(),
                                                 })),
                                             },
                                         ),
@@ -79,6 +80,7 @@ impl DebugSettings {
                                                         Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
                                                     ),
                                                     lib: MediaLibrary::User,
+                                                    kind: Default::default(),
                                                 })),
                                             },
                                             RawCard {
@@ -88,6 +90,7 @@ impl DebugSettings {
                                                         Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
                                                     ),
                                                     lib: MediaLibrary::User,
+                                                    kind: Default::default(),
                                                 })),
                                             },
                                         ),

@@ -155,6 +155,7 @@ impl ImageSearch {
             .prop("size", "thumb")
             .prop("lib", image.lib.to_str())
             .prop("id", image.id.0.to_string())
+            .prop("kind", image.kind.to_str())
             .prop("premium", image.is_premium)
             .event(clone!(state, image => move |_: events::Click| {
                 if !paywall::can_use_image(image.is_premium) {

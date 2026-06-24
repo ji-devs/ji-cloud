@@ -59,6 +59,33 @@ impl ImageSize {
     }
 }
 
+/// Stored file kind for module images.
+#[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum ImageFileKind {
+    /// PNG image variants.
+    Png,
+    /// Animated GIF file.
+    Gif,
+}
+
+impl Default for ImageFileKind {
+    fn default() -> Self {
+        Self::Png
+    }
+}
+
+impl ImageFileKind {
+    /// Returns the string used by frontend element properties.
+    #[must_use]
+    pub const fn to_str(self) -> &'static str {
+        match self {
+            Self::Png => "png",
+            Self::Gif => "gif",
+        }
+    }
+}
+
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a image.
     ///

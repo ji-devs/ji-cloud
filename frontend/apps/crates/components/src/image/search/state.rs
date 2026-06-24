@@ -6,7 +6,7 @@ use dominator::clone;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use futures_signals::signal_vec::MutableVec;
-use shared::domain::image::ImageId;
+use shared::domain::image::{ImageFileKind, ImageId};
 use shared::domain::meta::ImageStyle;
 use shared::domain::search::{ImageType, WebImageSearchItem};
 use shared::domain::user::UserProfile;
@@ -122,6 +122,7 @@ impl ImageSearchKind {
 pub struct PremiumableImage {
     pub id: ImageId,
     pub lib: MediaLibrary,
+    pub kind: ImageFileKind,
     pub is_premium: bool,
 }
 impl From<PremiumableImage> for Image {
@@ -129,6 +130,7 @@ impl From<PremiumableImage> for Image {
         Image {
             id: image.id,
             lib: image.lib,
+            kind: image.kind,
         }
     }
 }
@@ -137,6 +139,7 @@ impl PremiumableImage {
         PremiumableImage {
             id: image.id,
             lib: image.lib,
+            kind: image.kind,
             is_premium: false,
         }
     }

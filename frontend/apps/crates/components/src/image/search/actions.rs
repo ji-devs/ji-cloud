@@ -9,12 +9,11 @@ use futures_signals::signal_vec::MutableVec;
 use shared::api::endpoints::image;
 use shared::domain::image::recent::{UserRecentImageListPath, UserRecentImageUpsertPath};
 use shared::domain::image::recent::{UserRecentImageListRequest, UserRecentImageUpsertRequest};
-use shared::domain::image::{ImageId, ImageSearchPath};
+use shared::domain::image::{ImageFileKind, ImageId, ImageSearchPath};
 use shared::domain::media::{MediaCreatePath, WebMediaUrlCreateRequest};
 use shared::domain::meta::{GetMetadataPath, ImageTagIndex};
 use shared::domain::search::{WebImageSearchPath, WebImageSearchQuery};
 use shared::domain::user::GetProfilePath;
-use shared::media::MediaKind;
 use shared::{
     api::endpoints,
     domain::{
@@ -24,6 +23,7 @@ use shared::{
     },
     media::MediaLibrary,
 };
+use shared::{domain::animation::AnimationKind, media::MediaKind};
 use std::rc::Rc;
 use url::Url;
 use utils::prelude::*;
@@ -36,13 +36,16 @@ pub async fn web_to_image(url: Url) -> Result<Image, ()> {
         .await
         .map_err(|_| ())?;
 
-    if !matches!(res.kind, MediaKind::Image) {
-        unreachable!("Only images here but found: {:?}", res.kind);
-    }
+    let kind = match res.kind {
+        MediaKind::Image => ImageFileKind::Png,
+        MediaKind::Animation(AnimationKind::Gif) => ImageFileKind::Gif,
+        kind => unreachable!("Only images here but found: {:?}", kind),
+    };
 
     Ok(Image {
         id: ImageId(res.id),
         lib: MediaLibrary::Web,
+        kind,
     })
 }
 
@@ -206,6 +209,7 @@ impl ImageSearch {
                     .map(|i| PremiumableImage {
                         id: i.metadata.id,
                         lib: MediaLibrary::Global,
+                        kind: ImageFileKind::Png,
                         is_premium: i.metadata.is_premium,
                     })
                     .collect();
@@ -268,6 +272,7 @@ impl ImageSearch {
                         .map(|i| Image {
                             id: i.id,
                             lib: i.library,
+                            kind: ImageFileKind::Png,
                         })
                         .collect(),
                 );
@@ -302,9 +307,16 @@ impl ImageSearch {
     pub async fn upload_file(self: &Rc<Self>, file: File) {
         match upload_user_image(ImageSize::Sticker, &file, None).await {
             Ok(id) => {
+                let kind = if file.type_() == "image/gif" {
+                    ImageFileKind::Gif
+                } else {
+                    ImageFileKind::Png
+                };
+
                 self.set_selected(Image {
                     id,
                     lib: MediaLibrary::User,
+                    kind,
                 });
             }
             Err(err) => {

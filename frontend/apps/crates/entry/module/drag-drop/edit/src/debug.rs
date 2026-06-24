@@ -113,6 +113,7 @@ impl DebugSettings {
                                                         Uuid::parse_str(IMAGE_UUID).unwrap_ji(),
                                                     ),
                                                     lib: MediaLibrary::Global,
+                                                    kind: Default::default(),
                                                 });
 
                                                 sprite.transform.set_scale_2d(0.3, 0.3);

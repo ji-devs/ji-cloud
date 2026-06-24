@@ -1,7 +1,10 @@
 use super::init::settings::SETTINGS;
 use shared::{
     domain::audio::AudioId,
-    domain::{image::ImageId, pdf::PdfId},
+    domain::{
+        image::{ImageFileKind, ImageId},
+        pdf::PdfId,
+    },
     media::{media_key, FileKind, MediaLibrary, PngImageFile},
 };
 
@@ -35,6 +38,20 @@ pub fn audio_lib_url(library_kind: MediaLibrary, id: AudioId) -> String {
 
 pub fn image_lib_url(library_kind: MediaLibrary, img_kind: PngImageFile, id: ImageId) -> String {
     let path = media_key(library_kind, id.0, FileKind::ImagePng(img_kind));
+
+    uploads_url(&path)
+}
+
+pub fn module_image_url(
+    library_kind: MediaLibrary,
+    file_kind: ImageFileKind,
+    img_kind: PngImageFile,
+    id: ImageId,
+) -> String {
+    let path = match file_kind {
+        ImageFileKind::Png => media_key(library_kind, id.0, FileKind::ImagePng(img_kind)),
+        ImageFileKind::Gif => media_key(library_kind, id.0, FileKind::AnimationGif),
+    };
 
     uploads_url(&path)
 }
