@@ -66,9 +66,9 @@ impl ImageSize {
 #[repr(i16)]
 pub enum ImageFileKind {
     /// PNG image variants.
-    Png,
+    Png = 0,
     /// Animated GIF file.
-    Gif,
+    Gif = 1,
 }
 
 impl Default for ImageFileKind {
