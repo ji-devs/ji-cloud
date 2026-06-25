@@ -43,7 +43,7 @@ ON CONFLICT (user_id, image_id) DO UPDATE
     media_library = $3,
     kind = $4,
     last_used = now()
-returning image_id as "id: ImageId", media_library as "library: MediaLibrary", coalesce(kind, 0) as "kind!: ImageFileKind", last_used as "last_used: DateTime<Utc>";
+returning image_id as "id: ImageId", media_library as "library: MediaLibrary", kind as "kind: ImageFileKind", last_used as "last_used: DateTime<Utc>";
         "#,
         user_id.0,
         image_id.0,
@@ -83,7 +83,7 @@ pub async fn list(
     sqlx::query_as!(
             UserRecentImageResponse,
             r#"
-select image_id as "id: ImageId", media_library as "library: MediaLibrary", coalesce(kind, 0) as "kind!: ImageFileKind", last_used as "last_used: DateTime<Utc>"
+select image_id as "id: ImageId", media_library as "library: MediaLibrary", kind as "kind: ImageFileKind", last_used as "last_used: DateTime<Utc>"
 from user_recent_image
 where user_id = $1
 order by last_used desc

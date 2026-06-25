@@ -3827,47 +3827,6 @@
     },
     "query": "\nselect jdm.id          as \"id!: ModuleId\",\n       stable_id   as \"stable_id!: StableModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom resource_data_module \"jdm\"\ninner join resource on resource.draft_id = jdm.resource_data_id \nwhere jdm.id is not distinct from $1 \n"
   },
-  "3e102b1c36c8bc131d079606a88b0d7923f3de97bc011d3e75d1f1bf17ee9e0f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: ImageId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "library: MediaLibrary",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "kind!: ImageFileKind",
-          "ordinal": 2,
-          "type_info": "Int4"
-        },
-        {
-          "name": "last_used: DateTime<Utc>",
-          "ordinal": 3,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        null,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Int2",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\ninsert into user_recent_image (user_id, image_id, media_library, kind)\nvalues ($1, $2, $3, $4)\nON CONFLICT (user_id, image_id) DO UPDATE\n  SET user_id = $1,\n    image_id = $2,\n    media_library = $3,\n    kind = $4,\n    last_used = now()\nreturning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", coalesce(kind, 0) as \"kind!: ImageFileKind\", last_used as \"last_used: DateTime<Utc>\";\n        "
-  },
   "3e91ed53fd55db783c7fa9d57a9a8c8f06a41f40d9218a274bdb7a2c04c1e63e": {
     "describe": {
       "columns": [
@@ -9952,45 +9911,6 @@
     },
     "query": "\n        with cte as (\n            select array_agg(resource.id)\n            from resource\n                  inner join resource_data \"rd\" on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n                  left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n                  left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n            where (rd.draft_or_live = $1 or $1 is null)\n                and (author_id = $2 or $2 is null)\n                and (blocked = $3 or $3 is null)\n                and (rd.privacy_level = any($4) or $4 = array[]::smallint[])\n                and (rdr.resource_type_id = any($5) or $5 = array[]::uuid[])\n            group by updated_at, created_at, resource.published_at, admin.resource_id, resource_id\n        )\n            select count(*) as \"count!\" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord)\n        "
   },
-  "93b1148c8aef0cc0d4204516eb41da7244f88d40124875df6132eca7456a67c5": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: ImageId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "library: MediaLibrary",
-          "ordinal": 1,
-          "type_info": "Int2"
-        },
-        {
-          "name": "kind!: ImageFileKind",
-          "ordinal": 2,
-          "type_info": "Int4"
-        },
-        {
-          "name": "last_used: DateTime<Utc>",
-          "ordinal": 3,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        null,
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int8"
-        ]
-      }
-    },
-    "query": "\nselect image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", coalesce(kind, 0) as \"kind!: ImageFileKind\", last_used as \"last_used: DateTime<Utc>\"\nfrom user_recent_image\nwhere user_id = $1\norder by last_used desc\nlimit $2\n            "
-  },
   "943425e13636b972656a1c40172ae281420bdd0c840c0bac045bc1b1cdbc6957": {
     "describe": {
       "columns": [],
@@ -12022,6 +11942,47 @@
       }
     },
     "query": "\nupdate jig_data_module\nset index = index - 1\nwhere jig_data_id = $1\n  and index > $2\n"
+  },
+  "b2b563d8b0694b36be39ca601cff100c89b9e3dfa359e2f38dfa9f64db54be6d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: ImageId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "library: MediaLibrary",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "kind: ImageFileKind",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "last_used: DateTime<Utc>",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\ninsert into user_recent_image (user_id, image_id, media_library, kind)\nvalues ($1, $2, $3, $4)\nON CONFLICT (user_id, image_id) DO UPDATE\n  SET user_id = $1,\n    image_id = $2,\n    media_library = $3,\n    kind = $4,\n    last_used = now()\nreturning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", kind as \"kind: ImageFileKind\", last_used as \"last_used: DateTime<Utc>\";\n        "
   },
   "b2e961ba417e00528f9f4a6798dbf5b7a19d6f0fd1127ee6fb86d12a57dba2a5": {
     "describe": {
@@ -14240,6 +14201,45 @@
       }
     },
     "query": "with recursive links as\n(\n    select id,\n    parent_id\n    from category co\n    where id = any ($1::uuid[])\n    union all\n    select co.id,\n    co.parent_id\n    from category co\n    inner join links ct on (ct.parent_id = co.id)\n)\n\nselect\n    distinct id,\n    category.parent_id,\n    name,\n    category.index,\n    created_at,\n    updated_at,\n    user_scopes\nfrom category\ninner join links using (id);\n"
+  },
+  "cd07f1949801723063226fc3963e96571003de7cf67c6eb5b40fbc54295e8d28": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: ImageId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "library: MediaLibrary",
+          "ordinal": 1,
+          "type_info": "Int2"
+        },
+        {
+          "name": "kind: ImageFileKind",
+          "ordinal": 2,
+          "type_info": "Int2"
+        },
+        {
+          "name": "last_used: DateTime<Utc>",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\nselect image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", kind as \"kind: ImageFileKind\", last_used as \"last_used: DateTime<Utc>\"\nfrom user_recent_image\nwhere user_id = $1\norder by last_used desc\nlimit $2\n            "
   },
   "cd49cef54182b43dd7943bcd51fd3c535f4a8ec0dae95cbc8ceb39f7f757fe02": {
     "describe": {
