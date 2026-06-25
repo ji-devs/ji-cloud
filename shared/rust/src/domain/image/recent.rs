@@ -1,7 +1,7 @@
 //! Types for a user's recent images list. Can be from any ['MediaLibrary'](crate::media::MediaLibrary).
 //! Does not verify entries for validity/existence.
 
-use super::ImageId;
+use super::{ImageFileKind, ImageId};
 use crate::api::endpoints::PathPart;
 use crate::media::MediaLibrary;
 use chrono::{DateTime, Utc};
@@ -20,6 +20,10 @@ pub struct UserRecentImageResponse {
     /// The library that the image belongs to.
     pub library: MediaLibrary,
 
+    /// The stored file kind.
+    #[serde(default)]
+    pub kind: ImageFileKind,
+
     /// When the image was last used.
     pub last_used: DateTime<Utc>,
 }
@@ -35,6 +39,10 @@ pub struct UserRecentImageUpsertRequest {
 
     /// The library that the image belongs to.
     pub library: MediaLibrary,
+
+    /// The stored file kind.
+    #[serde(default)]
+    pub kind: ImageFileKind,
 }
 
 /// Query to list a user's recent images,

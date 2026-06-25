@@ -272,7 +272,7 @@ impl ImageSearch {
                         .map(|i| Image {
                             id: i.id,
                             lib: i.library,
-                            kind: ImageFileKind::Png,
+                            kind: i.kind,
                         })
                         .collect(),
                 );
@@ -298,6 +298,7 @@ impl ImageSearch {
         let req = UserRecentImageUpsertRequest {
             id: image.id,
             library: image.lib,
+            kind: image.kind,
         };
         self.loader.load(async {
             let _ = image::recent::Put::api_with_auth(UserRecentImageUpsertPath(), Some(req)).await;

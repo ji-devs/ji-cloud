@@ -9,7 +9,7 @@ use shared::{
     api::{endpoints::image::recent, ApiEndpoint},
     domain::image::{
         recent::{UserRecentImageListResponse, UserRecentImageResponse},
-        ImageId,
+        ImageFileKind, ImageId,
     },
     media::MediaLibrary,
 };
@@ -21,8 +21,14 @@ pub(in super::super) async fn put(
     req: Json<<recent::Put as ApiEndpoint>::Req>,
 ) -> Result<HttpResponse, error::UserRecentImage> {
     // TODO: new: return created; updated: return Ok
-    let (id, library, last_used, is_updated): (ImageId, MediaLibrary, DateTime<Utc>, bool) =
-        db::image::recent::upsert(db.as_ref(), claims.0.user_id, req.id, req.library).await?;
+    let (id, library, kind, last_used, is_updated): (
+        ImageId,
+        MediaLibrary,
+        ImageFileKind,
+        DateTime<Utc>,
+        bool,
+    ) = db::image::recent::upsert(db.as_ref(), claims.0.user_id, req.id, req.library, req.kind)
+        .await?;
 
     let status_code = if is_updated == true {
         StatusCode::OK
@@ -34,6 +40,7 @@ pub(in super::super) async fn put(
         HttpResponse::build(status_code).json(UserRecentImageResponse {
             id,
             library,
+            kind,
             last_used,
         }),
     )

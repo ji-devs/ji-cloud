@@ -61,7 +61,9 @@ impl ImageSize {
 
 /// Stored file kind for module images.
 #[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[serde(rename_all = "camelCase")]
+#[repr(i16)]
 pub enum ImageFileKind {
     /// PNG image variants.
     Png,

@@ -2,7 +2,7 @@ use crate::error;
 use chrono::{DateTime, Utc};
 use shared::{
     domain::{
-        image::{recent::UserRecentImageResponse, ImageId},
+        image::{recent::UserRecentImageResponse, ImageFileKind, ImageId},
         user::UserId,
     },
     media::MediaLibrary,
@@ -14,7 +14,11 @@ pub async fn upsert(
     user_id: UserId,
     image_id: ImageId,
     library: MediaLibrary,
-) -> anyhow::Result<(ImageId, MediaLibrary, DateTime<Utc>, bool), error::UserRecentImage> {
+    kind: ImageFileKind,
+) -> anyhow::Result<
+    (ImageId, MediaLibrary, ImageFileKind, DateTime<Utc>, bool),
+    error::UserRecentImage,
+> {
     let mut txn = db.begin().await?;
 
     let exists = sqlx::query!(
@@ -29,27 +33,29 @@ select exists(select 1 from user_recent_image where user_id = $1 and image_id = 
     .exists;
 
     let res = sqlx::query!(
-            // language=SQL
+        // language=SQL
         r#"
-insert into user_recent_image (user_id, image_id, media_library)
-values ($1, $2, $3)
+insert into user_recent_image (user_id, image_id, media_library, kind)
+values ($1, $2, $3, $4)
 ON CONFLICT (user_id, image_id) DO UPDATE
   SET user_id = $1,
     image_id = $2,
     media_library = $3,
+    kind = $4,
     last_used = now()
-returning image_id as "id: ImageId", media_library as "library: MediaLibrary", last_used as "last_used: DateTime<Utc>";
+returning image_id as "id: ImageId", media_library as "library: MediaLibrary", coalesce(kind, 0) as "kind!: ImageFileKind", last_used as "last_used: DateTime<Utc>";
         "#,
         user_id.0,
         image_id.0,
         library as i16,
+        kind as i16,
     )
     .fetch_one(&mut txn)
     .await?;
 
     txn.commit().await?;
 
-    return Ok((res.id, res.library, res.last_used, exists));
+    return Ok((res.id, res.library, res.kind, res.last_used, exists));
 }
 
 pub async fn delete(db: &PgPool, user_id: UserId, image_id: ImageId) -> sqlx::Result<()> {
@@ -77,7 +83,7 @@ pub async fn list(
     sqlx::query_as!(
             UserRecentImageResponse,
             r#"
-select image_id as "id: ImageId", media_library as "library: MediaLibrary", last_used as "last_used: DateTime<Utc>"
+select image_id as "id: ImageId", media_library as "library: MediaLibrary", coalesce(kind, 0) as "kind!: ImageFileKind", last_used as "last_used: DateTime<Utc>"
 from user_recent_image
 where user_id = $1
 order by last_used desc
