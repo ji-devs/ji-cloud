@@ -92,6 +92,7 @@ impl ImageMetaPage {
                                 html!("img-ji", {
                                     .prop("slot", "image")
                                     .prop("size", "thumb")
+                                    .style("width", "100%")
                                     .prop("cacheBust", true)
                                     .prop_signal("id", image.id.signal_cloned().map(|id| {
                                         id.0.to_string()
