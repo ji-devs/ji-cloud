@@ -26,6 +26,12 @@ pub fn on_change(state: Rc<State>, value: String) {
 
 pub fn on_file(state: Rc<State>, file: File) {
     state.loader.load(clone!(state => async move {
+        let size = *state.size.borrow();
+        if file.type_() == "image/gif" && size != ImageSize::Sticker {
+            log::error!("GIF uploads are only supported for sticker images");
+            return;
+        }
+
         let meta_resp = endpoints::meta::Get::api_no_auth(GetMetadataPath(), None).await.expect_ji("couldn't get meta response!");
 
         let affiliations = meta_resp.affiliations
@@ -48,7 +54,7 @@ pub fn on_file(state: Rc<State>, file: File) {
             age_ranges,
             affiliations,
             categories: Vec::new(),
-            size: *state.size.borrow()
+            size,
         };
 
         match endpoints::image::Create::api_with_auth(ImageCreatePath(), Some(req)).await {

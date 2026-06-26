@@ -2,7 +2,7 @@ use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use shared::domain::{
     category::CategoryId,
-    image::{ImageId, ImageMetadata},
+    image::{ImageFileKind, ImageId, ImageMetadata},
     meta::{AffiliationId, AgeRangeId, ImageStyleId},
 };
 use std::cell::RefCell;
@@ -73,6 +73,7 @@ pub struct MutableImage {
     pub name: Mutable<String>,
     pub description: Mutable<String>,
     pub is_premium: Mutable<bool>,
+    pub kind: Mutable<ImageFileKind>,
     pub styles: Mutable<HashSet<ImageStyleId>>,
     pub age_ranges: Mutable<HashSet<AgeRangeId>>,
     pub affiliations: Mutable<HashSet<AffiliationId>>,
@@ -90,6 +91,7 @@ impl From<ImageMetadata> for MutableImage {
             name: Mutable::new(image.name),
             description: Mutable::new(image.description),
             is_premium: Mutable::new(image.is_premium),
+            kind: Mutable::new(image.kind),
             styles: {
                 let mut styles = HashSet::with_capacity(image.styles.len());
                 for id in image.styles.into_iter() {

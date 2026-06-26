@@ -89,9 +89,19 @@ pub fn save(state: Rc<State>, req: ImageUpdateRequest) {
 
 pub fn on_file(state: Rc<State>, image: Rc<MutableImage>, file: File) {
     state.loader.load(clone!(state => async move {
+        if file.type_() == "image/gif" && image.orig.size != ImageSize::Sticker {
+            log::error!("GIF uploads are only supported for sticker images");
+            return;
+        }
 
         match upload_image(state.id, MediaLibrary::Global, &file, None).await {
             Ok(_) => {
+                let kind = if file.type_() == "image/gif" {
+                    ImageFileKind::Gif
+                } else {
+                    ImageFileKind::Png
+                };
+                image.kind.set(kind);
                 //Trigger a re-render.
                 //To debug: this shouldn't be necessary, but it temp fixes!
                 //TimeoutFuture::new(5_000).await;

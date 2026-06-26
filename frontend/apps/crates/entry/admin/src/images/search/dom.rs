@@ -64,6 +64,7 @@ impl ImageSearchPage {
                                 .prop("size", "thumb")
                                 .prop("cacheBust", true)
                                 .prop("id", id.0.to_string())
+                                .prop("kind", image.kind.to_str())
                             }))
                         }))
                     })

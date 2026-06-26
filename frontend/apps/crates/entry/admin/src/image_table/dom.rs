@@ -157,6 +157,7 @@ impl Component<ImageTable> for Rc<ImageTable> {
                                 .prop("size", "thumb")
                                 .prop("lib", MediaLibrary::Global.to_str())
                                 .prop("id", image.id.0.to_string())
+                                .prop_signal("kind", image.kind.signal().map(|kind| kind.to_str()))
                             }))
                         }),
                         html!("a", {

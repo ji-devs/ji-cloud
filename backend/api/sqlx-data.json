@@ -3082,18 +3082,6 @@
     },
     "query": "\nupdate jig_data\nset language         = coalesce($2, language),\n    theme            = coalesce($3, theme),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from language) or\n       ($3::smallint is not null and $3 is distinct from theme))\n"
   },
-  "349b494decf473417831c920c9464059a02b72132f57ab662396adcb07397c37": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update image_upload set uploaded_at = now(), processed_at = now(), processing_result = true where image_id = $1"
-  },
   "34b1dd32f76952aba5206b08017300b1a6bc63f329481d1fc5858d0a87fad235": {
     "describe": {
       "columns": [],
@@ -6877,6 +6865,19 @@
     },
     "query": "\ninsert into course_data_resource (course_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from course where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        "
   },
+  "72ee6a1bfcc8c4362ace7771889692683ece77f53a6983d44f9633cc37c59422": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "update image_upload set uploaded_at = now(), processed_at = now(), processing_result = true, kind = $2 where image_id = $1"
+  },
   "72ee7abfcc353425096ee87d60c13de39e3828a5bb19cae20cdfc654c0b8b9b8": {
     "describe": {
       "columns": [
@@ -9936,18 +9937,6 @@
     },
     "query": "\n        update user_asset_data \n        set course_count = course_count - 1,\n        total_asset_count = total_asset_count - 1\n        from course\n        where author_id = user_id and\n              published_at is not null and \n              id = $1"
   },
-  "950e0bf245b5112575b300e03d603731df659820819b36e95b6dc45a5bd423a3": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      }
-    },
-    "query": "update user_image_upload set uploaded_at = now(), processed_at = now(), processing_result = true where image_id = $1"
-  },
   "9532ae58ce1c2ac56c8ef079148fed881571b9efceb087e4723e2248ef13d82e": {
     "describe": {
       "columns": [
@@ -10303,6 +10292,19 @@
       }
     },
     "query": "\ndelete from jig_data where id = $1\n    "
+  },
+  "97770fd381210f966de99c51afa45ea6fb1749068e85538c7df516c7880375af": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2"
+        ]
+      }
+    },
+    "query": "update user_image_upload set uploaded_at = now(), processed_at = now(), processing_result = true, kind = $2 where image_id = $1"
   },
   "986130a83ea19f3782aa5e5c1c0a0a260c515e4aad15cc17d63aba20db572b2f": {
     "describe": {

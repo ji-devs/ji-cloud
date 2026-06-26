@@ -96,6 +96,7 @@ impl ImageMetaPage {
                                     .prop_signal("id", image.id.signal_cloned().map(|id| {
                                         id.0.to_string()
                                     }))
+                                    .prop_signal("kind", image.kind.signal().map(|kind| kind.to_str()))
                                 }),
                                 html!("button-rect", {
                                     .prop("slot", "replace")

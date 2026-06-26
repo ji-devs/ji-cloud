@@ -162,6 +162,7 @@ r#"
 select id,
        name,
        size,
+       image_upload.kind,
        description,
        translated_description,
        is_premium,
@@ -195,6 +196,7 @@ pub fn list(
 r#"
 select id,
        size,
+       image_upload.kind,
        name,
        description,
        translated_description,
@@ -248,6 +250,7 @@ pub fn get<'a>(db: &'a PgPool, ids: &'a [Uuid]) -> BoxStream<'a, sqlx::Result<Im
 r#"
 select id,
        size,
+       image_upload.kind,
        name,
        description,
        translated_description,

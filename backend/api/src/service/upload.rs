@@ -1,5 +1,8 @@
 use shared::{
-    domain::{animation::AnimationKind, image::ImageSize},
+    domain::{
+        animation::AnimationKind,
+        image::{ImageFileKind, ImageSize},
+    },
     media::{FileKind, MediaLibrary},
 };
 use sqlx::{Postgres, Transaction};
@@ -27,6 +30,10 @@ pub async fn process_image_bytes(
         kind.to_shared(),
         shared::media::MediaKind::Animation(AnimationKind::Gif)
     ) {
+        if size != ImageSize::Sticker {
+            return Err(error::Upload::InvalidMedia);
+        }
+
         process_uploaded_gif(
             txn,
             s3,
@@ -52,8 +59,9 @@ pub async fn process_image_bytes(
         .await?;
 
     sqlx::query!(
-        "update image_upload set uploaded_at = now(), processed_at = now(), processing_result = true where image_id = $1",
-        id
+        "update image_upload set uploaded_at = now(), processed_at = now(), processing_result = true, kind = $2 where image_id = $1",
+        id,
+        ImageFileKind::Png as i16,
     )
     .execute(&mut *txn)
     .await?;
@@ -104,8 +112,9 @@ pub async fn process_user_image_bytes(
         .await?;
 
     sqlx::query!(
-        "update user_image_upload set uploaded_at = now(), processed_at = now(), processing_result = true where image_id = $1",
-        id
+        "update user_image_upload set uploaded_at = now(), processed_at = now(), processing_result = true, kind = $2 where image_id = $1",
+        id,
+        ImageFileKind::Png as i16,
     )
     .execute(&mut *txn)
     .await?;
@@ -128,9 +137,13 @@ async fn process_uploaded_gif(
         .await?;
 
     let query = format!(
-        "update {table} set uploaded_at = now(), processed_at = now(), processing_result = true where {id_column} = $1"
+        "update {table} set uploaded_at = now(), processed_at = now(), processing_result = true, kind = $2 where {id_column} = $1"
     );
-    sqlx::query(&query).bind(id).execute(&mut *txn).await?;
+    sqlx::query(&query)
+        .bind(id)
+        .bind(ImageFileKind::Gif as i16)
+        .execute(&mut *txn)
+        .await?;
 
     Ok(())
 }

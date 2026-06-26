@@ -21,7 +21,7 @@ use std::collections::HashMap;
 make_path_parts!(ImageGetPath => "/v1/image/{}" => ImageId);
 
 /// Represents different sizes of images
-#[derive(Serialize, Deserialize, Copy, Clone, Debug)]
+#[derive(Serialize, Deserialize, Copy, Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "backend", derive(sqlx::Type))]
 #[repr(i16)]
 pub enum ImageSize {
@@ -389,6 +389,9 @@ pub struct ImageMetadata {
     /// What size of image this is.
     pub size: ImageSize,
 
+    /// The stored file kind.
+    pub kind: ImageFileKind,
+
     /// When the image should be considered published (if at all).
     pub publish_at: Option<DateTime<Utc>>,
 
@@ -425,6 +428,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for ImageMetadata {
         let DbImage {
             id,
             size,
+            kind,
             name,
             description,
             translated_description,
@@ -442,6 +446,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for ImageMetadata {
         Ok(Self {
             id,
             size,
+            kind,
             name,
             description,
             translated_description: translated_description.0,
@@ -463,6 +468,7 @@ impl<'r> sqlx::FromRow<'r, PgRow> for ImageMetadata {
 struct DbImage {
     pub id: ImageId,
     pub size: ImageSize,
+    pub kind: ImageFileKind,
     pub name: String,
     pub description: String,
     pub translated_description: Json<HashMap<String, String>>,

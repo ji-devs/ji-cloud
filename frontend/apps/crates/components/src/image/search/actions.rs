@@ -209,7 +209,7 @@ impl ImageSearch {
                     .map(|i| PremiumableImage {
                         id: i.metadata.id,
                         lib: MediaLibrary::Global,
-                        kind: ImageFileKind::Png,
+                        kind: i.metadata.kind,
                         is_premium: i.metadata.is_premium,
                     })
                     .collect();
