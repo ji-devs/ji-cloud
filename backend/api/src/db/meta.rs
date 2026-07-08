@@ -13,12 +13,8 @@ pub async fn get_image_styles(db: &PgPool) -> sqlx::Result<Vec<ImageStyle>> {
     sqlx::query_as!(
         ImageStyle,
         r#"
-with cte as (
-    select distinct style_id as id
-    from image_style
-)
 select id as "id: ImageStyleId", display_name, created_at, updated_at
-from cte inner join style using (id)
+from style
 order by index
         "#
     )

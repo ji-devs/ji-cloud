@@ -720,6 +720,42 @@
     },
     "query": "\n    update user_asset_data \n    set resource_count = resource_count - 1,\n        total_asset_count = total_asset_count - 1\n    from resource\n    where author_id = user_id and\n          published_at is not null and \n          id = $1\n    "
   },
+  "1003e650d4d16b329c5258c61b40e51521fd1bc06722392457712a20b05ff8e2": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id: ImageStyleId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "display_name",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 2,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "ordinal": 3,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\nselect id as \"id: ImageStyleId\", display_name, created_at, updated_at\nfrom style\norder by index\n        "
+  },
   "102e4932b8a64a36e59207c4bf365c343d4e2777b9896464917f7e03d108fc62": {
     "describe": {
       "columns": [
@@ -14969,42 +15005,6 @@
       }
     },
     "query": "\nupdate playlist_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords"
-  },
-  "e2879fa5a3c098c9cbcea806e2d51168ba02e91b8f928a7bc2cd1f7f36872faa": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id: ImageStyleId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "display_name",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 2,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "updated_at",
-          "ordinal": 3,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        true
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\nwith cte as (\n    select distinct style_id as id\n    from image_style\n)\nselect id as \"id: ImageStyleId\", display_name, created_at, updated_at\nfrom cte inner join style using (id)\norder by index\n        "
   },
   "e2b7e553e95da72d34812de664967b5239a39e7ee92d942b9d5ecb29b65000ac": {
     "describe": {
