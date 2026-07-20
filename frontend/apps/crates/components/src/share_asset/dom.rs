@@ -163,7 +163,7 @@ impl ShareAsset {
                 dom.prop("showSettings", true)
                 .child(html!("input-switch-direction", {
                     .prop("slot", "settings")
-                    .prop_signal("disabled", state.loader.is_loading())
+                    .prop_signal("disabled", state.share_url_loading.signal())
                     .prop_signal("direction", state.direction.signal().map(|dir| {
                         match dir {
                             TextDirection::LeftToRight => "ltr",
@@ -179,7 +179,7 @@ impl ShareAsset {
                 .child(html!("label", {
                     .prop("slot", "settings")
                     .child(html!("input-switch", {
-                        .prop_signal("disabled", state.loader.is_loading())
+                        .prop_signal("disabled", state.share_url_loading.signal())
                         .prop_signal("enabled", state.scoring.signal())
                         .event(clone!(state => move|evt :events::CustomToggle| {
                             state.scoring.set(evt.value());
@@ -195,7 +195,7 @@ impl ShareAsset {
                 dom.child(html!("share-jig-option", {
                     .prop("slot", "student")
                     .prop("kind", "students")
-                    .prop_signal("disabled", state.loader.is_loading())
+                    .prop_signal("disabled", state.share_url_loading.signal())
                     .text_signal(temp_playlist_link_copied.signal().map(clone!(state => move |copied| {
                         match copied {
                             false => STR_SHARE_STUDENTS.to_owned(),
@@ -215,7 +215,7 @@ impl ShareAsset {
                 dom.child(html!("share-jig-option", {
                     .prop("slot", "student")
                     .prop("kind", "code")
-                    .prop_signal("disabled", state.loader.is_loading())
+                    .prop_signal("disabled", state.share_url_loading.signal())
                     .text(STR_CODE_LABEL)
                     .event(clone!(state => move |_: events::Click| {
                         if !state.can_share() {
@@ -228,7 +228,7 @@ impl ShareAsset {
             .child(html!("share-jig-option", {
                 .prop("slot", "student")
                 .prop("kind", "google-classroom")
-                .prop_signal("disabled", state.loader.is_loading())
+                .prop_signal("disabled", state.share_url_loading.signal())
                 .text(STR_CLASSROOM)
                 .event(clone!(state => move |_: events::Click| {
                     if !state.can_share() {
@@ -240,7 +240,7 @@ impl ShareAsset {
             .child(html!("share-jig-option", {
                 .prop("slot", "student")
                 .prop("kind", "ms-teams")
-                .prop_signal("disabled", state.loader.is_loading())
+                .prop_signal("disabled", state.share_url_loading.signal())
                 .text(STR_MS_TEAMS)
                 .event(clone!(state => move |_: events::Click| {
                     if !state.can_share() {
@@ -252,7 +252,7 @@ impl ShareAsset {
             .child(html!("share-jig-option", {
                 .prop("slot", "other")
                 .prop("kind", "copy")
-                .prop_signal("disabled", state.loader.is_loading())
+                .prop_signal("disabled", state.share_url_loading.signal())
                 .text_signal(state.link_copied.signal().map(clone!(state => move |copied| {
                     match copied {
                         false => format!("{}{}{}", STR_COPY_LABEL_1, state.asset_type_name(), STR_COPY_LABEL_2),
@@ -270,7 +270,7 @@ impl ShareAsset {
                 dom.child(html!("share-jig-option", {
                     .prop("slot", "other")
                     .prop("kind", "embed")
-                    .prop_signal("disabled", state.loader.is_loading())
+                    .prop_signal("disabled", state.share_url_loading.signal())
                     .text(&format!("{STR_EMBED_LABEL}{}", state.asset_type_name()))
                     .event(clone!(state => move |_: events::Click| {
                         if !state.can_share() {
@@ -284,7 +284,7 @@ impl ShareAsset {
                 dom.child(html!("share-jig-option", {
                     .prop("slot", "other")
                     .prop("kind", "share")
-                    .prop_signal("disabled", state.loader.is_loading())
+                    .prop_signal("disabled", state.share_url_loading.signal())
                     .text(&STR_SHARE_LABEL)
                     .event(clone!(state => move |_: events::Click| {
                         state.active_popup.set(None);
@@ -445,7 +445,7 @@ impl ShareAsset {
                     .child(html!("button-rect", {
                         .prop("color", "blue")
                         .prop("kind", "text")
-                        .prop_signal("disabled", state.loader.is_loading())
+                        .prop_signal("disabled", state.share_url_loading.signal())
                         .text_signal(state.copied_embed.signal().map(|copied| {
                             if copied { STR_EMBED_COPIED_CODE_LABEL } else { STR_EMBED_COPY_CODE_LABEL }
                         }))

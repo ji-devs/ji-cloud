@@ -38,10 +38,12 @@ impl ShareAsset {
     pub(super) fn refresh_share_url(self: &Rc<Self>) {
         let state = self;
         state.loader.load(clone!(state => async move {
+            state.share_url_loading.set(true);
             if let Some((share_url, student_share_url)) = state.signed_share_urls().await {
                 state.share_url.set(share_url);
                 state.student_share_url.set(student_share_url);
             }
+            state.share_url_loading.set(false);
         }));
     }
 

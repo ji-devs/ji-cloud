@@ -19,6 +19,7 @@ pub struct ShareAsset {
     pub copied_student_url: Mutable<bool>,
     pub copied_student_code: Mutable<bool>,
     pub qr_dialog: Mutable<Option<Rc<QrDialog>>>,
+    pub share_url_loading: Mutable<bool>,
     // play settings
     pub code_name: Mutable<Option<String>>,
     pub direction: Mutable<TextDirection>,
@@ -76,6 +77,7 @@ impl ShareAsset {
             copied_student_url: Mutable::new(false),
             copied_student_code: Mutable::new(false),
             qr_dialog: Mutable::new(None),
+            share_url_loading: Mutable::new(false),
             code_name: Mutable::new(None),
             direction: Mutable::new(direction),
             scoring: Mutable::new(scoring),
