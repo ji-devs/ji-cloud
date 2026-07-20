@@ -27,5 +27,5 @@ csv = "1.1.6"
 image = "0.24.5"
 flate2 = "1.0.25"
 uuid = { version = "1.2.2", features = ["serde", "v1"] }
-serde_with = { version = "2.1.0", features = ["json", "macros"] }
+serde_with = { version = "3.21.0", features = ["json", "macros"] }
 glob = "0.3.0"
