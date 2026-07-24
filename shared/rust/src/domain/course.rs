@@ -185,6 +185,10 @@ pub struct CourseResponse {
     /// Pre-signed share URL for this course.
     #[serde(default)]
     pub share_url: String,
+
+    /// Pre-signed student share URL for this course.
+    #[serde(default)]
+    pub student_share_url: String,
 }
 
 make_path_parts!(CourseGetLivePath => "/v1/course/{}/live" => CourseId);
@@ -204,6 +208,9 @@ pub struct CourseShareUrlRequest {}
 pub struct CourseShareUrlResponse {
     /// The signed share URL.
     pub share_url: String,
+
+    /// The signed student share URL.
+    pub student_share_url: String,
 }
 
 make_path_parts!(CourseUpdateDraftDataPath => "/v1/course/{}" => CourseId);

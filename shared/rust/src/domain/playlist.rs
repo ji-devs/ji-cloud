@@ -198,6 +198,10 @@ pub struct PlaylistResponse {
     /// Pre-signed share URL for this playlist.
     #[serde(default)]
     pub share_url: String,
+
+    /// Pre-signed student share URL for this playlist.
+    #[serde(default)]
+    pub student_share_url: String,
 }
 
 make_path_parts!(PlaylistGetLivePath => "/v1/playlist/{}/live" => PlaylistId);
@@ -217,6 +221,9 @@ pub struct PlaylistShareUrlRequest {}
 pub struct PlaylistShareUrlResponse {
     /// The signed share URL.
     pub share_url: String,
+
+    /// The signed student share URL.
+    pub student_share_url: String,
 }
 
 make_path_parts!(PlaylistUpdateDraftDataPath => "/v1/playlist/{}" => PlaylistId);

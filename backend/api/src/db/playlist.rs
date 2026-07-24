@@ -270,6 +270,7 @@ from playlist_data
             premium: row.premium,
         },
         share_url: String::new(),
+        student_share_url: String::new(),
     });
 
     Ok(playlist)
@@ -442,6 +443,7 @@ order by ord asc
                 premium: playlist_row.premium,
             },
             share_url: String::new(),
+            student_share_url: String::new(),
         })
         .collect();
 
@@ -633,6 +635,7 @@ limit $6
                 premium: playlist_data_row.premium,
             },
             share_url: String::new(),
+            student_share_url: String::new(),
         })
         .collect();
 

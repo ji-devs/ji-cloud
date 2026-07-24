@@ -4,9 +4,12 @@ use http::StatusCode;
 use paseto::{PasetoBuilder, TimeBackend};
 use rand::Rng;
 use serde_json::json;
-use shared::domain::{
-    session::AUTH_COOKIE_NAME,
-    user::{UserId, UserScope},
+use shared::{
+    config::RemoteTarget,
+    domain::{
+        session::AUTH_COOKIE_NAME,
+        user::{UserId, UserScope},
+    },
 };
 use sqlx::PgPool;
 use tracing::instrument;
@@ -142,6 +145,7 @@ returning user_id
 pub fn create_auth_token(
     token_secret: &[u8; 32],
     local_insecure: bool,
+    remote_target: RemoteTarget,
     valid_duration: Duration,
     session: &str,
 ) -> anyhow::Result<(String, Cookie<'static>)> {
@@ -154,7 +158,10 @@ pub fn create_auth_token(
 
     let valid_duration = time::Duration::seconds(valid_duration.num_seconds());
 
-    Ok((csrf, create_cookie(token, local_insecure, valid_duration)))
+    Ok((
+        csrf,
+        create_cookie(token, local_insecure, remote_target, valid_duration),
+    ))
 }
 
 pub fn create_auth_token_no_cookie(
@@ -177,14 +184,47 @@ pub fn create_auth_token_no_cookie(
 }
 
 #[must_use]
-fn create_cookie(token: String, local_insecure: bool, ttl: time::Duration) -> Cookie<'static> {
-    CookieBuilder::new(AUTH_COOKIE_NAME, token)
+fn create_cookie(
+    token: String,
+    local_insecure: bool,
+    remote_target: RemoteTarget,
+    ttl: time::Duration,
+) -> Cookie<'static> {
+    let mut builder = CookieBuilder::new(AUTH_COOKIE_NAME, token)
         .http_only(true)
         .secure(!local_insecure)
         .same_site(SameSite::Lax)
         .max_age(ttl)
-        .path("/")
-        .finish()
+        .path("/");
+
+    if let Some(domain) = auth_cookie_domain(remote_target) {
+        builder = builder.domain(domain);
+    }
+
+    builder.finish()
+}
+
+#[must_use]
+pub fn auth_cookie_domain(remote_target: RemoteTarget) -> Option<&'static str> {
+    match remote_target {
+        RemoteTarget::Local => None,
+        RemoteTarget::Sandbox => Some("sandbox.jigzi.org"),
+        RemoteTarget::Release => Some("jigzi.org"),
+    }
+}
+
+#[must_use]
+pub fn clear_host_auth_cookie(remote_target: RemoteTarget) -> Option<Cookie<'static>> {
+    auth_cookie_domain(remote_target).map(|_| {
+        let mut cookie = CookieBuilder::new(AUTH_COOKIE_NAME, "")
+            .http_only(true)
+            .secure(true)
+            .same_site(SameSite::Strict)
+            .path("/")
+            .finish();
+        cookie.make_removal();
+        cookie
+    })
 }
 
 #[must_use]

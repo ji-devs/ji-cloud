@@ -44,7 +44,7 @@ use crate::{
     db, error,
     extractor::{ScopeAdmin, TokenUserNoCsrfWithScope, TokenUserWithScope},
     service::{mail, ServiceData},
-    token::{create_auth_token, SessionMask},
+    token::{clear_host_auth_cookie, create_auth_token, SessionMask},
 };
 
 /// Impersonate another user
@@ -78,13 +78,17 @@ async fn impersonate(
     let (csrf, cookie) = create_auth_token(
         &settings.token_secret,
         settings.is_local(),
+        settings.remote_target(),
         login_ttl,
         &session,
     )?;
 
-    Ok(HttpResponse::Ok()
-        .cookie(cookie)
-        .json(NewSessionResponse { csrf }))
+    let mut res = HttpResponse::Ok();
+    if let Some(cookie) = clear_host_auth_cookie(settings.remote_target()) {
+        res.cookie(cookie);
+    }
+
+    Ok(res.cookie(cookie).json(NewSessionResponse { csrf }))
 }
 
 async fn export_user_data(

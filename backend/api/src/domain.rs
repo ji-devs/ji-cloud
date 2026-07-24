@@ -1,12 +1,16 @@
 use actix_http::body::BoxBody;
 use actix_web::{
-    cookie::{Cookie, SameSite},
+    cookie::{Cookie, CookieBuilder, SameSite},
     HttpResponse, Responder,
 };
 
-use crate::db::{self, account::AccountMember};
+use crate::{
+    db::{self, account::AccountMember},
+    token::auth_cookie_domain,
+};
 use chrono::{DateTime, Utc};
 use http::StatusCode;
+use shared::config::RemoteTarget;
 use shared::domain::billing::AccountId;
 use shared::domain::user::{UserId, UserScope};
 use shared::domain::{
@@ -150,7 +154,7 @@ pub enum RegistrationStatus {
 }
 
 #[derive(Debug)]
-pub struct NoContentClearAuth;
+pub struct NoContentClearAuth(pub RemoteTarget);
 
 impl fmt::Display for NoContentClearAuth {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -162,16 +166,32 @@ impl Responder for NoContentClearAuth {
     type Body = BoxBody;
 
     fn respond_to(self, _: &actix_web::HttpRequest) -> HttpResponse<BoxBody> {
-        let mut cookie = Cookie::named(AUTH_COOKIE_NAME);
-        cookie.set_max_age(time::Duration::seconds(0));
-        cookie.set_http_only(true);
-        cookie.set_same_site(SameSite::Strict);
+        let mut response = actix_web::HttpResponse::build(StatusCode::NO_CONTENT);
 
-        actix_web::HttpResponse::build(StatusCode::NO_CONTENT)
+        if let Some(domain) = auth_cookie_domain(self.0) {
+            response.cookie(clear_auth_cookie(Some(domain)));
+        }
+
+        response
             .content_type("application/octet-stream")
-            .cookie(cookie)
+            .cookie(clear_auth_cookie(None))
             .finish()
     }
+}
+
+fn clear_auth_cookie(domain: Option<&'static str>) -> Cookie<'static> {
+    let mut builder = CookieBuilder::new(AUTH_COOKIE_NAME, "")
+        .http_only(true)
+        .same_site(SameSite::Strict)
+        .path("/");
+
+    if let Some(domain) = domain {
+        builder = builder.domain(domain);
+    }
+
+    let mut cookie = builder.finish();
+    cookie.make_removal();
+    cookie
 }
 
 #[derive(Debug)]

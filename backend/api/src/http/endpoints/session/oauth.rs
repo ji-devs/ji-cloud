@@ -25,7 +25,7 @@ use crate::{
     http::endpoints::user::send_verification_email,
     jwk::{self, IdentityClaims},
     service::{mail, ServiceData},
-    token::{create_auth_token, SessionMask},
+    token::{clear_host_auth_cookie, create_auth_token, SessionMask},
 };
 use shared::domain::session::OAuthUserProfile;
 use shared::error::{IntoAnyhow, ServiceError, ServiceKindError};
@@ -116,7 +116,12 @@ pub async fn create(
         other => return Err(anyhow::anyhow!("Unsupported OAuth request kind: {:?}", other).into()),
     };
 
-    Ok(HttpResponse::Created().cookie(cookie).json(response))
+    let mut res = HttpResponse::Created();
+    if let Some(cookie) = clear_host_auth_cookie(settings.remote_target()) {
+        res.cookie(cookie);
+    }
+
+    Ok(res.cookie(cookie).json(response))
 }
 
 async fn handle_google_oauth(
@@ -255,7 +260,13 @@ async fn handle_google_oauth(
 
     txn.commit().await?;
 
-    let (csrf, cookie) = create_auth_token(token_secret, local_insecure, login_ttl, &session)?;
+    let (csrf, cookie) = create_auth_token(
+        token_secret,
+        local_insecure,
+        remote_target,
+        login_ttl,
+        &session,
+    )?;
 
     let response = NewSessionResponse { csrf };
 

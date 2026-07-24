@@ -2,17 +2,24 @@ use std::rc::Rc;
 
 use crate::stickers::embed::types::ParseUrlExt;
 use dominator::{clone, html, Dom, DomBuilder};
+use futures_signals::signal::Mutable;
 use futures_signals::signal::SignalExt;
 use shared::{
+    api::endpoints::jig,
     domain::{
-        audio::AudioId, course::unit::CourseUnitValue, image::ImageId,
-        module::body::_groups::design::YoutubeEmbed, pdf::PdfId,
+        audio::AudioId,
+        course::unit::CourseUnitValue,
+        image::ImageId,
+        jig::{JigId, JigShareUrlPath},
+        module::body::_groups::design::YoutubeEmbed,
+        pdf::PdfId,
     },
     media::MediaLibrary,
 };
 use utils::{
     component::Component,
     path::{audio_lib_url, pdf_lib_url},
+    prelude::ApiEndpointExt,
     unwrap::UnwrapJiExt,
 };
 use web_sys::{File, HtmlElement, HtmlIFrameElement, ShadowRoot, Url};
@@ -93,8 +100,25 @@ impl UnitValueView {
     }
 
     fn render_active_link(self: &Rc<Self>, link: url::Url) -> Dom {
+        let iframe_url = Mutable::new(link.to_string());
+
         html!("iframe" => HtmlIFrameElement, {
-            .prop("src", link.to_string())
+            .prop_signal("src", iframe_url.signal_cloned())
+            .future(clone!(iframe_url, self as state => async move {
+                if let Some(jig_id) = jig_play_id(&link) {
+                    let res = jig::ShareUrl::api_no_auth(JigShareUrlPath(jig_id), Some(Default::default()))
+                        .await
+                        .ok();
+
+                    if let Some(res) = res {
+                        let signed_url = match state.is_student {
+                            true => res.student_share_url,
+                            false => res.share_url,
+                        };
+                        iframe_url.set(signed_url);
+                    }
+                }
+            }))
         })
     }
 
@@ -111,6 +135,20 @@ impl UnitValueView {
             .prop("src", resp)
             .prop("controls", true)
         })
+    }
+}
+
+fn jig_play_id(link: &url::Url) -> Option<JigId> {
+    let mut segments = link.path_segments()?;
+
+    match (
+        segments.next()?,
+        segments.next()?,
+        segments.next()?,
+        segments.next()?,
+    ) {
+        ("asset", "play", "jig", jig_id) => Some(JigId(jig_id.parse().ok()?)),
+        _ => None,
     }
 }
 

@@ -528,9 +528,13 @@ async fn get_share_url(
 ) -> Json<<playlist::ShareUrl as ApiEndpoint>::Res> {
     let playlist_id = path.into_inner();
 
-    let share_url = share_url::generate_playlist_share_url(&settings, playlist_id);
+    let share_url = share_url::generate_playlist_share_url(&settings, playlist_id, false);
+    let student_share_url = share_url::generate_playlist_share_url(&settings, playlist_id, true);
 
-    Json(PlaylistShareUrlResponse { share_url })
+    Json(PlaylistShareUrlResponse {
+        share_url,
+        student_share_url,
+    })
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {

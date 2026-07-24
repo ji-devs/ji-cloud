@@ -50,7 +50,7 @@ use crate::{
     extractor::{ScopeAdmin, SessionCreateProfile, SessionDelete, TokenSessionOf, TokenUser},
     service::{mail, s3, ServiceData},
     stripe::create_stripe_client,
-    token::{create_auth_token, SessionMask},
+    token::{clear_host_auth_cookie, create_auth_token, SessionMask},
 };
 use crate::{
     extractor::TokenUserWithScope,
@@ -432,12 +432,20 @@ returning user_id as "id!: UserId"
 
             txn.commit().await?;
 
-            let (csrf, cookie) =
-                create_auth_token(&config.token_secret, config.is_local(), login_ttl, &session)?;
+            let (csrf, cookie) = create_auth_token(
+                &config.token_secret,
+                config.is_local(),
+                config.remote_target(),
+                login_ttl,
+                &session,
+            )?;
 
-            Ok(HttpResponse::Created()
-                .cookie(cookie)
-                .json(NewSessionResponse { csrf }))
+            let mut res = HttpResponse::Created();
+            if let Some(cookie) = clear_host_auth_cookie(config.remote_target()) {
+                res.cookie(cookie);
+            }
+
+            Ok(res.cookie(cookie).json(NewSessionResponse { csrf }))
         }
     }
 }
@@ -513,6 +521,7 @@ async fn create_profile(
     let (csrf, cookie) = create_auth_token(
         &settings.token_secret,
         settings.is_local(),
+        settings.remote_target(),
         login_ttl,
         &session,
     )?;
@@ -536,9 +545,12 @@ async fn create_profile(
 
     txn.commit().await?;
 
-    Ok(HttpResponse::Created()
-        .cookie(cookie)
-        .json(NewSessionResponse { csrf }))
+    let mut res = HttpResponse::Created();
+    if let Some(cookie) = clear_host_auth_cookie(settings.remote_target()) {
+        res.cookie(cookie);
+    }
+
+    Ok(res.cookie(cookie).json(NewSessionResponse { csrf }))
 }
 
 #[instrument(skip(pool, s3))]
@@ -1000,6 +1012,7 @@ async fn switch_to_basic_auth(
 #[instrument(skip_all)]
 async fn delete(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     session: TokenSessionOf<SessionDelete>,
     algolia: ServiceData<crate::algolia::Manager>,
 ) -> Result<NoContentClearAuth, error::Server> {
@@ -1012,7 +1025,7 @@ async fn delete(
 
     algolia.delete_public_user(session.claims.user_id).await;
 
-    Ok(NoContentClearAuth)
+    Ok(NoContentClearAuth(settings.remote_target()))
 }
 
 /// Reset password

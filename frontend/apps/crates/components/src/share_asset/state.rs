@@ -42,13 +42,13 @@ impl ShareAsset {
                 Default::default(),
                 Default::default(),
                 playlist.share_url.clone(),
-                playlist.share_url.clone(),
+                playlist.student_share_url.clone(),
             ),
             Asset::Course(course) => (
                 Default::default(),
                 Default::default(),
                 course.share_url.clone(),
-                course.share_url.clone(),
+                course.student_share_url.clone(),
             ),
             Asset::Resource(resource) => (
                 Default::default(),

@@ -2071,6 +2071,7 @@ order by coalesce(updated_at, created_at) desc
                 premium: playlist_data_row.premium,
             },
             share_url: String::new(),
+            student_share_url: String::new(),
         })
         .collect();
 

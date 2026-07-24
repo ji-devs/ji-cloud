@@ -110,9 +110,13 @@ async fn get_share_url(
 ) -> Json<<course::ShareUrl as ApiEndpoint>::Res> {
     let course_id = path.into_inner();
 
-    let share_url = share_url::generate_course_share_url(&settings, course_id);
+    let share_url = share_url::generate_course_share_url(&settings, course_id, false);
+    let student_share_url = share_url::generate_course_share_url(&settings, course_id, true);
 
-    Json(CourseShareUrlResponse { share_url })
+    Json(CourseShareUrlResponse {
+        share_url,
+        student_share_url,
+    })
 }
 
 /// Update a Course's draft data.

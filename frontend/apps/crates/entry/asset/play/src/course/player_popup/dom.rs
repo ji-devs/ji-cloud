@@ -297,7 +297,10 @@ impl PlayerPopup {
     fn render_active_unit(self: &Rc<Self>, unit: CourseUnit) -> Dom {
         html!("div", {
             .class("unit-play")
-            .child(UnitValueView::new(Some(unit.value)).render())
+            .child(UnitValueView::new_with_student(
+                Some(unit.value),
+                self.player_state.player_options.is_student,
+            ).render())
         })
     }
 }

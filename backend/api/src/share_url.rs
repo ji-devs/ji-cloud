@@ -127,11 +127,15 @@ pub fn generate_student_jig_share_url(
 }
 
 /// Generates a signed share URL for a playlist.
-pub fn generate_playlist_share_url(settings: &RuntimeSettings, playlist_id: PlaylistId) -> String {
+pub fn generate_playlist_share_url(
+    settings: &RuntimeSettings,
+    playlist_id: PlaylistId,
+    is_student: bool,
+) -> String {
     let base_url = settings.remote_target().pages_url();
     let query = serde_urlencoded::to_string(PlaylistShareUrlQuery {
         draft_or_live: DraftOrLive::Live,
-        is_student: false,
+        is_student,
     })
     .expect("valid playlist share URL query");
     let path = format!("/asset/play/playlist/{}?{}", playlist_id.0, query);
@@ -140,11 +144,15 @@ pub fn generate_playlist_share_url(settings: &RuntimeSettings, playlist_id: Play
 }
 
 /// Generates a signed share URL for a course.
-pub fn generate_course_share_url(settings: &RuntimeSettings, course_id: CourseId) -> String {
+pub fn generate_course_share_url(
+    settings: &RuntimeSettings,
+    course_id: CourseId,
+    is_student: bool,
+) -> String {
     let base_url = settings.remote_target().pages_url();
     let query = serde_urlencoded::to_string(CourseShareUrlQuery {
         draft_or_live: DraftOrLive::Live,
-        is_student: false,
+        is_student,
     })
     .expect("valid course share URL query");
     let path = format!("/asset/play/course/{}?{}", course_id.0, query);
@@ -174,12 +182,14 @@ pub fn add_share_url_to_jig(settings: &RuntimeSettings, jig: &mut JigResponse) {
 
 /// Adds a signed share URL to a PlaylistResponse.
 pub fn add_share_url_to_playlist(settings: &RuntimeSettings, playlist: &mut PlaylistResponse) {
-    playlist.share_url = generate_playlist_share_url(settings, playlist.id);
+    playlist.share_url = generate_playlist_share_url(settings, playlist.id, false);
+    playlist.student_share_url = generate_playlist_share_url(settings, playlist.id, true);
 }
 
 /// Adds a signed share URL to a CourseResponse.
 pub fn add_share_url_to_course(settings: &RuntimeSettings, course: &mut CourseResponse) {
-    course.share_url = generate_course_share_url(settings, course.id);
+    course.share_url = generate_course_share_url(settings, course.id, false);
+    course.student_share_url = generate_course_share_url(settings, course.id, true);
 }
 
 fn jig_share_path(jig_id: JigId, module_id: Option<ModuleId>) -> String {

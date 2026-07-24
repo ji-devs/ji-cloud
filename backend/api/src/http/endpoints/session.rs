@@ -20,7 +20,7 @@ use crate::{
     domain::{NoContentClearAuth, RegistrationStatus},
     error,
     extractor::{EmailBasicUser, SessionAny, TokenSessionOf},
-    token::{create_auth_token, SessionMask},
+    token::{clear_host_auth_cookie, create_auth_token, SessionMask},
 };
 
 mod oauth;
@@ -52,6 +52,7 @@ async fn create_session(
     let (csrf, cookie) = create_auth_token(
         &settings.token_secret,
         settings.is_local(),
+        settings.remote_target(),
         login_ttl,
         &session,
     )?;
@@ -70,19 +71,25 @@ async fn create_session(
         CreateSessionResponse::Login(response)
     };
 
-    Ok(HttpResponse::Created().cookie(cookie).json(response))
+    let mut res = HttpResponse::Created();
+    if let Some(cookie) = clear_host_auth_cookie(settings.remote_target()) {
+        res.cookie(cookie);
+    }
+
+    Ok(res.cookie(cookie).json(response))
 }
 
 /// Logout
 async fn delete_session(
     db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
     session: TokenSessionOf<SessionAny>,
 ) -> Result<NoContentClearAuth, error::Server> {
     sqlx::query!("delete from session where token = $1", session.claims.token)
         .execute(db.as_ref())
         .await?;
 
-    Ok(NoContentClearAuth)
+    Ok(NoContentClearAuth(settings.remote_target()))
 }
 
 pub fn configure(cfg: &mut ServiceConfig) {

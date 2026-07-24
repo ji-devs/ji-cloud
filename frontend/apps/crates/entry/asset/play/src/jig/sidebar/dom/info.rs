@@ -12,7 +12,7 @@ use utils::{
     asset::{published_at_string, ResourceContentExt},
     events,
     iframe::{AssetPlayerToPlayerPopup, IframeInit, IframeMessageExt},
-    routes::{AssetPlayRoute, AssetRoute, CommunityMembersRoute, CommunityRoute, Route},
+    routes::{CommunityMembersRoute, CommunityRoute, Route},
     unwrap::UnwrapJiExt,
 };
 use web_sys::HtmlElement;
