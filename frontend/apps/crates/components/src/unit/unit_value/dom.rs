@@ -100,11 +100,12 @@ impl UnitValueView {
     }
 
     fn render_active_link(self: &Rc<Self>, link: url::Url) -> Dom {
+        let state = self;
         let iframe_url = Mutable::new(link.to_string());
 
         html!("iframe" => HtmlIFrameElement, {
             .prop_signal("src", iframe_url.signal_cloned())
-            .future(clone!(iframe_url, self as state => async move {
+            .future(clone!(iframe_url, state => async move {
                 if let Some(jig_id) = jig_play_id(&link) {
                     let res = jig::ShareUrl::api_no_auth(JigShareUrlPath(jig_id), Some(Default::default()))
                         .await
