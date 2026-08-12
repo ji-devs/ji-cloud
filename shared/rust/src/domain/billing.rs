@@ -117,22 +117,28 @@ impl fmt::Display for Last4 {
 #[strum(serialize_all = "lowercase")]
 pub enum PaymentNetwork {
     /// Visa
+    #[strum(to_string = "Visa")]
     Visa,
     /// Mastercard
+    #[strum(to_string = "Mastercard")]
     Mastercard,
     /// Discover Global Network
+    #[strum(to_string = "Discover")]
     Discover,
     /// JCB Co
+    #[strum(to_string = "JCB")]
     JCB,
     /// American Express
-    #[strum(serialize = "amex")]
+    #[strum(serialize = "amex", to_string = "American Express")]
     AmericanExpress,
     /// UnionPay
+    #[strum(to_string = "UnionPay")]
     UnionPay,
     /// Diners
-    #[strum(serialize = "diners")]
+    #[strum(serialize = "diners", to_string = "Diners Club")]
     DinersClub,
     /// Unknown
+    #[strum(to_string = "Unknown")]
     Unknown,
 }
 
