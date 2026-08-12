@@ -112,7 +112,7 @@ impl fmt::Display for Last4 {
 }
 
 /// Payment network associated with a [Card]
-#[derive(Debug, Serialize, Deserialize, Clone, EnumString)]
+#[derive(Debug, Serialize, Deserialize, Clone, Display, EnumString)]
 #[serde(rename_all = "kebab-case")]
 #[strum(serialize_all = "lowercase")]
 pub enum PaymentNetwork {
@@ -171,15 +171,19 @@ impl From<stripe::CardDetails> for Card {
 /// Type of payment method
 ///
 /// Note: Only the [PaymentMethodType::Card] variant has any display details.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Display)]
 pub enum PaymentMethodType {
     /// Apple Pay
+    #[strum(serialize = "Apple Pay")]
     ApplePay,
     /// Google Pay
+    #[strum(serialize = "Google Pay")]
     GooglePay,
     /// [Link](https://stripe.com/docs/payments/link) one-click checkout
+    #[strum(serialize = "Stripe Link")]
     Link,
     /// Card
+    #[strum(serialize = "Card")]
     Card(Card),
     /// Other/unknown
     Other,

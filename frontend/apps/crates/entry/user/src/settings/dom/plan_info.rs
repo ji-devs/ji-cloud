@@ -368,10 +368,24 @@ impl SettingsPage {
                         }))
                     },
                     Some(payment_method_type) => {
-                        dom.child(html!("img-ui", {
-                            .style("height", "22px")
-                            .prop("path", payment_method_type_icon(&payment_method_type))
-                        }))
+                        let dom = if let Some(path) = payment_method_type_icon(payment_method_type)
+                        {
+                            dom.child(html!("img-ui", {
+                                .style("height", "22px")
+                                .prop("path", path)
+                            }))
+                        } else {
+                            let display_name = match payment_method_type {
+                                PaymentMethodType::Card(card) => card.payment_network.to_string(),
+                                _ => payment_method_type.to_string(),
+                            };
+
+                            dom.child(html!("span", {
+                                .text(&display_name)
+                            }))
+                        };
+
+                        dom
                         .apply(|mut dom| {
                             if let PaymentMethodType::Card(card) = &payment_method_type {
                                 dom = dom.child(html!("span", {
@@ -389,22 +403,20 @@ impl SettingsPage {
     }
 }
 
-fn payment_method_type_icon(method_type: &PaymentMethodType) -> &'static str {
+fn payment_method_type_icon(method_type: &PaymentMethodType) -> Option<&'static str> {
     match method_type {
-        PaymentMethodType::ApplePay => "payment-method/apple-pay.svg",
-        PaymentMethodType::GooglePay => "payment-method/google-pay.svg",
-        PaymentMethodType::Link => "payment-method/??.svg",
+        PaymentMethodType::ApplePay => Some("payment-method/apple-pay.svg"),
+        PaymentMethodType::GooglePay => Some("payment-method/google-pay.svg"),
+        PaymentMethodType::Link => None,
         PaymentMethodType::Card(card) => match card.payment_network {
-            PaymentNetwork::Visa => "payment-method/visa.svg",
-            PaymentNetwork::Mastercard => "payment-method/mastercard.svg",
-            PaymentNetwork::Discover => "payment-method/discover.svg",
-            PaymentNetwork::JCB => "payment-method/jcb.svg",
-            PaymentNetwork::AmericanExpress => "payment-method/american-express.svg",
-            PaymentNetwork::UnionPay => "payment-method/??.svg",
-            PaymentNetwork::DinersClub => "payment-method/??.svg",
-            PaymentNetwork::Unknown => "payment-method/??.svg",
+            PaymentNetwork::Visa => Some("payment-method/visa.svg"),
+            PaymentNetwork::Mastercard => Some("payment-method/mastercard.svg"),
+            PaymentNetwork::Discover => Some("payment-method/discover.svg"),
+            PaymentNetwork::JCB => Some("payment-method/jcb.svg"),
+            PaymentNetwork::AmericanExpress => Some("payment-method/american-express.svg"),
+            PaymentNetwork::UnionPay | PaymentNetwork::DinersClub | PaymentNetwork::Unknown => None,
         },
-        PaymentMethodType::Other => "payment-method/??.svg",
+        PaymentMethodType::Other => None,
     }
 }
 fn price_string(
