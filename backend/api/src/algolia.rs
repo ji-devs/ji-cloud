@@ -207,6 +207,7 @@ struct BatchUser<'a> {
     created_at: DateTime<Utc>,
     organization: Option<String>,
     blocked: bool,
+    flagged: bool,
 }
 
 #[derive(Serialize)]
@@ -1321,7 +1322,8 @@ where playlist_data.id = any (select live_id from playlist where playlist.id = a
             organization                             as "organization?",
             location                                 as "location?",
             user_email.created_at                    as "created_at",
-            "user".blocked                           as "blocked!"
+            "user".blocked                           as "blocked!",
+            "user".flagged                           as "flagged!"
 from user_profile "up"
         inner join "user" on "user".id = up.user_id
         inner join user_email on user_email.user_id = up.user_id
@@ -1347,6 +1349,7 @@ limit 100 for no key update skip locked;
                     country: location.country_short,
                     created_at: row.created_at,
                     blocked: row.blocked,
+                    flagged: row.flagged,
                 })
                 .expect("failed to serialize BatchUser to json")
                 {
@@ -2644,6 +2647,8 @@ impl Client {
         user_id: Option<UserId>,
         page_limit: u32,
         page: Option<u32>,
+        blocked: Option<bool>,
+        flagged: Option<bool>,
     ) -> anyhow::Result<Option<(Vec<Uuid>, u32, u64)>> {
         let mut and_filters = algolia::filter::AndFilter { filters: vec![] };
 
@@ -2655,6 +2660,26 @@ impl Client {
                 },
                 invert: false,
             }))
+        }
+
+        if let Some(blocked) = blocked {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "blocked".to_owned(),
+                    value: blocked.to_string(),
+                },
+                invert: false,
+            }));
+        }
+
+        if let Some(flagged) = flagged {
+            and_filters.filters.push(Box::new(CommonFilter {
+                filter: FacetFilter {
+                    facet_name: "flagged".to_owned(),
+                    value: flagged.to_string(),
+                },
+                invert: false,
+            }));
         }
 
         let results: SearchResponse = self

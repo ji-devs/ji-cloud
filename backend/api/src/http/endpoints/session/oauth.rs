@@ -169,6 +169,33 @@ async fn handle_google_oauth(
                 return Err(error::OAuth::Unauthorized);
             }
 
+            let blocked = sqlx::query!(
+                r#"
+update "user"
+set blocked = true
+where id = $1
+and flagged = true
+and created_at <= now() - interval '1 day'
+returning id
+                "#,
+                google_auth.user_id,
+            )
+            .fetch_optional(&mut txn)
+            .await?;
+
+            if blocked.is_some() {
+                sqlx::query!(
+                    "update user_profile set updated_at = now() where user_id = $1",
+                    google_auth.user_id,
+                )
+                .execute(&mut txn)
+                .await?;
+
+                txn.commit().await?;
+
+                return Err(error::OAuth::Unauthorized);
+            }
+
             let mask = if check_status.has_profile {
                 SessionMask::GENERAL
             } else if check_status.has_verified_email {

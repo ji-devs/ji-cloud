@@ -51,6 +51,7 @@ export class _ extends LitElement {
         "Email",
         "Login Type",
         "Blocked",
+        "Flagged",
         "Badge",
         "Country",
         "State",

@@ -46,6 +46,7 @@ impl Users {
         let req = UserBrowseQuery {
             page: Some(self.active_page.get()),
             blocked: self.blocked_filter.get(),
+            flagged: self.flagged_filter.get(),
             ..Default::default()
         };
 
@@ -63,6 +64,8 @@ impl Users {
         let req = UserSearchQuery {
             q: query,
             page: Some(self.active_page.get()),
+            blocked: self.blocked_filter.get(),
+            flagged: self.flagged_filter.get(),
             ..Default::default()
         };
 

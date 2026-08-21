@@ -195,6 +195,7 @@ pub(crate) async fn user_index(
             FacetAttribute::filter_only(Attribute("persona".to_owned())),
             FacetAttribute::filter_only(Attribute("location".to_owned())),
             FacetAttribute::filter_only(Attribute("blocked".to_owned())),
+            FacetAttribute::filter_only(Attribute("flagged".to_owned())),
         ]),
     };
 

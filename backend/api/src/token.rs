@@ -115,6 +115,7 @@ where
     token = $1 and
     expires_at < now() is not true and
     (scope_mask & $2) = $2 and
+    exists(select 1 from "user" where id = session.user_id and blocked = false) and
     (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))
 returning user_id
 "#,
@@ -127,6 +128,33 @@ returning user_id
     .map_err(anyhow::Error::from)
     .map_err(error::ise)?
     .ok_or_else(|| BasicError::new(StatusCode::UNAUTHORIZED))?;
+
+    let cleared_signup_flag = sqlx::query!(
+        r#"
+update "user"
+set flagged = false
+where id = $1
+and flagged = true
+and created_at <= now() - interval '5 minutes'
+returning id
+        "#,
+        session_info.user_id,
+    )
+    .fetch_optional(db)
+    .await
+    .map_err(anyhow::Error::from)
+    .map_err(error::ise)?;
+
+    if cleared_signup_flag.is_some() {
+        sqlx::query!(
+            "update user_profile set updated_at = now() where user_id = $1",
+            session_info.user_id,
+        )
+        .execute(db)
+        .await
+        .map_err(anyhow::Error::from)
+        .map_err(error::ise)?;
+    }
 
     if min_mask.intersects(SessionMask::ONE_TIME) {
         sqlx::query!("delete from session where token = $1", &claims.sub)

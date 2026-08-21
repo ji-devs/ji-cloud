@@ -1,5 +1,25 @@
 {
   "db": "PostgreSQL",
+  "011e2ab55a3f44b999505c1ecb22550c018d626f83dc85f0b5b0945cad2fb426": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nupdate \"user\"\nset blocked = true\nwhere id = $1\nand flagged = true\nand created_at <= now() - interval '1 day'\nreturning id\n                        "
+  },
   "01a135ff430fa6ab0ac75454f6d1c25d2198d9f885e1abfdb4ca22c888df32a5": {
     "describe": {
       "columns": [],
@@ -59,28 +79,6 @@
       }
     },
     "query": "\nselect draft_id, live_id from course where id = $1\n"
-  },
-  "0290f5bd03aca237290476e581862f5a2083a41a46525ada93620d2893f0a4b9": {
-    "describe": {
-      "columns": [
-        {
-          "name": "user_id",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Int2",
-          "Int2"
-        ]
-      }
-    },
-    "query": "\nupdate session\nset last_used = now()\nwhere\n    token = $1 and\n    expires_at < now() is not true and\n    (scope_mask & $2) = $2 and\n    (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))\nreturning user_id\n"
   },
   "02c99d434bef7ea8602e6e462c5e93d9a0e11f47771b10b90d9482e79c18cfb0": {
     "describe": {
@@ -2305,162 +2303,6 @@
       }
     },
     "query": "\n        with user_scopes as (\n            select cm.user_id,\n                   array_agg(scope) as scopes\n            from circle_member cm\n            left join user_scope on cm.user_id = user_scope.user_id\n            inner join \"user\" on cm.user_id = \"user\".id\n            where cm.id = $1 and \"user\".blocked = false\n            group by cm.user_id\n        )\n        select us.user_id  \"user_id: UserId\"\n        from user_scopes us\n        left join circle_member cm on cm.user_id = us.user_id\n        where cm.id = $1 and\n            (case when $2 = false then $3 <> any(us.scopes) and ($4 @> us.scopes or $5 @> us.scopes)\n                  when $2 = true then $3 = any(us.scopes)\n                else us.scopes is not null\n            end\n            )\n"
-  },
-  "28918db73c1c14fcbe69381080ccfa43e32edd936729b85c071ee7529da62992": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 7,
-          "type_info": "Int2"
-        },
-        {
-          "name": "organization",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "plan_type?: PlanType",
-          "ordinal": 10,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 11,
-          "type_info": "Int2"
-        },
-        {
-          "name": "current_period_end?: DateTime<Utc>",
-          "ordinal": 12,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "is_trial?",
-          "ordinal": 13,
-          "type_info": "Bool"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 14,
-          "type_info": "Int8"
-        },
-        {
-          "name": "is_admin?",
-          "ordinal": 15,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_id?: SchoolId",
-          "ordinal": 16,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "school_name?",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "account_id?: AccountId",
-          "ordinal": 18,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "tier_override?: PlanTier",
-          "ordinal": 19,
-          "type_info": "Int2"
-        },
-        {
-          "name": "google_auth?: String",
-          "ordinal": 20,
-          "type_info": "Text"
-        },
-        {
-          "name": "blocked!",
-          "ordinal": 21,
-          "type_info": "Bool"
-        },
-        {
-          "name": "last_login?: DateTime<Utc>",
-          "ordinal": 22,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        null,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        null,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        false,
-        true,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int8",
-          "Int8",
-          "Int2Array",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nwith cte as (\n    select (array_agg(user_profile.user_id))[1]\n    from user_profile\n        inner join \"user\" on \"user\".id = user_profile.user_id\n        inner join user_email on user_profile.user_id = user_email.user_id\n    where (user_profile.user_id = $1 or $1 is null)\n      and (user_profile.badge = any($4) or $4 = array[]::smallint[])\n      and (\"user\".blocked = $5 or $5 is null)\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n),\naccount_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.amount_due,\n        subscription.is_trial,\n        user_account.admin,\n        school.school_id,\n        school.school_name,\n        account.account_id,\n        account.tier_override\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end,\n            is_trial\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.is_trial as \"is_trial?\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.school_id as \"school_id?: SchoolId\",\n        account_cte.school_name::text as \"school_name?\",\n        account_cte.account_id as \"account_id?: AccountId\",\n        account_cte.tier_override as \"tier_override?: PlanTier\",\n        user_auth_google.google_id as \"google_auth?: String\",\n        \"user\".blocked as \"blocked!\",\n        (\n            select created_at as \"last_login?\"\n            from session\n            where session.user_id = \"user\".id\n            order by created_at desc\n            limit 1\n        ) as \"last_login?: DateTime<Utc>\"\nfrom cte1\n        inner join \"user\" on cte1.id = \"user\".id\n        left join account_cte on cte1.id = account_cte.user_id\n        left join user_auth_google on user_auth_google.user_id = cte1.id\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email on cte1.id = user_email.user_id\norder by ord asc\nlimit $3\noffset $2\n"
   },
   "29a3fff0ef9ba759cb66de761d80243c888b264c14cfc2045ded1d2403c9d453": {
     "describe": {
@@ -5405,19 +5247,6 @@
     },
     "query": "delete from image_upload where image_id = $1"
   },
-  "5d6f4e4e7e51c368d170de65b7c743884f5420ed39f44c4b89e314f970598a3a": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\nupdate \"user\"\nset blocked = $2\nwhere id = $1\nand ($2 is distinct from blocked)\n            "
-  },
   "5d7020b3759281d303b515cf05ae1445d421aabf48d2212565a20faf794e6fc2": {
     "describe": {
       "columns": [],
@@ -6027,83 +5856,6 @@
     },
     "query": "\nwith delete as (\n        delete from user_font\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_font\nwhere user_id = $1 and index > $2\nfor update\n        "
   },
-  "64eecb1269ca52098d70aebab525af1da663d51d06e8a09aa8de0497f0909b36": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username!",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name!",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name!",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!: String",
-          "ordinal": 4,
-          "type_info": {
-            "Custom": {
-              "kind": "Simple",
-              "name": "citext"
-            }
-          }
-        },
-        {
-          "name": "language_emails!",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "organization?",
-          "ordinal": 6,
-          "type_info": "Text"
-        },
-        {
-          "name": "location?",
-          "ordinal": 7,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "created_at",
-          "ordinal": 8,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "blocked!",
-          "ordinal": 9,
-          "type_info": "Bool"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        true,
-        true,
-        false,
-        false
-      ],
-      "parameters": {
-        "Left": []
-      }
-    },
-    "query": "\n     select up.user_id                               as \"id!\",\n            username                                 as \"username!\",\n            given_name                               as \"given_name!\",\n            family_name                              as \"family_name!\",\n            email                                    as \"email!: String\",\n            language_emails                          as \"language_emails!\",\n            organization                             as \"organization?\",\n            location                                 as \"location?\",\n            user_email.created_at                    as \"created_at\",\n            \"user\".blocked                           as \"blocked!\"\nfrom user_profile \"up\"\n        inner join \"user\" on \"user\".id = up.user_id\n        inner join user_email on user_email.user_id = up.user_id\nwhere (last_synced_at is null or\n       (up.updated_at is not null and last_synced_at < up.updated_at))\nlimit 100 for no key update skip locked;\n     "
-  },
   "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1": {
     "describe": {
       "columns": [
@@ -6523,6 +6275,26 @@
       }
     },
     "query": "\ninsert into resource_data_affiliation(resource_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom resource_data_affiliation\nwhere resource_data_id = $1\n        "
+  },
+  "6b1c055fbc8e070e08cd4388e4fe034ea20f94d3bad0969a8cb39e7abb07eaee": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nupdate \"user\"\nset blocked = true\nwhere id = $1\nand flagged = true\nand created_at <= now() - interval '1 day'\nreturning id\n                "
   },
   "6b23aa76c017f61c1cec5fb58bb315c57ab46929dcc301602997c6c71a2fc22c": {
     "describe": {
@@ -8485,6 +8257,26 @@
     },
     "query": "\nupdate jig_data\nset privacy_level = coalesce($2, privacy_level)\nwhere id = $1\n  and $2 is distinct from privacy_level\n    "
   },
+  "7fc34ff1198ad97407821a93a835045cf61c21db7048a221aba45f4ef420c70b": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\nupdate \"user\"\nset flagged = false\nwhere id = $1\nand flagged = true\nand created_at <= now() - interval '5 minutes'\nreturning id\n        "
+  },
   "8002a58a2dfa494ffa463d70fe62cd1a6ca1a26e64f76cee1ca2a23ac58f802f": {
     "describe": {
       "columns": [],
@@ -8995,6 +8787,164 @@
     },
     "query": "\nupdate circle\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description\n"
   },
+  "8663f1f9936e249a134e120511d9351f5481a7e06bb4a5f9f743c8b4b2629598": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "organization",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 10,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "is_trial?",
+          "ordinal": 12,
+          "type_info": "Bool"
+        },
+        {
+          "name": "current_period_end?: DateTime<Utc>",
+          "ordinal": 13,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "is_admin?",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_id?: SchoolId",
+          "ordinal": 16,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "school_name?",
+          "ordinal": 17,
+          "type_info": "Text"
+        },
+        {
+          "name": "account_id?: AccountId",
+          "ordinal": 18,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "tier_override?: PlanTier",
+          "ordinal": 19,
+          "type_info": "Int2"
+        },
+        {
+          "name": "google_auth?: String",
+          "ordinal": 20,
+          "type_info": "Text"
+        },
+        {
+          "name": "blocked!",
+          "ordinal": 21,
+          "type_info": "Bool"
+        },
+        {
+          "name": "flagged!",
+          "ordinal": 22,
+          "type_info": "Bool"
+        },
+        {
+          "name": "last_login?: DateTime<Utc>",
+          "ordinal": 23,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        false,
+        true,
+        false,
+        null,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "UuidArray"
+        ]
+      }
+    },
+    "query": "\nwith account_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.is_trial,\n        subscription.amount_due,\n        user_account.admin,\n        school.school_id,\n        school.school_name,\n        account.account_id,\n        account.tier_override\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end,\n            is_trial\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n)\nselect  \"user\".id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end)                  as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.is_trial as \"is_trial?\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.school_id as \"school_id?: SchoolId\",\n        account_cte.school_name::text as \"school_name?\",\n        account_cte.account_id as \"account_id?: AccountId\",\n        account_cte.tier_override as \"tier_override?: PlanTier\",\n        user_auth_google.google_id as \"google_auth?: String\",\n        (\"user\".blocked or (\"user\".flagged and \"user\".created_at <= now() - interval '1 day')) as \"blocked!\",\n        \"user\".flagged as \"flagged!\",\n        (\n            select created_at as \"last_login?\"\n            from session\n            where session.user_id = \"user\".id\n            order by created_at desc\n            limit 1\n        ) as \"last_login?: DateTime<Utc>\"\nfrom \"user\"\nleft join account_cte on \"user\".id = account_cte.user_id\nleft join user_auth_google on user_auth_google.user_id = \"user\".id\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
+  },
   "86b018a6740d90547e7a7ee620398484bbb935a953433386139b520efc356188": {
     "describe": {
       "columns": [],
@@ -9280,6 +9230,28 @@
     },
     "query": "insert into resource (creator_id, author_id, live_id, draft_id) values ($1, $1, $2, $3) returning id"
   },
+  "8cf2744ed80c0a29f88aca252ed083082997cc4705984f5c4235f9bb7b4aaa36": {
+    "describe": {
+      "columns": [
+        {
+          "name": "user_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Int2",
+          "Int2"
+        ]
+      }
+    },
+    "query": "\nupdate session\nset last_used = now()\nwhere\n    token = $1 and\n    expires_at < now() is not true and\n    (scope_mask & $2) = $2 and\n    exists(select 1 from \"user\" where id = session.user_id and blocked = false) and\n    (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))\nreturning user_id\n"
+  },
   "8d478d2f1cd6a9913d7e9ac7fe8b0165ee2a13e6653bcf898035907c4cb1ee41": {
     "describe": {
       "columns": [
@@ -9364,158 +9336,6 @@
       }
     },
     "query": "\nselect media_id,\n       kind as \"kind: MediaKind\"\nfrom web_media_library_url\ninner join web_media_library on id = media_id\nwhere media_url = $1"
-  },
-  "8decdb4fd84cbeb08e7feb3a648c0d9b04143554fa28e14958de4e8195003dc3": {
-    "describe": {
-      "columns": [
-        {
-          "name": "id!: UserId",
-          "ordinal": 0,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "username",
-          "ordinal": 1,
-          "type_info": "Text"
-        },
-        {
-          "name": "given_name",
-          "ordinal": 2,
-          "type_info": "Text"
-        },
-        {
-          "name": "family_name",
-          "ordinal": 3,
-          "type_info": "Text"
-        },
-        {
-          "name": "email!",
-          "ordinal": 4,
-          "type_info": "Text"
-        },
-        {
-          "name": "language_emails",
-          "ordinal": 5,
-          "type_info": "Text"
-        },
-        {
-          "name": "created_at!",
-          "ordinal": 6,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "badge?: UserBadge",
-          "ordinal": 7,
-          "type_info": "Int2"
-        },
-        {
-          "name": "organization",
-          "ordinal": 8,
-          "type_info": "Text"
-        },
-        {
-          "name": "location",
-          "ordinal": 9,
-          "type_info": "Jsonb"
-        },
-        {
-          "name": "plan_type?: PlanType",
-          "ordinal": 10,
-          "type_info": "Int2"
-        },
-        {
-          "name": "subscription_status?: SubscriptionStatus",
-          "ordinal": 11,
-          "type_info": "Int2"
-        },
-        {
-          "name": "is_trial?",
-          "ordinal": 12,
-          "type_info": "Bool"
-        },
-        {
-          "name": "current_period_end?: DateTime<Utc>",
-          "ordinal": 13,
-          "type_info": "Timestamptz"
-        },
-        {
-          "name": "amount_due_in_cents?: AmountInCents",
-          "ordinal": 14,
-          "type_info": "Int8"
-        },
-        {
-          "name": "is_admin?",
-          "ordinal": 15,
-          "type_info": "Bool"
-        },
-        {
-          "name": "school_id?: SchoolId",
-          "ordinal": 16,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "school_name?",
-          "ordinal": 17,
-          "type_info": "Text"
-        },
-        {
-          "name": "account_id?: AccountId",
-          "ordinal": 18,
-          "type_info": "Uuid"
-        },
-        {
-          "name": "tier_override?: PlanTier",
-          "ordinal": 19,
-          "type_info": "Int2"
-        },
-        {
-          "name": "google_auth?: String",
-          "ordinal": 20,
-          "type_info": "Text"
-        },
-        {
-          "name": "blocked!",
-          "ordinal": 21,
-          "type_info": "Bool"
-        },
-        {
-          "name": "last_login?: DateTime<Utc>",
-          "ordinal": 22,
-          "type_info": "Timestamptz"
-        }
-      ],
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        null,
-        false,
-        false,
-        null,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
-        true,
-        false,
-        false,
-        null,
-        false,
-        true,
-        false,
-        false,
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "UuidArray"
-        ]
-      }
-    },
-    "query": "\nwith account_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.is_trial,\n        subscription.amount_due,\n        user_account.admin,\n        school.school_id,\n        school.school_name,\n        account.account_id,\n        account.tier_override\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end,\n            is_trial\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n)\nselect  \"user\".id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end)                  as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.is_trial as \"is_trial?\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.school_id as \"school_id?: SchoolId\",\n        account_cte.school_name::text as \"school_name?\",\n        account_cte.account_id as \"account_id?: AccountId\",\n        account_cte.tier_override as \"tier_override?: PlanTier\",\n        user_auth_google.google_id as \"google_auth?: String\",\n        \"user\".blocked as \"blocked!\",\n        (\n            select created_at as \"last_login?\"\n            from session\n            where session.user_id = \"user\".id\n            order by created_at desc\n            limit 1\n        ) as \"last_login?: DateTime<Utc>\"\nfrom \"user\"\nleft join account_cte on \"user\".id = account_cte.user_id\nleft join user_auth_google on user_auth_google.user_id = \"user\".id\ninner join user_profile on \"user\".id = user_profile.user_id\ninner join user_email on user_email.user_id = \"user\".id\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n"
   },
   "8e278a448877e906fbdfe221d23c9031f6743cf41d893d9f0209ad3220d75927": {
     "describe": {
@@ -11301,28 +11121,6 @@
     },
     "query": "\nupdate user_color\nset index = index - 1\nwhere index > $2 and user_id = $1\n"
   },
-  "a8fa6e4cd0a54bddeb7aae6e2ab852fb0045ef4fd482cbfd1bf083ad069a4b2f": {
-    "describe": {
-      "columns": [
-        {
-          "name": "count!",
-          "ordinal": 0,
-          "type_info": "Int8"
-        }
-      ],
-      "nullable": [
-        null
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Int2Array",
-          "Bool"
-        ]
-      }
-    },
-    "query": "\n        with cte as (\n            select (array_agg(user_profile.user_id))[1]\n            from user_profile\n            inner join \"user\" on \"user\".id = user_profile.user_id\n            inner join user_email on user_email.user_id = user_profile.user_id\n            where (\"user\".id = $1 or $1 is null)\n            and (user_profile.badge = any($2) or $2 = array[]::smallint[])\n            and (\"user\".blocked = $3 or $3 is null)\n            group by \"user\".created_at\n            order by \"user\".created_at desc\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n        "
-  },
   "a927e1b316983d98397a454a3198b08fcd37cb54056c0a5e57c18bbfcaa0985c": {
     "describe": {
       "columns": [
@@ -11610,6 +11408,18 @@
       }
     },
     "query": "\nupdate resource_curation_data\nset categories = $2\nwhere resource_id = $1 and $2 is distinct from categories\n            "
+  },
+  "ad0b1e39319dd7db547248eafe5339d81671cce6a007bbf280c9dbcf6ad1a33a": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "update user_profile set updated_at = now() where user_id = $1"
   },
   "adad83fde1425f52663ff929d8ba0cddfb5c8ce75ebe0d255e17e35c5d938073": {
     "describe": {
@@ -13564,6 +13374,169 @@
     },
     "query": "\nselect id                                   as \"id!: ReportId\",\n       resource_id                               as \"resource_id!: ResourceId\",    \n       report_type                          as \"report_type!: ResourceReportType\",                  \n       created_at,\n       reporter_id                          as \"reporter_id?: uuid::Uuid\",\n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = reporter_id\n        )                                       as \"name?\",\n        (\n            select email::text\n            from user_email\n            where user_email.user_id = reporter_id\n        )                                       as \"email?\"\nfrom resource_report\nwhere id = $1 and resource_id = $2\n"
   },
+  "c868a0096a2f10b9495f3e430f5614648372b8b6fac71d954951e9d3c7e8600d": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!: UserId",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!",
+          "ordinal": 4,
+          "type_info": "Text"
+        },
+        {
+          "name": "language_emails",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "created_at!",
+          "ordinal": 6,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "badge?: UserBadge",
+          "ordinal": 7,
+          "type_info": "Int2"
+        },
+        {
+          "name": "organization",
+          "ordinal": 8,
+          "type_info": "Text"
+        },
+        {
+          "name": "location",
+          "ordinal": 9,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "plan_type?: PlanType",
+          "ordinal": 10,
+          "type_info": "Int2"
+        },
+        {
+          "name": "subscription_status?: SubscriptionStatus",
+          "ordinal": 11,
+          "type_info": "Int2"
+        },
+        {
+          "name": "current_period_end?: DateTime<Utc>",
+          "ordinal": 12,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "is_trial?",
+          "ordinal": 13,
+          "type_info": "Bool"
+        },
+        {
+          "name": "amount_due_in_cents?: AmountInCents",
+          "ordinal": 14,
+          "type_info": "Int8"
+        },
+        {
+          "name": "is_admin?",
+          "ordinal": 15,
+          "type_info": "Bool"
+        },
+        {
+          "name": "school_id?: SchoolId",
+          "ordinal": 16,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "school_name?",
+          "ordinal": 17,
+          "type_info": "Text"
+        },
+        {
+          "name": "account_id?: AccountId",
+          "ordinal": 18,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "tier_override?: PlanTier",
+          "ordinal": 19,
+          "type_info": "Int2"
+        },
+        {
+          "name": "google_auth?: String",
+          "ordinal": 20,
+          "type_info": "Text"
+        },
+        {
+          "name": "blocked!",
+          "ordinal": 21,
+          "type_info": "Bool"
+        },
+        {
+          "name": "flagged!",
+          "ordinal": 22,
+          "type_info": "Bool"
+        },
+        {
+          "name": "last_login?: DateTime<Utc>",
+          "ordinal": 23,
+          "type_info": "Timestamptz"
+        }
+      ],
+      "nullable": [
+        null,
+        false,
+        false,
+        false,
+        null,
+        false,
+        false,
+        null,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        null,
+        false,
+        true,
+        false,
+        null,
+        false,
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int8",
+          "Int8",
+          "Int2Array",
+          "Bool",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nwith cte as (\n    select (array_agg(user_profile.user_id))[1]\n    from user_profile\n        inner join \"user\" on \"user\".id = user_profile.user_id\n        inner join user_email on user_profile.user_id = user_email.user_id\n    where (user_profile.user_id = $1 or $1 is null)\n      and (user_profile.badge = any($4) or $4 = array[]::smallint[])\n      and (\"user\".blocked = $5 or $5 is null)\n      and (\"user\".flagged = $6 or $6 is null)\n    group by \"user\".created_at\n    order by \"user\".created_at desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n),\naccount_cte as (\n    select\n        user_account.user_id,\n        subscription_plan.plan_type,\n        subscription.status,\n        subscription.current_period_end,\n        subscription.amount_due,\n        subscription.is_trial,\n        user_account.admin,\n        school.school_id,\n        school.school_name,\n        account.account_id,\n        account.tier_override\n    from user_account\n    inner join account using (account_id)\n    left join (\n        select\n            subscription.account_id,\n            status,\n            amount_due,\n            subscription_plan_id,\n            current_period_end,\n            is_trial\n        from subscription\n        join (\n            select\n                distinct on (account_id)\n                account_id, subscription_id\n            from subscription\n            order by account_id, created_at desc\n        ) as recent_subscription using (subscription_id)\n    ) as subscription using (account_id)\n    left join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\n    left join school using (account_id)\n)\nselect  cte1.id                 as \"id!: UserId\",\n        username,\n        given_name,\n        family_name,\n        user_email.email::text as \"email!\",\n        language_emails,\n        user_email.created_at  as \"created_at!\",\n        (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n        organization,\n        location,\n        account_cte.plan_type as \"plan_type?: PlanType\",\n        account_cte.status as \"subscription_status?: SubscriptionStatus\",\n        account_cte.current_period_end as \"current_period_end?: DateTime<Utc>\",\n        account_cte.is_trial as \"is_trial?\",\n        account_cte.amount_due as \"amount_due_in_cents?: AmountInCents\",\n        account_cte.admin as \"is_admin?\",\n        account_cte.school_id as \"school_id?: SchoolId\",\n        account_cte.school_name::text as \"school_name?\",\n        account_cte.account_id as \"account_id?: AccountId\",\n        account_cte.tier_override as \"tier_override?: PlanTier\",\n        user_auth_google.google_id as \"google_auth?: String\",\n        (\"user\".blocked or (\"user\".flagged and \"user\".created_at <= now() - interval '1 day')) as \"blocked!\",\n        \"user\".flagged as \"flagged!\",\n        (\n            select created_at as \"last_login?\"\n            from session\n            where session.user_id = \"user\".id\n            order by created_at desc\n            limit 1\n        ) as \"last_login?: DateTime<Utc>\"\nfrom cte1\n        inner join \"user\" on cte1.id = \"user\".id\n        left join account_cte on cte1.id = account_cte.user_id\n        left join user_auth_google on user_auth_google.user_id = cte1.id\n        inner join user_profile on cte1.id = user_profile.user_id\n        inner join user_email on cte1.id = user_email.user_id\norder by ord asc\nlimit $3\noffset $2\n"
+  },
   "c87091f51c107a335c2fc82f47b88c2d2b30d021e0c0866f0e2a3a4c0210c1fd": {
     "describe": {
       "columns": [
@@ -14898,6 +14871,29 @@
     },
     "query": "\ninsert into course_data\n(display_name, created_at, updated_at, language, last_synced_at, description, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom course_data\nwhere id = $1\nreturning id\n        "
   },
+  "de902c52fa052824d9e35247b07b2a6ec2a3dab6db1489d5733da476d799d620": {
+    "describe": {
+      "columns": [
+        {
+          "name": "count!",
+          "ordinal": 0,
+          "type_info": "Int8"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Int2Array",
+          "Bool",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\n        with cte as (\n            select (array_agg(user_profile.user_id))[1]\n            from user_profile\n            inner join \"user\" on \"user\".id = user_profile.user_id\n            inner join user_email on user_email.user_id = user_profile.user_id\n            where (\"user\".id = $1 or $1 is null)\n            and (user_profile.badge = any($2) or $2 = array[]::smallint[])\n            and (\"user\".blocked = $3 or $3 is null)\n            and (\"user\".flagged = $4 or $4 is null)\n            group by \"user\".created_at\n            order by \"user\".created_at desc\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n        "
+  },
   "df0f36024a994b31c943b7efa75bb1c59caf04d634e6e6f49bd0c7cf0e5bad08": {
     "describe": {
       "columns": [],
@@ -15145,6 +15141,89 @@
     },
     "query": "\nupdate subscription\nset\n    amount_due = $2\nwhere stripe_subscription_id = $1\n"
   },
+  "e8a7bc1d1346cd6fb3f96b150b361595b151dfb7664532a10d6de653f0ac14f4": {
+    "describe": {
+      "columns": [
+        {
+          "name": "id!",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        },
+        {
+          "name": "username!",
+          "ordinal": 1,
+          "type_info": "Text"
+        },
+        {
+          "name": "given_name!",
+          "ordinal": 2,
+          "type_info": "Text"
+        },
+        {
+          "name": "family_name!",
+          "ordinal": 3,
+          "type_info": "Text"
+        },
+        {
+          "name": "email!: String",
+          "ordinal": 4,
+          "type_info": {
+            "Custom": {
+              "kind": "Simple",
+              "name": "citext"
+            }
+          }
+        },
+        {
+          "name": "language_emails!",
+          "ordinal": 5,
+          "type_info": "Text"
+        },
+        {
+          "name": "organization?",
+          "ordinal": 6,
+          "type_info": "Text"
+        },
+        {
+          "name": "location?",
+          "ordinal": 7,
+          "type_info": "Jsonb"
+        },
+        {
+          "name": "created_at",
+          "ordinal": 8,
+          "type_info": "Timestamptz"
+        },
+        {
+          "name": "blocked!",
+          "ordinal": 9,
+          "type_info": "Bool"
+        },
+        {
+          "name": "flagged!",
+          "ordinal": 10,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "\n     select up.user_id                               as \"id!\",\n            username                                 as \"username!\",\n            given_name                               as \"given_name!\",\n            family_name                              as \"family_name!\",\n            email                                    as \"email!: String\",\n            language_emails                          as \"language_emails!\",\n            organization                             as \"organization?\",\n            location                                 as \"location?\",\n            user_email.created_at                    as \"created_at\",\n            \"user\".blocked                           as \"blocked!\",\n            \"user\".flagged                           as \"flagged!\"\nfrom user_profile \"up\"\n        inner join \"user\" on \"user\".id = up.user_id\n        inner join user_email on user_email.user_id = up.user_id\nwhere (last_synced_at is null or\n       (up.updated_at is not null and last_synced_at < up.updated_at))\nlimit 100 for no key update skip locked;\n     "
+  },
   "e8cac1c4331f80bc9b4d3eb878d98fb1650ea401e669cfa5154971251776f17d": {
     "describe": {
       "columns": [],
@@ -15277,6 +15356,19 @@
       }
     },
     "query": "\nupdate course_data\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description"
+  },
+  "ec4ea2b8d6b8ce9940095850ca72b9a33b1e83e18bf87537c15dc5c05362da4f": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\nupdate \"user\"\nset blocked = $2,\n    flagged = case when $2 = false then false else flagged end\nwhere id = $1\nand ($2 is distinct from blocked or ($2 = false and flagged = true))\n            "
   },
   "ec58db6f7417f0821c8a35acb1da226c7206c7614b4b5f9ab890693e0b9d9e41": {
     "describe": {

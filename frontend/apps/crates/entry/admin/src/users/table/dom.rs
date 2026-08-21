@@ -33,12 +33,27 @@ impl UsersTable {
                         html!("option", {
                             .text("All users")
                             .prop("value", "all")
-                            .prop_signal("selected", state.users_state.blocked_filter.signal().map(|f| f.is_none()))
+                            .prop_signal("selected", map_ref! {
+                                let blocked = state.users_state.blocked_filter.signal(),
+                                let flagged = state.users_state.flagged_filter.signal() => {
+                                    blocked.is_none() && flagged.is_none()
+                                }
+                            })
                         }),
                         html!("option", {
                             .text("Active only")
                             .prop("value", "active")
-                            .prop_signal("selected", state.users_state.blocked_filter.signal().map(|f| f == Some(false)))
+                            .prop_signal("selected", map_ref! {
+                                let blocked = state.users_state.blocked_filter.signal(),
+                                let flagged = state.users_state.flagged_filter.signal() => {
+                                    *blocked == Some(false) && *flagged == Some(false)
+                                }
+                            })
+                        }),
+                        html!("option", {
+                            .text("Flagged only")
+                            .prop("value", "flagged")
+                            .prop_signal("selected", state.users_state.flagged_filter.signal().map(|f| f == Some(true)))
                         }),
                         html!("option", {
                             .text("Blocked only")
@@ -48,13 +63,15 @@ impl UsersTable {
                     ])
                     .event(clone!(state, select => move |_: events::Change| {
                         let value = select.value();
-                        let blocked_filter = match value.as_str() {
-                            "all" => None,
-                            "active" => Some(false),
-                            "blocked" => Some(true),
-                            _ => Some(false),
+                        let (blocked_filter, flagged_filter) = match value.as_str() {
+                            "all" => (None, None),
+                            "active" => (Some(false), Some(false)),
+                            "flagged" => (Some(false), Some(true)),
+                            "blocked" => (Some(true), None),
+                            _ => (Some(false), Some(false)),
                         };
                         state.users_state.blocked_filter.set(blocked_filter);
+                        state.users_state.flagged_filter.set(flagged_filter);
                         state.users_state.active_page.set(0);
                         state.users_state.load_data();
                     }))
@@ -231,6 +248,9 @@ impl UsersTable {
                                     state.save_admin_data(&user);
                                 }))
                             }))
+                        }),
+                        html!("span", {
+                            .text(if user.flagged { "Yes" } else { "No" })
                         }),
                         html!("label", {
                             .child(html!("select" => HtmlSelectElement, {

@@ -423,6 +423,10 @@ pub struct UserResponse {
     #[serde(default)]
     pub blocked: bool,
 
+    /// Whether the user is flagged for signup review.
+    #[serde(default)]
+    pub flagged: bool,
+
     /// Last time the user logged in
     #[serde(default)]
     pub last_login: Option<DateTime<Utc>>,
@@ -914,6 +918,11 @@ pub struct UserBrowseQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub blocked: Option<bool>,
+
+    /// Optional filter for signup review status.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flagged: Option<bool>,
 }
 
 /// Response for [`Browse`](crate::api::endpoints::user::Browse).
@@ -961,6 +970,16 @@ pub struct UserSearchQuery {
     #[serde(default)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub page_limit: Option<u32>,
+
+    /// Optional filter for blocked status.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub blocked: Option<bool>,
+
+    /// Optional filter for signup review status.
+    #[serde(default)]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub flagged: Option<bool>,
 }
 
 /// Response for [`Search`](crate::api::endpoints::user::Search).

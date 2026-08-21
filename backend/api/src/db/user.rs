@@ -163,6 +163,7 @@ pub async fn browse(
     page_limit: u32,
     badge: Vec<UserBadge>,
     blocked: Option<bool>,
+    flagged: Option<bool>,
 ) -> sqlx::Result<Vec<UserResponse>> {
     let mut txn = db.begin().await?;
 
@@ -179,6 +180,7 @@ with cte as (
     where (user_profile.user_id = $1 or $1 is null)
       and (user_profile.badge = any($4) or $4 = array[]::smallint[])
       and ("user".blocked = $5 or $5 is null)
+      and ("user".flagged = $6 or $6 is null)
     group by "user".created_at
     order by "user".created_at desc
 ),
@@ -242,7 +244,8 @@ select  cte1.id                 as "id!: UserId",
         account_cte.account_id as "account_id?: AccountId",
         account_cte.tier_override as "tier_override?: PlanTier",
         user_auth_google.google_id as "google_auth?: String",
-        "user".blocked as "blocked!",
+        ("user".blocked or ("user".flagged and "user".created_at <= now() - interval '1 day')) as "blocked!",
+        "user".flagged as "flagged!",
         (
             select created_at as "last_login?"
             from session
@@ -264,7 +267,8 @@ offset $2
         (page * page_limit as i32) as i32,
         page_limit as i32,
         &badges[..],
-        blocked
+        blocked,
+        flagged,
     )
     .fetch_all(&mut txn)
     .instrument(tracing::info_span!("query user_profile"))
@@ -304,6 +308,7 @@ offset $2
                     UserLoginType::Email
                 },
                 blocked: user_row.blocked,
+                flagged: user_row.flagged,
                 last_login: user_row.last_login,
             }
         })
@@ -376,7 +381,8 @@ select  "user".id                 as "id!: UserId",
         account_cte.account_id as "account_id?: AccountId",
         account_cte.tier_override as "tier_override?: PlanTier",
         user_auth_google.google_id as "google_auth?: String",
-        "user".blocked as "blocked!",
+        ("user".blocked or ("user".flagged and "user".created_at <= now() - interval '1 day')) as "blocked!",
+        "user".flagged as "flagged!",
         (
             select created_at as "last_login?"
             from session
@@ -431,6 +437,7 @@ with ordinality t(id, ord) using (id)
                     UserLoginType::Email
                 },
                 blocked: row.blocked,
+                flagged: row.flagged,
                 last_login: row.last_login,
             }
         })
@@ -920,9 +927,10 @@ and ($2 is distinct from badge)
             //language=SQL
             r#"
 update "user"
-set blocked = $2
+set blocked = $2,
+    flagged = case when $2 = false then false else flagged end
 where id = $1
-and ($2 is distinct from blocked)
+and ($2 is distinct from blocked or ($2 = false and flagged = true))
             "#,
             user_id.0,
             blocked,
@@ -1391,6 +1399,7 @@ pub async fn filtered_count(
     user_id: Option<UserId>,
     badge: Vec<UserBadge>,
     blocked: Option<bool>,
+    flagged: Option<bool>,
 ) -> sqlx::Result<u64> {
     let badges: Vec<i16> = badge.iter().map(|x| *x as i16).collect();
 
@@ -1405,6 +1414,7 @@ pub async fn filtered_count(
             where ("user".id = $1 or $1 is null)
             and (user_profile.badge = any($2) or $2 = array[]::smallint[])
             and ("user".blocked = $3 or $3 is null)
+            and ("user".flagged = $4 or $4 is null)
             group by "user".created_at
             order by "user".created_at desc
         )
@@ -1412,7 +1422,8 @@ pub async fn filtered_count(
         "#,
         user_id.map(|it| it.0),
         &badges[..],
-        blocked
+        blocked,
+        flagged,
     )
     .fetch_one(db)
     .await?;

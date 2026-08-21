@@ -529,7 +529,38 @@ from user_auth_basic where email = $1::text
             .await;
 
             match res {
-                Ok(Ok(res)) => Ok(res),
+                Ok(Ok(res)) => {
+                    let blocked = sqlx::query!(
+                        r#"
+update "user"
+set blocked = true
+where id = $1
+and flagged = true
+and created_at <= now() - interval '1 day'
+returning id
+                        "#,
+                        res.id.0,
+                    )
+                    .fetch_optional(&db)
+                    .await
+                    .map_err(Into::into)
+                    .map_err(crate::error::ise)?;
+
+                    if blocked.is_some() {
+                        sqlx::query!(
+                            "update user_profile set updated_at = now() where user_id = $1",
+                            res.id.0,
+                        )
+                        .execute(&db)
+                        .await
+                        .map_err(Into::into)
+                        .map_err(crate::error::ise)?;
+
+                        return Err(BasicError::new(StatusCode::UNAUTHORIZED).into());
+                    }
+
+                    Ok(res)
+                }
                 Ok(Err(Either::Right(e))) => Err(crate::error::ise(e)),
                 Ok(Err(Either::Left(e))) => Err(e.into()),
                 Err(e) => Err(crate::error::ise(anyhow::anyhow!("{}", e))),

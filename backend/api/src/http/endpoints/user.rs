@@ -1194,6 +1194,7 @@ async fn browse(
         page_limit,
         query.badge.to_owned(),
         query.blocked,
+        query.flagged,
     );
 
     let total_count_future = db::user::filtered_count(
@@ -1201,6 +1202,7 @@ async fn browse(
         query.user_id,
         query.badge.to_owned(),
         query.blocked,
+        query.flagged,
     );
 
     let (users, total_count) = try_join!(browse_future, total_count_future,)?;
@@ -1227,7 +1229,14 @@ pub async fn search(
     let page_limit = page_limit(query.page_limit).await?;
 
     let (ids, pages, total_hits) = algolia
-        .search_user(&query.q, query.user_id, page_limit, query.page)
+        .search_user(
+            &query.q,
+            query.user_id,
+            page_limit,
+            query.page,
+            query.blocked,
+            query.flagged,
+        )
         .await?
         .ok_or_else(|| ServiceError::DisabledService(ServiceKindError::Algolia))?;
 
