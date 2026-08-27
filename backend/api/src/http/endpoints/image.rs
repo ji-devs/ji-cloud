@@ -87,7 +87,7 @@ for share of image_metadata
         "#,
         id.0
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .map(|it| it.size);
 

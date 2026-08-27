@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect exists(select 1 from user_scope where user_id = $1 and scope = any($2)) as \"authed!\"\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "authed!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2Array"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "87c78754f010d2cd7d18cc1024071cfd6d00983eb0d01153d7b4ad368ba20f71"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into circle_member(id, user_id) values($1, $2)\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "37733ecf394ecc562185c51b3465186f6c539f6b456c8c6a19a8929b710b7587"
+}

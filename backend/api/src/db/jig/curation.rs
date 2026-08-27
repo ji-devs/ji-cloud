@@ -40,7 +40,7 @@ where jig_id = $1 and $2 is distinct from display_name
             jig_id.0,
             display_name,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -55,7 +55,7 @@ where jig_id = $1 and $2 is distinct from language
             jig_id.0,
             language,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -70,7 +70,7 @@ where jig_id = $1 and $2 is distinct from categories
             jig_id.0,
             categories,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -85,7 +85,7 @@ where jig_id = $1 and $2 is distinct from categories
             jig_id.0,
             description,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -100,7 +100,7 @@ where jig_id = $1 and $2 is distinct from categories
             jig_id.0,
             age_ranges,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -115,7 +115,7 @@ where jig_id = $1 and $2 is distinct from categories
             jig_id.0,
             affiliations,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -131,7 +131,7 @@ where jig_id = $1 and $2 is distinct from categories
             jig_id.0,
             additional_resources,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -146,7 +146,7 @@ where jig_id = $1 and $2 is distinct from categories
             jig_id.0,
             curation_status as i16,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -158,7 +158,7 @@ where jig_id = $1 and $2 is distinct from categories
     "#,
         jig_id.0,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;

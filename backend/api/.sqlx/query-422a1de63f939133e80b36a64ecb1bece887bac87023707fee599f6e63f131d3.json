@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select admin from user_account where user_id = $1 and account_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "admin",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_account",
+            "name": "admin"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "422a1de63f939133e80b36a64ecb1bece887bac87023707fee599f6e63f131d3"
+}

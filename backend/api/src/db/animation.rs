@@ -9,7 +9,7 @@ pub async fn delete(db: &PgPool, animation: AnimationId) -> sqlx::Result<Option<
         r#"delete from animation_metadata where id = $1 returning kind as "kind: AnimationKind""#,
         animation.0
     )
-    .fetch_optional(&mut conn)
+    .fetch_optional(&mut *conn)
     .await?
     .map(|it| it.kind);
     conn.commit().await?;

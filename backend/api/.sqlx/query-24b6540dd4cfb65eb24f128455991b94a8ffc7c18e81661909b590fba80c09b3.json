@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect id as \"id: JigId\"\nfrom jig\nwhere jig_focus = 1\nlimit 150\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: JigId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "24b6540dd4cfb65eb24f128455991b94a8ffc7c18e81661909b590fba80c09b3"
+}

@@ -1,0 +1,205 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with cte as (\n            select array_agg(jd.id)\n            from jig_data \"jd\"\n                  inner join jig on (draft_id = jd.id or (live_id = jd.id and jd.last_synced_at is not null and published_at is not null))\n                  left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n                  left join jig_data_additional_resource \"resource\" on jd.id = resource.jig_data_id\n            where (jd.draft_or_live = $1)\n            group by updated_at, created_at, jig.published_at, admin.jig_id\n        ),\n        cte1 as (\n            select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord) order by ord\n        )\n        select jig.id                                           as \"jig_id: JigId\",\n            privacy_level                                       as \"privacy_level: PrivacyLevel\",\n            creator_id                                          as \"creator_id?: UserId\",\n            author_id                                           as \"author_id?: UserId\",\n            (select given_name || ' '::text || family_name\n                from user_profile\n             where user_profile.user_id = author_id)            as \"author_name\",\n            created_at,\n            published_at,\n            liked_count,\n            exists(select 1 from jig_like where jig_id = jig.id) as \"is_liked!\",\n            (\n                 select play_count\n                 from jig_play_count\n                 where jig_play_count.jig_id = jig.id\n            )                                                   as \"play_count!\",\n            display_name                                        as \"display_name!\",\n            language                                            as \"language!\",\n            description                                         as \"description!\",\n            rating                                              as \"rating!: Option<JigRating>\",\n            blocked                                             as \"blocked!\",\n            curated                                             as \"curated!\",\n            is_premium                                          as \"premium!\"\n        from cte1\n        inner join jig_data on cte1.id = jig_data.id\n        inner join jig on (\n            jig_data.id = jig.draft_id\n            or (\n                jig_data.id = jig.live_id\n                and last_synced_at is not null\n                and jig.published_at is not null\n            )\n        )\n        left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "jig_id: JigId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "privacy_level: PrivacyLevel",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "privacy_level"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "creator_id?: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "creator_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "author_id?: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "liked_count",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "liked_count"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "is_liked!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "play_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "language!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "language"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "description!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "rating!: Option<JigRating>",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_admin_data",
+            "name": "rating"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "blocked!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_admin_data",
+            "name": "blocked"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "curated!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_admin_data",
+            "name": "curated"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "premium!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_admin_data",
+            "name": "is_premium"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "7478e982839bc69ee3865309aab8293af6e60ccdc6dd80e13cf829603a276dea"
+}

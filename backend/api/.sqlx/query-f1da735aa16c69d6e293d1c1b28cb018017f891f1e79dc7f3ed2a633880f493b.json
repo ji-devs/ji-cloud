@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect count(*) as \"count!: i64\"\nfrom resource_data\ninner join resource on resource.live_id = resource_data.id\nwhere (privacy_level = coalesce($1, privacy_level))\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!: i64",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f1da735aa16c69d6e293d1c1b28cb018017f891f1e79dc7f3ed2a633880f493b"
+}

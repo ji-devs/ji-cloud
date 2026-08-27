@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        delete from \"user\" \n        using session\n        where \"user\".id = session.user_id \n        and (scope_mask & $1) = $1 \n        and expires_at <= now() \n     ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "608570654b76fe283fddb937731c721ebfee382fd9004821681ba0ebaaa953f6"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete from resource_like\nwhere resource_id = $1 and user_id = $2\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2771396d20d869e9cec94affe1be6219c175fd8b0303f0f7fa33ffbb11c1cc01"
+}

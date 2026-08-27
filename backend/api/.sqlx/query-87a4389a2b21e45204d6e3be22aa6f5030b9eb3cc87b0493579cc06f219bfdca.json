@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete\nfrom resource_data_resource\nwhere (resource_data_id = $1 or resource_data_id = $2)\n  and id = $3\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "87a4389a2b21e45204d6e3be22aa6f5030b9eb3cc87b0493579cc06f219bfdca"
+}

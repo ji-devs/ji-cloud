@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete from course_data where id = $1\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ed07a0bf0907ac9428772e386480174ad64a167e00993a53743e1c3b9b33ce08"
+}

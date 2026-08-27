@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            select\n                jig_data.display_name as \"display_name!\",\n                jig_data.description as \"description!\",\n                jig_data.other_keywords as \"other_keywords!\",\n                (\n                    select id\n                    from jig_data_module\n                    where jig_data_id = jig_data.id\n                    order by \"index\"\n                    limit 1\n                ) as \"cover_module_id?: ModuleId\"\n            from jig\n                inner join jig_data on jig_data.id = coalesce(jig.live_id, jig.draft_id)\n            where jig.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "description!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "other_keywords!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "other_keywords"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "cover_module_id?: ModuleId",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "ad37ecd3e4c4819634675daeb60993655c70c0cfa964cfb053cbb0904d45b38d"
+}

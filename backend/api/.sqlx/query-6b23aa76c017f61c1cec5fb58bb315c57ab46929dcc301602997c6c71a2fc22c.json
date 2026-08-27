@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate resource_data\nset privacy_level = coalesce($2, privacy_level)\nwhere id = $1\n  and $2 is distinct from privacy_level\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6b23aa76c017f61c1cec5fb58bb315c57ab46929dcc301602997c6c71a2fc22c"
+}

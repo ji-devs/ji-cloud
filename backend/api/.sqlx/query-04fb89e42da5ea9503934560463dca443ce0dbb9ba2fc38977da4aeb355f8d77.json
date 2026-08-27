@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_play_count\nset play_count = play_count + 1\nwhere jig_id = $1;\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "04fb89e42da5ea9503934560463dca443ce0dbb9ba2fc38977da4aeb355f8d77"
+}

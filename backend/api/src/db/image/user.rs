@@ -19,13 +19,13 @@ returning id as "id: ImageId"
         user_id.0,
         size as i16,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .instrument(tracing::info_span!("inser user_image_library"))
     .await?
     .id;
 
     sqlx::query!("insert into user_image_upload (image_id) values ($1)", id.0)
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .instrument(tracing::info_span!("inser user_image_upload"))
         .await?;
 

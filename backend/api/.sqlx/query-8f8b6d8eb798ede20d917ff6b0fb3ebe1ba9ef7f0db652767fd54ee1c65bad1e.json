@@ -1,0 +1,113 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                    select code as \"code!: i32\",\n                        jig_id as \"jig_id: JigId\",\n                        direction as \"direction: TextDirection\",\n                        scoring,\n                        drag_assist,\n                        name as \"name?\",\n                        created_at as \"created_at: DateTime<Utc>\",\n                        expires_at as \"expires_at: DateTime<Utc>\"\n                    from jig_code\n                    where jig_id = $1 and creator_id = $2\n                    order by created_at desc\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code!: i32",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "jig_id: JigId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "jig_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "direction: TextDirection",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "direction"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "scoring",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "scoring"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "drag_assist",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "drag_assist"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at: DateTime<Utc>",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "expires_at: DateTime<Utc>",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "expires_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "8f8b6d8eb798ede20d917ff6b0fb3ebe1ba9ef7f0db652767fd54ee1c65bad1e"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate category\nset updated_at = now(),\n    index = least((select count(*)::int2 from category c where c.parent_id is not distinct from parent_id), $1)\nwhere id = $2\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int2",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0978a2ae9cbe0c16d58c15229324bad8325b60d9128b982a6476980be6965677"
+}

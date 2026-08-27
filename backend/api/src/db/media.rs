@@ -72,7 +72,7 @@ where media_url = $1"#,
         &hash,
         kind as i16
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .id;
 
@@ -81,7 +81,7 @@ where media_url = $1"#,
         id,
         &url_string
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     process_web_media_bytes(s3, id, kind, data)
@@ -92,14 +92,14 @@ where media_url = $1"#,
         "insert into web_media_upload (media_id, uploaded_at) values ($1, now())",
         id,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     sqlx::query!(
         "update web_media_upload set processed_at = now(), processing_result = true where media_id = $1",
         id
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;

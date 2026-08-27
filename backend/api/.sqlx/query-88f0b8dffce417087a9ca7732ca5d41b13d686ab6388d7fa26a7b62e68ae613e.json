@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate resource_data_module\nset\n    index = case when index = $2 then $3 else index + 1 end,\n    updated_at = now()\nwhere resource_data_id = $1 and index between $3 and $2\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "88f0b8dffce417087a9ca7732ca5d41b13d686ab6388d7fa26a7b62e68ae613e"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete from image_tag where index = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "aec729ae876f9816b6a64f6527c6e8497140391a8bebb7a00fc5418cb07682a8"
+}

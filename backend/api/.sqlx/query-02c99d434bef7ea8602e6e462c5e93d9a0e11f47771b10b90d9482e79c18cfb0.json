@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "delete from web_media_library_url where media_url = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "02c99d434bef7ea8602e6e462c5e93d9a0e11f47771b10b90d9482e79c18cfb0"
+}

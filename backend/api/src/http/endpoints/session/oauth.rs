@@ -148,7 +148,7 @@ async fn handle_google_oauth(
         "select user_id from user_auth_google where google_id = $1",
         &claims.google_id
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?;
 
     let (user_id, mask) = match &google_auth {
@@ -162,7 +162,7 @@ async fn handle_google_oauth(
                 "#,
                 google_auth.user_id
             )
-            .fetch_one(&mut txn)
+            .fetch_one(&mut *txn)
             .await?;
 
             if check_status.blocked.unwrap_or(false) {
@@ -180,7 +180,7 @@ returning id
                 "#,
                 google_auth.user_id,
             )
-            .fetch_optional(&mut txn)
+            .fetch_optional(&mut *txn)
             .await?;
 
             if blocked.is_some() {
@@ -188,7 +188,7 @@ returning id
                     "update user_profile set updated_at = now() where user_id = $1",
                     google_auth.user_id,
                 )
-                .execute(&mut txn)
+                .execute(&mut *txn)
                 .await?;
 
                 txn.commit().await?;
@@ -206,7 +206,7 @@ returning id
                     r#"select unverified_email::text as "email!" from user_auth_google where user_id = $1 and unverified_email is not null"#,
                     google_auth.user_id
                 )
-                .fetch_one(&mut txn)
+                .fetch_one(&mut *txn)
                 .await
                 .map_err(|_| anyhow::anyhow!("Google auth record missing email"))?;
 
@@ -235,7 +235,7 @@ returning id
                 r#"select exists(select 1 from user_email where email = lower($1::text)) as "exists!""#,
                 &claims.email
             )
-            .fetch_one(&mut txn)
+            .fetch_one(&mut *txn)
             .await?
             .exists;
 
@@ -244,7 +244,7 @@ returning id
             }
 
             let id = sqlx::query!(r#"insert into "user" default values returning id"#)
-                .fetch_one(&mut txn)
+                .fetch_one(&mut *txn)
                 .await?
                 .id;
 
@@ -255,7 +255,7 @@ returning id
                 &claims.google_id,
                 &claims.email
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .await?;
 
             // Send verification email

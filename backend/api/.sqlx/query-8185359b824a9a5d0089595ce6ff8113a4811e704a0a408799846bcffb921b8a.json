@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate course_admin_data\nset\n    rating = coalesce($2, rating),\n    blocked = coalesce($3, blocked),\n    curated = coalesce($4, curated),\n    is_premium = coalesce($5, is_premium)\nwhere course_id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Bool",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8185359b824a9a5d0089595ce6ff8113a4811e704a0a408799846bcffb921b8a"
+}

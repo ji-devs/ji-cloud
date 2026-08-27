@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "delete from locale_entry where id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cd49cef54182b43dd7943bcd51fd3c535f4a8ec0dae95cbc8ceb39f7f757fe02"
+}

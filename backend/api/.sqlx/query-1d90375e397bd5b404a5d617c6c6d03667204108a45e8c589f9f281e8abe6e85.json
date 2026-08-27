@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into course(creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom course\nwhere id = $1\nreturning id as \"id!: CourseId\"\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: CourseId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1d90375e397bd5b404a5d617c6c6d03667204108a45e8c589f9f281e8abe6e85"
+}

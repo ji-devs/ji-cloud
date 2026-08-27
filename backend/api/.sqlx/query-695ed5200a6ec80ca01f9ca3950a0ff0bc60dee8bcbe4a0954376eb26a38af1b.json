@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate resource_data_module\nset contents    = coalesce($3, contents),\n    kind        = coalesce($4, kind),\n    is_complete = coalesce($5, is_complete)\nwhere resource_data_id = $1\n  and index = $2\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Jsonb",
+        "Int2",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "695ed5200a6ec80ca01f9ca3950a0ff0bc60dee8bcbe4a0954376eb26a38af1b"
+}

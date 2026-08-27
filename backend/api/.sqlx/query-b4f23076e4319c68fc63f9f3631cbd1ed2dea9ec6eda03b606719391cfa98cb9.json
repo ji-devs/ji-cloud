@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update school set verified = $2 where school_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b4f23076e4319c68fc63f9f3631cbd1ed2dea9ec6eda03b606719391cfa98cb9"
+}

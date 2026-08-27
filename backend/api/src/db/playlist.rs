@@ -67,7 +67,7 @@ pub async fn create(
         live_id,
         draft_id,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -176,9 +176,9 @@ select cte.playlist_id                                          as "playlist_id:
        other_keywords,
        translated_keywords,
        rating                                               as "rating?: PlaylistRating",
-       blocked                                              as "blocked",
-       curated,
-       is_premium                                           as "premium",
+       blocked                                              as "blocked!",
+       curated                                              as "curated!",
+       is_premium                                           as "premium!",
        exists(select 1 from playlist_like where playlist_id = $1 and user_id = $3) as "is_liked!",
        (
             select row(playlist_data_module.id, playlist_data_module.stable_id, kind, is_complete)
@@ -313,7 +313,7 @@ order by ord asc
         &ids.iter().map(|i| i.0).collect::<Vec<Uuid>>(),
         user_id.map(|x| x.0)
     )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .await?;
 
     let playlist_data_ids: Vec<Uuid> = match draft_or_live {
@@ -366,7 +366,7 @@ order by ord asc
 "#,
         &playlist_data_ids
     )
-        .fetch_all(&mut txn)
+        .fetch_all(&mut *txn)
         .await?;
 
     let v = playlist
@@ -558,7 +558,7 @@ limit $6
     page_limit as i32,
     user_id.map(|x| x.0)
 )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .instrument(tracing::info_span!("query playlist_data"))
     .await?;
 
@@ -667,7 +667,7 @@ select draft_id from playlist join playlist_data on playlist.draft_id = playlist
 "#,
         id.0
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .ok_or(error::UpdateWithMetadata::ResourceNotFound)?
     .draft_id;
@@ -685,7 +685,7 @@ where id = $1
             draft_id,
             privacy_level as i16,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -699,7 +699,7 @@ where id = $1 and $2 is distinct from description"#,
             draft_id,
             description,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -737,7 +737,7 @@ where id = $1 and $2 is distinct from display_name"#,
             draft_id,
             display_name,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -754,7 +754,7 @@ where id = $1
         draft_id,
         language,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     if let Some(categories) = categories {
@@ -824,7 +824,7 @@ where id is not distinct from $3
         live_id,
         id.0,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1131,7 +1131,7 @@ returning id as "id!: PlaylistId"
         new_live_id,
         new_draft_id,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1232,7 +1232,7 @@ where id = $1
     "#,
         id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     //check if Playlist is published and likeable
@@ -1255,7 +1255,7 @@ values ($1, $2)
         id.0,
         user_id.0
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await
     .map_err(|_| anyhow::anyhow!("Cannot like a playlist more than once"))?;
 
@@ -1276,7 +1276,7 @@ where id = $1
     "#,
         id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     //check if playlist has been published and playable
@@ -1328,7 +1328,7 @@ where playlist_id = $1
         admin_data.curated.into_option(),
         admin_data.premium.into_option(),
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     if blocked.is_some() {
@@ -1342,7 +1342,7 @@ where playlist.live_id = $1
             "#,
             playlist_id.0,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 

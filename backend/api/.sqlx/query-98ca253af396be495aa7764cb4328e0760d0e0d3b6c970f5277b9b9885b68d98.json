@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate resource\nset views = views + 1\nwhere id = $1;\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "98ca253af396be495aa7764cb4328e0760d0e0d3b6c970f5277b9b9885b68d98"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect draft_id from course where course.id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "draft_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "draft_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a47efec2570cc4f4dc91ac5cbeeef6c184bfbd3ced34a523919ab35a9ec17fc0"
+}

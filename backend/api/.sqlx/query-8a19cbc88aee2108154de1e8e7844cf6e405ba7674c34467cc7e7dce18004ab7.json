@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect author_id    \"author_id: UserId\",\n       published_at  as \"published_at?\"\nfrom jig\nwhere id = $1\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "author_id: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "published_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "published_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "8a19cbc88aee2108154de1e8e7844cf6e405ba7674c34467cc7e7dce18004ab7"
+}

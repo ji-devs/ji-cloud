@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect exists(select 1 from resource_data_resource \"rdr\" where resource_data_id = $1\n    and rdr.id = $2) as \"exists!\"\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0275b21fac8ef6473d7a30163979cfca243fe9fcfa294dbe0d4d3f8b22ee7c67"
+}

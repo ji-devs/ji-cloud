@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate user_color\nset index = index - 1\nwhere index > $2 and user_id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a87ea4169f26518cbf7f88c1777bd15bbf72f938d6352567cd549bbe970db5f2"
+}

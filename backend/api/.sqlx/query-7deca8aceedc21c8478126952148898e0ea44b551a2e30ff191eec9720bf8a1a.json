@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect count(distinct circle.id) as \"count!: i64\"\n    from circle\n    left join circle_member \"cm\" on cm.id = circle.id\n    where (creator_id = $1 or $1 is null)\n    and (cm.user_id = any($2) or $2 = array[]::uuid[])\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!: i64",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7deca8aceedc21c8478126952148898e0ea44b551a2e30ff191eec9720bf8a1a"
+}

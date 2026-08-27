@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update user_pdf_upload set uploaded_at = now(), processed_at = now(), processing_result = true where pdf_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fedba4f80f775f4439219539f5728a0d601dfb8b906916c9e804e40f02824f33"
+}

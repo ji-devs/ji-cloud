@@ -1,0 +1,255 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n    user_profile.user_id as \"id!: UserId\",\n    username                as \"username!\",\n    user_email.email::text  as \"email!\",\n    given_name              as \"given_name!\",\n    family_name             as \"family_name!\",\n    profile_image_id        as \"profile_image?: ImageId\",\n    language_app            as \"language_app!\",\n    language_emails         as \"language_emails!\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    user_profile.created_at as \"created_at!\",\n    user_profile.updated_at,\n    organization,\n    persona                 as \"persona!: Vec<String>\",\n    (\n        select created_at as \"last_login?\"\n        from session\n        where session.user_id = \"user\".id\n        order by created_at desc\n        limit 1\n    ),\n    (\n        select last_used as \"last_action?\"\n        from session\n        where session.user_id = \"user\".id\n        order by last_used desc\n        limit 1\n    ),\n    (\n        select count(*) as liked_jig_count\n        from jig_like\n        where user_id = \"user\".id\n    ),\n    (\n        select count(*) as published_jigs_count\n        from jig\n        where published_at is not null\n        and author_id = \"user\".id\n    ),\n    location,\n    opt_into_edu_resources,\n    \"user\".blocked as \"blocked!\",\n    array(\n        select subject.display_name\n        from subject\n        inner join user_subject on subject.subject_id = user_subject.subject_id\n        where user_subject.user_id = \"user\".id\n    ) as \"subjects!: Vec<String>\",\n    array(\n        select affiliation.display_name\n        from affiliation\n        inner join user_affiliation on affiliation.id = user_affiliation.affiliation_id\n        where user_affiliation.user_id = \"user\".id\n    ) as \"affiliations!: Vec<String>\",\n    array(\n        select age_range.display_name\n        from age_range\n        inner join user_age_range on age_range.id = user_age_range.age_range_id\n        where user_age_range.user_id = \"user\".id\n    ) as \"age_ranges!: Vec<String>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\nwhere\n    ($4::bool is null or \"user\".blocked = $4)\n    and (\n        (\n            ($3 = 'either' or $3 = 'onlynew')\n            and (\n                user_profile.created_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n                and user_profile.created_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n            )\n        )\n        or (\n            ($3 = 'either' or $3 = 'onlyupdated')\n            and (\n                user_profile.updated_at >= case when $1::timestamptz is null then to_timestamp('-infinity') else $1 end\n                and user_profile.updated_at < case when $2::timestamptz is null then to_timestamp('infinity') else $2 end\n            )\n        )\n    )\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "username!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "username"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "given_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "given_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "family_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "family_name"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "profile_image?: ImageId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "profile_image_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "language_app!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "language_app"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "language_emails!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "language_emails"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "languages_spoken!: Vec<String>",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "languages_spoken"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "organization",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "organization"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "persona!: Vec<String>",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "persona"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "last_login?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "last_action?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "liked_jig_count",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "published_jigs_count",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "location",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "location"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "opt_into_edu_resources",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "opt_into_edu_resources"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "blocked!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "\"user\"",
+            "name": "blocked"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "subjects!: Vec<String>",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 21,
+        "name": "affiliations!: Vec<String>",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 22,
+        "name": "age_ranges!: Vec<String>",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Timestamptz",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      null,
+      null,
+      null,
+      null,
+      true,
+      false,
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "4f4afc330ccb20d9010ab42a2f44f086e32349ad9da0e9f9a12b2ba531fe4545"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect id as \"id!: UserId\"\nfrom \"user\"\njoin public.user_email ue on \"user\".id = ue.user_id\nwhere ue.email = $1::text::citext\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "\"user\"",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b40588a017fc706bd7f319085c1707b0e0d0d206afea13f10f08f97bef7a8bd6"
+}

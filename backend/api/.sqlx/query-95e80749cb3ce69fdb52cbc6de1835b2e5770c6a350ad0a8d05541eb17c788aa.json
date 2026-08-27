@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into course_data_category(course_data_id, category_id)\nselect $2, category_id\nfrom course_data_category\nwhere course_data_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "95e80749cb3ce69fdb52cbc6de1835b2e5770c6a350ad0a8d05541eb17c788aa"
+}

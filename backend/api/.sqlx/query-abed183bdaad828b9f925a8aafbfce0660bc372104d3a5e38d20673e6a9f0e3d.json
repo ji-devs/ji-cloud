@@ -1,0 +1,177 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with cte1 as (\n            select (array_agg(public_user.user_id))[1]\n            from public_user\n            left join user_asset_data \"uad\" on public_user.user_id = uad.user_id\n            inner join \"user\" on public_user.user_id = \"user\".id\n            inner join \"user_profile\" on public_user.user_id = \"user_profile\".user_id\n            left join circle_member \"cm\" on cm.user_id = public_user.user_id\n            where (cm.id = any($1) or $1 = array[]::uuid[])\n                and (user_profile.badge = any($6) or $6 = array[]::smallint[])\n                and \"user\".blocked = false\n            group by \"user\".created_at, total_asset_count\n            order by case when $4 = 0 then total_asset_count\n                else extract(epoch from \"user\".created_at)\n            end desc\n        ),\n        cte2 as (\n            select * from unnest(array(select cte1.array_agg from cte1)) with ordinality t(id\n           , ord) order by ord\n        )\n        select  user_profile.user_id                as \"id!: UserId\",\n                username               as \"username!\",\n                given_name             as \"given_name!\",\n                family_name            as \"family_name!\",\n                profile_image_id       as \"profile_image?: ImageId\",\n                (select case when badge <> 10 then badge else null end)       as \"badge?: UserBadge\",\n                (select languages_spoken from user_profile where user_profile.user_id = \"user\".id and languages_spoken_public is true)      as \"languages_spoken?: Vec<String>\",\n                (select organization from user_profile where user_profile.user_id = \"user\".id and organization_public is true)  as \"organization?\",\n                (select persona from user_profile where user_profile.user_id = \"user\".id and persona_public is true)      as \"persona?: Vec<String>\",\n                (select location from user_profile where user_profile.user_id = \"user\".id and location_public is true)      as \"location?\",\n                (select bio from user_profile where user_profile.user_id = \"user\".id and bio_public is true)      as \"bio?\",\n                (select (CASE WHEN jig_count > 0 THEN jig_count else 0 end))      as \"jig_count!\",\n                (select (CASE WHEN resource_count > 0 THEN resource_count else 0 end))      as \"resource_count!\",\n                (select (CASE WHEN course_count > 0 THEN course_count else 0 end))      as \"course_count!\",\n                (select (CASE WHEN playlist_count > 0 THEN playlist_count else 0 end))      as \"playlist_count!\",\n                total_asset_count      as \"total_asset_count!\",\n                (select array(select circle.id\n                    from circle_member bm\n                    inner join circle on bm.id = circle.id\n                    where bm.user_id = \"user\".id\n                )) as \"circles!: Vec<CircleId>\",\n                exists(select 1 from user_follow where follower_id = $5 and user_id = \"user\".id) as \"following!\"\n        from cte2\n        inner join user_profile on cte2.id = user_profile.user_id\n        inner join user_asset_data \"uad\" on cte2.id = uad.user_id\n        inner join \"user\" on cte2.id = \"user\".id\n        where ord > (1 * $2 * $3)\n        order by ord\n        limit $3\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "username!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "username"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "given_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "given_name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "family_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "family_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "profile_image?: ImageId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "profile_image_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "badge?: UserBadge",
+        "type_info": "Int2",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "languages_spoken?: Vec<String>",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "organization?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "persona?: Vec<String>",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "location?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "bio?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "jig_count!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "resource_count!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "course_count!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "playlist_count!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "total_asset_count!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "user_asset_data",
+            "name": "total_asset_count"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "circles!: Vec<CircleId>",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "following!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Uuid",
+        "Int2Array"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "abed183bdaad828b9f925a8aafbfce0660bc372104d3a5e38d20673e6a9f0e3d"
+}

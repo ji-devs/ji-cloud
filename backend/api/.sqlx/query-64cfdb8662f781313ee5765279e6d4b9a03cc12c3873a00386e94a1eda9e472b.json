@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nwith delete as (\n        delete from user_font\n    where user_id = $1 and index = $2\n)\nselect 1 as discard\nfrom user_font\nwhere user_id = $1 and index > $2\nfor update\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "discard",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "64cfdb8662f781313ee5765279e6d4b9a03cc12c3873a00386e94a1eda9e472b"
+}

@@ -1,0 +1,162 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n    school_id as \"id!: SchoolId\",\n    school_name::text as \"school_name!\",\n    internal_school_name_id as \"internal_school_name_id?: SchoolNameId\",\n    verified as \"verified!\",\n    location as \"location?: serde_json::Value\",\n    email::text as \"email!\",\n    description,\n    profile_image_id as \"profile_image?: ImageId\",\n    website,\n    organization_type,\n    account_id as \"account_id!: AccountId\",\n    created_at,\n    updated_at\nfrom school\nwhere school_id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: SchoolId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "school_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "school_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "internal_school_name_id?: SchoolNameId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "internal_school_name_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "verified!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "verified"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "location?: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "location"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "profile_image?: ImageId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "profile_image_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "website",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "website"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "organization_type",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "organization_type"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "account_id!: AccountId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "account_id"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "74b7fecc1f3492b521314c03a90d4f77563de26d85ffa94a7c821c2d11cd7525"
+}

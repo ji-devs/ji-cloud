@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into category (index, parent_id, name, user_scopes)\nVALUES((select count(*)::int2 from category where parent_id is not distinct from $1), $1, $2, array[]::smallint[])\nreturning index, id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "index"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "a0f81385b9713d0c508a0a5e6658939c1edf5149c2440bd55c07e788dfc2ed2a"
+}

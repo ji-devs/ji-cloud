@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            select\n                course_data.display_name as \"display_name!\",\n                course_data.description as \"description!\",\n                course_data.other_keywords as \"other_keywords!\",\n                (\n                    select id\n                    from course_data_module\n                    where course_data_id = course_data.id\n                    order by \"index\"\n                    limit 1\n                ) as \"cover_module_id?: ModuleId\"\n            from course\n                inner join course_data on course_data.id = coalesce(course.live_id, course.draft_id)\n            where course.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "description!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "other_keywords!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "other_keywords"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "cover_module_id?: ModuleId",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "acfd0e04c36f86b84c2618c671c395b15be452caae521c41a7982cc3da8d83a0"
+}

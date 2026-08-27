@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate resource_curation_data\nset language = $2\nwhere resource_id = $1 and $2 is distinct from language\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ae4fdfb4902138c696e98472c65aecc4b8e91017229379f1acb1752a195c06da"
+}

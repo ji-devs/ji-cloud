@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect draft_id from resource join resource_data on resource.draft_id = resource_data.id where resource.id = $1 for update\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "draft_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource",
+            "name": "draft_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "09c1cfec82b7cb56b3cc85a61216442c9e218a0f4126160c35bd16fab13c09fd"
+}

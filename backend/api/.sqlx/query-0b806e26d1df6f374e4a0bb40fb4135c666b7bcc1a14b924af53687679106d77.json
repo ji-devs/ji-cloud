@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate resource_data\nset updated_at = now()\nfrom resource\nwhere resource.live_id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0b806e26d1df6f374e4a0bb40fb4135c666b7bcc1a14b924af53687679106d77"
+}

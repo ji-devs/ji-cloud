@@ -409,7 +409,7 @@ impl Manager {
             AlgoliaIndices::UserIndex.as_str(),
             migration::USER_HASH.to_owned(),
         )
-        .fetch_all(&mut txn)
+        .fetch_all(&mut *txn)
         .await?
         .into_iter()
         .map(|x| x.name)
@@ -630,7 +630,7 @@ where ((last_synced_at is null and published_at is not null)
 limit 100 for no key update skip locked;
      "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| {
             let mut tags = Vec::new();
 
@@ -716,7 +716,7 @@ where jig_data.id = any (select live_id from jig where jig.id = any ($1))
 "#,
             &ids
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
 
         txn.commit().await?;
@@ -801,7 +801,7 @@ where ((last_synced_at is null and published_at is not null)
 limit 100 for no key update skip locked;
      "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| {
             let mut tags = Vec::new();
 
@@ -887,7 +887,7 @@ where resource_data.id = any (select live_id from resource where resource.id = a
 "#,
             &ids
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
 
         txn.commit().await?;
@@ -908,7 +908,7 @@ where resource_data.id = any (select live_id from resource where resource.id = a
         where usage_reset_at < now() - interval '14 days'
             "#
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
 
         // todo: allow for some way to do a partial update (for example, by having a channel for queueing partial updates)
@@ -973,7 +973,7 @@ where ((last_synced_at is null and publish_at is not null) or
 limit 100 for no key update skip locked;
      "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| {
             let mut tags = Vec::new();
             if row.is_published {
@@ -1040,7 +1040,7 @@ limit 100 for no key update skip locked;
             "update image_metadata set last_synced_at = now() where id = any($1)",
             &ids
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
 
         txn.commit().await?;
@@ -1129,7 +1129,7 @@ where (last_synced_at is null and published_at is not null)
 limit 100 for no key update skip locked;
      "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| {
             let mut tags = Vec::new();
 
@@ -1214,7 +1214,7 @@ where playlist_data.id = any (select live_id from playlist where playlist.id = a
 "#,
             &ids
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
 
         txn.commit().await?;
@@ -1253,7 +1253,7 @@ where playlist_data.id = any (select live_id from playlist where playlist.id = a
     limit 100 for no key update skip locked;
        "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| {
 
             algolia::request::BatchWriteRequest::UpdateObject {
@@ -1296,7 +1296,7 @@ where playlist_data.id = any (select live_id from playlist where playlist.id = a
             "update public_user set last_synced_at = now() where user_id = any($1)",
             &ids
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
 
         txn.commit().await?;
@@ -1332,7 +1332,7 @@ where (last_synced_at is null or
 limit 100 for no key update skip locked;
      "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| {
             let location = get_location(row.location);
 
@@ -1377,7 +1377,7 @@ limit 100 for no key update skip locked;
             "update user_profile set last_synced_at = now() where user_id = any($1)",
             &ids
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
 
         txn.commit().await?;
@@ -1409,7 +1409,7 @@ where (last_synced_at is null or
 limit 100 for no key update skip locked;
      "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| {
 
             algolia::request::BatchWriteRequest::UpdateObject {
@@ -1446,7 +1446,7 @@ limit 100 for no key update skip locked;
             "update circle set last_synced_at = now() where id = any($1)",
             &ids
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
 
         txn.commit().await?;
@@ -1519,7 +1519,7 @@ where (last_synced_at is null and published_at is not null)
 limit 100 for no key update skip locked;
      "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| {
             let mut tags = Vec::new();
 
@@ -1593,7 +1593,7 @@ where course_data.id = any (select live_id from course where course.id = any ($1
 "#,
             &ids
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
 
         txn.commit().await?;

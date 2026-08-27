@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update user_audio_upload set uploaded_at = now(), processed_at = now(), processing_result = true where audio_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "25d7c8f073779b2521585bf469b5d5809549a5d03cca2c08c38edd37b913782d"
+}

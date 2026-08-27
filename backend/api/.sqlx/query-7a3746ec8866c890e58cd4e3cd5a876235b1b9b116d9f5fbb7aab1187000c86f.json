@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into web_media_upload (media_id, uploaded_at) values ($1, now())",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7a3746ec8866c890e58cd4e3cd5a876235b1b9b116d9f5fbb7aab1187000c86f"
+}

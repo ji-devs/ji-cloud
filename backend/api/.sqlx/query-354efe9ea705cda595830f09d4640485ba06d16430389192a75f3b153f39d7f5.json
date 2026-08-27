@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate subscription\nset\n    subscription_plan_id = coalesce($2, subscription_plan_id),\n    status = coalesce($3, status),\n    current_period_end = coalesce($4, current_period_end),\n    updated_at = now(),\n    latest_invoice_id = case when $5 then $6 else latest_invoice_id end,\n    is_trial = coalesce($7, is_trial),\n    price = coalesce($8, price),\n    coupon_name = case when $9 then $10 else coupon_name end,\n    coupon_percent = case when $11 then $12 else coupon_percent end,\n    coupon_from = case when $13 then $14 else coupon_from end,\n    coupon_to = case when $15 then $16 else coupon_to end\nwhere stripe_subscription_id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Int2",
+        "Timestamptz",
+        "Bool",
+        "Text",
+        "Bool",
+        "Int8",
+        "Bool",
+        "Text",
+        "Bool",
+        "Numeric",
+        "Bool",
+        "Timestamptz",
+        "Bool",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "354efe9ea705cda595830f09d4640485ba06d16430389192a75f3b153f39d7f5"
+}

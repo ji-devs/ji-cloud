@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate account\nset\n    tier_override = case when $2 then $3 else tier_override end\nwhere account_id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b8882d211b07177c5a7379d55b3589de1b11dcaf6f85acbb94536365716215a7"
+}

@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into image_metadata (name, description, is_premium, publish_at, size) values ($1, $2, $3, $4, $5)\nreturning id as \"id: ImageId\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: ImageId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Bool",
+        "Timestamptz",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "23a8521d00447ec2e9a085665eb0ac2ee6b39b4e06a4e490c0b3ab5f6299f96c"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect count(*) as \"count!: i64\"\nfrom jig_data\ninner join jig on jig.live_id = jig_data.id\nwhere (privacy_level = coalesce($1, privacy_level))\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!: i64",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b67b8e012384bd9845c73795310576f24736ac1d450f542962286a1a57a15cc2"
+}

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select user_id as \"id: UserId\" from user_profile where (user_id = $1 and $1 is not null) or (lower(username) = lower($2) and $2 is not null)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "user_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "bf8018c2bd265ba9c3761fff51a1910989dce917461d98255d13b87a04c36d11"
+}

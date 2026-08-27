@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate course_data_module\nset index = index - 1\nwhere course_data_id = $1\n  and index > $2\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7bd8eff40b8bb4649064764c88f6087f405f0727abb476003a960c379a8e3bc7"
+}

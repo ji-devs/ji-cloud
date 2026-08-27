@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into web_media_library_url (media_id, media_url) values ($1, $2) on conflict (media_id, media_url) do nothing",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8e91b63b58e15b8c898573ffd729ea87968e8d2efa24ee4d855ac357c193087b"
+}

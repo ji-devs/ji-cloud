@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig\nset author_id = $1,\n    creator_id = $1\nwhere (creator_id = $2 or author_id = $2)\nand id = any($3)\nreturning live_id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "live_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "live_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "085a3f1da9ea1c91ef70dae39e77c7381000397be1ce5e545e9e783e0a39d6fb"
+}

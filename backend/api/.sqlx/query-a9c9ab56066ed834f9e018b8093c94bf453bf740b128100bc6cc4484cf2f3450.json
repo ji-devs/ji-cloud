@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into playlist_data_category(playlist_data_id, category_id)\nselect $2, category_id\nfrom playlist_data_category\nwhere playlist_data_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a9c9ab56066ed834f9e018b8093c94bf453bf740b128100bc6cc4484cf2f3450"
+}

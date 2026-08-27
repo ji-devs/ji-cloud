@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_data\nset last_synced_at = now()\nwhere playlist_data.id = any (select live_id from playlist where playlist.id = any ($1))\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "43082d5f34ede50dd2d6b87b05e46f7b293f1dca74afba83f33361d5314b746b"
+}

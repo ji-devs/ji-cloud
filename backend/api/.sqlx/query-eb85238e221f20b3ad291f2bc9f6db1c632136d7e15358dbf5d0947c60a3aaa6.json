@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into web_media_library_url (media_id, media_url) values ($1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "eb85238e221f20b3ad291f2bc9f6db1c632136d7e15358dbf5d0947c60a3aaa6"
+}

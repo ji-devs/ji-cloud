@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n    plan_id as \"plan_id: PlanId\",\n    plan_type as \"plan_type: PlanType\",\n    price_id as \"price_id: StripePriceId\",\n    created_at as \"created_at: DateTime<Utc>\",\n    updated_at as \"updated_at: DateTime<Utc>\"\nfrom subscription_plan\nwhere plan_type = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "plan_id: PlanId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subscription_plan",
+            "name": "plan_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "plan_type: PlanType",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "subscription_plan",
+            "name": "plan_type"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "price_id: StripePriceId",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "subscription_plan",
+            "name": "price_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at: DateTime<Utc>",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "subscription_plan",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "updated_at: DateTime<Utc>",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "subscription_plan",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "457c728cb149fc869a3625cb05fc1188616305fa009f1dedcafecd42e3814998"
+}

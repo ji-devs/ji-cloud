@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into jig_like(jig_id, user_id)\nvalues ($1, $2)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4fb49fe4ad3204755e0a09d701e36d421c6a6696509bd37c238b1a835e022d7b"
+}

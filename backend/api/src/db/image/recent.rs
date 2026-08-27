@@ -28,7 +28,7 @@ select exists(select 1 from user_recent_image where user_id = $1 and image_id = 
         user_id.0,
         image_id.0,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .exists;
 
@@ -50,7 +50,7 @@ returning image_id as "id: ImageId", media_library as "library: MediaLibrary", k
         library as i16,
         kind as i16,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     txn.commit().await?;

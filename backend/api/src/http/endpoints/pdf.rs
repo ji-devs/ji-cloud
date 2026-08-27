@@ -71,7 +71,7 @@ pub mod user {
         r#"select exists(select 1 from user_pdf_upload where pdf_id = $1 for no key update) as "exists!""#,
         id.0
     )
-            .fetch_one(&mut txn)
+            .fetch_one(&mut *txn)
             .await?.exists;
 
         if !exists {

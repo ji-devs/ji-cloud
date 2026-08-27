@@ -39,7 +39,7 @@ use shared::{
     error::{IntoAnyhow, ServiceError, ServiceKindError},
     media::MediaLibrary,
 };
-use sqlx::{postgres::PgDatabaseError, Acquire, PgConnection, PgPool};
+use sqlx::{postgres::PgDatabaseError, PgConnection, PgPool};
 use tracing::{instrument, Instrument};
 use uuid::Uuid;
 
@@ -234,7 +234,7 @@ async fn create_user(
         r#"select exists(select 1 from user_auth_basic where email = $1::text) as "exists!""#,
         email
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .instrument(tracing::info_span!("check basic exists"))
     .await
     .into_anyhow()?
@@ -244,7 +244,7 @@ async fn create_user(
         r#"select exists(select 1 from user_email where email = $1::text) as "exists!""#,
         email
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .instrument(tracing::info_span!("check google exists"))
     .await
     .into_anyhow()?
@@ -262,7 +262,7 @@ async fn create_user(
     }
 
     let user = sqlx::query!(r#"insert into "user" default values returning id"#)
-        .fetch_one(&mut txn)
+        .fetch_one(&mut *txn)
         .instrument(tracing::info_span!("insert user"))
         .await
         .into_anyhow()?;
@@ -275,7 +275,7 @@ async fn create_user(
         email,
         pass_hash.to_string(),
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .instrument(tracing::info_span!("insert user_basic_auth"))
     .await
     .into_anyhow()?;
@@ -326,7 +326,7 @@ where
 "#,
                 lowercase_email
             )
-            .fetch_optional(&mut txn)
+            .fetch_optional(&mut *txn)
             .instrument(tracing::info_span!("get user_id"))
             .await?;
 
@@ -388,7 +388,7 @@ returning user_id as "id!: UserId"
                 token,
                 SessionMask::VERIFY_EMAIL.bits(),
             )
-            .fetch_optional(&mut txn) // Result<Option<UserId>, Error>
+            .fetch_optional(&mut *txn) // Result<Option<UserId>, Error>
             .instrument(tracing::info_span!("insert user_email"))
             .await
             .map_err(|err| match err {
@@ -409,7 +409,7 @@ returning user_id as "id!: UserId"
                 "update user_auth_google set unverified_email = null where user_id = $1",
                 user.id.0
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .await?;
 
             // make sure they can't use the link, now that they're verified.
@@ -681,7 +681,7 @@ async fn email_reset(
         r#"select exists(select 1 from user_auth_basic where email = $1::text) as "exists!""#,
         lowercase_email
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .instrument(tracing::info_span!("validate email"))
     .await
     .into_anyhow()?
@@ -691,7 +691,7 @@ async fn email_reset(
         r#"select exists(select 1 from user_email where email = $1::text) as "exists!""#,
         lowercase_email
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .instrument(tracing::info_span!("check google exists"))
     .await
     .into_anyhow()?
@@ -829,7 +829,7 @@ async fn verify_email_reset(
                 r#"select email::text as "email!" from user_email where user_id = $1 for share"#,
                 token.user_id.0
             )
-            .fetch_optional(&mut txn)
+            .fetch_optional(&mut *txn)
             .instrument(tracing::info_span!("email exists"))
             .await?;
 
@@ -852,7 +852,7 @@ async fn verify_email_reset(
                 &email,
                 token.email
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .instrument(tracing::info_span!("update user_auth_basic"))
             .await?;
 
@@ -867,13 +867,13 @@ async fn verify_email_reset(
                 &email,
                 token.email
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .instrument(tracing::info_span!("update user_email"))
             .await?;
 
             if force_logout {
                 sqlx::query!("delete from session where user_id = $1", token.user_id.0)
-                    .execute(&mut txn)
+                    .execute(&mut *txn)
                     .instrument(tracing::info_span!("force logout"))
                     .await?;
             }
@@ -1021,7 +1021,7 @@ async fn switch_to_basic_auth(
         profile.email,
         pass_hash,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await
     .into_anyhow()?;
 
@@ -1090,7 +1090,7 @@ async fn reset_password(
          where email = lower($1::text)"#,
         &email
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .instrument(tracing::info_span!("get user_id"))
     .await.into_anyhow()?;
 
@@ -1147,7 +1147,7 @@ async fn put_password(
         r#"select email::text as "email!" from user_email where user_id = $1 for share"#,
         user_id.0
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .instrument(tracing::info_span!("get email address"))
     .await?;
 
@@ -1159,7 +1159,7 @@ async fn put_password(
     let pass_hash = hash_password(password).await?;
 
     sqlx::query!("delete from user_auth_basic where user_id = $1", user_id.0)
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .instrument(tracing::info_span!("delete user_auth_basic"))
         .await?;
 
@@ -1168,13 +1168,13 @@ async fn put_password(
         user_id.0,
         email as _
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .instrument(tracing::info_span!("get user_id"))
     .await.into_anyhow()?;
 
     if let Some(user_to_delete) = user_to_delete {
         sqlx::query!(r#"delete from "user" where id = $1"#, user_to_delete.id.0)
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .instrument(tracing::info_span!("delete user_to_delete"))
             .await
             .into_anyhow()?;
@@ -1189,14 +1189,14 @@ values ($1, $2::text, $3)
         &email,
         pass_hash.to_string(),
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .instrument(tracing::info_span!("insert user_auth_basic"))
     .await
     .into_anyhow()?;
 
     if force_logout {
         sqlx::query!("delete from session where user_id = $1", user_id.0)
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .instrument(tracing::info_span!("delete session"))
             .await
             .into_anyhow()?;

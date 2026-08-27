@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e20b4591bf68cf81d48798fac81a372d0ea11690b17c245381645e6dbc49759e"
+}

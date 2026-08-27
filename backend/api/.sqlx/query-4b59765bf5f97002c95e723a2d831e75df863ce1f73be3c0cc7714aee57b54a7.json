@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect exists(\n        select 1\n        from user_font\n        where user_id = $1\n            and index = $2\n        for update\n) as \"exists!\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4b59765bf5f97002c95e723a2d831e75df863ce1f73be3c0cc7714aee57b54a7"
+}

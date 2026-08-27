@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into jig_play_count (jig_id, play_count)\nvalues ($1, 0)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f92c14a182afb0bbc54cf4ce449d6d5c124ef1f3b7c364178247a28a1371fe4c"
+}

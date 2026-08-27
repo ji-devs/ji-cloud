@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data_additional_resource\nset resource_content = $3\nwhere jig_data_id = $1 and id = $2\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d5f7bcda61b8abb751cc560960d08dbc327b476eb3b9ee8b7e8acb627833fbce"
+}

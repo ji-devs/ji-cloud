@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        update user_asset_data\n        set playlist_count = playlist_count + 1,\n        total_asset_count = total_asset_count + 1\n        from playlist\n        where author_id = user_id and\n              published_at is null and\n              id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b112cb6d91c1a044dc07e04f50d8a9529160e5d8f410dd23bf2b0b5004111342"
+}

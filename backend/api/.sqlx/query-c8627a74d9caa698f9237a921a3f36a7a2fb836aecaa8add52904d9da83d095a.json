@@ -1,0 +1,91 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect id                                   as \"id!: ReportId\",\n       resource_id                               as \"resource_id!: ResourceId\",    \n       report_type                          as \"report_type!: ResourceReportType\",                  \n       created_at,\n       reporter_id                          as \"reporter_id?: uuid::Uuid\",\n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = reporter_id\n        )                                       as \"name?\",\n        (\n            select email::text\n            from user_email\n            where user_email.user_id = reporter_id\n        )                                       as \"email?\"\nfrom resource_report\nwhere id = $1 and resource_id = $2\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: ReportId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_report",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "resource_id!: ResourceId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_report",
+            "name": "resource_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "report_type!: ResourceReportType",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "resource_report",
+            "name": "report_type"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "resource_report",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "reporter_id?: uuid::Uuid",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_report",
+            "name": "reporter_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "name?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "email?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "c8627a74d9caa698f9237a921a3f36a7a2fb836aecaa8add52904d9da83d095a"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into jig_data_category(jig_data_id, category_id)\nselect $2, category_id\nfrom jig_data_category\nwhere jig_data_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "49e49fd07ac30a6dde52fa0090ae8a616a808e045e474fedac23568b6d876fdb"
+}

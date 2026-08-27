@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect draft_id from course join course_data on course.draft_id = course_data.id where course.id = $1 for update\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "draft_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "draft_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b16c8686d6dd580d8d45a8ec9174425b692c17ea1a9f0c19958d9f6b871639c3"
+}

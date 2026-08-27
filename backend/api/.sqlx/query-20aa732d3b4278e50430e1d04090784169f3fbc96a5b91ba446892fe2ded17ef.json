@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into playlist_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist_data",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "20aa732d3b4278e50430e1d04090784169f3fbc96a5b91ba446892fe2ded17ef"
+}

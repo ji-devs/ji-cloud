@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "delete from category where id = $1 returning index, parent_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "index"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "parent_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "parent_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "65bbbe5cb9eba5f0bf454b10f8b07ccf8eb3f519970d09868b486cbaa7d560a1"
+}

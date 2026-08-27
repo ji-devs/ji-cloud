@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect count(*) as \"count!: i64\" \nfrom image_metadata\n        inner join image_upload on image_id = id \nwhere processing_result is not distinct from true \n    and (publish_at < now() is not distinct from $1 or $1 is null)\n    and (size is not distinct from $2 or $2 is null)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!: i64",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bool",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "553077643f8e2943593651973afe7e2e6710791e2b5d00fba06fd31e09fea9f5"
+}

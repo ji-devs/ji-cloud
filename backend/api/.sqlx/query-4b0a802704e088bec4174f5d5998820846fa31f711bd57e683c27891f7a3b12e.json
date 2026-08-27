@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate course_data_unit\nset\n    index = case when index = $2 then $3 else index - 1 end,\n    updated_at = now()\nwhere course_data_id = $1 and index between $2 and $3\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4b0a802704e088bec4174f5d5998820846fa31f711bd57e683c27891f7a3b12e"
+}

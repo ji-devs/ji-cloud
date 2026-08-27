@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into user_image_library (user_id, size)\nvalues ($1, $2)\nreturning id as \"id: ImageId\"\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: ImageId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_image_library",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "406a9225e00ac74b1e4bb2988774ca554e97ebe660c07bc1184b7ac93c8c5e43"
+}

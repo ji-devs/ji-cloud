@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into user_pdf_library(user_id)\nvalues($1)\nreturning id as \"id: PdfId\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: PdfId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_pdf_library",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2c9269da9de0d178512713b7fc2789ad3472cc1dcea22eecd5fb941415d37bc4"
+}

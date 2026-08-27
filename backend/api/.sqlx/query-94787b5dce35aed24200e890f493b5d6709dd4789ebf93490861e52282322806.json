@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        update user_asset_data \n        set course_count = course_count - 1,\n        total_asset_count = total_asset_count - 1\n        from course\n        where author_id = user_id and\n              published_at is not null and \n              id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "94787b5dce35aed24200e890f493b5d6709dd4789ebf93490861e52282322806"
+}

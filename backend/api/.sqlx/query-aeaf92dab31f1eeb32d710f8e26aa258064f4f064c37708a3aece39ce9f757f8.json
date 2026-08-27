@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    insert into user_daily_plays (user_id, play_date, play_count)\n    values ($1, CURRENT_DATE, 1)\n    ON CONFLICT (user_id, play_date) DO UPDATE\n    SET play_count = user_daily_plays.play_count + 1\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "aeaf92dab31f1eeb32d710f8e26aa258064f4f064c37708a3aece39ce9f757f8"
+}

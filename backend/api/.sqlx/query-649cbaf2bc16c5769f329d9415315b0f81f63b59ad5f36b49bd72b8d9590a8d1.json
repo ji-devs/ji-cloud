@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into user_email (user_id, email)\nselect session.user_id, coalesce(\n    (select lower(email) from user_auth_basic where user_id = session.user_id),\n    (select lower(unverified_email) from user_auth_google where user_id = session.user_id)\n)\nfrom session\nwhere\n    session.token = $1 and\n    session.expires_at > now() and\n    (session.scope_mask & $2) = $2 and\n    (\n        exists(select 1 from user_auth_basic where user_id = session.user_id) or\n        exists(select 1 from user_auth_google where user_id = session.user_id and unverified_email is not null)\n    )\nreturning user_id as \"id!: UserId\"\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_email",
+            "name": "user_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "649cbaf2bc16c5769f329d9415315b0f81f63b59ad5f36b49bd72b8d9590a8d1"
+}

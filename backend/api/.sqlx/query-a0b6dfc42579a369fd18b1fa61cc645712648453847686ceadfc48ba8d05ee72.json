@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        update image_usage\n        set usage_reset_at = now()\n        where usage_reset_at < now() - interval '14 days'\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "a0b6dfc42579a369fd18b1fa61cc645712648453847686ceadfc48ba8d05ee72"
+}

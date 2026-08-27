@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate image_metadata\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5daa06279831770307bdc0bbf7ecfad3ba4338634f2b76f518b0d3a93bdbc993"
+}

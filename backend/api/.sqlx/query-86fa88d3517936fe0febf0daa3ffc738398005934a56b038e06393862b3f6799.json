@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_data\nset language         = coalesce($2, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from language)\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "86fa88d3517936fe0febf0daa3ffc738398005934a56b038e06393862b3f6799"
+}

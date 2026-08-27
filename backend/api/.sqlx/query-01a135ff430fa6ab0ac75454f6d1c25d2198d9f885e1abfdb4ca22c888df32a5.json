@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data\nset description = $2,\n    translated_description = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "01a135ff430fa6ab0ac75454f6d1c25d2198d9f885e1abfdb4ca22c888df32a5"
+}

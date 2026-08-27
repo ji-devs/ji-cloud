@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update resource set live_id = $1, published_at = now() where id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b4a3e18464bbe0ab39e4eb3484d137a0419c8bf112560a0cf4a26846d6e5e84b"
+}

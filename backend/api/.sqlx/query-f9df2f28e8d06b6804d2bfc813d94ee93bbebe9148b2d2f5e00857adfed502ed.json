@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select email::text as \"email!\" from user_email where user_id = $1 for share",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f9df2f28e8d06b6804d2bfc813d94ee93bbebe9148b2d2f5e00857adfed502ed"
+}

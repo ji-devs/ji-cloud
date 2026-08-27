@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect published_at  as \"published_at?\"\nfrom jig\nwhere id = $1\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "published_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "published_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "e5ce362b6edf11adff2f1261b9b1c92c6bf77ae823f8dd2b58befb23761f0254"
+}

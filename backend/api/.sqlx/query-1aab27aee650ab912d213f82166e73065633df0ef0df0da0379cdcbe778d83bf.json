@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into resource_data\n   (display_name, language, description, draft_or_live)\nvalues ($1, $2, $3, $4)\nreturning id\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_data",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1aab27aee650ab912d213f82166e73065633df0ef0df0da0379cdcbe778d83bf"
+}

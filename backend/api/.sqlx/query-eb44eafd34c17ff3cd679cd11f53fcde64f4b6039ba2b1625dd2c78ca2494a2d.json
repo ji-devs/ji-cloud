@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate image_metadata \nset usage = usage + 1\nwhere id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "eb44eafd34c17ff3cd679cd11f53fcde64f4b6039ba2b1625dd2c78ca2494a2d"
+}

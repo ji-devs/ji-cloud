@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate user_auth_basic\nset email = $2::text,\nupdated_at = now()\nwhere user_id = $1\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "971beb1892cd824384c7deee44f815bea06ec92d73898aef65a74b54f6b44920"
+}

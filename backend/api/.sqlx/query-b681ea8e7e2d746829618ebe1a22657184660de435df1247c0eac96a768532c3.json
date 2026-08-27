@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update algolia_index_settings set updated_at = now(), index_hash = $1 where index_name = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b681ea8e7e2d746829618ebe1a22657184660de435df1247c0eac96a768532c3"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into user_audio_library default values\nreturning id as \"id: AudioId\"\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: AudioId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_audio_library",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "72e3aca05740c8e1615e5e90644ce5edcf661280ab2b72b5f6af4932618ce5ab"
+}

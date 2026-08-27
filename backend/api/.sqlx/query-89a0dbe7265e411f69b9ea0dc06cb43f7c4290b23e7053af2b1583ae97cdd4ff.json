@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect id,\n       hash,\n       kind as \"kind: MediaKind\"\nfrom web_media_library\nwhere hash = $1\nfor update\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "web_media_library",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "hash",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "web_media_library",
+            "name": "hash"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "kind: MediaKind",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "web_media_library",
+            "name": "kind"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "89a0dbe7265e411f69b9ea0dc06cb43f7c4290b23e7053af2b1583ae97cdd4ff"
+}

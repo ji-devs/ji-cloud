@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into resource_data_affiliation(resource_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom resource_data_affiliation\nwhere resource_data_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6b18f4d20c2efb63ec1be956c25ebb85875cd8972346f74e21ca7f429d2fb9d5"
+}

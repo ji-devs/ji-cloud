@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    update user_asset_data\n    set jig_count = jig_count - 1,\n        total_asset_count = total_asset_count - 1\n    from jig\n    where author_id = user_id and\n          published_at is not null and\n          id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f629f6ae198d9383eddc3700726f6ff4ba527a5088f3e2eff79c3f53cbf97f47"
+}

@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "with recursive links as\n(\n    select id,\n    parent_id\n    from category co\n    where id = any ($1::uuid[])\n    union all\n    select co.id,\n    co.parent_id\n    from category co\n    inner join links ct on (ct.parent_id = co.id)\n)\n\nselect\n    distinct id,\n    category.parent_id,\n    name,\n    category.index,\n    created_at,\n    updated_at,\n    user_scopes\nfrom category\ninner join links using (id);\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "parent_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "parent_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "index",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "index"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "user_scopes",
+        "type_info": "Int2Array",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "user_scopes"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "ccaab803ac7df84e46c738158dc62311d906d6da57a8b1c701855e2a8bd4c2f8"
+}

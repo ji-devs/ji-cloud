@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect jdm.id          as \"id!: ModuleId\",\n       stable_id   as \"stable_id!: StableModuleId\",\n       contents    as \"body!\",\n       created_at  as \"created_at!\",\n       updated_at  as \"updated_at!\",\n       kind        as \"kind!: ModuleKind\",\n       is_complete as \"is_complete!\"\nfrom resource_data_module \"jdm\"\ninner join resource on resource.draft_id = jdm.resource_data_id \nwhere jdm.id is not distinct from $1 \n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: ModuleId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_data_module",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "stable_id!: StableModuleId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_data_module",
+            "name": "stable_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "body!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "resource_data_module",
+            "name": "contents"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "resource_data_module",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "updated_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "resource_data_module",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "kind!: ModuleKind",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "resource_data_module",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_complete!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "resource_data_module",
+            "name": "is_complete"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3dc297e82dd4b728ab317e98fa4de4e087ad8531ffa37616c9fbde9f2ae4ad90"
+}

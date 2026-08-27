@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate \"user\"\nset flagged = true,\n    blocked = true\nwhere id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e5bb7d6632f8f03b76ffae4dacaf5a98cae11ad6cc899e3952d798b83830e4c1"
+}

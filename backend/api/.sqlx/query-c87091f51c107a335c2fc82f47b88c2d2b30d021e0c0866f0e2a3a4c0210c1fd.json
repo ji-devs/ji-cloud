@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into playlist (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom playlist\nwhere id = $1\nreturning id as \"id!: PlaylistId\"\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: PlaylistId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c87091f51c107a335c2fc82f47b88c2d2b30d021e0c0866f0e2a3a4c0210c1fd"
+}

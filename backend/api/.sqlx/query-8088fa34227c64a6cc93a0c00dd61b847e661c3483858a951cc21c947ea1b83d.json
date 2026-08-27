@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect id                               as \"id!: ImageId\",\n       description\nfrom image_metadata\n     inner join image_upload on id = image_id\nwhere description <> '' and translated_description = '{}'\nand processed_at is not null\nand description_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: ImageId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "description"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "8088fa34227c64a6cc93a0c00dd61b847e661c3483858a951cc21c947ea1b83d"
+}

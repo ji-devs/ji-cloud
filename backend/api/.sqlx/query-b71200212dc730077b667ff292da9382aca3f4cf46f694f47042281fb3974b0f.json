@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate course_data\nset created_at = now()\nwhere id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b71200212dc730077b667ff292da9382aca3f4cf46f694f47042281fb3974b0f"
+}

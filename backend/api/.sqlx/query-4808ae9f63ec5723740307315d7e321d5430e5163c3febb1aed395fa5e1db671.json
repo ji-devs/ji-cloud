@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect resource_data.id,\n       display_name\nfrom resource_data\ninner join resource on live_id = resource_data.id\nwhere display_name <> '' and translated_name = '{}'\nand published_at is not null\nand name_translate_status is null\norder by coalesce(updated_at, created_at) desc\nlimit 10 for no key update skip locked;\n         ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_data",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "resource_data",
+            "name": "display_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "4808ae9f63ec5723740307315d7e321d5430e5163c3febb1aed395fa5e1db671"
+}

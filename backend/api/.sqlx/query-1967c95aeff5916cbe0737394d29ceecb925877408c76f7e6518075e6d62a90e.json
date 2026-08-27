@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate resource_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1967c95aeff5916cbe0737394d29ceecb925877408c76f7e6518075e6d62a90e"
+}

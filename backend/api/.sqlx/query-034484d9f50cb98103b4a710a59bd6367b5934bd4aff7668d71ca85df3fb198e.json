@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data_module\nset\n    index = case when index = $2 then $3 else index - 1 end,\n    updated_at = now()\nwhere jig_data_id = $1 and index between $2 and $3\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "034484d9f50cb98103b4a710a59bd6367b5934bd4aff7668d71ca85df3fb198e"
+}

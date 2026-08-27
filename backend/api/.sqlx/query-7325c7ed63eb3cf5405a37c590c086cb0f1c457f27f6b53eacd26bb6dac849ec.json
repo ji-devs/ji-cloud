@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into user_image_upload (image_id) values ($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7325c7ed63eb3cf5405a37c590c086cb0f1c457f27f6b53eacd26bb6dac849ec"
+}

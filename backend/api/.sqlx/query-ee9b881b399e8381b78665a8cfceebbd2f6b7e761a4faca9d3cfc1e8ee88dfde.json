@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with cte as (\n            select (array_agg(cd.id))[1]\n            from playlist_data \"cd\"\n                  inner join playlist on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join playlist_data_resource \"resource\" on cd.id = resource.playlist_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Int2Array",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ee9b881b399e8381b78665a8cfceebbd2f6b7e761a4faca9d3cfc1e8ee88dfde"
+}

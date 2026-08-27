@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect display_name         as \"display_name!\",\n       resource_type_id     as \"resource_type_id!: ResourceTypeId\",\n       resource_content    as \"resource_content!\"\nfrom playlist_data_resource \"jdar\"\nwhere playlist_data_id = $1\n  and jdar.id = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "playlist_data_resource",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "resource_type_id!: ResourceTypeId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist_data_resource",
+            "name": "resource_type_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "resource_content!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "playlist_data_resource",
+            "name": "resource_content"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "26efd17cb0658fa49a15076f4b0a628fe22eb3dd3b2c3a466eb9eae6880b9eb3"
+}

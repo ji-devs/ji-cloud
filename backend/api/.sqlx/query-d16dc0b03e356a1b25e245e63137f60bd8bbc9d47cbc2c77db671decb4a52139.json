@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into resource_data_module (\"index\", resource_data_id, kind, is_complete, contents)\nselect \"index\", $2 as \"resource_id\", kind, is_complete, contents\nfrom resource_data_module\nwhere resource_data_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d16dc0b03e356a1b25e245e63137f60bd8bbc9d47cbc2c77db671decb4a52139"
+}

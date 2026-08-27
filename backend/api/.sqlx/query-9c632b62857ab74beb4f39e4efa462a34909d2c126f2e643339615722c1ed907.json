@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    update resource_curation_data\n    set age_ranges = $2\n    where resource_id = $1 and $2 is distinct from age_ranges\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9c632b62857ab74beb4f39e4efa462a34909d2c126f2e643339615722c1ed907"
+}

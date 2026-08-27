@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate user_image_upload\nset uploaded_at       = now(),\n    processed_at      = now(),\n    processing_result = true\nwhere image_id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "59c49f0ffacb928c16d48a8a91fc04e16057b123de225183c88bfd1348042e1b"
+}

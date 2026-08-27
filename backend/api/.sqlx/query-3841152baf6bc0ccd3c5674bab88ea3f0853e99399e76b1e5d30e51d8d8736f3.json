@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into school_name (name)\nvalues ($1::text::citext)\nreturning school_name_id as \"school_name_id!: SchoolNameId\"\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "school_name_id!: SchoolNameId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "school_name",
+            "name": "school_name_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3841152baf6bc0ccd3c5674bab88ea3f0853e99399e76b1e5d30e51d8d8736f3"
+}

@@ -151,11 +151,11 @@ pub async fn create_default_individual_account(
         r#"insert into account (account_type) values ($1) returning account_id as "account_id!: AccountId""#,
         AccountType::Individual as AccountType,
     )
-        .fetch_one(&mut txn)
+        .fetch_one(&mut *txn)
         .await?;
 
     // Associate the user with the account and mark them as an administrator.
-    associate_user_with_account(&mut txn, user_id, &account_id, true, true).await?;
+    associate_user_with_account(&mut *txn, user_id, &account_id, true, true).await?;
 
     txn.commit().await?;
 
@@ -176,11 +176,11 @@ pub async fn create_school_account(
         r#"insert into account (account_type) values ($1) returning account_id as "account_id!: AccountId""#,
         AccountType::School as AccountType,
     )
-        .fetch_one(&mut txn)
+        .fetch_one(&mut *txn)
         .await?;
 
     // Associate the user with the account and mark them as an administrator.
-    associate_user_with_account(&mut txn, &user_id, &account_id, true, true).await?;
+    associate_user_with_account(&mut *txn, &user_id, &account_id, true, true).await?;
 
     // Create the school record
     let school_id = sqlx::query_scalar!(
@@ -201,7 +201,7 @@ returning school_id as "school_id!: SchoolId"
         create_school.organization_type,
         create_school.profile_image as Option<ImageId>,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     txn.commit().await?;

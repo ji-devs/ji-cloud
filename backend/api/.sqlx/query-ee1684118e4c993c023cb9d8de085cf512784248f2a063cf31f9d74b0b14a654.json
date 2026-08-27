@@ -1,0 +1,403 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n    user_profile.user_id as \"id: UserId\",\n    username,\n    user_email.email::text as \"email!\",\n    given_name,\n    family_name,\n    profile_image_id       as \"profile_image?: ImageId\",\n    exists(select * from user_auth_google where user_id = $1) as \"is_oauth!: bool\",\n    languages_spoken         as \"languages_spoken!: Vec<String>\",\n    language_app,\n    language_emails,\n    bio,\n    (select case when badge <> 10 then badge else null end) as \"badge?: UserBadge\",\n    location_public,\n    languages_spoken_public,\n    persona_public,\n    bio_public,\n    organization_public,\n    opt_into_edu_resources,\n    over_18,\n    timezone,\n    user_profile.created_at,\n    user_profile.updated_at,\n    organization,\n    persona                as \"persona!: Vec<String>\",\n    location,\n    jig_count      as \"jig_count!\",\n    resource_count      as \"resource_count!\",\n    course_count      as \"course_count!\",\n    playlist_count      as \"playlist_count!\",\n    total_asset_count      as \"total_asset_count!\",\n    coalesce(user_daily_plays.play_count, 0) as \"daily_jig_play_count!\",\n    array(select scope from user_scope where user_scope.user_id = \"user\".id) as \"scopes!: Vec<i16>\",\n    array(select subject_id from user_subject where user_subject.user_id = \"user\".id) as \"subjects!: Vec<Uuid>\",\n    array(select affiliation_id from user_affiliation where user_affiliation.user_id = \"user\".id) as \"affiliations!: Vec<Uuid>\",\n    array(select age_range_id from user_age_range where user_age_range.user_id = \"user\".id) as \"age_ranges!: Vec<Uuid>\",\n    array(select circle.id\n        from circle_member bm\n        inner join circle on bm.id = circle.id\n        where bm.user_id = \"user\".id or circle.creator_id = \"user\".id\n    ) as \"circles!: Vec<Uuid>\"\nfrom \"user\"\n    inner join user_profile on \"user\".id = user_profile.user_id\n    inner join user_email using(user_id)\n    inner join user_asset_data \"uad\" on \"user\".id = uad.user_id\n    left join user_daily_plays on user_daily_plays.user_id = \"user\".id and user_daily_plays.play_date = CURRENT_DATE\nwhere id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "username",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "username"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "given_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "given_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "family_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "family_name"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "profile_image?: ImageId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "profile_image_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "is_oauth!: bool",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "languages_spoken!: Vec<String>",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "languages_spoken"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "language_app",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "language_app"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "language_emails",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "language_emails"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "bio",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "bio"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "badge?: UserBadge",
+        "type_info": "Int2",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "location_public",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "location_public"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "languages_spoken_public",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "languages_spoken_public"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "persona_public",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "persona_public"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "bio_public",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "bio_public"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "organization_public",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "organization_public"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "opt_into_edu_resources",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "opt_into_edu_resources"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "over_18",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "over_18"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "timezone",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "timezone"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "organization",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "organization"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "persona!: Vec<String>",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "persona"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "location",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "location"
+          }
+        }
+      },
+      {
+        "ordinal": 25,
+        "name": "jig_count!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "user_asset_data",
+            "name": "jig_count"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "resource_count!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "user_asset_data",
+            "name": "resource_count"
+          }
+        }
+      },
+      {
+        "ordinal": 27,
+        "name": "course_count!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "user_asset_data",
+            "name": "course_count"
+          }
+        }
+      },
+      {
+        "ordinal": 28,
+        "name": "playlist_count!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "user_asset_data",
+            "name": "playlist_count"
+          }
+        }
+      },
+      {
+        "ordinal": 29,
+        "name": "total_asset_count!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "user_asset_data",
+            "name": "total_asset_count"
+          }
+        }
+      },
+      {
+        "ordinal": 30,
+        "name": "daily_jig_play_count!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 31,
+        "name": "scopes!: Vec<i16>",
+        "type_info": "Int2Array",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 32,
+        "name": "subjects!: Vec<Uuid>",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 33,
+        "name": "affiliations!: Vec<Uuid>",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 34,
+        "name": "age_ranges!: Vec<Uuid>",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 35,
+        "name": "circles!: Vec<Uuid>",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      false,
+      true,
+      null,
+      false,
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "ee1684118e4c993c023cb9d8de085cf512784248f2a063cf31f9d74b0b14a654"
+}

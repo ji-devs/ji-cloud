@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into playlist_data\n(display_name, created_at, updated_at, language, last_synced_at, description, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom playlist_data\nwhere id = $1\nreturning id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist_data",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2e7d45524ed2fe392b804b9225b512539934c9ac4f837f8ae1ad64faab24e2ce"
+}

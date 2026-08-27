@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with cte as (\n            select (array_agg(course.id))[1]\n            from course_data \"cd\"\n                  inner join course on (draft_id = cd.id or (live_id = cd.id and cd.last_synced_at is not null and published_at is not null))\n                  left join course_admin_data \"admin\" on admin.course_id = course.id\n                  left join course_data_resource \"resource\" on cd.id = resource.course_data_id\n            where (author_id = $1 or $1 is null)\n                and (cd.draft_or_live = $2 or $2 is null)\n                and (blocked = $5 or $5 is null)\n                and (cd.privacy_level = any($3) or $3 = array[]::smallint[])\n                and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n            group by coalesce(updated_at, created_at)\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Int2Array",
+        "UuidArray",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e928b59f8711545331fc24f9466d390eaf3f48a4d001ddb59b42d8f0cdd3df41"
+}

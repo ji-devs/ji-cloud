@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n insert into course_data_module (\"index\", course_data_id, kind, is_complete, contents)\n select \"index\", $2 as \"course_id\", kind, is_complete, contents\n from course_data_module\n where course_data_id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9a280ed5b2d646c563937e8cee1bae592f8d46322edf1769a7c89670088ac3d8"
+}

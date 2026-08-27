@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect draft_id, live_id from resource where id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "draft_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource",
+            "name": "draft_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "live_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource",
+            "name": "live_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "cc430874ec63e9d9fb14fd7569cd7246c82087353d633acae71120e6920a2752"
+}

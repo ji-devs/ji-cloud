@@ -1,0 +1,187 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect playlist.id                                       as \"id!: PlaylistId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       exists(select 1 from playlist_like where playlist_id = playlist.id and user_id = $2) as \"is_liked!\",\n       rating                                   as \"rating?: PlaylistRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       is_premium                               as \"premium!\"\nfrom playlist\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\ninner join playlist_admin_data \"admin\" on admin.playlist_id = playlist.id\norder by ord asc\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: PlaylistId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "creator_id?: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "creator_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "author_id?: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "live_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "live_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "draft_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "draft_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "likes!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "likes"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "plays!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "plays"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "live_up_to_date!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "live_up_to_date"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "is_liked!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "rating?: PlaylistRating",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "playlist_admin_data",
+            "name": "rating"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "blocked!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "playlist_admin_data",
+            "name": "blocked"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "curated!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "playlist_admin_data",
+            "name": "curated"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "premium!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "playlist_admin_data",
+            "name": "is_premium"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      null,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      null,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "73d7b742af6f66b1580ad224d3acf037ed5ac0122865ebb97b78c8a92ad2d677"
+}

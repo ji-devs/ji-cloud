@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect id                                                                 as \"id!: CategoryId\",\n       name                                                               as \"name!\",\n       created_at                                                         as \"created_at!\",\n       updated_at,\n       user_scopes                                                        as \"user_scopes!\"\nfrom category\n         inner join unnest($1::uuid[]) with ordinality t(id, ord) USING (id)\norder by t.ord\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: CategoryId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "user_scopes!",
+        "type_info": "Int2Array",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "user_scopes"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "a293497e635f9a60d77be04ce0babce3020ea53f4a0e230ba5725914125e9120"
+}

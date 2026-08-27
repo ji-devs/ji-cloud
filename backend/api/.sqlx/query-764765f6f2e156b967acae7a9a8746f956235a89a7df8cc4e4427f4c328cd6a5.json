@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into session (token, user_id, impersonator_id, expires_at, scope_mask, last_used) values ($1, $2, $3, $4, $5, now())",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Timestamptz",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "764765f6f2e156b967acae7a9a8746f956235a89a7df8cc4e4427f4c328cd6a5"
+}

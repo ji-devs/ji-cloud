@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nwith recursive cte(parent_id) as (\nselect parent_id from category where id = $1\nunion all\nselect c.parent_id from category c inner join cte on cte.parent_id = c.id\n) select exists(select 1 from cte where parent_id = $2) as \"would_cycle!\"\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "would_cycle!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "edf5cb94b8714ed9995df1c7266d8837390d35250f6c20f3d65b73974e50da4b"
+}

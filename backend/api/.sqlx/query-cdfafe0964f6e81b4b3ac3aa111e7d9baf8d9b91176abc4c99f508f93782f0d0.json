@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data\nset direction = $2,\n    scoring = $3,\n    drag_assist = $4,\n    updated_at = now()\nwhere id = $1 and\n    (($2 is distinct from direction) or\n     ($3 is distinct from scoring) or\n     ($4 is distinct from drag_assist))\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cdfafe0964f6e81b4b3ac3aa111e7d9baf8d9b91176abc4c99f508f93782f0d0"
+}

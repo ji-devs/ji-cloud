@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete from playlist_like\nwhere playlist_id = $1 and user_id = $2\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7d6295f3a9896ad81c1850a00cd713b0dd18fe04a7146e147162a76b9abf2246"
+}

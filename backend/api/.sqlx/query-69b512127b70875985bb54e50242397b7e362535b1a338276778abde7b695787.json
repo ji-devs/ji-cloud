@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update user_color set color = $3 where user_id = $1 and index = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "69b512127b70875985bb54e50242397b7e362535b1a338276778abde7b695787"
+}

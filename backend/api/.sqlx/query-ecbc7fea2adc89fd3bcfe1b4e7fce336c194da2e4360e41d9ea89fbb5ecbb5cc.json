@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into jig_data\n(display_name, created_at, updated_at, language, last_synced_at, description, theme, audio_background,\n audio_feedback_negative, audio_feedback_positive, direction, scoring, drag_assist, privacy_level, other_keywords, translated_keywords, translated_description)\nselect display_name,\n       created_at,\n       updated_at,\n       language,\n       last_synced_at,\n       description,\n       theme,\n       audio_background,\n       audio_feedback_negative,\n       audio_feedback_positive,\n       direction,\n       scoring,\n       drag_assist,\n       privacy_level,\n       other_keywords,\n       translated_keywords,\n       translated_description::jsonb\nfrom jig_data\nwhere id = $1\nreturning id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ecbc7fea2adc89fd3bcfe1b4e7fce336c194da2e4360e41d9ea89fbb5ecbb5cc"
+}

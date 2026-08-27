@@ -66,7 +66,7 @@ pub async fn create(
         live_id,
         draft_id,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -183,10 +183,10 @@ select cte.resource_id                                          as "resource_id:
         other_keywords,
         translated_keywords,
         rating                                               as "rating?: ResourceRating",
-        blocked                                              as "blocked",
+        blocked                                              as "blocked!",
         exists(select 1 from resource_like where resource_id = $1 and user_id = $3)  as "is_liked!",
-        curated,
-        is_premium                                           as "premium",
+        curated                                              as "curated!",
+        is_premium                                           as "premium!",
         (
                 select row(resource_data_module.id, resource_data_module.stable_id, kind, is_complete)
                 from resource_data_module
@@ -313,7 +313,7 @@ order by ord asc
         &ids.iter().map(|i| i.0).collect::<Vec<Uuid>>(),
         user_id.map(|x| x.0)
     )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .instrument(tracing::info_span!("query resources"))
     .await?;
 
@@ -362,7 +362,7 @@ order by ord asc
 "#,
         &resource_data_ids
     )
-        .fetch_all(&mut txn)
+        .fetch_all(&mut *txn)
         .instrument(tracing::info_span!("query resource_data"))
         .await?;
 
@@ -555,7 +555,7 @@ limit $8
     page_limit as i32,
     user_id.map(|x| x.0)
 )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .instrument(tracing::info_span!("query resource_data"))
     .await?;
 
@@ -659,7 +659,7 @@ select draft_id from resource join resource_data on resource.draft_id = resource
 "#,
         id.0
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .ok_or(error::UpdateWithMetadata::ResourceNotFound)?
     .draft_id;
@@ -676,7 +676,7 @@ where id = $1
             draft_id,
             privacy_level as i16,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -691,7 +691,7 @@ where id = $1 and $2 is distinct from description"#,
             draft_id,
             description,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -729,7 +729,7 @@ where id = $1 and $2 is distinct from display_name"#,
             draft_id,
             display_name,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -746,7 +746,7 @@ where id = $1
         draft_id,
         language,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     if let Some(categories) = categories {
@@ -810,7 +810,7 @@ where id is not distinct from $3
         live_id,
         id.0,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1065,7 +1065,7 @@ returning id as "id!: ResourceId"
         new_live_id,
         new_draft_id,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1085,7 +1085,7 @@ where id = $1
     "#,
         id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     //check if resource has been published and playable
@@ -1137,7 +1137,7 @@ where resource_id = $1
         admin_data.curated.into_option(),
         admin_data.premium.into_option(),
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
     if blocked.is_some() {
         sqlx::query!(
@@ -1150,7 +1150,7 @@ where resource.live_id = $1
             "#,
             resource_id.0,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -1171,7 +1171,7 @@ where id = $1
     "#,
         id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     //check if Resource is published and likeable
@@ -1194,7 +1194,7 @@ values ($1, $2)
         id.0,
         user_id.0
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await
     .map_err(|_| anyhow::anyhow!("Cannot like a resource more than once"))?;
 

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate course_data\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ebf961d5777f0009b3717b25f4328a1d4e8230adc40135440a107f570062e9f6"
+}

@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with cte as (\n            select array_agg(resource.id)\n            from resource\n                  inner join resource_data \"rd\" on (draft_id = rd.id or (live_id = rd.id and rd.last_synced_at is not null and published_at is not null))\n                  left join resource_admin_data \"admin\" on admin.resource_id = resource.id\n                  left join resource_data_resource \"rdr\" on rd.id = rdr.resource_data_id\n            where (rd.draft_or_live = $1 or $1 is null)\n                and (author_id = $2 or $2 is null)\n                and (blocked = $3 or $3 is null)\n                and (rd.privacy_level = any($4) or $4 = array[]::smallint[])\n                and (rdr.resource_type_id = any($5) or $5 = array[]::uuid[])\n            group by updated_at, created_at, resource.published_at, admin.resource_id, resource_id\n        )\n            select count(*) as \"count!\" from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord)\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2",
+        "Uuid",
+        "Bool",
+        "Int2Array",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "932508742699d5ebb198b02fc4f4bcaa9fd0e50c4206e6536279163533526826"
+}

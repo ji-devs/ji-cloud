@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate account\nset payment_method = $2,\nupdated_at = now()\nwhere account_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "78b48e52d416cf94b8daaf7ce4b6dcbb7bae4ba6c5f85bc4121c626f37c4df4e"
+}

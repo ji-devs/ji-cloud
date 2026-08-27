@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    insert into resource_report(resource_id, report_type, reporter_id)\n    values ($1, $2, $3)\n    returning id as \"id!: ReportId\"\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: ReportId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_report",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "96569e9389d5fa1a63e58cd3f1b618d0edd302dab9da28604bd88276d2e344c1"
+}

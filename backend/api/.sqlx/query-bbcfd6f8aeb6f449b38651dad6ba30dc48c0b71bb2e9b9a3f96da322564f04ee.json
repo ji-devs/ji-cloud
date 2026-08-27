@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select account_id as \"account_id: AccountId\" from account where stripe_customer_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "account_id: AccountId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "account",
+            "name": "account_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "bbcfd6f8aeb6f449b38651dad6ba30dc48c0b71bb2e9b9a3f96da322564f04ee"
+}

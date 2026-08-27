@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into user_account\n(user_id, account_id, admin, verified)\nvalues\n($1, $2, $3, $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7ed5f007e50173d816514b56f308c12ccbbfd8ad1eb488ab54d86bf3f325f6fa"
+}

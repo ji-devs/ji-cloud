@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate course_data_unit\nset display_name    = coalesce($3, display_name),\n    description     = coalesce($4, description)\nwhere course_data_id = $1\n  and index = $2\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "25860c59889da796ca09dadde97f5ca87b634e16509c431b66485fc4bab7426c"
+}

@@ -75,7 +75,7 @@ select exists(select 1 from course_data_resource "pddr" where course_data_id = $
         course_data_id,
         id.0,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .exists
     {
@@ -94,7 +94,7 @@ where course_data_id = $1
         course_data_id,
         id.0,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     let content: ResourceContent = serde_json::from_value::<ResourceContent>(res.resource_content)?;
@@ -135,7 +135,7 @@ where id = $1 and $2 is distinct from display_name
             id.0,
             display_name
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -150,7 +150,7 @@ where id = $1 and $2 is distinct from resource_type_id
             id.0,
             resource_type_id.0
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -166,7 +166,7 @@ where course_data_id = $1 and id = $2
             id.0,
             json!(resource_content)
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -198,7 +198,7 @@ where (course_data_id = $1 or course_data_id = $2)
         live_id,
         id.0,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;

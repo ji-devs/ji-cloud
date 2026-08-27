@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update school set internal_school_name_id = $2 where school_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "96459ff3ea8e971231813b94ba45414bf7de30ef206dc9c12244774ab809332f"
+}

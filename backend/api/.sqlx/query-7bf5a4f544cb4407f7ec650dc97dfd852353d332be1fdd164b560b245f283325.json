@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate course_data\nset privacy_level = coalesce($2, privacy_level),\n    updated_at = now()\nwhere id = $1\n  and $2 is distinct from privacy_level\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7bf5a4f544cb4407f7ec650dc97dfd852353d332be1fdd164b560b245f283325"
+}

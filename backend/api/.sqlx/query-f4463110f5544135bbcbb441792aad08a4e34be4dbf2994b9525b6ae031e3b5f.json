@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_curation_data\nset language = $2\nwhere jig_id = $1 and $2 is distinct from language\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f4463110f5544135bbcbb441792aad08a4e34be4dbf2994b9525b6ae031e3b5f"
+}

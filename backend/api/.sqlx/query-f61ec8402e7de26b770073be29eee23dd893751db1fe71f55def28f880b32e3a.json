@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select id, display_name as name from locale_item_kind order by created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "locale_item_kind",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "locale_item_kind",
+            "name": "display_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "f61ec8402e7de26b770073be29eee23dd893751db1fe71f55def28f880b32e3a"
+}

@@ -1,0 +1,203 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with cte as (\n            select array_agg(pd.id)\n            from playlist_data \"pd\"\n                  inner join playlist on (draft_id = pd.id or (live_id = pd.id and pd.last_synced_at is not null and published_at is not null))\n                  left join playlist_admin_data \"admin\" on admin.playlist_id = playlist.id\n            where (pd.draft_or_live = $1)\n            group by updated_at, created_at, playlist.published_at, admin.playlist_id\n        ),\n        cte1 as (\n            select * from unnest(array((select cte.array_agg[1] from cte))) with ordinality t(id\n           , ord) order by ord\n        )\n        select playlist.id                                      as \"playlist_id: PlaylistId\",\n            privacy_level                                       as \"privacy_level: PrivacyLevel\",\n            creator_id                                          as \"creator_id?: UserId\",\n            author_id                                           as \"author_id?: UserId\",\n            (select given_name || ' '::text || family_name\n                from user_profile\n             where user_profile.user_id = author_id)            as \"author_name\",\n            created_at,\n            published_at,\n            likes,\n            plays,\n            display_name                                        as \"display_name!\",\n            language                                            as \"language!\",\n            description                                         as \"description!\",\n            rating                                              as \"rating!: Option<PlaylistRating>\",\n            blocked                                             as \"blocked!\",\n            curated                                             as \"curated!\",\n            is_premium                                          as \"premium!\"\n        from cte1\n        inner join playlist_data on cte1.id = playlist_data.id\n        inner join playlist on (\n            playlist_data.id = playlist.draft_id\n            or (\n                playlist_data.id = playlist.live_id\n                and last_synced_at is not null\n                and playlist.published_at is not null\n            )\n        )\n        left join playlist_admin_data \"admin\" on admin.playlist_id = playlist.id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "playlist_id: PlaylistId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "privacy_level: PrivacyLevel",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "playlist_data",
+            "name": "privacy_level"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "creator_id?: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "creator_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "author_id?: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "playlist_data",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "likes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "likes"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "plays",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "plays"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "playlist_data",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "language!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "playlist_data",
+            "name": "language"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "description!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "playlist_data",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "rating!: Option<PlaylistRating>",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "playlist_admin_data",
+            "name": "rating"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "blocked!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "playlist_admin_data",
+            "name": "blocked"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "curated!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "playlist_admin_data",
+            "name": "curated"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "premium!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "playlist_admin_data",
+            "name": "is_premium"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      null,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "688ca554263ad9bee35f1fe5d4c99682f7d47c847249d304422858b265bce880"
+}

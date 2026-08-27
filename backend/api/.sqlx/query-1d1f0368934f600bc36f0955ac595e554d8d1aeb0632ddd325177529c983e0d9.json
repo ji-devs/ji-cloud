@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data\nset updated_at = now()\nfrom jig\nwhere jig.live_id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1d1f0368934f600bc36f0955ac595e554d8d1aeb0632ddd325177529c983e0d9"
+}

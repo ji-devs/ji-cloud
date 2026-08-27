@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate circle\nset description = $2,\n    updated_at = now()\nwhere id = $1 and $2 is distinct from description\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "85e966383548127dd992f5834be4f1bcc383e9324244d97643b175bf49b3c3e5"
+}

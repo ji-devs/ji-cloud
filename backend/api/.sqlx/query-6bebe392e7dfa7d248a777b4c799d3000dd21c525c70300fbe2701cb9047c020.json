@@ -1,0 +1,138 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect resource_id                               as \"resource_id!: ResourceId\",\n       display_name,\n       language,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status!: ResourceCurationStatus\",\n       array(\n            select row (rcc.id, rcc.resource_id, comment, created_at, author_id)\n            from resource_curation_comment  \"rcc\"\n            where rcd.resource_id = rcc.resource_id\n            order by created_at desc\n       )                                         as \"comments!: Vec<(ResourceCurationComment)>\",\n       array(\n           select row (rr.id, rr.resource_id, report_type, reporter_id, created_at,      \n                        (\n                        select given_name || ' '::text || family_name\n                        from user_profile\n                        where user_profile.user_id = reporter_id\n                        ),\n                        (\n                            select email::text\n                            from user_email\n                            where user_email.user_id = reporter_id\n                        )                                                                       \n            )\n           from resource_report \"rr\"\n           where rcd.resource_id = rr.resource_id\n           order by created_at desc\n       )                                                    as \"reports!: Vec<(ResourceReport)>\"\nfrom resource_curation_data \"rcd\"\nwhere resource_id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "resource_id!: ResourceId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_curation_data",
+            "name": "resource_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "resource_curation_data",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "language",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "resource_curation_data",
+            "name": "language"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "categories",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "resource_curation_data",
+            "name": "categories"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "resource_curation_data",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "age_ranges",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "resource_curation_data",
+            "name": "age_ranges"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "affiliations",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "resource_curation_data",
+            "name": "affiliations"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "additional_resources",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "resource_curation_data",
+            "name": "additional_resources"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "curation_status!: ResourceCurationStatus",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "resource_curation_data",
+            "name": "curation_status"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "comments!: Vec<(ResourceCurationComment)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "reports!: Vec<(ResourceReport)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "6bebe392e7dfa7d248a777b4c799d3000dd21c525c70300fbe2701cb9047c020"
+}

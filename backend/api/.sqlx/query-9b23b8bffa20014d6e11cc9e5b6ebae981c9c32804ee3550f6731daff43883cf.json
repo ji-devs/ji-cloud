@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into jig (creator_id, author_id, parents, live_id, draft_id)\nselect creator_id, $2, array_append(parents, $1), $3, $4\nfrom jig\nwhere id = $1\nreturning id as \"id!: JigId\"\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: JigId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9b23b8bffa20014d6e11cc9e5b6ebae981c9c32804ee3550f6731daff43883cf"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into jig_data_affiliation(jig_data_id, affiliation_id)\nselect $2, affiliation_id\nfrom jig_data_affiliation\nwhere jig_data_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5330258c1771d3e64b884d567ed1290ab484fb36f84360c05a1ac06fb8e11032"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data\nset other_keywords = $2,\n    translated_keywords = (case when ($3::text is not null) then $3::text else (translated_keywords) end),\n    updated_at = now()\nwhere id = $1 and $2 is distinct from other_keywords",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e8cac1c4331f80bc9b4d3eb878d98fb1650ea401e669cfa5154971251776f17d"
+}

@@ -63,7 +63,7 @@ pub async fn process_image_bytes(
         id,
         ImageFileKind::Png as i16,
     )
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .await?;
 
     Ok(())
@@ -116,7 +116,7 @@ pub async fn process_user_image_bytes(
         id,
         ImageFileKind::Png as i16,
     )
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .await?;
 
     Ok(())
@@ -139,10 +139,10 @@ async fn process_uploaded_gif(
     let query = format!(
         "update {table} set uploaded_at = now(), processed_at = now(), processing_result = true, kind = $2 where {id_column} = $1"
     );
-    sqlx::query(&query)
+    sqlx::query(sqlx::AssertSqlSafe(query))
         .bind(id)
         .bind(ImageFileKind::Gif as i16)
-        .execute(&mut *txn)
+        .execute(&mut **txn)
         .await?;
 
     Ok(())
@@ -173,7 +173,7 @@ pub async fn process_animation_bytes(
         "update global_animation_upload set uploaded_at = now(), processed_at = now(), processing_result = true where animation_id = $1",
         id
     )
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .await?;
 
     Ok(())
@@ -192,7 +192,7 @@ pub async fn process_user_audio_bytes(
         "update user_audio_upload set uploaded_at = now(), processed_at = now(), processing_result = true where audio_id = $1",
         id
     )
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .await?;
 
     Ok(())
@@ -211,7 +211,7 @@ pub async fn process_user_pdf_bytes(
         "update user_pdf_upload set uploaded_at = now(), processed_at = now(), processing_result = true where pdf_id = $1",
         id
     )
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .await?;
 
     Ok(())

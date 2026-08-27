@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select index as \"index: ImageTagIndex\", display_name, created_at, updated_at from \"image_tag\"\n        order by index\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index: ImageTagIndex",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "image_tag",
+            "name": "index"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "image_tag",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "image_tag",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "image_tag",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "758bee136eaae799c8beef0e069597d0f67cfc590d5ecc6a4353d24b3474e39b"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        truncate table featured_jigs\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "9bfa117ce2cdc10f4f38b76d9b471e89ef7376a85ccc8c9e3cc6350705d29387"
+}

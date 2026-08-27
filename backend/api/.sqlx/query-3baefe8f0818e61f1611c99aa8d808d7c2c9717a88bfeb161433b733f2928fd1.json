@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                                update image_metadata\n                                set translated_description = $2,\n                                    last_synced_at = null\n                                where id = $1\n                            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3baefe8f0818e61f1611c99aa8d808d7c2c9717a88bfeb161433b733f2928fd1"
+}

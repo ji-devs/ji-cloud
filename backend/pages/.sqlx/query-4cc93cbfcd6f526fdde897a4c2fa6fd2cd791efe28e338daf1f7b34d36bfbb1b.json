@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            select\n                playlist_data.display_name as \"display_name!\",\n                playlist_data.description as \"description!\",\n                playlist_data.other_keywords as \"other_keywords!\",\n                (\n                    select id\n                    from playlist_data_module\n                    where playlist_data_id = playlist_data.id\n                    order by \"index\"\n                    limit 1\n                ) as \"cover_module_id?: ModuleId\"\n            from playlist\n                inner join playlist_data on playlist_data.id = coalesce(playlist.live_id, playlist.draft_id)\n            where playlist.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "playlist_data",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "description!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "playlist_data",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "other_keywords!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "playlist_data",
+            "name": "other_keywords"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "cover_module_id?: ModuleId",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "4cc93cbfcd6f526fdde897a4c2fa6fd2cd791efe28e338daf1f7b34d36bfbb1b"
+}

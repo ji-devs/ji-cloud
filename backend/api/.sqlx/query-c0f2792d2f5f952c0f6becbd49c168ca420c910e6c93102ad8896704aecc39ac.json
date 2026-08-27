@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate category\nset updated_at = now(),\n    index = index + 1\nwhere index >= $1 and index < $2 and parent_id is not distinct from $3\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int2",
+        "Int2",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c0f2792d2f5f952c0f6becbd49c168ca420c910e6c93102ad8896704aecc39ac"
+}

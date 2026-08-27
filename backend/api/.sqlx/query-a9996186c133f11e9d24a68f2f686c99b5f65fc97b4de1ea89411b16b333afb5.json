@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select exists(\n            select 1\n            from \"user_scope\"\n            where\n                user_id = $1 and\n                (scope = $2 or scope = $3)\n        ) as \"exists!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a9996186c133f11e9d24a68f2f686c99b5f65fc97b4de1ea89411b16b333afb5"
+}

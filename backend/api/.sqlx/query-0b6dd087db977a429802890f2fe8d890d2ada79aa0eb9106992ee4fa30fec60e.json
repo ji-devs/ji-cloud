@@ -1,0 +1,125 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT * FROM jig_code\n            WHERE creator_id = $1 AND code = $2;\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "jig_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "jig_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "direction",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "direction"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "scoring",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "scoring"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "drag_assist",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "drag_assist"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "expires_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "creator_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "creator_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_code",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "0b6dd087db977a429802890f2fe8d890d2ada79aa0eb9106992ee4fa30fec60e"
+}

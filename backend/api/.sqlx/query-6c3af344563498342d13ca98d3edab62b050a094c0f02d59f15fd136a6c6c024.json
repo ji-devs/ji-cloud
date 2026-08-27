@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select account_id as \"account_id!: AccountId\" from user_account where user_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "account_id!: AccountId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_account",
+            "name": "account_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6c3af344563498342d13ca98d3edab62b050a094c0f02d59f15fd136a6c6c024"
+}

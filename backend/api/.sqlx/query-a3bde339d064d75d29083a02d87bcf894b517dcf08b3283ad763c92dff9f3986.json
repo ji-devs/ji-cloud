@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into course_data_unit (course_data_id, display_name, description, value, index)\nvalues ((select draft_id from course where id = $1), $2, $3, $4, (select count(*) from course_data_unit where course_data_id = $5))\nreturning unit_id as \"unit_id!: CourseUnitId\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "unit_id!: CourseUnitId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course_data_unit",
+            "name": "unit_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a3bde339d064d75d29083a02d87bcf894b517dcf08b3283ad763c92dff9f3986"
+}

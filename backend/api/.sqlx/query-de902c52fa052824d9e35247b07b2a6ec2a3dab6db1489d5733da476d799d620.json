@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with cte as (\n            select (array_agg(user_profile.user_id))[1]\n            from user_profile\n            inner join \"user\" on \"user\".id = user_profile.user_id\n            inner join user_email on user_email.user_id = user_profile.user_id\n            where (\"user\".id = $1 or $1 is null)\n            and (user_profile.badge = any($2) or $2 = array[]::smallint[])\n            and (\"user\".blocked = $3 or $3 is null)\n            and (\"user\".flagged = $4 or $4 is null)\n            group by \"user\".created_at\n            order by \"user\".created_at desc\n        )\n        select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id, ord)\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2Array",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "de902c52fa052824d9e35247b07b2a6ec2a3dab6db1489d5733da476d799d620"
+}

@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect id,\n       kind as \"kind: MediaKind\",\n       created_at,\n       updated_at,\n       array(select media_url from web_media_library_url where media_id = id) as \"urls!\"\nfrom web_media_library\nwhere id = (select media_id from web_media_library_url where media_url = $1)\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "web_media_library",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "kind: MediaKind",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "web_media_library",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "web_media_library",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "web_media_library",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "urls!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "5e4bfa7c86f036663500b75df28a943c55cbc671a2dd296514568680f1b3733f"
+}

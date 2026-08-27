@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data\nset language         = coalesce($2, language),\n    theme            = coalesce($3, theme),\n    updated_at = now()\nwhere id = $1\n  and (($2::text is not null and $2 is distinct from language) or\n       ($3::smallint is not null and $3 is distinct from theme))\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "340e501a7da4700b5bccce3e503981333ee8176b2043bf55410d9292833ccea1"
+}

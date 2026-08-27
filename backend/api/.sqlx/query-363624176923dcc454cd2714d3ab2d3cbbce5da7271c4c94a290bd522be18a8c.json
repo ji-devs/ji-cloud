@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n    user_id     as \"id!: UserId\",\n    password,\n    exists(select 1 from user_profile where user_id = user_auth_basic.user_id) as \"has_profile!\",\n    exists(select 1 from user_email where user_id = user_auth_basic.user_id) as \"has_verified_email!\",\n    (select blocked from \"user\" where id = user_auth_basic.user_id) as \"blocked?\"\nfrom user_auth_basic where email = $1::text\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_auth_basic",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "password",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_auth_basic",
+            "name": "password"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "has_profile!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "has_verified_email!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "blocked?",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "363624176923dcc454cd2714d3ab2d3cbbce5da7271c4c94a290bd522be18a8c"
+}

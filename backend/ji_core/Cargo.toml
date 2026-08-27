@@ -21,9 +21,10 @@ log = "0.4.14"
 reqwest = { version = "0.11.4", default-features = false, features = ["json", "rustls-tls"] }
 serde = { version = "1.0.193", features = ["derive"] }
 shared = { path = "../../shared/rust", features = ["backend"] }
-sqlx = { version = "0.6.3", default-features = false, features = [
+sqlx = { version = "0.9.0", default-features = false, features = [
   "postgres",
-  "runtime-tokio-rustls",
+  "runtime-tokio",
+  "tls-rustls",
 ], optional = true }
 yup-oauth2 = "7.0.1"
 tracing = "0.1.31"

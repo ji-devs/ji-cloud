@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate session\nset last_used = now()\nwhere\n    token = $1 and\n    expires_at < now() is not true and\n    (scope_mask & $2) = $2 and\n    exists(select 1 from \"user\" where id = session.user_id and blocked = false) and\n    (impersonator_id is null or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3))\nreturning user_id\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "session",
+            "name": "user_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int2",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8cf2744ed80c0a29f88aca252ed083082997cc4705984f5c4235f9bb7b4aaa36"
+}

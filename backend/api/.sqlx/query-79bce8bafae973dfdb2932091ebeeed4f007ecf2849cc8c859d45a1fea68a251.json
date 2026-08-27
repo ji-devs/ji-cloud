@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete from jig_like\nwhere jig_id = $1 and user_id = $2\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "79bce8bafae973dfdb2932091ebeeed4f007ecf2849cc8c859d45a1fea68a251"
+}

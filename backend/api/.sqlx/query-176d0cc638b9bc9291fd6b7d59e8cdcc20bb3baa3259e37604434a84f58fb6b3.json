@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    insert into jig_play(jig_id, user_id)\n    values ($1, $2)\n    ON CONFLICT (jig_id, user_id) DO UPDATE\n    SET at = now()\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "176d0cc638b9bc9291fd6b7d59e8cdcc20bb3baa3259e37604434a84f58fb6b3"
+}

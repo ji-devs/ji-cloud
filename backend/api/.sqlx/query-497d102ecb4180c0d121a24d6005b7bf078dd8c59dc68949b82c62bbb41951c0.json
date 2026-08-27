@@ -1,0 +1,84 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect id                                   as \"id!: CommentId\",\n       jig_id                               as \"jig_id!: JigId\",                      \n       comment,\n       created_at,\n       author_id                            as \"author_id!: Uuid\",\n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = author_id\n        )                                       as \"author_name!\"\nfrom jig_curation_comment\nwhere id = $1 and jig_id = $2\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: CommentId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_comment",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "jig_id!: JigId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_comment",
+            "name": "jig_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "comment",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_comment",
+            "name": "comment"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_comment",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "author_id!: Uuid",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_comment",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "author_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "497d102ecb4180c0d121a24d6005b7bf078dd8c59dc68949b82c62bbb41951c0"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_data_resource\nset resource_type_id = coalesce($2, resource_type_id)\nwhere id = $1 and $2 is distinct from resource_type_id\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "29a3fff0ef9ba759cb66de761d80243c888b264c14cfc2045ded1d2403c9d453"
+}

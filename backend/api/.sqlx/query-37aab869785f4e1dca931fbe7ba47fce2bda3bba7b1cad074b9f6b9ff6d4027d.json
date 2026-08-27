@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select account_id as \"account_id: AccountId\" from school where school_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "account_id: AccountId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "account_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "37aab869785f4e1dca931fbe7ba47fce2bda3bba7b1cad074b9f6b9ff6d4027d"
+}

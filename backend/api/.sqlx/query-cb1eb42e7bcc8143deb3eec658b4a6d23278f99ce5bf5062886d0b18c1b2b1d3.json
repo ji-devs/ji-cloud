@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate user_font\n    set name = $3\n    where user_id = $1\n    and index = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cb1eb42e7bcc8143deb3eec658b4a6d23278f99ce5bf5062886d0b18c1b2b1d3"
+}

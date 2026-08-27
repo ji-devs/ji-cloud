@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect user_id as \"user_id: UserId\"\nfrom session\nwhere token = $1\n  and expires_at < now() is not true\n  and (scope_mask & $2) = $2\n  and (\n      impersonator_id is null\n      or exists(select 1 from user_scope where user_scope.user_id = impersonator_id and user_scope.scope = $3)\n  )\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "session",
+            "name": "user_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int2",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "17145324013bccd92b122b8c7981f26bc5105c013650814bd2e80b687f4231c3"
+}

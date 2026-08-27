@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate image_metadata\nset is_premium  = coalesce($2, is_premium),\n    updated_at  = now()\nwhere id = $1\n  and ($2::boolean is not null and $2 is distinct from is_premium)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "54bd0fd9b43e386d322274148c5ed9b47efb8479f32da5b1cacff2f7ce55c397"
+}

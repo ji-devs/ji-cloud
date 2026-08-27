@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into jig_data_additional_resource (jig_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from jig where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: AdditionalResourceId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_data_additional_resource",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "62d96e4b30f7828cbc7255b3be93f16aa1a868bd5a9780ae80079dbbfe858694"
+}

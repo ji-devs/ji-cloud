@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    update jig_data\n    set last_synced_at = null\n    where id = any($1)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "640b89322af8a3bbd2f1a6c68299ec477e9a58e1aa95ffb5e23e314daf05702a"
+}

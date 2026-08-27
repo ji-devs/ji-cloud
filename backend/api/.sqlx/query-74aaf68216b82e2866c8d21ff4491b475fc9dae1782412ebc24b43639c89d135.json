@@ -1,0 +1,179 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect course.id                               as \"id!: CourseId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       rating                                   as \"rating?: CourseRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       is_premium                               as \"premium!\"\nfrom course\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\ninner join course_admin_data \"admin\" on admin.course_id = course.id\norder by ord asc\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: CourseId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "creator_id?: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "creator_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "author_id?: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "live_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "live_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "draft_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "draft_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "likes!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "likes"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "plays!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "plays"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "live_up_to_date!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "live_up_to_date"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "rating?: CourseRating",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "course_admin_data",
+            "name": "rating"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "blocked!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "course_admin_data",
+            "name": "blocked"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "curated!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "course_admin_data",
+            "name": "curated"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "premium!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "course_admin_data",
+            "name": "is_premium"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      null,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "74aaf68216b82e2866c8d21ff4491b475fc9dae1782412ebc24b43639c89d135"
+}

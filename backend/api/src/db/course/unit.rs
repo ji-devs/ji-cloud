@@ -43,7 +43,7 @@ select draft_id from course where id = $1
 "#,
         course_id.0,
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .map(|it| it.draft_id);
 
@@ -95,7 +95,7 @@ select exists(select 1 from course_data_unit "pddu" where course_data_id = $1
         course_data_id,
         unit_id.0,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .exists
     {
@@ -115,7 +115,7 @@ where course_data_id = $1
         course_data_id,
         unit_id.0,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     let content = serde_json::from_value::<CourseUnitValue>(res.value)?;
@@ -143,7 +143,7 @@ select draft_id from course where course.id = $1
 "#,
         course_id.0,
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .map(|it| it.draft_id);
 
@@ -156,7 +156,7 @@ where course_data_id = $1 and course_data_unit.unit_id is not distinct from $2
         draft_id,
         unit_id.0,
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?;
 
     let index = match index {
@@ -178,7 +178,7 @@ where course_data_id = $1
         display_name,
         description,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     if let Some(unit_value) = unit_value {
@@ -195,7 +195,7 @@ where course_data_id = $1
             index,
             json!(unit),
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     };
 
@@ -207,7 +207,7 @@ where course_data_id = $1
             r#"select count(*) - 1 as "max_index!" from course_data_unit where course_data_id = $1"#,
             draft_id
         )
-        .fetch_one(&mut txn)
+        .fetch_one(&mut *txn)
         .await?
         .max_index;
 
@@ -227,7 +227,7 @@ where course_data_id = $1 and index between $3 and $2
                 index,
                 new_index
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .await?;
         } else if new_index > index {
             sqlx::query!(
@@ -243,7 +243,7 @@ where course_data_id = $1 and index between $2 and $3
                 index,
                 new_index
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .await?;
         }
     }
@@ -267,7 +267,7 @@ select draft_id from course where course.id = $1
 "#,
         course_id.0,
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .map(|it| it.draft_id);
 
@@ -282,7 +282,7 @@ returning index
         draft_id,
         unit_id.0,
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .map(|it| it.index);
 
@@ -298,7 +298,7 @@ where course_data_id = $1
             draft_id,
             idx,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 

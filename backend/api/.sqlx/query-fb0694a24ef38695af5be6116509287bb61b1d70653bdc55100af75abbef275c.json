@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "delete from web_media_library where id = $1 returning kind as \"kind: MediaKind\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "kind: MediaKind",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "web_media_library",
+            "name": "kind"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fb0694a24ef38695af5be6116509287bb61b1d70653bdc55100af75abbef275c"
+}

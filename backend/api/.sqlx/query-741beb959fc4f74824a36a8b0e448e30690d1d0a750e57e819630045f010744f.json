@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                            update playlist_data\n                            set translated_name = $2,\n                                last_synced_at = null\n                            where id = $1\n                            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "741beb959fc4f74824a36a8b0e448e30690d1d0a750e57e819630045f010744f"
+}

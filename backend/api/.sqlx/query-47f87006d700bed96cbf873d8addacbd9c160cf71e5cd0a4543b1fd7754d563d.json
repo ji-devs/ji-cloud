@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete from user_recent_image\nwhere user_id = $1 and image_id = $2\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "47f87006d700bed96cbf873d8addacbd9c160cf71e5cd0a4543b1fd7754d563d"
+}

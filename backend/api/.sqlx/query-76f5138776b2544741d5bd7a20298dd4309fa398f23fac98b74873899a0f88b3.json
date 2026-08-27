@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into image_tag (index, display_name)\nvalues ($1, $2)\nreturning index as \"index: ImageTagIndex\", display_name\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index: ImageTagIndex",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "image_tag",
+            "name": "index"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "image_tag",
+            "name": "display_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "76f5138776b2544741d5bd7a20298dd4309fa398f23fac98b74873899a0f88b3"
+}

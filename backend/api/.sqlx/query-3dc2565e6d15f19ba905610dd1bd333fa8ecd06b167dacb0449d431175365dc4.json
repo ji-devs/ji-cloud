@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n    user_id as \"user_id!: UserId\",\n    admin as \"is_admin!\",\n    verified as \"verified!\"\nfrom user_account\nwhere account_id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id!: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_account",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "is_admin!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_account",
+            "name": "admin"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "verified!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_account",
+            "name": "verified"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3dc2565e6d15f19ba905610dd1bd333fa8ecd06b167dacb0449d431175365dc4"
+}

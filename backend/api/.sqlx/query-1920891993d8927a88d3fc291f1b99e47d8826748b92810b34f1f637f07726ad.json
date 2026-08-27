@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select index as \"index: i16\" from image_tag where index = $1 for update",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index: i16",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "image_tag",
+            "name": "index"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1920891993d8927a88d3fc291f1b99e47d8826748b92810b34f1f637f07726ad"
+}

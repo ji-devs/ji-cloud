@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_data_module\nset index = index - 1\nwhere playlist_data_id = $1\n  and index > $2\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7687758947cd67921247e6b7295c3b5645af11bd05dac4f804d301ab74bda572"
+}

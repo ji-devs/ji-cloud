@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete from jig_data where id = $1\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9756ed1443684d458b7a28a371aa5f4562dea68d71b181d1f8f8ea5c831c6866"
+}

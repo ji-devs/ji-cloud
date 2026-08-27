@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update image_metadata set last_synced_at = now() where id = any($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "83a19967d79935450a0c984ec7c3cde0626f3347618e8dd1d84e883f73ae2898"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete\nfrom playlist_data_resource\nwhere (playlist_data_id = $1 or playlist_data_id = $2)\n  and id = $3\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2d5f46daef527aa380903565718b0dbfce58bbd28a3f4fd992dde7955e56691b"
+}

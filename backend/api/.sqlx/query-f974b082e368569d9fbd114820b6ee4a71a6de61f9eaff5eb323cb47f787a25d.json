@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    insert into user_follow(user_id, follower_id, followed_at)\n    values($1, $2, now())\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f974b082e368569d9fbd114820b6ee4a71a6de61f9eaff5eb323cb47f787a25d"
+}

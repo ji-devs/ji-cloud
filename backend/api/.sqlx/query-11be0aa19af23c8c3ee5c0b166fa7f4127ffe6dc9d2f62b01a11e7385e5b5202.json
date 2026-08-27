@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into jig_data_additional_resource(jig_data_id, resource_type_id, display_name, resource_content)\nselect $2, resource_type_id, display_name, resource_content\nfrom jig_data_additional_resource\nwhere jig_data_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "11be0aa19af23c8c3ee5c0b166fa7f4127ffe6dc9d2f62b01a11e7385e5b5202"
+}

@@ -200,14 +200,14 @@ select parent_id, index from category where id = $1 for update
     "#,
         id
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .ok_or(error::CategoryUpdate::CategoryNotFound)?;
 
     if let Some(name) = name {
         #[allow(clippy::suspicious_else_formatting)]
         sqlx::query!("update category set name = $1 where id = $2", name, id)
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .await?;
     }
 
@@ -236,7 +236,7 @@ returning index
                 parent_id,
                 id
             )
-            .fetch_optional(&mut txn)
+            .fetch_optional(&mut *txn)
             .await?
             .ok_or(error::CategoryUpdate::ParentCategoryNotFound)?;
 
@@ -260,7 +260,7 @@ where index >= $1 and index < $2 and parent_id is not distinct from $3
                 current_index,
                 current_parent
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .await?;
         }
 
@@ -279,7 +279,7 @@ where id = $2
                 index,
                 id
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .await?;
         }
     }
@@ -394,7 +394,7 @@ pub async fn delete(db: &PgPool, id: CategoryId) -> Result<(), Delete> {
             "delete from category where id = $1 returning index, parent_id",
             id.0
         )
-        .fetch_optional(&mut txn)
+        .fetch_optional(&mut *txn)
         .await?;
 
         if let Some(res) = res {

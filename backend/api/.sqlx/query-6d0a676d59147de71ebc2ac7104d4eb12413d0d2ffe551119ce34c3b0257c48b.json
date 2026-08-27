@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_data_module\nset\n    index = case when index = $2 then $3 else index - 1 end,\n    updated_at = now()\nwhere playlist_data_id = $1 and index between $2 and $3\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6d0a676d59147de71ebc2ac7104d4eb12413d0d2ffe551119ce34c3b0257c48b"
+}

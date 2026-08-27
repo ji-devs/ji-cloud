@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select id as \"id: AudioId\" from user_audio_library where id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: AudioId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_audio_library",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8313a67bf42c71861a5f4935f1cd53fda46e3da275e46cdaa266a785595b8cd1"
+}

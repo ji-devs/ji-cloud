@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data\nset audio_background = $2,\nupdated_at = now()\nwhere id = $1 and $2 is distinct from audio_background\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c340da8122545a5c5cffc7a9b7c8b03d6d7eed1e58ece1d6a462dbcebe030f10"
+}

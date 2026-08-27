@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into subscription_plan\n    (plan_type, price_id)\nvalues\n    ($1, $2)\non conflict (plan_type) do update\nset\n    plan_type = $1,\n    price_id = $2,\n    updated_at = now()\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int2",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f206ec0b1c020544ecfa7646aa07af52f492ced75033641ff3022dacc33fb256"
+}

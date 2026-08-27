@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select user_id \"id!: UserId\" from user_auth_basic where user_id <> $1 and email = $2 for update",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_auth_basic",
+            "name": "user_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        {
+          "Custom": {
+            "name": "citext",
+            "kind": "Simple"
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8d478d2f1cd6a9913d7e9ac7fe8b0165ee2a13e6653bcf898035907c4cb1ee41"
+}

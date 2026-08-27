@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect author_id    \"author_id: UserId\",\n       published_at  as \"published_at?\"\nfrom resource\nwhere id = $1\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "author_id: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "published_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "resource",
+            "name": "published_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "4d406cb8e5d3e19b5e8cb863383e5027dfd3564a28a4a3725acfbc9ebb30e467"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect published_at  as \"published_at?\"\nfrom playlist\nwhere id = $1\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "published_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "published_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "7cc4dd06d23bb79d9a2ea56c294ee6a42646c877a0bfbb0991bd6dd86db82f6e"
+}

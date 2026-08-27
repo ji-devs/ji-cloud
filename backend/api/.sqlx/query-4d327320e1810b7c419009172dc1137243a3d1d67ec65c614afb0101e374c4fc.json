@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select id as \"id: PdfId\" from user_pdf_library where id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: PdfId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_pdf_library",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4d327320e1810b7c419009172dc1137243a3d1d67ec65c614afb0101e374c4fc"
+}

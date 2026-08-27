@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into user_audio_upload (audio_id) values($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "57b72bbdece8deb3ac84c44b94157afbd3d50d16c893613f54145b9ca7e255d0"
+}

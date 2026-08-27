@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate school_name\nset\n    name = $2::text::citext\nwhere school_name_id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c7c3476f7178dffb88724706ed1916ee5810812fbc75101ad3a961d4ad36cea6"
+}

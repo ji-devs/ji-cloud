@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with cte as (\n            select jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1 and jig.published_at is not null\n           ),\n           cte1 as (\n              select cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from playlist_data_resource \"cdr\"\n          inner join playlist on playlist.live_id = cdr.playlist_data_id\n          inner join playlist_data on playlist.live_id = playlist_data.id\n          where author_id = $1 and playlist.published_at is not null\n          ),\n          cte2 as (\n            select *\n            from unnest(array(\n                select\n                (array_agg(id))[1] as id\n                from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)\n                resource\n                group by resource.updated_at, resource.created_at\n                order by coalesce(resource.updated_at, created_at))) with ordinality t(id\n                , ord) order by ord\n         )\n          select cte3.id                as \"id!: AddId\",\n                 display_name           as \"display_name!\",\n                 resource_type_id       as \"resource_type_id!: TypeId\",\n                 resource_content        as \"resource_content!\"\n         from\n          (select * from cte\n          union all\n          select * from cte1) cte3\n        inner join cte2 on cte2.id = cte3.id\n        where ord > (1 * $2 * $3)\n        order by ord asc\n        limit $3\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: AddId",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "resource_type_id!: TypeId",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "resource_content!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "605f9b9b03ca7908ff0a89bb4794d447710484326f57bdc6e31b59d8efbee5e8"
+}

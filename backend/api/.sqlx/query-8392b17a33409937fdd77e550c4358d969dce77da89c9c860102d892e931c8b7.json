@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect exists(select 1 from playlist_data_resource \"jdar\" where playlist_data_id = $1\n    and jdar.id = $2) as \"exists!\"\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8392b17a33409937fdd77e550c4358d969dce77da89c9c860102d892e931c8b7"
+}

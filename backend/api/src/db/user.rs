@@ -270,7 +270,7 @@ offset $2
         blocked,
         flagged,
     )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .instrument(tracing::info_span!("query user_profile"))
     .await?;
 
@@ -400,7 +400,7 @@ with ordinality t(id, ord) using (id)
 "#,
         ids
     )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .await?;
 
     let v = res
@@ -637,7 +637,7 @@ pub async fn upsert_profile(
         "#,
         &req.username
     )
-    .fetch_one(&mut *txn)
+    .fetch_one(&mut **txn)
     .instrument(tracing::info_span!("user is not in user"))
     .await?
     .exists
@@ -682,7 +682,7 @@ set
         &req.persona,
         req.location.as_ref(),
     )
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .instrument(tracing::info_span!("insert user_profile"))
     .await?;
 
@@ -691,7 +691,7 @@ set
         user_id.0,
         UserScope::ManageSelfAsset as i16
     )
-    .execute(&mut *txn)
+    .execute(&mut **txn)
     .instrument(tracing::info_span!("insert user_scope"))
     .await?;
 
@@ -722,7 +722,7 @@ select exists(select 1 from user_profile where user_id = $1 for update) as "exis
     "#,
         user_id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .instrument(tracing::info_span!("user exists"))
     .await?
     .exists
@@ -741,7 +741,7 @@ where user_id = $1 and organization is distinct from $2"#,
             user_id.0,
             organization
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .instrument(tracing::info_span!("update organization"))
         .await?;
     }
@@ -757,7 +757,7 @@ where user_id = $1 and location is distinct from $2"#,
             user_id.0,
             location
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .instrument(tracing::info_span!("update location"))
         .await?;
     }
@@ -774,7 +774,7 @@ where user_id = $1 and profile_image_id is distinct from $2
             user_id.0,
             profile_image.map(|it| it.0),
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .instrument(tracing::info_span!("update profile_image"))
         .await?;
     }
@@ -791,7 +791,7 @@ where user_id = $1 and persona is distinct from $2
             user_id.0,
             &persona
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .instrument(tracing::info_span!("update persona"))
         .await?;
     }
@@ -808,7 +808,7 @@ where user_id = $1 and languages_spoken is distinct from $2
             user_id.0,
             &languages_spoken
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .instrument(tracing::info_span!("update language spoken"))
         .await?;
     }
@@ -862,7 +862,7 @@ where user_id = $1
         req.bio,
         req.bio_public,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .instrument(tracing::info_span!("update user_profile"))
     .await?;
 
@@ -895,7 +895,7 @@ select exists(select 1 from user_profile where user_id = $1 for update) as "exis
     "#,
         user_id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .instrument(tracing::info_span!("user exists"))
     .await?
     .exists
@@ -917,7 +917,7 @@ and ($2 is distinct from badge)
             user_id.0,
             badge as i16,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .instrument(tracing::info_span!("update user_profile badge"))
         .await?;
     }
@@ -935,7 +935,7 @@ and ($2 is distinct from blocked or ($2 = false and flagged = true))
             user_id.0,
             blocked,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .instrument(tracing::info_span!("update user blocked"))
         .await?;
 
@@ -945,7 +945,7 @@ and ($2 is distinct from blocked or ($2 = false and flagged = true))
                 r#"delete from session where user_id = $1"#,
                 user_id.0,
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .instrument(tracing::info_span!("delete sessions for blocked user"))
             .await?;
         }
@@ -962,7 +962,7 @@ where user_id = $1
         user_id.0,
         &req.email,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .instrument(tracing::info_span!("update user_auth email"))
     .await?;
 
@@ -977,7 +977,7 @@ where user_id = $1
         user_id.0,
         &req.email,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .instrument(tracing::info_span!("update user_email"))
     .await?;
 
@@ -991,7 +991,7 @@ where user_id = $1
     "#,
         user_id.0,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .instrument(tracing::info_span!("update user_profile updated_at"))
     .await?;
 
@@ -1090,7 +1090,7 @@ select exists(
         user_id.0,
         index as i16
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .exists;
 
@@ -1104,7 +1104,7 @@ select exists(
         index as i16,
         color
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1148,7 +1148,7 @@ for update
         user_id.0,
         index as i16
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?;
 
     sqlx::query!(
@@ -1160,7 +1160,7 @@ where index > $2 and user_id = $1
         user_id.0,
         index as i16
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1219,7 +1219,7 @@ select exists(
         user_id.0,
         index as i16
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .exists;
 
@@ -1238,7 +1238,7 @@ update user_font
         index as i16,
         name
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1372,7 +1372,7 @@ for update
         user_id.0,
         index as i16
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?;
 
     sqlx::query!(
@@ -1384,7 +1384,7 @@ where index > $2 and user_id = $1
         user_id.0,
         index as i16
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;

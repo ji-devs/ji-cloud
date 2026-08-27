@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            update jig_code\n            set name = case when $2 then $3 else name end,\n                direction = coalesce($4, direction),\n                scoring = coalesce($5, scoring),\n                drag_assist = coalesce($6, drag_assist)\n            where code = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Bool",
+        "Text",
+        "Int2",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "16f8910b20347fe554aa439d7e678c377d5798bf89a14267614e1d47521bc8b0"
+}

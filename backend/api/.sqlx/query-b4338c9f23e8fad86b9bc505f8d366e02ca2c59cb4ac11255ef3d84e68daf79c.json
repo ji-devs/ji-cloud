@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into jig_curation_comment (jig_id, comment, author_id)\nvalues ($1, $2, $3)\nreturning id as \"id!: CommentId\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: CommentId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_comment",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b4338c9f23e8fad86b9bc505f8d366e02ca2c59cb4ac11255ef3d84e68daf79c"
+}

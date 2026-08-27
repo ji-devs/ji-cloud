@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_data\nset updated_at = now()\nfrom playlist\nwhere playlist.live_id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4e803ce9db7e63196433531408bdcd6378a8580e06ab09ab6a302924b9444929"
+}

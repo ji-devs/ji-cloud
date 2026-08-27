@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect given_name\nfrom user_profile\nwhere user_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "given_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "given_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "dc5e4bfd066126930dad28ab25adeceabbe52d53236bb74f1ba26cf733147ffb"
+}

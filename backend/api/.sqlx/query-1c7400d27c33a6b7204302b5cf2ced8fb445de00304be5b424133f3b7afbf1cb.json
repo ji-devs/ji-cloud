@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into user_auth_basic (user_id, email, password) values ($1, $2::text, $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1c7400d27c33a6b7204302b5cf2ced8fb445de00304be5b424133f3b7afbf1cb"
+}

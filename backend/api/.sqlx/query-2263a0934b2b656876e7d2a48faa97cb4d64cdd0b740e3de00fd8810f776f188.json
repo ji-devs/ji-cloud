@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            insert into featured_jigs\n                (jig_id, index)\n            values\n                ($1, $2)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2263a0934b2b656876e7d2a48faa97cb4d64cdd0b740e3de00fd8810f776f188"
+}

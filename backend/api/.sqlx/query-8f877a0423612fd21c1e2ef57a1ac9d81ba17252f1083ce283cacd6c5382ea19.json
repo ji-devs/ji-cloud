@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_data_resource\nset display_name = coalesce($2, display_name)\nwhere id = $1 and $2 is distinct from display_name\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8f877a0423612fd21c1e2ef57a1ac9d81ba17252f1083ce283cacd6c5382ea19"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    insert into course_data_unit(course_data_id, display_name, description, index, value)\n    select $2, display_name, description, index, value\n    from course_data_unit\n    where course_data_id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dc706d22aba39f093437f08c0c711eb96c900e6ffad21fd9590f7784c2c8439b"
+}

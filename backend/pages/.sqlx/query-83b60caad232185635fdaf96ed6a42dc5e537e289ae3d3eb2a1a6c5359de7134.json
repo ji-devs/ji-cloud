@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect exists(\n    select 1\n    from playlist\n    where id = $1\n      and (creator_id = $2 or author_id = $2)\n) as \"exists!\"\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "83b60caad232185635fdaf96ed6a42dc5e537e289ae3d3eb2a1a6c5359de7134"
+}

@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate course_data_module\nset contents    = coalesce($3, contents),\n    kind        = coalesce($4, kind),\n    is_complete = coalesce($5, is_complete)\nwhere course_data_id = $1\n  and index = $2\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Jsonb",
+        "Int2",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dc4b4b097aabd9a7d4c876a4e5441730da81acd043b23082f87fdfb6502b0b8f"
+}

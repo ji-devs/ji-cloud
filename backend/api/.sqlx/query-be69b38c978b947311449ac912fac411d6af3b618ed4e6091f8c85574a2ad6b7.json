@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate course_data\nset language         = coalesce($2, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from language)\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "be69b38c978b947311449ac912fac411d6af3b618ed4e6091f8c85574a2ad6b7"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        select jig_id\n        from featured_jigs\n        order by index\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "jig_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "featured_jigs",
+            "name": "jig_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f7b5a610be2fd7795e3dd854087338f708e0610f58aeada55bf68ae4162f5bea"
+}

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete\nfrom resource_data_module\nwhere resource_data_id = $1 and resource_data_module.id is not distinct from $2\nreturning index\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "resource_data_module",
+            "name": "index"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8b89d31edede1436cf8618bf8a9e27a5ef5e07d0958af9f6b7bab0ec7f2088cf"
+}

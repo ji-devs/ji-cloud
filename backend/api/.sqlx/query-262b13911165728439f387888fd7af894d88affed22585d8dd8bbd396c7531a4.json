@@ -1,0 +1,120 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect  id            as \"circle_id!: CircleId\",\n        display_name  as \"display_name!\",\n        description   as \"description!\",\n        image         as \"image!: ImageId\",\n        member_count  as \"member_count!\",\n        creator_id    as \"creator_id!: UserId\",\n        created_at    as \"created_at!\",\n        updated_at,\n        exists(select 1 from circle_member where user_id = $2 and circle.id = circle_member.id) as \"joined!\"\nfrom circle\ninner join unnest($1::uuid[])\nwith ordinality t(id, ord) using (id)\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "circle_id!: CircleId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "circle",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circle",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "description!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circle",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "image!: ImageId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "circle",
+            "name": "image"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "member_count!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "circle",
+            "name": "member_count"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "creator_id!: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "circle",
+            "name": "creator_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "circle",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "circle",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "joined!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "262b13911165728439f387888fd7af894d88affed22585d8dd8bbd396c7531a4"
+}

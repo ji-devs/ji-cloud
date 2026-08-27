@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate user_profile\nset location = $2,\n    updated_at = now()\nwhere user_id = $1 and location is distinct from $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b9595a3827091a7520dd91e64bfd465a6521548631244e2f37ab78227ddc9863"
+}

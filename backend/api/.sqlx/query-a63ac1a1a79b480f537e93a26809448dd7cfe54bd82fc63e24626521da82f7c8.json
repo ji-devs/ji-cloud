@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "delete from session where token = $1 and (scope_mask & $2) = $2 returning user_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "session",
+            "name": "user_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a63ac1a1a79b480f537e93a26809448dd7cfe54bd82fc63e24626521da82f7c8"
+}

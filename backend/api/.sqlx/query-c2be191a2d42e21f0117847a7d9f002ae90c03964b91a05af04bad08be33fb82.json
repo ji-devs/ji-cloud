@@ -1,0 +1,187 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nwith recursive categories_cte(id, name, parent_id, depth, full_name) as (\n    select\n        c.id, c.name, c.parent_id, 1::int as depth, c.name::text as full_name\n    from category as c\n    where c.parent_id is null\n    union all\n    select\n        c.id, c.name, c.parent_id, cte.depth + 1 as depth,\n        (cte.full_name || '/' || c.name)\n    from categories_cte as cte, category as c\n    where c.parent_id = cte.id\n)\nselect id,\n       name,\n       size                                                                                     as \"size!: ImageSize\",\n       description,\n       translated_description                                                                   as \"translated_description!: Json<HashMap<String, String>>\",\n       translated_name                                                                          as \"translated_name!: Json<HashMap<String, String>>\",\n       array((select affiliation_id from image_affiliation where image_id = image_metadata.id)) as \"affiliations!\",\n       array((select affiliation.display_name\n              from affiliation\n                       inner join image_affiliation on affiliation.id = image_affiliation.affiliation_id\n              where image_affiliation.image_id = image_metadata.id))                            as \"affiliation_names!\",\n       array((select style_id from image_style where image_id = image_metadata.id))             as \"styles!\",\n       array((select style.display_name\n              from style\n                       inner join image_style on style.id = image_style.style_id\n              where image_style.image_id = image_metadata.id))                                  as \"style_names!\",\n       array((select age_range_id from image_age_range where image_id = image_metadata.id))     as \"age_ranges!\",\n       array((select age_range.display_name\n              from age_range\n                       inner join image_age_range on age_range.id = image_age_range.age_range_id\n              where image_age_range.image_id = image_metadata.id))                              as \"age_range_names!\",\n       array((select category_id from image_category where image_id = image_metadata.id))       as \"categories!\",\n       array((select full_name\n              from categories_cte\n              join image_category on categories_cte.id = image_category.category_id\n              where image_category.image_id = image_metadata.id))                               as \"category_names!\",\n       array((select index\n              from image_tag\n                       inner join image_tag_join on image_tag.index = image_tag_join.tag_index\n              where image_tag_join.image_id = image_metadata.id))                               as \"tags!\",\n       array((select display_name\n              from image_tag\n                       inner join image_tag_join on image_tag.index = image_tag_join.tag_index\n              where image_tag_join.image_id = image_metadata.id))                               as \"tag_names!\",\n       (publish_at < now() is true)                                                             as \"is_published!\",\n       is_premium,\n       usage                                                                               as \"usage!\"\nfrom image_metadata\n         join image_upload on id = image_id\nwhere ((last_synced_at is null and publish_at is not null) or\n       (updated_at is not null and last_synced_at < updated_at) or\n       (publish_at < now() is true and last_synced_at < publish_at))\n  and processed_at is not null\nlimit 100 for no key update skip locked;\n     ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "size!: ImageSize",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "size"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "translated_description!: Json<HashMap<String, String>>",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "translated_description"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "translated_name!: Json<HashMap<String, String>>",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "translated_name"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "affiliations!",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "affiliation_names!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "styles!",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "style_names!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "age_ranges!",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "age_range_names!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "categories!",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "category_names!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "tags!",
+        "type_info": "Int2Array",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "tag_names!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "is_published!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "is_premium",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "is_premium"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "usage!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "usage"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      false,
+      false
+    ]
+  },
+  "hash": "c2be191a2d42e21f0117847a7d9f002ae90c03964b91a05af04bad08be33fb82"
+}

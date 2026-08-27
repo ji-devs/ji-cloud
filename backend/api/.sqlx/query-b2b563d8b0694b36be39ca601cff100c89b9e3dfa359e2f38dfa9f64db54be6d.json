@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into user_recent_image (user_id, image_id, media_library, kind)\nvalues ($1, $2, $3, $4)\nON CONFLICT (user_id, image_id) DO UPDATE\n  SET user_id = $1,\n    image_id = $2,\n    media_library = $3,\n    kind = $4,\n    last_used = now()\nreturning image_id as \"id: ImageId\", media_library as \"library: MediaLibrary\", kind as \"kind: ImageFileKind\", last_used as \"last_used: DateTime<Utc>\";\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: ImageId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_recent_image",
+            "name": "image_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "library: MediaLibrary",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "user_recent_image",
+            "name": "media_library"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "kind: ImageFileKind",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "user_recent_image",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "last_used: DateTime<Utc>",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "user_recent_image",
+            "name": "last_used"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int2",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b2b563d8b0694b36be39ca601cff100c89b9e3dfa359e2f38dfa9f64db54be6d"
+}

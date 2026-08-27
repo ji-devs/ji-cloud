@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into playlist_data_jig(playlist_data_id, jig_id, index)\nselect $2, jig_id, index\nfrom playlist_data_jig\nwhere playlist_data_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5c74fc8320e9a7a78b6ac4fc29214b03fade67d4023300f5ec44f258167df11c"
+}

@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect index as \"index: ImageTagIndex\", display_name from \"image_tag\"\norder by index\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index: ImageTagIndex",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "image_tag",
+            "name": "index"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "image_tag",
+            "name": "display_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "a85530d1d83a7f3cd3786da68f5b489fbddbf411d735cf114817e4417768520b"
+}

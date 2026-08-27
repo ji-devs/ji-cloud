@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into resource_curation_comment (resource_id, comment, author_id)\nvalues ($1, $2, $3)\nreturning id as \"id!: CommId\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: CommId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_curation_comment",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a12553a0b07c167a0fecdcedfe7c0cf6f57f9a5b32ea13474d9ecb64815e8701"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update user_profile set last_synced_at = now() where user_id = any($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2f6ca33e3cb1e774922b88b18a179fc3d3a95c49c78210e9259a0ae78afe2cba"
+}

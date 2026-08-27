@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect index from course_data_unit\nwhere course_data_id = $1 and course_data_unit.unit_id is not distinct from $2\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "course_data_unit",
+            "name": "index"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "46c33b81e5196642a75aa8374f72f013f66a7b798de0b2a5a5f5a2928b1f7d7d"
+}

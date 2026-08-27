@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    update jig_curation_data\n    set age_ranges = $2\n    where jig_id = $1 and $2 is distinct from age_ranges\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5db8993ee5d00df44d48007636297504ce52b6f236c785cc04e4e39df9f4a3ce"
+}

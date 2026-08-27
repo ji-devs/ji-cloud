@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select stripe_subscription_id as \"id: StripeSubscriptionId\" from subscription where latest_invoice_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: StripeSubscriptionId",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "stripe_subscription_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "71addff4abef3da03bd78d3d17a6fc89faf2a8febe06016b8239225cd072fecc"
+}

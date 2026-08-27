@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update global_animation_upload set uploaded_at = now(), processed_at = now(), processing_result = true where animation_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a95c325282721238520f0821a1bb21e18862ae861d8566ad72d6ce9495cba316"
+}

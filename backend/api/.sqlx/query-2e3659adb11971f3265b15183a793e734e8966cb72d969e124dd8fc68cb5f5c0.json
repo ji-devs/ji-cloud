@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete\nfrom course_data_resource\nwhere (course_data_id = $1 or course_data_id = $2)\n  and id = $3\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2e3659adb11971f3265b15183a793e734e8966cb72d969e124dd8fc68cb5f5c0"
+}

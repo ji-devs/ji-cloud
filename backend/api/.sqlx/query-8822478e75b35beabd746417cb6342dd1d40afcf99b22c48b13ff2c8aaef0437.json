@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n insert into playlist_data_module (\"index\", playlist_data_id, kind, is_complete, contents)\n select \"index\", $2 as \"playlist_id\", kind, is_complete, contents\n from playlist_data_module\n where playlist_data_id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8822478e75b35beabd746417cb6342dd1d40afcf99b22c48b13ff2c8aaef0437"
+}

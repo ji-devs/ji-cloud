@@ -1,0 +1,151 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n     select up.user_id                               as \"id!\",\n            username                                 as \"username!\",\n            given_name                               as \"given_name!\",\n            family_name                              as \"family_name!\",\n            email                                    as \"email!: String\",\n            language_emails                          as \"language_emails!\",\n            organization                             as \"organization?\",\n            location                                 as \"location?\",\n            user_email.created_at                    as \"created_at\",\n            \"user\".blocked                           as \"blocked!\",\n            \"user\".flagged                           as \"flagged!\"\nfrom user_profile \"up\"\n        inner join \"user\" on \"user\".id = up.user_id\n        inner join user_email on user_email.user_id = up.user_id\nwhere (last_synced_at is null or\n       (up.updated_at is not null and last_synced_at < up.updated_at))\nlimit 100 for no key update skip locked;\n     ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "username!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "username"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "given_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "given_name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "family_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "family_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "email!: String",
+        "type_info": {
+          "Custom": {
+            "name": "citext",
+            "kind": "Simple"
+          }
+        },
+        "origin": {
+          "Table": {
+            "table": "user_email",
+            "name": "email"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "language_emails!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "language_emails"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "organization?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "organization"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "location?",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "user_profile",
+            "name": "location"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "user_email",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "blocked!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "\"user\"",
+            "name": "blocked"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "flagged!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "\"user\"",
+            "name": "flagged"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e8a7bc1d1346cd6fb3f96b150b361595b151dfb7664532a10d6de653f0ac14f4"
+}

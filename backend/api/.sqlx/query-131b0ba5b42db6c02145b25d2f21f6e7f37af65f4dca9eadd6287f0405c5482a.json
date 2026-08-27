@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data\nset last_synced_at = now()\nwhere jig_data.id = any (select live_id from jig where jig.id = any ($1))\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "131b0ba5b42db6c02145b25d2f21f6e7f37af65f4dca9eadd6287f0405c5482a"
+}

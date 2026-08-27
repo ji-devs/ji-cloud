@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate course_data_resource\nset display_name = coalesce($2, display_name)\nwhere id = $1 and $2 is distinct from display_name\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f65d66fd5c93ed44d622034a55b8db3173b70a1800852d6de4064e60718a2cc5"
+}

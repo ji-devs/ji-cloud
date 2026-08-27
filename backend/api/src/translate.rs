@@ -4,7 +4,7 @@ use ji_core::settings::RuntimeSettings;
 use reqwest::{self};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::{PgConnection, PgPool};
+use sqlx::{AssertSqlSafe, PgConnection, PgPool};
 use std::collections::HashMap;
 
 use shared::domain::image::ImageId;
@@ -190,7 +190,7 @@ order by coalesce(updated_at, created_at) desc
 limit 10 for no key update skip locked;
  "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| ImageTranslate {
             image_id: row.id,
             text: row.description,
@@ -212,7 +212,7 @@ order by coalesce(updated_at, created_at) desc
 limit 10 for no key update skip locked;
  "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| ImageTranslate {
             image_id: row.id,
             text: row.name,
@@ -241,7 +241,7 @@ limit 10 for no key update skip locked;
                             t.image_id.0,
                             json!(descriptions)
                         )
-                        .execute(&mut txn)
+                        .execute(&mut *txn)
                         .await?;
                         update_image_translation_status(
                             &mut txn,
@@ -301,7 +301,7 @@ limit 10 for no key update skip locked;
                             t.image_id.0,
                             json!(names)
                         )
-                        .execute(&mut txn)
+                        .execute(&mut *txn)
                         .await?;
                         update_image_translation_status(
                             &mut txn,
@@ -369,7 +369,7 @@ order by coalesce(updated_at, created_at) desc
 limit 30 for no key update skip locked;
  "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| JigTranslate {
             jig_data_id: row.id,
             text: row.description,
@@ -391,7 +391,7 @@ order by coalesce(updated_at, created_at) desc
 limit 30 for no key update skip locked;
          "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| JigTranslate {
             jig_data_id: row.id,
             text: row.display_name,
@@ -419,7 +419,7 @@ limit 30 for no key update skip locked;
                         &t.jig_data_id,
                         json!(res)
                     )
-                    .execute(&mut txn)
+                    .execute(&mut *txn)
                     .await?;
                     update_asset_translation_status(
                         &mut txn,
@@ -476,7 +476,7 @@ limit 30 for no key update skip locked;
                         &t.jig_data_id,
                         json!(res)
                     )
-                    .execute(&mut txn)
+                    .execute(&mut *txn)
                     .await?;
                     update_asset_translation_status(
                         &mut txn,
@@ -543,7 +543,7 @@ order by coalesce(updated_at, created_at) desc
 limit 10 for no key update skip locked;
  "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| ResourceTranslate {
             resource_data_id: row.id,
             text: row.description,
@@ -565,7 +565,7 @@ order by coalesce(updated_at, created_at) desc
 limit 10 for no key update skip locked;
          "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| ResourceTranslate {
             resource_data_id: row.id,
             text: row.display_name,
@@ -593,7 +593,7 @@ limit 10 for no key update skip locked;
                         &t.resource_data_id,
                         json!(res)
                     )
-                    .execute(&mut txn)
+                    .execute(&mut *txn)
                     .await?;
                     update_asset_translation_status(
                         &mut txn,
@@ -653,7 +653,7 @@ limit 10 for no key update skip locked;
                         &t.resource_data_id,
                         json!(res)
                     )
-                    .execute(&mut txn)
+                    .execute(&mut *txn)
                     .await?;
 
                     update_asset_translation_status(
@@ -726,7 +726,7 @@ order by coalesce(updated_at, created_at) desc
 limit 20 for no key update skip locked;
  "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| PlaylistTranslate {
             playlist_data_id: row.id,
             text: row.description,
@@ -749,7 +749,7 @@ order by coalesce(updated_at, created_at) desc
 limit 20 for no key update skip locked;
  "#
         )
-        .fetch(&mut txn)
+        .fetch(&mut *txn)
         .map_ok(|row| PlaylistTranslate {
             playlist_data_id: row.id,
             text: row.display_name,
@@ -777,7 +777,7 @@ limit 20 for no key update skip locked;
                         &t.playlist_data_id,
                         json!(res),
                     )
-                    .execute(&mut txn)
+                    .execute(&mut *txn)
                     .await?;
 
                     update_asset_translation_status(
@@ -840,7 +840,7 @@ limit 20 for no key update skip locked;
                         &t.playlist_data_id,
                         json!(res)
                     )
-                    .execute(&mut txn)
+                    .execute(&mut *txn)
                     .await?;
 
                     update_asset_translation_status(
@@ -993,10 +993,10 @@ async fn update_asset_translation_status(
     id: Uuid,
     status: TranslationStatus,
 ) -> sqlx::Result<()> {
-    sqlx::query(&format!(
+    sqlx::query(AssertSqlSafe(format!(
         "update {0} set {1}_translate_status = $2 where {0}.live_id = $1",
         table, field
-    ))
+    )))
     .bind(id)
     .bind(status as i16)
     .execute(&mut *conn)
@@ -1012,10 +1012,10 @@ async fn update_image_translation_status(
     id: Uuid,
     status: TranslationStatus,
 ) -> sqlx::Result<()> {
-    sqlx::query(&format!(
+    sqlx::query(AssertSqlSafe(format!(
         "update {0} set {1}_translate_status = $2 where {0}.id = $1",
         table, field
-    ))
+    )))
     .bind(id)
     .bind(status as i16)
     .execute(&mut *conn)

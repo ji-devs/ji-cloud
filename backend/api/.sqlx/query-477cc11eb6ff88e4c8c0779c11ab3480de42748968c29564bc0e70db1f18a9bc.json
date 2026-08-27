@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data_module\nset contents    = coalesce($3, contents),\n    kind        = coalesce($4, kind),\n    is_complete = coalesce($5, is_complete)\nwhere jig_data_id = $1\n  and index = $2\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Jsonb",
+        "Int2",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "477cc11eb6ff88e4c8c0779c11ab3480de42748968c29564bc0e70db1f18a9bc"
+}

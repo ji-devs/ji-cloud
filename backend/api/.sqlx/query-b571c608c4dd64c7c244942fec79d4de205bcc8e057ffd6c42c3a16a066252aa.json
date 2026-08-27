@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into resource_data_category(resource_data_id, category_id)\nselect $2, category_id\nfrom resource_data_category\nwhere resource_data_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b571c608c4dd64c7c244942fec79d4de205bcc8e057ffd6c42c3a16a066252aa"
+}

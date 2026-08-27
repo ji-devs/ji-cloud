@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select\n                    exists(select 1 from user_profile where user_id = $1) as \"has_profile!\",\n                    exists(select 1 from user_email where user_id = $1) as \"has_verified_email!\",\n                    (select blocked from \"user\" where id = $1) as \"blocked?\"\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "has_profile!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "has_verified_email!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "blocked?",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "bce9a462235fc284c2a48bc534d3021af32fe8f801dac229d5547afc906bc772"
+}

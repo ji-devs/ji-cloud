@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate user_profile\nset updated_at = now()\nwhere user_id = $1\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "39b0f5738c641b3774d97899ccc93df7e7a28532b5ab1e3d66dd304e2cf681a8"
+}

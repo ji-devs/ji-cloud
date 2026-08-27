@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete\nfrom course_data_unit\nwhere course_data_id = $1 and course_data_unit.unit_id is not distinct from $2\nreturning index\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "course_data_unit",
+            "name": "index"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ca4a7a38a1d182c5f9aa095a9d75bb990b1020c15295591f59789a4b6946e9b5"
+}

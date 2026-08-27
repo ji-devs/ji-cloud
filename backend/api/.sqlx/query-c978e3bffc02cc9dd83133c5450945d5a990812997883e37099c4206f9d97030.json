@@ -1,0 +1,114 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n    subscription_plan.plan_type as \"plan_type?: PlanType\",\n    subscription.status as \"subscription_status?: SubscriptionStatus\",\n    user_account.admin as \"is_admin!\",\n    user_account.verified as \"verified!\",\n    school.school_id as \"school_id?: SchoolId\",\n    school.school_name::text as \"school_name?\",\n    case\n        when subscription.amount_due > 0 then true\n        else false\n    end as \"overdue!\",\n    account.account_id as \"account_id?: AccountId\",\n    tier_override as \"tier_override?: PlanTier\"\nfrom user_account\ninner join account using (account_id)\nleft join school using (account_id)\nleft join (\n    select subscription.account_id, status, amount_due, subscription_plan_id\n    from subscription\n    join (\n        select\n            distinct on (account_id)\n            account_id, subscription_id\n        from subscription\n        order by account_id, created_at desc\n    ) as recent_subscription using (subscription_id)\n) as subscription using (account_id)\nleft join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere user_account.user_id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "plan_type?: PlanType",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "subscription_plan",
+            "name": "plan_type"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "subscription_status?: SubscriptionStatus",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "is_admin!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_account",
+            "name": "admin"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "verified!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "user_account",
+            "name": "verified"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "school_id?: SchoolId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "school",
+            "name": "school_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "school_name?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "overdue!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "account_id?: AccountId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "account",
+            "name": "account_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "tier_override?: PlanTier",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "account",
+            "name": "tier_override"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      false,
+      false,
+      true,
+      null,
+      null,
+      false,
+      true
+    ]
+  },
+  "hash": "c978e3bffc02cc9dd83133c5450945d5a990812997883e37099c4206f9d97030"
+}

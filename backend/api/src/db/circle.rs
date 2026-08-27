@@ -46,7 +46,7 @@ pub async fn update(
         r#"select exists(select 1 from circle where id = $1) as "exists!""#,
         id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .exists
     {
@@ -64,7 +64,7 @@ where id = $1 and $2 is distinct from display_name
             id.0,
             display_name,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -79,7 +79,7 @@ where id = $1 and $2 is distinct from description
             id.0,
             description,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -93,7 +93,7 @@ where id = $1 and $2 is distinct from image"#,
             id.0,
             image.0,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -106,7 +106,7 @@ pub async fn delete(db: &PgPool, id: CircleId) -> sqlx::Result<()> {
     let mut conn = db.begin().await?;
 
     sqlx::query!("delete from circle where id = $1", id.0)
-        .execute(&mut conn)
+        .execute(&mut *conn)
         .await?;
 
     conn.commit().await
@@ -236,7 +236,7 @@ pub async fn browse(
         order_by.map(|it| it as i32),
         token_user.map(|id| id.0)
     )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .await?;
 
     let res = circle_data
@@ -285,7 +285,7 @@ with ordinality t(id, ord) using (id)
         ids,
         token_user.map(|id| id.0)
     )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .await?;
 
     let v = res
@@ -346,7 +346,7 @@ pub async fn browse_circle_members(
         ][..],
         &[UserScope::ManageSelfAsset as i16,][..],
     )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .await?;
 
     txn.rollback().await?;

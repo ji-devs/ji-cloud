@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n    update resource_curation_data\n    set description = $2\n    where resource_id = $1 and $2 is distinct from description\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0fa3d6c3b75e08c7dde2c450f7dc25cbe15f58cface2d765b16c13594d95c571"
+}

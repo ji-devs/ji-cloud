@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into user_auth_google (user_id, google_id, unverified_email) values ($1, $2, lower($3::text))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0c48894fce2a3858a305f483e9fe0a2702df7fe87ca3045f50edcf5d080cfdd4"
+}

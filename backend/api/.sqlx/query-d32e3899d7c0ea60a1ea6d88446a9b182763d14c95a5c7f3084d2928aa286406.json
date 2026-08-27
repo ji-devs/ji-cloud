@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nwith cte as (\n    insert into user_color\n    (user_id, color, index)\n    values ($1, $2, (select count(*) from user_color where user_id = $1)) returning color\n), colors as (\n    select color\n    from user_color\n    where user_id = $1\n    order by index\n)\nselect color as \"color!\" from colors\nunion all\nselect color as \"color!\" from cte\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "color!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d32e3899d7c0ea60a1ea6d88446a9b182763d14c95a5c7f3084d2928aa286406"
+}

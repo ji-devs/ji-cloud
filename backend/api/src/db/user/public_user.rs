@@ -158,7 +158,7 @@ pub async fn browse_users(
             token.map(|id| id.0),
             &badges[..],
         )
-            .fetch_all(&mut txn)
+            .fetch_all(&mut *txn)
             .await?;
 
     let res: Vec<_> = user_data
@@ -287,7 +287,7 @@ pub async fn follow(
         user_id.0,
         follower_id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .exists;
 
@@ -305,7 +305,7 @@ pub async fn follow(
         user_id.0,
         follower_id.0
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await
     .map_err(|_| anyhow::anyhow!("User already follows target user"))?;
 
@@ -328,7 +328,7 @@ pub async fn unfollow(
         user_id.0,
         follower_id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .exists;
 
@@ -345,7 +345,7 @@ pub async fn unfollow(
         user_id.0,
         follower_id.0
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await
     .map_err(|_| anyhow::anyhow!("Could not unfollow user"))?;
 
@@ -398,7 +398,7 @@ pub async fn get_by_ids(
             ids,
             token.map(|id| id.0)
     )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .await?;
 
     let v = res
@@ -558,7 +558,7 @@ pub async fn browse_followers(
             page_limit as i32,
             token.map(|id| id.0)
         )
-            .fetch_all(&mut txn)
+            .fetch_all(&mut *txn)
             .await?;
 
     let res: Vec<_> = user_data
@@ -651,7 +651,7 @@ pub async fn browse_following(
             page_limit as i32,
             token.map(|id| id.0)
         )
-            .fetch_all(&mut txn)
+            .fetch_all(&mut *txn)
             .await?;
 
     let res: Vec<_> = user_data

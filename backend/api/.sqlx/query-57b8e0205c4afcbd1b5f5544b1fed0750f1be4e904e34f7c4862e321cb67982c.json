@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                            update resource_data\n                            set translated_name = $2,\n                                last_synced_at = null\n                            where id = $1\n                            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "57b8e0205c4afcbd1b5f5544b1fed0750f1be4e904e34f7c4862e321cb67982c"
+}

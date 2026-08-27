@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ndelete\nfrom jig_data_additional_resource\nwhere (jig_data_id = $1 or jig_data_id = $2)\n  and id = $3\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1b5e989b1af771fbf21f73fc4d871be83f7c1d508ae051602beae21a6ffe9609"
+}

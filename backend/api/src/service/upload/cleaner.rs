@@ -1,6 +1,6 @@
 use anyhow::Context;
 use ji_core::config::UPLOAD_EXPIRY_TIME;
-use sqlx::PgPool;
+use sqlx::{AssertSqlSafe, PgPool};
 
 /// Generate query to delete failed old uploads
 ///
@@ -101,7 +101,7 @@ impl UploadCleaner {
 
         let mut txn = self.db.begin().await?;
 
-        sqlx::query(&query).execute(&mut txn).await?;
+        sqlx::query(AssertSqlSafe(query)).execute(&mut *txn).await?;
 
         txn.commit().await?;
 

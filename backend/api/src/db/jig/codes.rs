@@ -540,7 +540,7 @@ pub async fn start_session(
         "#,
         code.0
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .ok_or(error::JigCode::ResourceNotFound)?;
 
@@ -555,7 +555,7 @@ pub async fn start_session(
         code.0,
         ip_address.0,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .id;
 

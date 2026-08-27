@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update category set user_scopes= $1, updated_at = now() where id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int2Array",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5d7020b3759281d303b515cf05ae1445d421aabf48d2212565a20faf794e6fc2"
+}

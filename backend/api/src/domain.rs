@@ -123,7 +123,7 @@ pub fn build_tree(categories: Vec<RawCategory>) -> Vec<Category> {
 }
 
 #[derive(Debug, Copy, Clone, sqlx::Type)]
-#[repr(u16)]
+#[repr(i16)]
 pub enum RegistrationStatus {
     /// The user was just registered ([`POST /v1/user`](shared::api::endpoints::user::Register))
     ///

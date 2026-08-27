@@ -1,0 +1,160 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n    id as \"id\",\n    bundle_id,\n    section,\n    item_kind_id,\n    english,\n    hebrew,\n    status as \"status: EntryStatus\",\n    zeplin_reference,\n    comments,\n    in_app, \n    in_element, \n    in_mock\nfrom locale_entry\nwhere id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "bundle_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "bundle_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "section",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "section"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "item_kind_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "item_kind_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "english",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "english"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "hebrew",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "hebrew"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "status: EntryStatus",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "zeplin_reference",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "zeplin_reference"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "comments",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "comments"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "in_app",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "in_app"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "in_element",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "in_element"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "in_mock",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "in_mock"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "172c8df92f296df4a816c4c9d77c091c56919f84f54bc1cc1174060aff2d64c6"
+}

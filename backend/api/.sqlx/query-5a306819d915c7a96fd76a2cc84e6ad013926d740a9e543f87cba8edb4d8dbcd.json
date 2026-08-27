@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        insert into jig_code_session (code, started_at, ip_address)\n        values ($1, current_timestamp, $2)\n        returning id as \"id: Uuid\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: Uuid",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_code_session",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5a306819d915c7a96fd76a2cc84e6ad013926d740a9e543f87cba8edb4d8dbcd"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update category set name = $1, updated_at = now() where id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "33b3def525f80ae097847489feda1bcb7cc23f2b24ae237dbb93e17802d5fb74"
+}

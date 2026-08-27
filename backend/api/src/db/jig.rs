@@ -77,7 +77,7 @@ pub async fn create(
         live_id,
         draft_id,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     sqlx::query!(
@@ -88,7 +88,7 @@ values ($1, 0)
         "#,
         jig.id
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -211,16 +211,16 @@ select cte.jig_id                                          as "jig_id: JigId",
         theme                                               as "theme: ThemeId",
         audio_background                                    as "audio_background: AudioBackground",
         liked_count,
-        play_count,
+        play_count                                           as "play_count!",
         live_up_to_date,
         exists(select 1 from jig_like where jig_id = $1 and user_id = $3)    as "is_liked!",
         locked,
         other_keywords,
         translated_keywords,
         rating                                               as "rating?: JigRating",
-        blocked                                              as "blocked",
-        curated,
-        is_premium                                           as "premium",
+        blocked                                              as "blocked!",
+        curated                                              as "curated!",
+        is_premium                                           as "premium!",
         array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
         array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
         array(
@@ -400,7 +400,7 @@ from jig
         &ids.iter().map(|i| i.0).collect::<Vec<Uuid>>(),
         user_id.map(|x| x.0)
     )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .instrument(tracing::info_span!("query jigs"))
     .await?;
 
@@ -479,7 +479,7 @@ order by ord asc
 "#,
         &jig_data_ids
     )
-        .fetch_all(&mut txn)
+        .fetch_all(&mut *txn)
         .instrument(tracing::info_span!("query jig_data"))
         .await?;
 
@@ -730,7 +730,7 @@ limit $8
     page_limit as i32,
     user_id.map(|x| x.0)
 )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .instrument(tracing::info_span!("query jig_data"))
     .await?;
 
@@ -861,7 +861,7 @@ select draft_id from jig join jig_data on jig.draft_id = jig_data.id where jig.i
 "#,
         id.0
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .ok_or(error::UpdateWithMetadata::ResourceNotFound)?
     .draft_id;
@@ -879,7 +879,7 @@ where id = $1 and $2 is distinct from audio_background
             draft_id,
             audio_background.map(|it| it as i16),
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -906,7 +906,7 @@ where id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negativ
                 .map(|it| *it as i16)
                 .collect::<Vec<_>>(),
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -929,7 +929,7 @@ where id = $1 and
             settings.scoring,
             settings.drag_assist,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -945,7 +945,7 @@ where id = $1
             draft_id,
             privacy_level as i16,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -960,7 +960,7 @@ where id = $1 and $2 is distinct from description"#,
             draft_id,
             description,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -998,7 +998,7 @@ where id = $1 and $2 is distinct from display_name"#,
             draft_id,
             display_name,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -1018,7 +1018,7 @@ where id = $1
         language,
         theme.map(|it| *it as i16),
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     if let Some(categories) = categories {
@@ -1157,7 +1157,7 @@ where id is not distinct from $3
         live_id,
         id.0,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1449,7 +1449,7 @@ returning id as "id!: JigId"
         new_live_id,
         new_draft_id,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     sqlx::query!(
@@ -1460,7 +1460,7 @@ values ($1, 0)
         "#,
         new_jig.id.0
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1480,7 +1480,7 @@ where id = $1
     "#,
         jig_id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     //check if jig has been published and playable
@@ -1498,7 +1498,7 @@ where jig_id = $1;
             "#,
         jig_id.0,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1518,7 +1518,7 @@ where id = $1
     "#,
         jig_id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     //check if jig has been published and playable
@@ -1538,7 +1538,7 @@ where id = $1
         jig_id.0,
         user_id.0
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     // increment daily play count for the logged in user
@@ -1553,7 +1553,7 @@ where id = $1
                 "#,
         user_id.0
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1587,7 +1587,7 @@ where jig_id = $1
         admin_data.curated.into_option(),
         admin_data.premium.into_option(),
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     if blocked.is_some() {
@@ -1601,7 +1601,7 @@ where jig.live_id = $1
             "#,
             jig_id.0,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -1624,7 +1624,7 @@ select exists (select 1 from "user" where id = $1) as "check_from!"
         "#,
         from.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .check_from;
 
@@ -1638,7 +1638,7 @@ select exists (select 1 from "user" where id = $1) as "check_to!"
         "#,
         to.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .check_to;
 
@@ -1667,7 +1667,7 @@ returning live_id
         from.0,
         &ids[..]
     )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .await?;
 
     sqlx::query!(
@@ -1684,7 +1684,7 @@ where user_asset_data.user_id = new_data.author_id;
         to.0,
         from.0
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     let live_ids: Vec<_> = ids.into_iter().map(|record| record.live_id).collect();
@@ -1701,7 +1701,7 @@ where user_asset_data.user_id = new_data.author_id;
             "#,
         &live_ids[..]
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;
@@ -1721,7 +1721,7 @@ where id = $1
     "#,
         id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?;
 
     //check if Jig is published and likeable
@@ -1744,7 +1744,7 @@ values ($1, $2)
         id.0,
         user_id.0
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await
     .map_err(|_| anyhow::anyhow!("Cannot like a jig more than once"))?;
 
@@ -1898,7 +1898,7 @@ pub async fn update_featured(db: &PgPool, jigs: Vec<JigId>) -> sqlx::Result<()> 
         truncate table featured_jigs
     "#
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     for (i, jig) in jigs.into_iter().enumerate() {
@@ -1912,7 +1912,7 @@ pub async fn update_featured(db: &PgPool, jigs: Vec<JigId>) -> sqlx::Result<()> 
             jig.0,
             i as i32
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -1994,7 +1994,7 @@ order by coalesce(updated_at, created_at) desc
     jig_id.0,
     user_id.map(|x| x.0)
 )
-    .fetch_all(&mut txn)
+    .fetch_all(&mut *txn)
     .instrument(tracing::info_span!("query playlist_data"))
     .await?;
 

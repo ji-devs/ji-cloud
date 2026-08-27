@@ -1,0 +1,138 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect jig_id                               as \"jig_id!: JigId\",\n       display_name,\n       language,\n       categories,\n       description,\n       age_ranges,\n       affiliations,\n       additional_resources,\n       curation_status                          as \"curation_status!: JigCurationStatus\",\n       array(\n            select row (jcc.id, jcc.jig_id, comment, created_at, author_id)\n            from jig_curation_comment  \"jcc\"\n            where jcd.jig_id = jcc.jig_id\n            order by created_at desc\n       )                                                    as \"comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>\",\n       array(\n           select row (jr.id, jr.jig_id, report_type, reporter_id,        \n                        (\n                        select given_name || ' '::text || family_name\n                        from user_profile\n                        where user_profile.user_id = reporter_id\n                        ),\n                        (\n                            select email::text\n                            from user_email\n                            where user_email.user_id = reporter_id\n                        ),\n                        created_at                                                                         \n            )\n           from jig_report \"jr\"\n           where jcd.jig_id = jr.jig_id\n           order by created_at desc\n       )                                                    as \"reports!: Vec<(JigReport)>\"\nfrom jig_curation_data \"jcd\"\nwhere jig_id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "jig_id!: JigId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_data",
+            "name": "jig_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_data",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "language",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_data",
+            "name": "language"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "categories",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_data",
+            "name": "categories"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_data",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "age_ranges",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_data",
+            "name": "age_ranges"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "affiliations",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_data",
+            "name": "affiliations"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "additional_resources",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_data",
+            "name": "additional_resources"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "curation_status!: JigCurationStatus",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_curation_data",
+            "name": "curation_status"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "comments!: Vec<(CommentId, JigId, String, DateTime<Utc>, Uuid)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "reports!: Vec<(JigReport)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "d2d8130135ba5fcf56cd25706a0c1d4bceef2c7c3c984c7827ec29ee32106dc9"
+}

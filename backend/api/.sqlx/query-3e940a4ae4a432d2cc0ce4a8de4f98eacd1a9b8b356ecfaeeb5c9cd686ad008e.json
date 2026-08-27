@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        update user_email\n        set email = $3::text\n        where user_id = $1 and email = $2::text\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3e940a4ae4a432d2cc0ce4a8de4f98eacd1a9b8b356ecfaeeb5c9cd686ad008e"
+}

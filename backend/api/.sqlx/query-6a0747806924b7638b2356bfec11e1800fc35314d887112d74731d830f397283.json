@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into playlist_data_age_range(playlist_data_id, age_range_id)\nselect $2, age_range_id\nfrom playlist_data_age_range\nwhere playlist_data_id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6a0747806924b7638b2356bfec11e1800fc35314d887112d74731d830f397283"
+}

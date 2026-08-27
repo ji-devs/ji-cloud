@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select user_id from user_auth_google where google_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_auth_google",
+            "name": "user_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "760185608bd03a9a30aba9100ecc18e170aed0b1008c5f51ad0c7c6f564b090e"
+}

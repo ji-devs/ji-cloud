@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect published_at as \"published_at?\"\nfrom course\nwhere id = $1\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "published_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "published_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "cf6147c4f87557fcf1cb7f07b255528dfbb62278f6c3f12827eca5d906091029"
+}

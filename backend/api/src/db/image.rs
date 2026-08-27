@@ -305,12 +305,12 @@ pub async fn delete(db: &PgPool, image: ImageId) -> sqlx::Result<()> {
     .await?;
 
     sqlx::query!("delete from image_upload where image_id = $1", image.0)
-        .execute(&mut conn)
+        .execute(&mut *conn)
         .await?;
 
     // then drop.
     sqlx::query!("delete from image_metadata where id = $1", image.0)
-        .execute(&mut conn)
+        .execute(&mut *conn)
         .await?;
 
     conn.commit().await

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect size as \"size: ImageSize\"\nfrom image_metadata\ninner join image_upload on image_metadata.id = image_upload.image_id\nwhere image_id = $1\nfor no key update of image_upload\nfor share of image_metadata\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "size: ImageSize",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "image_metadata",
+            "name": "size"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "10994a52fc088ec407cdf33c8115d3213696aa7b4ecdfb63930425af46ca0a35"
+}

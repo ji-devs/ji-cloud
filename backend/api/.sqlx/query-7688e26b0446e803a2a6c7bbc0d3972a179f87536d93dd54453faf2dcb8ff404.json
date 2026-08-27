@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect draft_id, live_id from playlist where id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "draft_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "draft_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "live_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist",
+            "name": "live_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "7688e26b0446e803a2a6c7bbc0d3972a179f87536d93dd54453faf2dcb8ff404"
+}

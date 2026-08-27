@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with cte as (\n            select jdar.id              as id,\n                   jdar.display_name,\n                   resource_type_id,\n                   resource_content,\n                   author_id,\n                   updated_at,\n                   created_at\n            from jig_data_additional_resource \"jdar\"\n            inner join jig on jig.live_id = jdar.jig_data_id\n            inner join jig_data on jig.live_id = jig_data.id\n            where author_id = $1 and jig.published_at is not null\n        ),\n        cte1 as (\n              select cdr.id              as id,\n                cdr.display_name,\n                resource_type_id,\n                resource_content,\n                author_id,\n                updated_at,\n                created_at\n          from playlist_data_resource \"cdr\"\n          inner join playlist on playlist.live_id = cdr.playlist_data_id\n          inner join playlist_data on playlist.live_id = playlist_data.id\n          where author_id = $1 and playlist.published_at is not null\n        )\n        select count(id) as \"count!\"\n        from unnest(array(\n        select\n        (array_agg(id))[1] as id\n        from (select id, updated_at, created_at from cte union all select id, updated_at, created_at from cte1)\n        resource\n        group by resource.updated_at, resource.created_at)) with ordinality t(id, ord)\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7c57b0d0965b041e39cb4a535e5f6a8a07c24f5479a692ab9cb4ac24cc292660"
+}

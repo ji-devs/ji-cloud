@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist\nset plays = plays + 1\nwhere id = $1;\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e135b43fef8a93d12695d5f5e9478fddff08b7236df1f62bf3307a3568714b37"
+}

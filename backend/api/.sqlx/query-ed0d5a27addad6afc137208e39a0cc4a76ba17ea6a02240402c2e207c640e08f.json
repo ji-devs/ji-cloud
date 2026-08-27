@@ -1,0 +1,208 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n    subscription_id as \"subscription_id!: SubscriptionId\",\n    stripe_subscription_id as \"stripe_subscription_id!: StripeSubscriptionId\",\n    subscription_plan.plan_type as \"subscription_plan_type!: PlanType\",\n    is_trial,\n    status as \"status!: SubscriptionStatus\",\n    current_period_end as \"current_period_end!: DateTime<Utc>\",\n    account_id as \"account_id!: AccountId\",\n    latest_invoice_id as \"latest_invoice_id?: StripeInvoiceId\",\n    amount_due as \"amount_due_in_cents?: AmountInCents\",\n    price as \"price!: AmountInCents\",\n    coupon_name as \"coupon_name?\",\n    coupon_from as \"coupon_from?: DateTime<Utc>\",\n    coupon_to as \"coupon_to?: DateTime<Utc>\",\n    coupon_percent as \"coupon_percent?\",\n    subscription.created_at as \"created_at!: DateTime<Utc>\",\n    subscription.updated_at as \"updated_at?: DateTime<Utc>\"\nfrom subscription\ninner join subscription_plan on subscription.subscription_plan_id = subscription_plan.plan_id\nwhere subscription_id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "subscription_id!: SubscriptionId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "subscription_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "stripe_subscription_id!: StripeSubscriptionId",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "stripe_subscription_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "subscription_plan_type!: PlanType",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "subscription_plan",
+            "name": "plan_type"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "is_trial",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "is_trial"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "status!: SubscriptionStatus",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "current_period_end!: DateTime<Utc>",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "current_period_end"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "account_id!: AccountId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "account_id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "latest_invoice_id?: StripeInvoiceId",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "latest_invoice_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "amount_due_in_cents?: AmountInCents",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "amount_due"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "price!: AmountInCents",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "price"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "coupon_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "coupon_name"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "coupon_from?: DateTime<Utc>",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "coupon_from"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "coupon_to?: DateTime<Utc>",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "coupon_to"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "coupon_percent?",
+        "type_info": "Numeric",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "coupon_percent"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "created_at!: DateTime<Utc>",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "updated_at?: DateTime<Utc>",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "subscription",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "ed0d5a27addad6afc137208e39a0cc4a76ba17ea6a02240402c2e207c640e08f"
+}

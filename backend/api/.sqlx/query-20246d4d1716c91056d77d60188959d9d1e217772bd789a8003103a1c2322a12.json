@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_admin_data\nset\n    rating = coalesce($2, rating),\n    blocked = coalesce($3, blocked),\n    curated = coalesce($4, curated),\n    is_premium = coalesce($5, is_premium)\nwhere playlist_id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Bool",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "20246d4d1716c91056d77d60188959d9d1e217772bd789a8003103a1c2322a12"
+}

@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nwith cte as (\n    insert into user_font\n    (user_id, name, index)\n    values ($1, $2, (select count(*) from user_font where user_id = $1)) returning name\n), names as (\n    select name\n    from user_font\n    where user_id = $1\n    order by index\n)\nselect name as \"name!\" from names\nunion all\nselect name as \"name!\" from cte\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8f373a91b6dab0b7b89a03f5479b2ebe6dd2657bc06ebbe3aca37b1bac312f0e"
+}

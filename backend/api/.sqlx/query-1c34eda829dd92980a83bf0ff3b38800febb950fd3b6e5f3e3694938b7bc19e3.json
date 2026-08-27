@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect display_name                               as \"display_name!\",    \n       report_type                                as \"report_type!: JigReportType\",                  \n       (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = reporter_id\n        )                                       as \"name?\",\n        (\n            select email::text\n            from user_email\n            where user_email.user_id = reporter_id\n        )                                       as \"email?\",\n        (\n            select given_name || ' '::text || family_name\n            from user_profile\n            where user_profile.user_id = creator_id\n        )                                       as \"creator_name!\"\nfrom jig_report\n    left join jig on jig.id = jig_report.jig_id\n    left join jig_data on jig_data.id = jig.live_id\nwhere jig_report.id = $1 and jig_report.jig_id = $2\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "report_type!: JigReportType",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_report",
+            "name": "report_type"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "email?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "creator_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      false,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "1c34eda829dd92980a83bf0ff3b38800febb950fd3b6e5f3e3694938b7bc19e3"
+}

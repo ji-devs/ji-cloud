@@ -38,7 +38,7 @@ where resource_id = $1 and $2 is distinct from display_name
             resource_id.0,
             display_name,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -53,7 +53,7 @@ where resource_id = $1 and $2 is distinct from language
             resource_id.0,
             language,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -68,7 +68,7 @@ where resource_id = $1 and $2 is distinct from categories
             resource_id.0,
             categories,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -83,7 +83,7 @@ where resource_id = $1 and $2 is distinct from categories
             resource_id.0,
             description,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -98,7 +98,7 @@ where resource_id = $1 and $2 is distinct from categories
             resource_id.0,
             age_ranges,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -113,7 +113,7 @@ where resource_id = $1 and $2 is distinct from categories
             resource_id.0,
             affiliations,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -129,7 +129,7 @@ where resource_id = $1 and $2 is distinct from categories
             resource_id.0,
             additional_resources,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -144,7 +144,7 @@ where resource_id = $1 and $2 is distinct from categories
             resource_id.0,
             curation_status as i16,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -156,7 +156,7 @@ where resource_id = $1 and $2 is distinct from categories
     "#,
         resource_id.0,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     txn.commit().await?;

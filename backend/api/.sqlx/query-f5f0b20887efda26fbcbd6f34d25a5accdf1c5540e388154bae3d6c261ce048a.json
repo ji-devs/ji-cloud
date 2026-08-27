@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect\n    school_name_id as \"id!: SchoolNameId\",\n    name::text as \"name!\"\nfrom school_name\nwhere school_name_id = $1\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: SchoolNameId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "school_name",
+            "name": "school_name_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "f5f0b20887efda26fbcbd6f34d25a5accdf1c5540e388154bae3d6c261ce048a"
+}

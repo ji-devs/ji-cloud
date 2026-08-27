@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into resource_like(resource_id, user_id)\nvalues ($1, $2)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1ca172f2f399db6888f233df2ab959edcabfef47e2af649589ae9f8b99be85cb"
+}

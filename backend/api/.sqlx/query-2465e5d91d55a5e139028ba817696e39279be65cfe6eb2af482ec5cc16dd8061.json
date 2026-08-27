@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                            update jig_data\n                            set translated_description = $2,\n                                last_synced_at = null\n                            where id = $1\n                            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2465e5d91d55a5e139028ba817696e39279be65cfe6eb2af482ec5cc16dd8061"
+}

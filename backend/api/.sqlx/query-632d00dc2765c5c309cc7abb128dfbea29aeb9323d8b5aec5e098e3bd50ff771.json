@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate resource_admin_data\nset\n    rating = coalesce($2, rating),\n    blocked = coalesce($3, blocked),\n    curated = coalesce($4, curated),\n    is_premium = coalesce($5, is_premium)\nwhere resource_id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Bool",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "632d00dc2765c5c309cc7abb128dfbea29aeb9323d8b5aec5e098e3bd50ff771"
+}

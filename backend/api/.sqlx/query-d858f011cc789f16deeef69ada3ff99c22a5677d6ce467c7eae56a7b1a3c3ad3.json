@@ -1,0 +1,182 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect jig.id                                       as \"id!: JigId\",\n       creator_id                               as \"creator_id: UserId\",\n       author_id                                as \"author_id: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       liked_count                              as \"liked_count!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       exists(select 1 from jig_like where jig_id = jig.id and user_id = $2) as \"is_liked!\",\n       (\n           select play_count\n           from jig_play_count\n           where jig_play_count.jig_id = jig.id\n       )                                        as \"play_count!\",\n       rating                                   as \"rating?: JigRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       is_premium                               as \"premium!\"\nfrom jig\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    inner join jig_admin_data \"admin\" on admin.jig_id = jig.id\n    order by ord asc\n    ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: JigId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "creator_id: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "creator_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "author_id: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "live_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "live_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "draft_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "draft_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "liked_count!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "liked_count"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "live_up_to_date!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "live_up_to_date"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "is_liked!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "play_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "rating?: JigRating",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_admin_data",
+            "name": "rating"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "blocked!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_admin_data",
+            "name": "blocked"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "curated!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_admin_data",
+            "name": "curated"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "premium!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_admin_data",
+            "name": "is_premium"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      null,
+      false,
+      false,
+      true,
+      false,
+      false,
+      null,
+      null,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d858f011cc789f16deeef69ada3ff99c22a5677d6ce467c7eae56a7b1a3c3ad3"
+}

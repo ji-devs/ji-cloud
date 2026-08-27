@@ -23,7 +23,7 @@ select draft_id from playlist where playlist.id = $1
 "#,
         parent.0,
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .map(|it| it.draft_id);
 
@@ -39,7 +39,7 @@ returning id, stable_id, "index"
         body,
         is_complete
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await
     .map(|it| LiteModule {
         id: ModuleId(it.id),
@@ -155,7 +155,7 @@ select draft_id from playlist where playlist.id = $1
 "#,
         parent_id.0,
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .map(|it| it.draft_id);
 
@@ -168,7 +168,7 @@ where playlist_data_id = $1 and playlist_data_module.id is not distinct from $2
         draft_id,
         module_id.0
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?;
 
     let index = match index {
@@ -192,7 +192,7 @@ where playlist_data_id = $1
         kind.map(|it| it as i16),
         is_complete,
     )
-    .execute(&mut txn)
+    .execute(&mut *txn)
     .await?;
 
     if let Some(new_index) = new_index {
@@ -203,7 +203,7 @@ where playlist_data_id = $1
             r#"select count(*) - 1 as "max_index!" from playlist_data_module where playlist_data_id = $1"#,
             draft_id
         )
-        .fetch_one(&mut txn)
+        .fetch_one(&mut *txn)
         .await?
         .max_index;
 
@@ -223,7 +223,7 @@ where playlist_data_id = $1 and index between $3 and $2
                 index,
                 new_index
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .await?;
         } else if new_index > index {
             sqlx::query!(
@@ -239,7 +239,7 @@ where playlist_data_id = $1 and index between $2 and $3
                 index,
                 new_index
             )
-            .execute(&mut txn)
+            .execute(&mut *txn)
             .await?;
         }
     }
@@ -259,7 +259,7 @@ select draft_id from playlist where playlist.id = $1
 "#,
         parent.0,
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .map(|it| it.draft_id);
 
@@ -274,7 +274,7 @@ returning index
         draft_id,
         id.0,
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?
     .map(|it| it.index);
 
@@ -290,7 +290,7 @@ where playlist_data_id = $1
             draft_id,
             idx,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 

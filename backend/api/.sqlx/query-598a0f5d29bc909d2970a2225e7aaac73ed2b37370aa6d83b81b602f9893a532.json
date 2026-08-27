@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_data\nset draft_or_live = $2\nwhere id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "598a0f5d29bc909d2970a2225e7aaac73ed2b37370aa6d83b81b602f9893a532"
+}

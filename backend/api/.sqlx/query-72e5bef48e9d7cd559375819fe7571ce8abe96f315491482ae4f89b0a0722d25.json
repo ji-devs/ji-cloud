@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into course_data_resource (course_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from course where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: AdditionalResourceId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course_data_resource",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "72e5bef48e9d7cd559375819fe7571ce8abe96f315491482ae4f89b0a0722d25"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate resource_data\nset language         = coalesce($2, language),\n    updated_at = now()\nwhere id = $1\n  and ($2::text is not null and $2 is distinct from language)\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c56be98e44e9e3b3a764796441393998484aa2c1a91dd6fca10b918a5c08848e"
+}

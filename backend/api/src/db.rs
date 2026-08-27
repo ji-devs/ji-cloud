@@ -29,7 +29,7 @@ use shared::domain::{
 };
 use sqlx::{
     postgres::{PgConnectOptions, PgPool, PgPoolOptions},
-    PgConnection,
+    AssertSqlSafe, PgConnection,
 };
 use std::fmt::Write as _;
 use std::time::Duration;
@@ -139,10 +139,10 @@ async fn recycle_metadata<'a, T: Metadata>(
     // the info_span! macro as an argument.
     let table_name_suffix = T::TABLE;
 
-    sqlx::query(&format!(
+    sqlx::query(AssertSqlSafe(format!(
         "delete from {0}_{1} where {0}_id = $1",
         table, table_name_suffix
-    ))
+    )))
     .bind(id)
     .execute(&mut *conn)
     .instrument(tracing::info_span!(
@@ -155,7 +155,7 @@ async fn recycle_metadata<'a, T: Metadata>(
     for meta in meta.chunks(i16::MAX as usize - 1) {
         let query = generate_metadata_insert(table, T::TABLE, meta.len());
 
-        let mut query = sqlx::query(&query).bind(id);
+        let mut query = sqlx::query(AssertSqlSafe(query)).bind(id);
 
         for meta in meta {
             let uuid: Uuid = meta.clone().into();
@@ -199,10 +199,10 @@ async fn recycle_tags<T: TagIndex>(
     id: Uuid,
     tag_index: &[T],
 ) -> sqlx::Result<()> {
-    sqlx::query(&format!(
+    sqlx::query(AssertSqlSafe(format!(
         "delete from {0}_tag_join where {0}_id = $1",
         table,
-    ))
+    )))
     .bind(id)
     .execute(&mut *conn)
     .await?;
@@ -210,7 +210,7 @@ async fn recycle_tags<T: TagIndex>(
     for chunk in tag_index.chunks(i16::MAX as usize - 1) {
         let query = generate_tag_insert(table, chunk.len());
 
-        let mut query = sqlx::query(&query).bind(id);
+        let mut query = sqlx::query(AssertSqlSafe(query)).bind(id);
 
         for tag in chunk {
             let tag: i16 = tag.clone().into();

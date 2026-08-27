@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect index from resource_data_module\nwhere resource_data_id = $1 and resource_data_module.id is not distinct from $2\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "resource_data_module",
+            "name": "index"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4ab4c7e45ea4d4dead6ad479dd764474979f932fbb3f8e65657c946afea2d4eb"
+}

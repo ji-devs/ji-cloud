@@ -43,7 +43,7 @@ returning index as "index: ImageTagIndex", display_name
         index.0,
         display_name,
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await
     .map_err(handle_tag_err)?;
 
@@ -64,7 +64,7 @@ pub async fn update(
         r#"select index as "index: i16" from image_tag where index = $1 for update"#,
         curr_index
     )
-    .fetch_optional(&mut txn)
+    .fetch_optional(&mut *txn)
     .await?;
 
     if res.is_none() {
@@ -78,7 +78,7 @@ pub async fn update(
             curr_index,
             display_name,
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await?;
     }
 
@@ -90,7 +90,7 @@ pub async fn update(
             curr_index,
             new_index
         )
-        .execute(&mut txn)
+        .execute(&mut *txn)
         .await
         .map_err(handle_tag_err)?;
     }

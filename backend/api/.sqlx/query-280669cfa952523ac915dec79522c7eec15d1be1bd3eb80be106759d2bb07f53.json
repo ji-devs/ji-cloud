@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with user_scopes as (\n            select cm.user_id,\n                   array_agg(scope) as scopes\n            from circle_member cm\n            left join user_scope on cm.user_id = user_scope.user_id\n            inner join \"user\" on cm.user_id = \"user\".id\n            where cm.id = $1 and \"user\".blocked = false\n            group by cm.user_id\n        )\n        select us.user_id  \"user_id: UserId\"\n        from user_scopes us\n        left join circle_member cm on cm.user_id = us.user_id\n        where cm.id = $1 and\n            (case when $2 = false then $3 <> any(us.scopes) and ($4 @> us.scopes or $5 @> us.scopes)\n                  when $2 = true then $3 = any(us.scopes)\n                else us.scopes is not null\n            end\n            )\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "circle_member",
+            "name": "user_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Int2",
+        "Int2Array",
+        "Int2Array"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "280669cfa952523ac915dec79522c7eec15d1be1bd3eb80be106759d2bb07f53"
+}

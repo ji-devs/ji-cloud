@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        update resource_curation_data\n        set updated_at = now()\n        where resource_id = $1\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2e8b8fc6284f216dd0ddaba73da461f72cfcd37a805ce30311f45b73f1eb38d2"
+}

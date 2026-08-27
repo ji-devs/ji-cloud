@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data\nset privacy_level = coalesce($2, privacy_level)\nwhere id = $1\n  and $2 is distinct from privacy_level\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7f4908d542be3a32a0d877287e49a87f69834904c30affc1dce2454cd0c8d4de"
+}

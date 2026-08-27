@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate user_profile\nset persona = $2,\n    updated_at = now()\nwhere user_id = $1 and persona is distinct from $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "117aec1ce14cfb2c45f31a37e6ea9acba4cff35c27710ed57499a6f7ec709844"
+}

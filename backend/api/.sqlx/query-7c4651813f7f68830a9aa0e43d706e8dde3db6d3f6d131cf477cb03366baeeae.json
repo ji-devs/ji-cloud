@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate resource_data\nset last_synced_at = now()\nwhere resource_data.id = any (select live_id from resource where resource.id = any ($1))\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7c4651813f7f68830a9aa0e43d706e8dde3db6d3f6d131cf477cb03366baeeae"
+}

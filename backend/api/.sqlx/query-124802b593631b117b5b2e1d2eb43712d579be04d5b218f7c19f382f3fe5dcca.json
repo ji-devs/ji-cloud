@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into locale_entry (bundle_id, section, item_kind_id, english, hebrew, status, zeplin_reference, comments, in_app, in_element, in_mock)\nvalues ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)\nreturning id\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "locale_entry",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Text",
+        "Text",
+        "Int2",
+        "Text",
+        "Text",
+        "Bool",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "124802b593631b117b5b2e1d2eb43712d579be04d5b218f7c19f382f3fe5dcca"
+}

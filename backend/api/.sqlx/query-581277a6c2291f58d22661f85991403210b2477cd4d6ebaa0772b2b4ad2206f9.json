@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect display_name         as \"display_name!\",\n       resource_type_id     as \"resource_type_id!: ResourceTypeId\",\n       resource_content    as \"resource_content!\"\nfrom resource_data_resource \"rdr\"\nwhere resource_data_id = $1\n  and rdr.id = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "resource_data_resource",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "resource_type_id!: ResourceTypeId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "resource_data_resource",
+            "name": "resource_type_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "resource_content!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "resource_data_resource",
+            "name": "resource_content"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "581277a6c2291f58d22661f85991403210b2477cd4d6ebaa0772b2b4ad2206f9"
+}

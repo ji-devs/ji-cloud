@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate subscription\nset\n    amount_due = $2\nwhere stripe_subscription_id = $1\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e844fcef9a18fca356013f7762a171a6c6d4c0ffa6df42c1e231cf8619c331fc"
+}

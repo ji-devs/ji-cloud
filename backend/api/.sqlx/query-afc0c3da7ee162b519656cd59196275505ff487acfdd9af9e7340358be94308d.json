@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate user_profile\nset organization = $2,\n    updated_at = now()\nwhere user_id = $1 and organization is distinct from $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "afc0c3da7ee162b519656cd59196275505ff487acfdd9af9e7340358be94308d"
+}

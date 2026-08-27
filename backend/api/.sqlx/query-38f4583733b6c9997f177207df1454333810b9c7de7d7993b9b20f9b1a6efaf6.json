@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into circle (display_name, description, image, creator_id) values ($1, $2, $3, $4)\nreturning id as \"id: CircleId\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: CircleId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "circle",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "38f4583733b6c9997f177207df1454333810b9c7de7d7993b9b20f9b1a6efaf6"
+}

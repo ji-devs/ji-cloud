@@ -1,0 +1,264 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect id,\n       display_name                                                                  as \"display_name!\",\n       created_at                                                                    as \"created_at!\",\n       updated_at,\n       language                                                                      as \"language!\",\n       description                                                                   as \"description!\",\n       translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n       direction                                                                     as \"direction!: TextDirection\",\n       scoring                                                                       as \"scoring!\",\n       drag_assist                                                                   as \"drag_assist!\",\n       theme                                                                         as \"theme!: ThemeId\",\n       audio_background                                                              as \"audio_background!: Option<AudioBackground>\",\n       array(select row (unnest(audio_feedback_positive)))                           as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n       array(select row (unnest(audio_feedback_negative)))                           as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n       array(\n                select row (jig_data_module.id, jig_data_module.stable_id, kind, is_complete)\n                from jig_data_module\n                where jig_data_id = jig_data.id\n                order by \"index\"\n       )                                               as \"modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>\",\n       (\n            select coalesce(sum(\n                case\n                    when kind = 2 then\n                        LEAST(\n                            coalesce((contents->'content'->'player_settings'->>'n_choices')::int, 0),\n                            coalesce(jsonb_array_length(contents->'content'->'base'->'pairs'), 0)\n                        ) * coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2\n                    when kind = 9 then\n                        coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2\n                    when kind = 10 then\n                        (select count(*)::int from jsonb_array_elements(\n                            coalesce(contents->'content'->'items', '[]'::jsonb)\n                        ) as item where item->'kind' ? 'Interactive') * 2\n                    when kind = 13 then\n                        coalesce(jsonb_array_length(contents->'content'->'questions'), 0) * 2\n                    else 0\n                end\n            )::int, 0)\n            from jig_data_module\n            where jig_data_id = jig_data.id\n       )                                               as \"max_score!\",\n       array(select row (category_id)\n             from jig_data_category\n             where jig_data_id = jig_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(select row (affiliation_id)\n             from jig_data_affiliation\n             where jig_data_id = jig_data.id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n       array(select row (age_range_id)\n             from jig_data_age_range\n             where jig_data_id = jig_data.id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n       array(\n                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n                from jig_data_additional_resource \"jdar\"\n                where jdar.jig_data_id = jig_data.id\n            )                                               as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       privacy_level                              as \"privacy_level!: PrivacyLevel\",\n       locked                                     as \"locked!\",\n       other_keywords                             as \"other_keywords!\",\n       translated_keywords                        as \"translated_keywords!\"\nfrom jig_data\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\norder by ord asc\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "language!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "language"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "description!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "translated_description!: Json<HashMap<String,String>>",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "translated_description"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "direction!: TextDirection",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "direction"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "scoring!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "scoring"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "drag_assist!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "drag_assist"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "theme!: ThemeId",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "theme"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "audio_background!: Option<AudioBackground>",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "audio_background"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "max_score!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "categories!: Vec<(CategoryId,)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "affiliations!: Vec<(AffiliationId,)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 18,
+        "name": "age_ranges!: Vec<(AgeRangeId,)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 19,
+        "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 20,
+        "name": "privacy_level!: PrivacyLevel",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "privacy_level"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "locked!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "locked"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "other_keywords!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "other_keywords"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "translated_keywords!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "jig_data",
+            "name": "translated_keywords"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "efebb2e957234642a660741ae24c3158a4b6f8c75665c553ccf26bf4c44f3882"
+}

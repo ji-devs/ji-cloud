@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        update user_asset_data\n        set resource_count = resource_count + 1,\n        total_asset_count = total_asset_count + 1\n        from resource\n        where author_id = user_id and\n              published_at is null and\n              id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "68b0cdf2330e61ee24a41779cd6a9a2d5d4b6aa32856cb5168bf45afd98d6ccf"
+}

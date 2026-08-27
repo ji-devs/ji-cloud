@@ -64,7 +64,7 @@ pub(super) async fn upload(
         r#"select size as "size: ImageSize" from user_image_library where id = $1"#,
         id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?
     .size;
 

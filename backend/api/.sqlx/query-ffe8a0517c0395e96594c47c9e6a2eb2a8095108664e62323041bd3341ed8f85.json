@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select unverified_email::text as \"email!\" from user_auth_google where user_id = $1 and unverified_email is not null",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ffe8a0517c0395e96594c47c9e6a2eb2a8095108664e62323041bd3341ed8f85"
+}

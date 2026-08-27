@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate \"user\"\nset blocked = true\nwhere id = $1\nand flagged = true\nand created_at <= now() - interval '7 days'\nreturning id\n                        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "\"user\"",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f21c47140974aa176b5714cfbc8ee9acc77ad85e8f5ad53f6083f9f0453eb838"
+}

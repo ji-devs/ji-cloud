@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate \"user\"\nset blocked = $2,\n    flagged = case when $2 = false then false else flagged end\nwhere id = $1\nand ($2 is distinct from blocked or ($2 = false and flagged = true))\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ec4ea2b8d6b8ce9940095850ca72b9a33b1e83e18bf87537c15dc5c05362da4f"
+}

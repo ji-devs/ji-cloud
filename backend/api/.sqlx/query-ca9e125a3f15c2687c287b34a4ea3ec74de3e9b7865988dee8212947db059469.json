@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        with cte as (\n            select (array_agg(up.user_id))[1]\n            from user_profile \"up\"\n            inner join \"user\" on up.user_id = \"user\".id\n            left join circle_member \"cm\" on cm.user_id = up.user_id\n            where (cm.id = any($1) or $1 = array[]::uuid[])\n                and (up.badge = any($2) or $2 = array[]::smallint[])\n                and \"user\".blocked = false\n            group by \"user\".created_at\n        )\n            select count(*) as \"count!\" from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n           , ord)\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Int2Array"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ca9e125a3f15c2687c287b34a4ea3ec74de3e9b7865988dee8212947db059469"
+}

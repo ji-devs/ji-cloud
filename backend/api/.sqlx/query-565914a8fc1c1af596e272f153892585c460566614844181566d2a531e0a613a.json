@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data\nset audio_feedback_positive = $2,\n    audio_feedback_negative = $3,\n    updated_at = now()\nwhere id = $1 and ($2 <> audio_feedback_positive or $3 <> audio_feedback_negative)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2Array",
+        "Int2Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "565914a8fc1c1af596e272f153892585c460566614844181566d2a531e0a613a"
+}

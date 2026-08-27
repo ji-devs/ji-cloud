@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nwith del_data as (\n    delete from course_data\n        where id is not distinct from $1 or id is not distinct from $2)\ndelete\nfrom course\nwhere id is not distinct from $3\n\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2d7bafd7b464bb3dd87cf57bc759efe7e5cb73de4ee63feed43f08e2edc1270f"
+}

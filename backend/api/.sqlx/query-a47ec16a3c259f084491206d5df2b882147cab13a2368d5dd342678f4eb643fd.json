@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into playlist_data_resource (playlist_data_id, resource_type_id, resource_content, display_name)\nvalues ((select draft_id from playlist where id = $1), $2, $3, $4)\nreturning id as \"id!: AdditionalResourceId\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!: AdditionalResourceId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "playlist_data_resource",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a47ec16a3c259f084491206d5df2b882147cab13a2368d5dd342678f4eb643fd"
+}

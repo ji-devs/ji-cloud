@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate user_profile\nset profile_image_id = $2,\n    updated_at = now()\nwhere user_id = $1 and profile_image_id is distinct from $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "70b86c7baab4d0ef8ac17327fa57d5c17983e1fe2b5656560694640916b7458d"
+}

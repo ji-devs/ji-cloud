@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate playlist_data\nset display_name = $2,\n    translated_name = '{}',\n    updated_at = now()\nwhere id = $1 and $2 is distinct from display_name",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "84a58a1a319e72ec21bac200fe7b99a22d2c26a7fb87636c2a8e35be0dd4e412"
+}

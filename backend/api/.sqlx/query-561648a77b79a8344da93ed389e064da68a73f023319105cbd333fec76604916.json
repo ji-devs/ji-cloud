@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\ninsert into user_profile\n    (user_id, username, over_18, given_name, family_name, profile_image_id, language_app, language_emails, languages_spoken, timezone, opt_into_edu_resources, organization, persona, location)\nvalues\n    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)\non conflict (user_id) do update\nset\n    over_18 = $3,\n    given_name = $4,\n    family_name = $5,\n    profile_image_id = $6,\n    language_app = $7,\n    language_emails = $8,\n    languages_spoken = $9,\n    timezone = $10,\n    opt_into_edu_resources = $11,\n    organization = $12,\n    persona = $13,\n    location = $14\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Bool",
+        "Text",
+        "Text",
+        "Uuid",
+        "Text",
+        "Text",
+        "TextArray",
+        "Text",
+        "Bool",
+        "Text",
+        "TextArray",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "561648a77b79a8344da93ed389e064da68a73f023319105cbd333fec76604916"
+}

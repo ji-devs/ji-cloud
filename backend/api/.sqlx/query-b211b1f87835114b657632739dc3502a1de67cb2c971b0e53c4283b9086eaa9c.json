@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate jig_data_module\nset index = index - 1\nwhere jig_data_id = $1\n  and index > $2\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b211b1f87835114b657632739dc3502a1de67cb2c971b0e53c4283b9086eaa9c"
+}

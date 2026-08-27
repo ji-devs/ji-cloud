@@ -1,0 +1,292 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nwith cte as (\n    select id      as \"course_id\",\n           creator_id,\n           author_id,\n           likes,\n           plays,\n           live_up_to_date,\n           case\n               when $2 = 0 then course.draft_id\n               when $2 = 1 then course.live_id\n               end as \"draft_or_live_id\",\n           published_at,\n           rating,\n           blocked,\n           curated,\n           is_premium\n    from course\n    left join course_admin_data \"admin\" on admin.course_id = course.id\n    where id = $1\n)\nselect cte.course_id                                          as \"course_id: CourseId\",\n       display_name,\n       creator_id                                             as \"creator_id?: UserId\",\n       author_id                                              as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n       published_at,\n       updated_at,\n       privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n       language,\n       description,\n       translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n       likes,\n       plays,\n       live_up_to_date,\n       other_keywords,\n       translated_keywords,\n       duration,\n       rating                                               as \"rating?: CourseRating\",\n       blocked                                              as \"blocked!\",\n       curated                                              as \"curated!\",\n       is_premium                                           as \"premium!\",\n       (\n            select row(course_data_module.id, course_data_module.stable_id, kind, is_complete)\n            from course_data_module\n            where course_data_id = cte.draft_or_live_id and \"index\" = 0\n            order by \"index\"\n        )                                                   as \"cover?: (ModuleId, StableModuleId, ModuleKind, bool)\",\n       array(select row (category_id)\n             from course_data_category\n             where course_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n       array(\n             select row (pddr.id, pddr.display_name, resource_type_id, resource_content)\n             from course_data_resource \"pddr\"\n             where pddr.course_data_id = cte.draft_or_live_id\n       )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n       array(\n            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)\n            from course_data_unit \"pddu\"\n            where pddu.course_data_id = course_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(CourseUnitId, String, String, Value)>\"\nfrom course_data\n         inner join cte on cte.draft_or_live_id = course_data.id\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "course_id: CourseId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "creator_id?: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "creator_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "author_id?: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "author_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "privacy_level!: PrivacyLevel",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "privacy_level"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "language",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "language"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "translated_description!: Json<HashMap<String, String>>",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "translated_description"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "likes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "likes"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "plays",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "plays"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "live_up_to_date",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "course",
+            "name": "live_up_to_date"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "other_keywords",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "other_keywords"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "translated_keywords",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "translated_keywords"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "duration",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "course_data",
+            "name": "duration"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "rating?: CourseRating",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "course_admin_data",
+            "name": "rating"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "blocked!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "course_admin_data",
+            "name": "blocked"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "curated!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "course_admin_data",
+            "name": "curated"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "premium!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "course_admin_data",
+            "name": "is_premium"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
+        "type_info": "Record",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 22,
+        "name": "categories!: Vec<(CategoryId,)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 23,
+        "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 24,
+        "name": "units!: Vec<(CourseUnitId, String, String, Value)>",
+        "type_info": "RecordArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      null,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "ccc8a05fe5c336ed5d15b688edbf210e2c0788c6d15bef4e76ef3b54aff6968e"
+}

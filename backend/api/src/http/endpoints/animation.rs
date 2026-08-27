@@ -106,7 +106,7 @@ async fn upload(
         r#"select exists(select 1 from global_animation_upload where animation_id = $1 for no key update) as "exists!""#,
         id.0
     )
-    .fetch_one(&mut txn)
+    .fetch_one(&mut *txn)
     .await?.exists;
 
     if !exists {

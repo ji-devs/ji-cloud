@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update circle set last_synced_at = now() where id = any($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "adad83fde1425f52663ff929d8ba0cddfb5c8ce75ebe0d255e17e35c5d938073"
+}

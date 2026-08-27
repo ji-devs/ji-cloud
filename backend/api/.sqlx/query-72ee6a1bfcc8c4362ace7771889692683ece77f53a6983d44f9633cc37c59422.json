@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update image_upload set uploaded_at = now(), processed_at = now(), processing_result = true, kind = $2 where image_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "72ee6a1bfcc8c4362ace7771889692683ece77f53a6983d44f9633cc37c59422"
+}

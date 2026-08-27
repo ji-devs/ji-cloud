@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE jig_code_session\n            SET finished_at = current_timestamp, info=$1, players_name=$2\n            WHERE id = $3 and ip_address = $4 and finished_at is null;\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Json",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0a4377abb5f1eb886ef3eb9c454946088b76e292b5c0b97907ae5cfefd7ffa04"
+}

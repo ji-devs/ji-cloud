@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate image_metadata\nset publish_at = $2, updated_at = now()\nwhere id = $1 and $2 is distinct from publish_at",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fc6bfe176017b10253bc42ecb9f96f0533953b10ea0ad57299f99a3a17bc6721"
+}

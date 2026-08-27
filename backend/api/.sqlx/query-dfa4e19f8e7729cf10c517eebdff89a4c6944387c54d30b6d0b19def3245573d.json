@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate account\nset stripe_customer_id = $2,\nupdated_at = now()\nwhere account_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dfa4e19f8e7729cf10c517eebdff89a4c6944387c54d30b6d0b19def3245573d"
+}

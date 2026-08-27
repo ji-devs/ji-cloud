@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nupdate category\nset parent_id = $1,\n    updated_at = now(),\n    index = (select count(*)::int2 from category where parent_id is not distinct from $1)\nwhere id = $2\nreturning index\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "index",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "category",
+            "name": "index"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1f8df54bb87c543c4a975eb72c8c981ecd033664f68e66a2caff692ac30c14c3"
+}

@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nselect id as \"id: ImageId\", size as \"size: ImageSize\"\nfrom user_image_library\n         inner join user_image_upload\n                    on user_image_library.id = user_image_upload.image_id\nwhere user_id = $1\n  and id = $2\n  and processing_result is true\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id: ImageId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "user_image_library",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "size: ImageSize",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "user_image_library",
+            "name": "size"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "ef36b57ff9ff33f2f63f72fa62022287ac897ed5075fba89ba47a1356e0e2549"
+}
