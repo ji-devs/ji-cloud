@@ -104,6 +104,9 @@ pub struct RuntimeSettings {
     /// * optional, if missing it will use the server's compiled default (an indeterminate but reasonable amount of time)
     pub login_token_valid_duration: Option<chrono::Duration>,
 
+    /// Blocked ISO 3166 country codes
+    pub blocked_countries: Vec<String>,
+
     /// Secret for Stripe API
     pub stripe_secret_key: Option<String>,
 
@@ -139,6 +142,7 @@ impl RuntimeSettings {
             google_api_key,
             token_secret,
             login_token_valid_duration,
+            blocked_countries: Vec::new(),
             stripe_secret_key,
             stripe_webhook_secret,
         }
@@ -151,6 +155,7 @@ impl RuntimeSettings {
         google_oauth: Option<GoogleOAuth>,
         token_secret: Box<[u8; 32]>,
         login_token_valid_duration: Option<chrono::Duration>,
+        blocked_countries: Vec<String>,
         stripe_secret_key: Option<String>,
         stripe_webhook_secret: Option<String>,
     ) -> anyhow::Result<Self> {
@@ -177,6 +182,7 @@ impl RuntimeSettings {
             google_api_key,
             token_secret,
             login_token_valid_duration,
+            blocked_countries,
             stripe_secret_key,
             stripe_webhook_secret,
         })
@@ -768,6 +774,19 @@ impl SettingsManager {
             self.get_varying_secret(keys::GOOGLE_OAUTH_SECRET).await?,
         );
 
+        let blocked_countries = self
+            .get_optional_secret(keys::BLOCKED_SIGNUP_COUNTRIES)
+            .await?
+            .map(|countries| {
+                countries
+                    .split(',')
+                    .map(str::trim)
+                    .filter(|country| !country.is_empty())
+                    .map(str::to_uppercase)
+                    .collect()
+            })
+            .unwrap_or_default();
+
         RuntimeSettings::with_env(
             self.remote_target,
             pixabay_search_key,
@@ -775,6 +794,7 @@ impl SettingsManager {
             google_oauth,
             token_secret,
             login_token_valid_duration,
+            blocked_countries,
             self.stripe_secret_key().await?,
             self.stripe_webhook_secret().await?,
         )

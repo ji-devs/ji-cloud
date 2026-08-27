@@ -175,7 +175,7 @@ update "user"
 set blocked = true
 where id = $1
 and flagged = true
-and created_at <= now() - interval '1 day'
+and created_at <= now() - interval '7 days'
 returning id
                 "#,
                 google_auth.user_id,

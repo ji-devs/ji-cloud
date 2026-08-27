@@ -160,6 +160,9 @@ pub const TOKEN_SECRET: &str = "TOKEN_SECRET";
 /// This environment variable is optional, if missing it will use the server's compiled default (an indeterminate but reasonable amount of time)
 pub const LOGIN_TOKEN_VALID_DURATION: &str = "LOGIN_TOKEN_VALID_DURATION";
 
+/// Comma-separated ISO 3166-1 alpha-2 country codes to block at signup.
+pub const BLOCKED_SIGNUP_COUNTRIES: &str = "BLOCKED_SIGNUP_COUNTRIES";
+
 pub const PIXABAY_SEARCH_KEY: &str = "PIXABAY_SEARCH_KEY";
 
 /// ID of the google oauth client.

@@ -488,6 +488,17 @@ async fn create_profile(
 
     let user_id = signup_user.claims.user_id;
 
+    let signup_country = req
+        .location
+        .clone()
+        .and_then(|location| db::user::get_location(Some(location)).country_short);
+    let should_block_signup = signup_country.as_deref().map_or(false, |country| {
+        settings
+            .blocked_countries
+            .iter()
+            .any(|blocked_country| blocked_country == country)
+    });
+
     let profile_image_id: Option<ImageId> = match req.profile_image_url {
         Some(ref url) => create_user_profile_image(&db, &s3, &url, &user_id)
             .await
@@ -495,15 +506,36 @@ async fn create_profile(
         None => None,
     };
 
-    let mut txn = db.begin().await?;
-
-    let mut upsert_txn = txn.begin().await?;
+    let mut upsert_txn = db.begin().await?;
 
     upsert_profile(&mut upsert_txn, &req, profile_image_id, user_id).await?;
 
     db::session::delete(&mut upsert_txn, &signup_user.claims.token).await?;
 
     upsert_txn.commit().await?;
+
+    if should_block_signup {
+        sqlx::query!(
+            r#"
+update "user"
+set flagged = true,
+    blocked = true
+where id = $1
+            "#,
+            user_id.0,
+        )
+        .execute(db.as_ref())
+        .instrument(tracing::info_span!("block signup user"))
+        .await?;
+
+        return Err(error::UserUpdate::InternalServerError(anyhow::anyhow!(
+            "blocked signup country: {}",
+            signup_country.unwrap_or_default(),
+        ))
+        .into());
+    }
+
+    let mut txn = db.begin().await?;
 
     let login_ttl = settings
         .login_token_valid_duration

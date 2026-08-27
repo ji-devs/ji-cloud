@@ -244,7 +244,7 @@ select  cte1.id                 as "id!: UserId",
         account_cte.account_id as "account_id?: AccountId",
         account_cte.tier_override as "tier_override?: PlanTier",
         user_auth_google.google_id as "google_auth?: String",
-        ("user".blocked or ("user".flagged and "user".created_at <= now() - interval '1 day')) as "blocked!",
+        ("user".blocked or ("user".flagged and "user".created_at <= now() - interval '7 days')) as "blocked!",
         "user".flagged as "flagged!",
         (
             select created_at as "last_login?"
@@ -381,7 +381,7 @@ select  "user".id                 as "id!: UserId",
         account_cte.account_id as "account_id?: AccountId",
         account_cte.tier_override as "tier_override?: PlanTier",
         user_auth_google.google_id as "google_auth?: String",
-        ("user".blocked or ("user".flagged and "user".created_at <= now() - interval '1 day')) as "blocked!",
+        ("user".blocked or ("user".flagged and "user".created_at <= now() - interval '7 days')) as "blocked!",
         "user".flagged as "flagged!",
         (
             select created_at as "last_login?"
