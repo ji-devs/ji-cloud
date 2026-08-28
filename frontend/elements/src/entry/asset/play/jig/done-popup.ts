@@ -6,6 +6,7 @@ const STR_SCORE = "SCORE";
 const GOLD_CUP_PATH = "entry/jig/play/jig-finish.gif";
 const SILVER_CUP_PATH = "entry/jig/play/jig-finish-silver.gif";
 const BRONZE_CUP_PATH = "entry/jig/play/jig-finish-bronze.gif";
+const TRY_AGAIN_PATH = "entry/jig/play/jig-finish-tryagain.gif";
 
 @customElement("jig-play-done-popup")
 export class _ extends PopupBase {
@@ -73,7 +74,7 @@ export class _ extends PopupBase {
             return GOLD_CUP_PATH;
         }
         if (this.percentage === 0) {
-            return null;
+            return TRY_AGAIN_PATH;
         }
         if (this.percentage <= 33) {
             return BRONZE_CUP_PATH;
