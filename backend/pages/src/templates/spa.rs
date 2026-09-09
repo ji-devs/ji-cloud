@@ -188,9 +188,29 @@ pub async fn asset_template(
             .path_and_query()
             .map(|pq| pq.as_str())
             .unwrap_or(req.uri().path());
+        let debug = req
+            .query_string()
+            .split('&')
+            .any(|param| param == "debug=1");
+        let path_and_query = if debug {
+            // Manually added debug flags are not part of the signed URL.
+            let query = req
+                .query_string()
+                .split('&')
+                .filter(|param| *param != "debug=1")
+                .collect::<Vec<_>>()
+                .join("&");
+            Cow::Owned(if query.is_empty() {
+                req.uri().path().to_owned()
+            } else {
+                format!("{}?{}", req.uri().path(), query)
+            })
+        } else {
+            Cow::Borrowed(path_and_query)
+        };
 
-        if verify_signed_url(path_and_query, &settings.token_secret).is_none()
-            && !can_view_unsigned_play_url(&settings, &db, &req, &asset_path).await
+        if verify_signed_url(&path_and_query, &settings.token_secret).is_none()
+            && !can_view_unsigned_play_url(&settings, &db, &req, &asset_path, debug).await
         {
             return Err(ErrorForbidden("Invalid or missing signature"));
         }
@@ -226,8 +246,9 @@ async fn can_view_unsigned_play_url(
     db: &PgPool,
     req: &HttpRequest,
     asset_path: &str,
+    debug: bool,
 ) -> bool {
-    if matches!(settings.remote_target(), RemoteTarget::Release) {
+    if matches!(settings.remote_target(), RemoteTarget::Release) && !debug {
         return true; // temporarily disabled checks
     }
     let Some(user_id) = auth_user_id(settings, db, req).await else {
