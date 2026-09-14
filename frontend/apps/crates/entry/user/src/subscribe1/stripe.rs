@@ -60,7 +60,6 @@ impl Stripe {
                     "type": "tabs",
                     "defaultCollapsed": false
                 },
-                "paymentMethodOrder": ["card", "apple_pay", "google_pay", "link"],
             }),
         );
         payment_element.mount(el);
