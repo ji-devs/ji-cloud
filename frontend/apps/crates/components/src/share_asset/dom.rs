@@ -142,6 +142,15 @@ impl ShareAsset {
         can_play
     }
 
+    fn copied_link_label(&self) -> String {
+        let asset_name = if self.asset.is_playlist() {
+            "Playlist"
+        } else {
+            self.asset_type_name()
+        };
+        format!("{asset_name}{STR_COPIED_LABEL}")
+    }
+
     fn render_share_main(self: &Rc<Self>) -> Dom {
         fn share_to(base: &str, url: &str) {
             if let Some(window) = window() {
@@ -196,11 +205,12 @@ impl ShareAsset {
                     .prop("slot", "student")
                     .prop("kind", "students")
                     .prop_signal("disabled", state.share_url_loading.signal())
-                    .text_signal(temp_playlist_link_copied.signal().map(clone!(state => move |copied| {
-                        match copied {
+                    .child_signal(temp_playlist_link_copied.signal().map(clone!(state => move |copied| {
+                        let label = match copied {
                             false => STR_SHARE_STUDENTS.to_owned(),
-                            true => format!("{}{STR_COPIED_LABEL}", state.asset_type_name()),
-                        }
+                            true => state.copied_link_label(),
+                        };
+                        Some(render_copy_feedback(copied, &label))
                     })))
                     .event(clone!(state => move |_: events::Click| {
                         if !state.can_share() {
@@ -253,11 +263,12 @@ impl ShareAsset {
                 .prop("slot", "other")
                 .prop("kind", "copy")
                 .prop_signal("disabled", state.share_url_loading.signal())
-                .text_signal(state.link_copied.signal().map(clone!(state => move |copied| {
-                    match copied {
+                .child_signal(state.link_copied.signal().map(clone!(state => move |copied| {
+                    let label = match copied {
                         false => format!("{}{}{}", STR_COPY_LABEL_1, state.asset_type_name(), STR_COPY_LABEL_2),
-                        true => format!("{}{STR_COPIED_LABEL}", state.asset_type_name()),
-                    }
+                        true => state.copied_link_label(),
+                    };
+                    Some(render_copy_feedback(copied, &label))
                 })))
                 .event(clone!(state => move|_: events::Click| {
                     if !state.can_play() {
@@ -371,8 +382,8 @@ impl ShareAsset {
                     .prop("slot", "copy-url")
                     .prop("color", "blue")
                     .prop("kind", "text")
-                    .text_signal(state.copied_student_url.signal().map(|copied| {
-                        if copied { STR_STUDENTS_COPIED_URL_LABEL } else { STR_STUDENTS_COPY_URL_LABEL }
+                    .child_signal(state.copied_student_url.signal().map(|copied| {
+                        Some(render_copy_feedback(copied, if copied { STR_STUDENTS_COPIED_URL_LABEL } else { STR_STUDENTS_COPY_URL_LABEL }))
                     }))
                     .prop_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
                     .event(clone!(state => move |_: events::Click| {
@@ -389,8 +400,8 @@ impl ShareAsset {
                     .prop("kind", "text")
                     .prop("color", "blue")
                     .prop_signal("disabled", state.student_code.signal_ref(|x| x.is_none()))
-                    .text_signal(state.copied_student_code.signal().map(|copied| {
-                        if copied { STR_CODE_COPIED_CODE_LABEL } else { STR_CODE_COPY_CODE_LABEL }
+                    .child_signal(state.copied_student_code.signal().map(|copied| {
+                        Some(render_copy_feedback(copied, if copied { STR_CODE_COPIED_CODE_LABEL } else { STR_CODE_COPY_CODE_LABEL }))
                     }))
                     .event(clone!(state => move|_: events::Click| {
                         let student_code = state.student_code.get_cloned().unwrap_ji();
@@ -446,8 +457,8 @@ impl ShareAsset {
                         .prop("color", "blue")
                         .prop("kind", "text")
                         .prop_signal("disabled", state.share_url_loading.signal())
-                        .text_signal(state.copied_embed.signal().map(|copied| {
-                            if copied { STR_EMBED_COPIED_CODE_LABEL } else { STR_EMBED_COPY_CODE_LABEL }
+                        .child_signal(state.copied_embed.signal().map(|copied| {
+                            Some(render_copy_feedback(copied, if copied { STR_EMBED_COPIED_CODE_LABEL } else { STR_EMBED_COPY_CODE_LABEL }))
                         }))
                         .event(clone!(state => move |_: events::Click| {
                             state.copy_embed_code();
@@ -464,6 +475,14 @@ impl ShareAsset {
             ])
         })
     }
+}
+
+// Replacing the label also restarts the animation on repeated copy clicks.
+fn render_copy_feedback(copied: bool, label: &str) -> Dom {
+    html!("share-copy-feedback", {
+        .prop("copied", copied)
+        .text(label)
+    })
 }
 
 fn has_native_share() -> bool {
