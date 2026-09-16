@@ -36,11 +36,13 @@ macro_rules! dialog {
                     })
                     .style("border", "none")
                     .style("padding", "0")
+                    .style("margin", "0")
                     .style("border-radius", "16px")
                     .style("box-shadow", "0 3px 6px 0 rgba(0, 0, 0, 0.16)")
                     .style("position", "fixed")
                     .style("top", "50%")
                     .style("left", "50%")
+                    .style("right", "auto")
                     .style("transform", "translate(-50%, -50%)")
                     .style("z-index", "1")
                     $($methods)*
