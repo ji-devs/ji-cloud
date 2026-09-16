@@ -107,7 +107,7 @@ export class _ extends LitElement {
                     <fa-icon icon="fa-regular fa-angle-right"></fa-icon>
                     What happens to my JIGs, playlists, resources, and courses if I downgrade to a FREE account?
                 </summary>
-                <p>Anything you have created and published will continue to work as before. You will still be able to edit, play, and share your creations, however, you will no longer be able to create playlists, resources, or courses, and if you have already created 5 JIGs you will not be able to create new ones.</p>
+                <p>Anything you have created and published will continue to work as before. You will still be able to edit, play, and share your creations, however, you will no longer be able to create playlists, resources, or courses, and if you have already created 3 JIGs you will not be able to create new ones.</p>
             </details>
         `;
     }
