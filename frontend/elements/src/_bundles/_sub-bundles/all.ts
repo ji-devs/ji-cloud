@@ -4,4 +4,3 @@ import "@elements/core/icon/fa-icon";
 import "@elements/core/buttons/main";
 import "@elements/_bundles/_sub-bundles/overlay";
 import "@elements/core/modals/confirm";
-import "@elements/core/share-jig/copy-feedback";

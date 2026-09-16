@@ -2,6 +2,7 @@ import { LitElement, html, css, customElement, property } from "lit-element";
 import "@elements/core/popups/popup-body";
 import "@elements/core/inputs/composed/switch-direction";
 import "@elements/core/inputs/composed/switch";
+import "./copy-feedback";
 import { nothing } from "lit-html";
 
 const STR_SHARING_OPTIONS = "Sharing Options";

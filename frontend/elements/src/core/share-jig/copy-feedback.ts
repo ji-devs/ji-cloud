@@ -24,11 +24,6 @@ export class _ extends LitElement {
                     transform: translateY(0) scale(1);
                 }
             }
-            @media (prefers-reduced-motion: reduce) {
-                :host([copied]) {
-                    animation: none;
-                }
-            }
         `;
     }
 
