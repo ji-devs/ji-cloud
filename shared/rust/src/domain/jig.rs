@@ -29,7 +29,6 @@ use crate::{api::endpoints::PathPart, domain::module::body::ThemeId};
 /// Maximum owned or published JIGs for Free and Basic accounts.
 pub const FREE_BASIC_JIG_LIMIT: u64 = 3;
 
-
 wrap_uuid! {
     /// Wrapper type around [`Uuid`], represents the ID of a JIG.
     pub struct JigId
