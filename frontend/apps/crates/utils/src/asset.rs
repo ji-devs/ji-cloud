@@ -348,8 +348,8 @@ pub fn create_jig() {
     if !paywall::can_create_jig(total_existing) {
         paywall::dialog_limit(
             "
-                Looking to create more than 3 JIGs?
-                Upgrade now for UNLIMITED access to Jigzi Studio.
+                Wanting to create more than 3 JIGs?
+                Upgrade to Pro to create UNLIMITED JIGs.
             ",
         );
         return;
