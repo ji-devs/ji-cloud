@@ -21,7 +21,7 @@ pub fn render_studio() -> Dom {
                 .prop("kind", "filled")
                 .prop("size", "regular")
                 .event(|_: events::Click| {
-                    let jig_count = with_user(|user| user.jig_count).unwrap_or(0);
+                    let jig_count = with_user(|user| user.total_jig_count).unwrap_or(0);
                     if !paywall::can_create_jig(jig_count) {
                         paywall::dialog_limit(
                             "

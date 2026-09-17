@@ -239,7 +239,10 @@ impl Gallery {
                                                     .text(STR_DUPLICATE)
                                                     .event(clone!(state, asset_id => move |_: events::Click| {
                                                         is_open.set(false); // Not using set_neq to ensure the menu is closed even if the previous value was false
-                                                        let jig_count = with_user(|user| user.jig_count).unwrap_or(0);
+                                                        let jig_count = with_user(|user| match asset_id {
+                                                            AssetId::JigId(_) => user.total_jig_count,
+                                                            _ => user.jig_count,
+                                                        }).unwrap_or(0);
                                                         if !paywall::can_create_jig(jig_count) {
                                                             paywall::dialog_limit(
                                                                 "

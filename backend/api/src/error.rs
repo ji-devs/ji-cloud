@@ -361,6 +361,7 @@ impl Into<actix_web::Error> for Upload {
 pub enum CreateWithMetadata {
     InternalServerError(anyhow::Error),
     Forbidden,
+    JigLimitReached,
     MissingMetadata(MetadataNotFound),
     ResourceNotFound,
 }
@@ -389,6 +390,12 @@ impl Into<actix_web::Error> for CreateWithMetadata {
                 message: "Metadata not Found".to_owned(),
                 extra: data,
             }
+            .into(),
+            Self::JigLimitReached => BasicError::with_message(
+                http::StatusCode::PAYMENT_REQUIRED,
+                "Wanting to create more than 3 JIGs? Upgrade to Pro to add or publish more JIGs."
+                    .to_owned(),
+            )
             .into(),
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
             Self::InternalServerError(e) => ise(e),
@@ -564,6 +571,7 @@ pub enum CloneDraft {
     IncompleteModules,
     Conflict,
     Forbidden,
+    JigLimitReached,
     InternalServerError(anyhow::Error),
 }
 
@@ -610,6 +618,12 @@ impl Into<actix_web::Error> for CloneDraft {
             )
             .into(),
 
+            Self::JigLimitReached => BasicError::with_message(
+                http::StatusCode::PAYMENT_REQUIRED,
+                "Wanting to create more than 3 JIGs? Upgrade to Pro to add or publish more JIGs."
+                    .to_owned(),
+            )
+            .into(),
             Self::Forbidden => BasicError::new(http::StatusCode::FORBIDDEN).into(),
 
             Self::InternalServerError(e) => ise(e),

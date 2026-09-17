@@ -31,6 +31,56 @@ pub(crate) mod curation;
 pub(crate) mod module;
 pub(crate) mod report;
 
+/// Serialize quota checks with the write so concurrent requests cannot exceed the limit.
+async fn within_jig_limit(
+    txn: &mut PgConnection,
+    user_id: UserId,
+    publishing: Option<JigId>,
+) -> anyhow::Result<bool> {
+    sqlx::query!(
+        // language=SQL
+        r#"select id from "user" where id = $1 for no key update"#,
+        user_id.0,
+    )
+    .fetch_one(&mut *txn)
+    .await?;
+
+    let summary = super::account::get_user_account_summary(&mut *txn, &user_id).await?;
+    let tier = summary
+        .map(|summary| match summary.subscription_status {
+            Some(status) if !status.is_valid() => shared::domain::billing::PlanTier::Free,
+            _ => summary.plan_tier,
+        })
+        .unwrap_or_default();
+    if tier == shared::domain::billing::PlanTier::Pro {
+        return Ok(true);
+    }
+
+    if let Some(jig_id) = publishing {
+        let already_published = sqlx::query_scalar!(
+            // language=SQL
+            r#"select published_at is not null as "already_published!" from jig where id = $1"#,
+            jig_id.0,
+        )
+        .fetch_one(&mut *txn)
+        .await?;
+        if already_published {
+            return Ok(true);
+        }
+    }
+
+    let count = sqlx::query_scalar!(
+        // language=SQL
+        r#"select count(*) as "count!" from jig where author_id = $1 and (not $2 or published_at is not null)"#,
+        user_id.0,
+        publishing.is_some(),
+    )
+    .fetch_one(&mut *txn)
+    .await?;
+
+    Ok(count < shared::domain::jig::FREE_BASIC_JIG_LIMIT as i64)
+}
+
 pub async fn create(
     pool: &PgPool,
     display_name: &str,
@@ -43,6 +93,9 @@ pub async fn create(
     default_player_settings: &JigPlayerSettings,
 ) -> Result<JigId, CreateJigError> {
     let mut txn = pool.begin().await?;
+    if !within_jig_limit(&mut txn, creator_id, None).await? {
+        return Err(CreateJigError::LimitReached);
+    }
 
     let draft_id = create_jig_data(
         &mut txn,
@@ -138,6 +191,7 @@ returning id
 /// Handle errors for creating a module when posting a Jig
 /// This is here because the scope is limited to the above function
 pub enum CreateJigError {
+    LimitReached,
     Sqlx(sqlx::Error),
     DefaultModules(serde_json::Error),
     InternalServerError(anyhow::Error),
@@ -1047,6 +1101,18 @@ where id = $1
 pub async fn publish_draft_to_live(db: &PgPool, jig_id: JigId) -> Result<(), error::CloneDraft> {
     let mut txn = db.begin().await?;
 
+    let author_id = sqlx::query_scalar!(
+        // language=SQL
+        r#"select author_id as "author_id!: UserId" from jig where id = $1"#,
+        jig_id.0,
+    )
+    .fetch_optional(&mut *txn)
+    .await?
+    .ok_or(error::CloneDraft::ResourceNotFound)?;
+    if !within_jig_limit(&mut txn, author_id, Some(jig_id)).await? {
+        return Err(error::CloneDraft::JigLimitReached);
+    }
+
     let (draft_id, live_id) = get_draft_and_live_ids(&mut *txn, jig_id)
         .await
         .ok_or(error::CloneDraft::ResourceNotFound)?;
@@ -1409,6 +1475,9 @@ pub async fn clone_jig(
     user_id: UserId,
 ) -> Result<JigId, error::CloneDraft> {
     let mut txn = db.begin().await?;
+    if !within_jig_limit(&mut txn, user_id, None).await? {
+        return Err(error::CloneDraft::JigLimitReached);
+    }
 
     let (draft_id, live_id) = get_draft_and_live_ids(&mut *txn, parent)
         .await

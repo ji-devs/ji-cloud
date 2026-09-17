@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select published_at is not null as \"already_published!\" from jig where id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "already_published!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d2530089a7035aba846bd6c6c0af03c90a48d48f7a457e3d410f47dddb83f81a"
+}

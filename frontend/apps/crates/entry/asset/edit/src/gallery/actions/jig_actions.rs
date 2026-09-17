@@ -49,7 +49,16 @@ pub async fn search_jigs(q: String, is_published: Option<bool>) -> Result<Vec<As
 }
 
 pub async fn copy_jig(jig_id: JigId) -> Result<Asset, ()> {
-    match endpoints::jig::Clone::api_with_auth(JigClonePath(jig_id), None).await {
+    let (response, status) =
+        endpoints::jig::Clone::api_with_auth_status(JigClonePath(jig_id), None).await;
+    if status == 402 {
+        utils::paywall::dialog_limit(
+            "Wanting to create more than 3 JIGs? Upgrade to Pro to create unlimited JIGs.",
+        );
+        return Err(());
+    }
+    utils::fetch::side_effect_status_code(status).await;
+    match response {
         Ok(resp) => endpoints::jig::GetDraft::api_with_auth(JigGetDraftPath(resp.id), None)
             .await
             .map(|resp| {

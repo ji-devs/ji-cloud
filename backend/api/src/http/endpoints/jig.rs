@@ -73,6 +73,7 @@ async fn create(
     )
     .await
     .map_err(|e| match e {
+        CreateJigError::LimitReached => error::CreateWithMetadata::JigLimitReached,
         CreateJigError::DefaultModules(e) => {
             error::CreateWithMetadata::InternalServerError(e.into())
         }

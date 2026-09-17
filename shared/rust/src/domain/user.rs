@@ -269,7 +269,11 @@ pub struct UserProfile {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<serde_json::Value>,
 
-    /// Number of Jigs
+    /// Number of owned JIGs, including drafts and published JIGs.
+    #[serde(default)]
+    pub total_jig_count: u64,
+
+    /// Number of published JIGs
     #[serde(default)]
     pub jig_count: u64,
 

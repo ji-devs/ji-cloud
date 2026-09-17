@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select author_id as \"author_id!: UserId\" from jig where id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "author_id!: UserId",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "jig",
+            "name": "author_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "30faa69d9bf447494171484d961ed1aaf0c4319b325bfd3b82fe3ba388783a8b"
+}

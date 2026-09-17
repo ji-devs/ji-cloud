@@ -141,6 +141,13 @@ where id = $1"#,
         organization: row.organization,
         persona: row.persona,
         location: row.location,
+        total_jig_count: sqlx::query_scalar!(
+            // language=SQL
+            r#"select count(*) as "count!" from jig where author_id = $1"#,
+            id.0,
+        )
+        .fetch_one(db)
+        .await? as u64,
         jig_count: row.jig_count as u64,
         resource_count: row.resource_count as u64,
         course_count: row.course_count as u64,

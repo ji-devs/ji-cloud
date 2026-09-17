@@ -1,13 +1,16 @@
 use crate::prelude::get_plan_tier;
-use shared::domain::{asset::AssetType, billing::PlanTier};
+use shared::domain::{asset::AssetType, billing::PlanTier, jig::FREE_BASIC_JIG_LIMIT};
 
 pub fn can_create_jig(total_existing: u64) -> bool {
     match get_plan_tier() {
         PlanTier::Pro => true,
-        PlanTier::Basic => total_existing < 3,
-        PlanTier::Free => total_existing < 3,
+        PlanTier::Basic | PlanTier::Free => total_existing < FREE_BASIC_JIG_LIMIT,
     }
 }
+pub fn can_publish_jig(published_count: u64) -> bool {
+    can_create_jig(published_count)
+}
+
 pub fn can_create_playlist(_total_existing: u64) -> bool {
     match get_plan_tier() {
         PlanTier::Pro => true,

@@ -343,7 +343,7 @@ pub fn create_jig() {
     let total_existing = get_user_mutable()
         .lock_ref()
         .as_ref()
-        .map(|user| user.jig_count)
+        .map(|user| user.total_jig_count)
         .unwrap_or_default();
     if !paywall::can_create_jig(total_existing) {
         paywall::dialog_limit(
@@ -357,9 +357,17 @@ pub fn create_jig() {
     spawn_local(async move {
         let req = JigCreateRequest::default();
 
-        let resp = endpoints::jig::Create::api_with_auth(JigCreatePath(), Some(req))
-            .await
-            .unwrap_ji();
+        let (resp, status) =
+            endpoints::jig::Create::api_with_auth_status(JigCreatePath(), Some(req)).await;
+        if status == 402 {
+            paywall::dialog_limit(
+                "Wanting to create more than 3 JIGs? Upgrade to Pro to create unlimited JIGs.",
+            );
+            return;
+        }
+        crate::fetch::side_effect_status_code(status).await;
+        let resp = resp.unwrap_ji();
+        crate::init::user::refresh().await;
         let url: String = Route::Asset(AssetRoute::Edit(AssetEditRoute::Jig(
             resp.id,
             JigEditRoute::Landing,

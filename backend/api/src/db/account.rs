@@ -277,8 +277,8 @@ values
 }
 
 #[instrument(skip(pool))]
-pub async fn get_user_account_summary(
-    pool: &PgPool,
+pub async fn get_user_account_summary<'a>(
+    pool: impl Executor<'a, Database = Postgres>,
     user_id: &UserId,
 ) -> sqlx::Result<Option<UserAccountSummary>> {
     let record = sqlx::query!(

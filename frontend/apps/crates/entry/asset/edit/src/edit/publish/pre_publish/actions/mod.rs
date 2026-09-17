@@ -141,10 +141,26 @@ impl PrePublish {
         };
 
         state.loader.load(clone!(state => async move {
+            utils::init::user::refresh().await;
+            if let EditableAsset::Jig(jig) = &*state.asset {
+                let published_count =
+                    utils::init::user::with_user(|user| user.jig_count).unwrap_or_default();
+                if jig.published_at.get_cloned().is_none()
+                    && !utils::paywall::can_publish_jig(published_count)
+                {
+                    utils::paywall::dialog_limit(
+                        "Wanting to create more than 3 JIGs? Upgrade to Pro to publish unlimited JIGs.",
+                    );
+                    return;
+                }
+            }
             state.save_async().await;
             let asset: Asset = match &*state.asset {
                 EditableAsset::Jig(jig) => {
-                    jig_actions::publish_jig(jig.id).await.unwrap_ji().into()
+                    match jig_actions::publish_jig(jig.id).await.unwrap_ji() {
+                        Some(jig) => jig.into(),
+                        None => return,
+                    }
                 },
                 EditableAsset::Resource(resource) => {
                     resource_actions::publish_resource(resource.id).await.unwrap_ji().into()

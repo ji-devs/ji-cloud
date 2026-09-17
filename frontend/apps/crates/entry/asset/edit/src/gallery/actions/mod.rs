@@ -103,7 +103,7 @@ impl Gallery {
     pub fn can_create(self: &Rc<Self>) -> bool {
         match self.asset_type {
             AssetType::Jig => {
-                let jig_count = with_user(|user| user.jig_count).unwrap_or(0);
+                let jig_count = with_user(|user| user.total_jig_count).unwrap_or(0);
                 let can_create = paywall::can_create_jig(jig_count);
                 if !can_create {
                     paywall::dialog_limit(
@@ -165,7 +165,10 @@ impl Gallery {
                 AssetId::PlaylistId(playlist_id) => playlist_actions::copy_playlist(playlist_id).await,
                 AssetId::CourseId(course_id) => course_actions::copy_course(course_id).await,
             };
-            state.assets.lock_mut().insert_cloned(0, asset.unwrap_ji());
+            if let Ok(asset) = asset {
+                state.assets.lock_mut().insert_cloned(0, asset);
+            }
+            refresh().await;
         }));
     }
 
