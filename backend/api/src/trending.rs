@@ -116,9 +116,15 @@ pub async fn get_trending(
                 as Pin<Box<dyn Future<Output = _> + Send + Sync + 'static>>;
             let future = future.shared();
             *TRENDING_CACHE.write().unwrap() = TrendingCacheState::Loading(future.clone());
-            let jigs = future
-                .await
-                .map_err(|_| anyhow::Error::msg("failed to fetch trending jigs from algolia"))?;
+            let jigs = match future.await {
+                Ok(jigs) => jigs,
+                Err(()) => {
+                    *TRENDING_CACHE.write().unwrap() = TrendingCacheState::Init;
+                    return Err(anyhow::Error::msg(
+                        "failed to fetch trending jigs from algolia",
+                    ));
+                }
+            };
             let expires_at = expiration_time();
             *TRENDING_CACHE.write().unwrap() = TrendingCacheState::Loaded(TrendingCache {
                 expires_at,
