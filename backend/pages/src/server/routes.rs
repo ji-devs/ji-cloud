@@ -3,7 +3,7 @@ use crate::templates::{
 };
 use actix_web::{
     web::{self, ServiceConfig},
-    HttpResponse,
+    HttpRequest, HttpResponse,
 };
 
 pub fn configure(config: &mut ServiceConfig) {
@@ -12,6 +12,17 @@ pub fn configure(config: &mut ServiceConfig) {
         let mut response = HttpResponse::TemporaryRedirect();
         response.append_header(("Location", "https://www.jewishinteractive.org/plans/"));
         response.into()
+    }
+    async fn redirect_jig(req: HttpRequest) -> HttpResponse {
+        let page_kind = req.uri().path().split('/').nth(2).unwrap();
+        let location = req.uri().to_string().replacen(
+            &format!("/jig/{page_kind}/"),
+            &format!("/asset/{page_kind}/jig/"),
+            1,
+        );
+        HttpResponse::MovedPermanently()
+            .append_header(("Location", location))
+            .finish()
     }
     config
         .route("/kids/{path:.*}", web::get().to(spa::kids_template))
@@ -35,10 +46,7 @@ pub fn configure(config: &mut ServiceConfig) {
             web::get().to(spa::asset_template),
         )
         // jig route is just to redirect old urls
-        .route(
-            "/jig/{page_kind}/{path:.*}",
-            web::get().to(spa::asset_template),
-        )
+        .route("/jig/{page_kind}/{path:.*}", web::get().to(redirect_jig))
         .route("/legacy/play/{jig_id}", web::get().to(spa::legacy_template))
         .route(
             "/legacy/play/{jig_id}/{module_id}",
