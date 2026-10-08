@@ -1,4 +1,7 @@
-use crate::db::{get_course_metadata, get_jig_metadata, get_playlist_metadata, AssetMetadata};
+use crate::db::{
+    get_course_metadata, get_jig_metadata, get_playlist_metadata, jig_is_not_embeddable,
+    AssetMetadata,
+};
 use actix_web::{
     error::{ErrorForbidden, ErrorInternalServerError},
     web::{Data, Path},
@@ -6,6 +9,7 @@ use actix_web::{
 };
 use ji_core::{settings::RuntimeSettings, url_signature::verify_signed_url};
 use paseto::TimeBackend;
+use reqwest::Url;
 use serde::Deserialize;
 use shared::{
     config::RemoteTarget,
@@ -142,7 +146,13 @@ fn spa_template(
 
     let info = info.render().map_err(ErrorInternalServerError)?;
 
-    Ok(actix_web::HttpResponse::Ok().body(info))
+    let mut response = HttpResponse::Ok();
+
+    if matches!(spa, SpaPage::Asset(_) | SpaPage::Module(_, _)) {
+        response.append_header(("Vary", "Sec-Fetch-Dest, Referer"));
+    }
+
+    Ok(response.body(info))
 }
 
 pub async fn home_template(settings: Data<RuntimeSettings>) -> actix_web::Result<HttpResponse> {
@@ -180,6 +190,18 @@ pub async fn asset_template(
     path: Path<(ModuleAssetPageKind, String)>,
 ) -> actix_web::Result<HttpResponse> {
     let (page_kind, asset_path) = path.into_inner();
+
+    if let Some(AssetId::JigId(jig_id)) = asset_id_from_asset_path(&asset_path) {
+        if is_iframe(&req)
+            && !has_same_host_referrer(&req)
+            && jig_is_not_embeddable(&db, jig_id)
+                .await
+                .map_err(ErrorInternalServerError)?
+        {
+            return Err(ErrorForbidden("Embedding this JIG is not allowed"));
+        }
+    }
+
     let metadata = load_asset_spa_metadata(&settings, &db, &req, page_kind, &asset_path).await;
 
     if page_kind == ModuleAssetPageKind::Play {
@@ -235,10 +257,41 @@ pub async fn legacy_template_with_module(
 
 pub async fn module_template(
     settings: Data<RuntimeSettings>,
+    req: HttpRequest,
     path: Path<(String, ModuleAssetPageKind, String)>,
 ) -> actix_web::Result<HttpResponse> {
-    let (module_kind, page_kind, _) = path.into_inner();
+    let (module_kind, page_kind, asset_path) = path.into_inner();
+
+    if asset_path.starts_with("jig/") && (!is_iframe(&req) || !has_same_host_referrer(&req)) {
+        return Err(ErrorForbidden(
+            "JIG modules must be embedded on the same host",
+        ));
+    }
+
     spa_template(&settings, SpaPage::Module(module_kind, page_kind), None)
+}
+
+fn is_iframe(req: &HttpRequest) -> bool {
+    req.headers()
+        .get("sec-fetch-dest")
+        .map_or(false, |value| value == "iframe")
+}
+
+fn has_same_host_referrer(req: &HttpRequest) -> bool {
+    let Some(referrer) = req
+        .headers()
+        .get("referer")
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| Url::parse(value).ok())
+    else {
+        return false;
+    };
+
+    let Ok(pages_url) = Url::parse(&format!("https://{}", req.connection_info().host())) else {
+        return false;
+    };
+
+    referrer.host_str().is_some() && referrer.host_str() == pages_url.host_str()
 }
 
 async fn can_view_unsigned_play_url(

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            select exists(\n                select 1\n                from jig\n                where id = $1 and not is_embeddable\n            ) as \"is_not_embeddable!\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "is_not_embeddable!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a1bc910119d4e44022a34b5b94a6f57f262d208993b20c7c23ffb97483738194"
+}

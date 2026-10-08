@@ -16,6 +16,23 @@ pub struct AssetMetadata {
     pub cover_module_id: Option<ModuleId>,
 }
 
+pub async fn jig_is_not_embeddable(db: &PgPool, jig_id: JigId) -> sqlx::Result<bool> {
+    let row = sqlx::query!(
+        r#"
+            select exists(
+                select 1
+                from jig
+                where id = $1 and not is_embeddable
+            ) as "is_not_embeddable!"
+        "#,
+        jig_id.0,
+    )
+    .fetch_one(db)
+    .await?;
+
+    Ok(row.is_not_embeddable)
+}
+
 pub async fn get_jig_metadata(db: &PgPool, jig_id: JigId) -> sqlx::Result<Option<AssetMetadata>> {
     let row = sqlx::query!(
         r#"
