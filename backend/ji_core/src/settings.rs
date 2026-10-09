@@ -99,6 +99,9 @@ pub struct RuntimeSettings {
     /// Secret for signing/encrypting tokens.
     pub token_secret: Box<[u8; 32]>,
 
+    /// Whether pages should verify play URL signatures. Disabled by default.
+    pub enable_url_signature_verification: bool,
+
     /// How long *login* tokens are valid for (measured in seconds).
     /// * can only be set on `local`
     /// * optional, if missing it will use the server's compiled default (an indeterminate but reasonable amount of time)
@@ -141,6 +144,7 @@ impl RuntimeSettings {
             google_oauth,
             google_api_key,
             token_secret,
+            enable_url_signature_verification: false,
             login_token_valid_duration,
             blocked_countries: Vec::new(),
             stripe_secret_key,
@@ -154,6 +158,7 @@ impl RuntimeSettings {
         google_api_key: Option<String>,
         google_oauth: Option<GoogleOAuth>,
         token_secret: Box<[u8; 32]>,
+        enable_url_signature_verification: bool,
         login_token_valid_duration: Option<chrono::Duration>,
         blocked_countries: Vec<String>,
         stripe_secret_key: Option<String>,
@@ -181,6 +186,7 @@ impl RuntimeSettings {
             google_oauth,
             google_api_key,
             token_secret,
+            enable_url_signature_verification,
             login_token_valid_duration,
             blocked_countries,
             stripe_secret_key,
@@ -756,6 +762,12 @@ impl SettingsManager {
 
         let pixabay_search_key = self.get_optional_secret(keys::PIXABAY_SEARCH_KEY).await?;
 
+        let enable_url_signature_verification = self
+            .get_optional_secret(keys::ENABLE_URL_SIGNATURE_VERIFICATION)
+            .await?
+            .as_deref()
+            .map_or(false, |value| ["true", "1", "y"].contains(&value));
+
         let google_api_key = self.get_optional_secret(keys::GOOGLE_API_KEY).await?;
 
         let login_token_valid_duration = match self.remote_target {
@@ -793,6 +805,7 @@ impl SettingsManager {
             google_api_key,
             google_oauth,
             token_secret,
+            enable_url_signature_verification,
             login_token_valid_duration,
             blocked_countries,
             self.stripe_secret_key().await?,

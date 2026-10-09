@@ -155,6 +155,9 @@ pub mod algolia {
 /// Must be 32 bytes of hex
 pub const TOKEN_SECRET: &str = "TOKEN_SECRET";
 
+/// Enable play URL signature verification. Defaults to false.
+pub const ENABLE_URL_SIGNATURE_VERIFICATION: &str = "ENABLE_URL_SIGNATURE_VERIFICATION";
+
 /// How long *login* tokens are valid for (measured in seconds).
 /// This environment variable can only be set on `local`
 /// This environment variable is optional, if missing it will use the server's compiled default (an indeterminate but reasonable amount of time)

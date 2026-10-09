@@ -204,16 +204,19 @@ pub async fn asset_template(
 
     let metadata = load_asset_spa_metadata(&settings, &db, &req, page_kind, &asset_path).await;
 
-    if page_kind == ModuleAssetPageKind::Play {
+    let debug = req
+        .query_string()
+        .split('&')
+        .any(|param| param == "debug=1");
+
+    if (settings.enable_url_signature_verification || debug)
+        && page_kind == ModuleAssetPageKind::Play
+    {
         let path_and_query = req
             .uri()
             .path_and_query()
             .map(|pq| pq.as_str())
             .unwrap_or(req.uri().path());
-        let debug = req
-            .query_string()
-            .split('&')
-            .any(|param| param == "debug=1");
         let path_and_query = if debug {
             // Manually added debug flags are not part of the signed URL.
             let query = req
