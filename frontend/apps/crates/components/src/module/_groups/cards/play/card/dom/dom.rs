@@ -1,10 +1,11 @@
-use crate::audio::mixer::AUDIO_MIXER;
+use crate::audio::mixer::{AudioHandle, AUDIO_MIXER};
 use crate::module::_groups::cards::lookup::Side;
 use dominator::{clone, html, Dom, DomBuilder};
 use shared::domain::module::body::{
     _groups::cards::{Card, Mode},
     ModeExt,
 };
+use std::{cell::RefCell, rc::Rc};
 use utils::prelude::*;
 use web_sys::HtmlElement;
 
@@ -15,7 +16,7 @@ pub struct CardOptions<'a> {
     pub back_card: Option<&'a Card>,
     pub flip_on_hover: bool,
     pub flipped: bool,
-    pub play_audio_on_click: bool,
+    pub play_audio_on_click: Option<Rc<RefCell<Option<AudioHandle>>>>,
     pub transparent: bool,
     pub hidden: bool,
     pub simple_transform: Option<SimpleTransform>,
@@ -49,7 +50,7 @@ impl<'a> CardOptions<'a> {
             back_card: None,
             flip_on_hover: false,
             flipped: false,
-            play_audio_on_click: false,
+            play_audio_on_click: None,
             transparent: false,
             hidden: false,
             simple_transform: None,
@@ -141,12 +142,16 @@ where
         .apply_if(mixin.is_some(), |dom| {
             (mixin.unwrap_ji()) (dom)
         })
-        .apply_if(play_audio_on_click, clone!(card => move |dom| {
+        .apply_if(play_audio_on_click.is_some(), clone!(card => move |dom| {
+            let audio_handle = play_audio_on_click.unwrap_ji();
+
             dom.event(clone!(card => move |_evt: events::Click| {
                 if let Some(audio) = &card.audio {
-                    AUDIO_MIXER.with(move |mixer| {
-                        mixer.play_oneshot(audio.into());
+                    AUDIO_MIXER.with(|mixer| {
+                        *audio_handle.borrow_mut() = Some(mixer.play(audio.into(), false));
                     });
+                } else {
+                    *audio_handle.borrow_mut() = None;
                 }
             }))
         }))

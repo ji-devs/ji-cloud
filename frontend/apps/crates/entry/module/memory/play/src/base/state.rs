@@ -14,16 +14,19 @@ use shared::{
 };
 
 use super::card::state::*;
+use components::audio::mixer::AudioHandle;
 use components::module::{_common::play::prelude::*, _groups::cards::lookup::Side};
 use futures::future::join_all;
 use futures_signals::signal::{self, Mutable, ReadOnlyMutable, Signal, SignalExt};
 use gloo_timers::future::TimeoutFuture;
 use rand::prelude::*;
+use std::cell::RefCell;
 use std::future::Future;
 use std::rc::Rc;
 use utils::prelude::*;
 
 pub struct Base {
+    pub audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub module_id: ModuleId,
     pub stable_module_id: StableModuleId,
     pub mode: Mode,
@@ -123,6 +126,7 @@ impl Base {
         }
 
         Rc::new(Self {
+            audio_handle: Default::default(),
             module_id,
             stable_module_id,
             mode: content.base.mode,

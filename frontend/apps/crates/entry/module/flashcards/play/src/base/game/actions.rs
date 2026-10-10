@@ -18,6 +18,8 @@ use utils::prelude::*;
 
 impl Game {
     pub fn next(&self) {
+        *self.audio_handle.borrow_mut() = None;
+
         // Update rounds played before anything else happens so that we can
         // be sure that it represent the actual amount of pairs the student
         // has played through.
@@ -67,15 +69,21 @@ impl Game {
         if state.gate.get() == Gate::Waiting {
             // Play card flipping sound effect
             AUDIO_MIXER.with(clone!(state => move |mixer| {
-                mixer.play_oneshot_on_ended(
+                let audio = state.current.get_cloned().other.audio;
+                let audio_handle = Rc::clone(&state.audio_handle);
+
+                *state.audio_handle.borrow_mut() = Some(mixer.play_on_ended(
                     // Then play the cards audio clip
                     AudioPath::new_cdn(FLIPPED_AUDIO_EFFECT.to_string()),
+                    false,
                     move || {
-                        if let Some(audio) = &state.current.get_cloned().other.audio {
-                            AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.into()));
+                        if let Some(audio) = &audio {
+                            AUDIO_MIXER.with(|mixer| {
+                                *audio_handle.borrow_mut() = Some(mixer.play(audio.into(), false));
+                            });
                         }
                     }
-                )
+                ));
             }));
 
             state.animation_loader.load(clone!(state => async move {

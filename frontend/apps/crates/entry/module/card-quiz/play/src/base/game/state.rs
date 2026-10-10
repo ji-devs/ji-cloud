@@ -1,4 +1,5 @@
 use crate::base::state::Base;
+use components::audio::mixer::AudioHandle;
 use components::module::_groups::cards::lookup::Side;
 use futures_signals::signal::Mutable;
 use rand::prelude::*;
@@ -11,6 +12,7 @@ use utils::prelude::*;
 
 pub struct Game {
     pub base: Rc<Base>,
+    pub audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub rng: RefCell<ThreadRng>,
     pub remaining: RefCell<Vec<CardPairId>>,
     pub used: RefCell<Vec<CardPairId>>,
@@ -46,6 +48,7 @@ impl Game {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
         let _self = Rc::new(Self {
             base,
+            audio_handle: Default::default(),
             remaining: RefCell::new(Vec::new()),
             used: RefCell::new(Vec::new()),
             rng: RefCell::new(thread_rng()),

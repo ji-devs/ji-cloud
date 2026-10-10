@@ -24,6 +24,8 @@ use wasm_bindgen_futures::spawn_local;
 
 impl Game {
     pub fn next(state: Rc<Self>) {
+        *state.audio_handle.borrow_mut() = None;
+
         let rounds_played = state.rounds_played.load(Ordering::SeqCst);
 
         let has_ended = {
@@ -116,21 +118,22 @@ impl Game {
                     if let Some(current) = current {
                         let card_id = current.others.iter().find(|card_id| card_id.pair_id == pair_id);
                         if let Some(card_id) = card_id {
-                            let play_feedback = |mixer: &AudioMixer| {
+                            let audio_handle = Rc::clone(&state.audio_handle);
+                            let play_feedback = clone!(audio_handle => move |mixer: &AudioMixer| {
                                 let audio_path: AudioPath<'_> = mixer.get_random_positive().into();
 
-                                mixer.play_oneshot(audio_path);
-                            };
+                                *audio_handle.borrow_mut() = Some(mixer.play(audio_path, false));
+                            });
 
                             // Play the card audio first if it exists and then the feedback effect.
                             if let Some(audio) = &card_id.card.audio {
                                 AUDIO_MIXER.with(move |mixer| {
-                                    mixer.play_oneshot_on_ended(audio.into(), move || {
-                                        AUDIO_MIXER.with(play_feedback);
-                                    })
+                                    *audio_handle.borrow_mut() = Some(mixer.play_on_ended(audio.into(), false, move || {
+                                        AUDIO_MIXER.with(&play_feedback);
+                                    }));
                                 });
                             } else {
-                                AUDIO_MIXER.with(play_feedback);
+                                AUDIO_MIXER.with(&play_feedback);
                             }
                         }
                     }
@@ -147,19 +150,19 @@ impl Game {
                         let audio_path: AudioPath<'_> = mixer.get_random_negative().into();
 
                         // Play the negative effect and then the card audio
-                        mixer.play_oneshot_on_ended(audio_path, clone!(state => move || {
+                        *state.audio_handle.borrow_mut() = Some(mixer.play_on_ended(audio_path, false, clone!(state => move || {
                             let current = state.current.get_cloned();
                             if let Some(current) = current {
                                 let card_id = current.others.iter().find(|card_id| card_id.pair_id == pair_id);
                                 if let Some(card_id) = card_id {
                                     if let Some(audio) = &card_id.card.audio {
                                         AUDIO_MIXER.with(|mixer| {
-                                            mixer.play_oneshot(audio.into())
+                                            *state.audio_handle.borrow_mut() = Some(mixer.play(audio.into(), false));
                                         });
                                     }
                                 }
                             }
-                        }))
+                        })));
                     });
                     phase.set(CurrentPhase::Wrong(pair_id));
                     state.base.play_report.lock_mut().rounds.last_mut().unwrap_ji().failed_tries += 1;

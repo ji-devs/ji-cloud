@@ -1,4 +1,4 @@
-use dominator::{html, Dom};
+use dominator::{clone, html, Dom};
 use shared::domain::module::body::_groups::cards::get_longest_card_text_length;
 
 use super::{
@@ -11,6 +11,9 @@ use futures_signals::signal::SignalExt;
 
 pub fn render(state: Rc<Game>) -> Dom {
     html!("matching-main", {
+        .after_removed(clone!(state => move |_| {
+            *state.audio_handle.borrow_mut() = None;
+        }))
         .prop("slot", "main")
         .children_signal_vec(
             state.current.signal_cloned()

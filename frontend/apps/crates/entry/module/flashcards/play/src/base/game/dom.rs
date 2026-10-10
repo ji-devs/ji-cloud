@@ -29,14 +29,21 @@ pub fn render(state: Rc<Game>) -> Dom {
         }
     };
     html!("flashcards-main", {
+        .after_removed(clone!(state => move |_| {
+            *state.audio_handle.borrow_mut() = None;
+        }))
         .prop("slot", "main")
-        .future(audio_signal.for_each(|audio| {
+        .future(audio_signal.for_each(clone!(state => move |audio| {
             if let Some(audio) = audio {
-                AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.into()));
+                AUDIO_MIXER.with(|mixer| {
+                    *state.audio_handle.borrow_mut() = Some(mixer.play(audio.into(), false));
+                });
+            } else {
+                *state.audio_handle.borrow_mut() = None;
             }
 
             async {}
-        }))
+        })))
         .children_signal_vec(
             state.current.signal_cloned()
                 .map(clone!(state => move |current| {
