@@ -1,17 +1,23 @@
 use super::{AudioHandleId, AudioMessageFromTop, AudioMessageToTop, PlayAudioMessage, AUDIO_MIXER};
 use dominator::clone;
-use gloo_timers::future::TimeoutFuture;
 use itertools::Itertools;
 use std::{cell::RefCell, collections::HashMap};
 use utils::{js_wrappers::set_event_listener, prelude::*};
-use wasm_bindgen_futures::spawn_local;
+use wasm_bindgen_futures::{spawn_local, JsFuture};
 use web_sys::{AudioContext, Event, HtmlAudioElement};
 
 const EMPTY_AUDIO_URL: &str = "data:audio/mpeg;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAABAAADQgD///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8AAAA6TEFNRTMuMTAwAc0AAAAAAAAAABSAJAJAQgAAgAAAA0LqRHv+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAADwAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
 
 thread_local! {
-    // using vec of tuples instead of hashmap because HtmlAudioElement doesn't implement Hash
-    static ENDED_CALLBACKS: RefCell<Vec<(HtmlAudioElement, Box<dyn FnMut()>)>> = Default::default();
+    // Using a vec because HtmlAudioElement does not implement Hash.
+    static ENDED_CALLBACKS: RefCell<Vec<EndedCallback>> = Default::default();
+}
+
+struct EndedCallback {
+    el: HtmlAudioElement,
+    handle_id: AudioHandleId,
+    settle_on_error: bool,
+    callback: Box<dyn FnMut()>,
 }
 
 pub struct AudioMixerTop {
@@ -59,8 +65,8 @@ impl AudioMixerTop {
             }
             AudioMessageToTop::PlayAll { except } => {
                 for (handle, el) in self.active.borrow().iter() {
-                    if !except.contains(handle) {
-                        let _ = el.play();
+                    if !except.contains(handle) && !el.ended() {
+                        play_audio_element(el, handle);
                     }
                 }
             }
@@ -86,34 +92,33 @@ impl AudioMixerTop {
         el.set_src(&audio_message.url);
         el.set_loop(audio_message.is_loop);
         ENDED_CALLBACKS.with(|ended_callbacks| {
-            ended_callbacks
-                .borrow_mut()
-                .push((el.clone(), Box::new(on_ended)));
+            ended_callbacks.borrow_mut().push(EndedCallback {
+                el: el.clone(),
+                handle_id: audio_message.handle_id.clone(),
+                settle_on_error: audio_message.settle_on_error,
+                callback: Box::new(on_ended),
+            });
         });
 
-        let _ = el.play();
-        self.active.borrow_mut().insert(audio_message.handle_id, el);
+        self.active
+            .borrow_mut()
+            .insert(audio_message.handle_id.clone(), el.clone());
+        play_audio_element(&el, &audio_message.handle_id);
     }
 
     fn handle_dropped(&self, handle_id: AudioHandleId) {
-        let mut active = self.active.borrow_mut();
-        let el = active.remove(&handle_id);
-        if let Some(el) = &el {
-            spawn_local(clone!(el => async move {
-                // We need to make sure that the audio has stopped playing once the handle was "dropped"
-                // otherwise it'll keep playing even while in the inactive queue.
-                let _ = el.set_src(EMPTY_AUDIO_URL);
-                // wait for next cycle as ended_callbacks is currently locked because handle_dropped is called from within a callback
-                TimeoutFuture::new(0).await;
-                ENDED_CALLBACKS.with(clone!(el => move |ended_callbacks| {
-                    let mut ended_callbacks = ended_callbacks.borrow_mut();
-                    if let Some(index) = ended_callbacks.iter().position(|(el2, _)| el2 == &el) {
-                        let _ = ended_callbacks.remove(index);
-                    }
-                }));
-            }));
-        }
+        let el = self.active.borrow_mut().remove(&handle_id);
         if let Some(el) = el {
+            let callback = ENDED_CALLBACKS.with(|ended_callbacks| {
+                let mut ended_callbacks = ended_callbacks.borrow_mut();
+                ended_callbacks
+                    .iter()
+                    .position(|entry| entry.handle_id == handle_id)
+                    .map(|index| ended_callbacks.remove(index))
+            });
+            drop(callback);
+
+            el.set_src(EMPTY_AUDIO_URL);
             self.inactive.borrow_mut().push(el);
         }
     }
@@ -128,7 +133,7 @@ impl AudioMixerTop {
     fn play_handle_called(&self, handle_id: AudioHandleId) {
         let active = self.active.borrow();
         if let Some(audio) = active.get(&handle_id) {
-            let _ = audio.play();
+            play_audio_element(audio, &handle_id);
         }
     }
 
@@ -158,22 +163,62 @@ fn create_audio_element_on_context(context: &AudioContext) -> HtmlAudioElement {
         &el,
         "ended",
         Box::new(clone!(el => move |_: Event| {
-            ENDED_CALLBACKS.with(clone!(el => move |ended_callbacks| {
-                let mut ended_callbacks = ended_callbacks.borrow_mut();
-                let callback = ended_callbacks.iter_mut().find_map(|(el2, callback)| {
-                    if el2 == &el {
-                        Some(callback)
-                    } else {
-                        None
-                    }
-                });
-                if let Some(callback) = callback {
-                    (callback)();
-                }
-            }));
+            if el.ended() {
+                run_ended_callback(|entry| entry.el == el);
+            }
+        })),
+    );
+    set_event_listener(
+        &el,
+        "error",
+        Box::new(clone!(el => move |_: Event| {
+            if el.error().is_some() {
+                run_ended_callback(|entry| entry.el == el && entry.settle_on_error);
+            }
         })),
     );
     el
+}
+
+fn run_ended_callback(matches: impl Fn(&EndedCallback) -> bool) {
+    let callback = ENDED_CALLBACKS.with(|ended_callbacks| {
+        let mut ended_callbacks = ended_callbacks.borrow_mut();
+        ended_callbacks
+            .iter()
+            .position(matches)
+            .map(|index| ended_callbacks.remove(index))
+    });
+
+    if let Some(mut entry) = callback {
+        (entry.callback)();
+    }
+}
+
+fn play_audio_element(el: &HtmlAudioElement, handle_id: &AudioHandleId) {
+    let result = el.play();
+    let settle_on_error = ENDED_CALLBACKS.with(|ended_callbacks| {
+        ended_callbacks
+            .borrow()
+            .iter()
+            .any(|entry| entry.handle_id == *handle_id && entry.settle_on_error)
+    });
+
+    if settle_on_error {
+        spawn_local(clone!(handle_id => async move {
+            let result = match result {
+                Ok(promise) => JsFuture::from(promise).await,
+                Err(error) => Err(error),
+            };
+
+            if let Err(error) = result {
+                // Pausing while play is pending aborts the promise, but playback can resume.
+                let name = js_sys::Reflect::get(&error, &"name".into()).ok();
+                if name.and_then(|name| name.as_string()).as_deref() != Some("AbortError") {
+                    run_ended_callback(|entry| entry.handle_id == handle_id);
+                }
+            }
+        }));
+    }
 }
 
 fn create_audio_context() -> AudioContext {

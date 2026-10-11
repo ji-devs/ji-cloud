@@ -38,6 +38,8 @@ impl Game {
                 state.base.settings.n_rounds
             );
         } else {
+            *state.audio_handle.borrow_mut() = None;
+
             let info = state.base.play_report.lock_ref().clone();
             let info = JigPlaySessionModule::Matching(info);
             let msg = IframeAction::new(ModuleToJigPlayerMessage::AddCodeSessionInfo(info));

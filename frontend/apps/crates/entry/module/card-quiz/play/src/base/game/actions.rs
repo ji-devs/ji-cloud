@@ -5,7 +5,7 @@ use super::state::*;
 use std::sync::atomic::Ordering;
 
 use components::{
-    audio::mixer::{AudioMixer, AudioPath, AUDIO_MIXER},
+    audio::mixer::{AudioPath, AUDIO_MIXER},
     module::_common::play::{
         prelude::{BaseExt, ModuleEnding, ModulePlayPhase},
         scoring::MAX_POINTS_PER_ITEM,
@@ -24,6 +24,8 @@ use wasm_bindgen_futures::spawn_local;
 
 impl Game {
     pub fn next(state: Rc<Self>) {
+        *state.audio_handle.borrow_mut() = None;
+
         let rounds_played = state.rounds_played.load(Ordering::SeqCst);
 
         let has_ended = {
@@ -109,68 +111,104 @@ impl Game {
     }
 
     pub fn evaluate(state: Rc<Self>, pair_id: usize, phase: Mutable<CurrentPhase>) {
-        if phase.get() == CurrentPhase::Waiting {
-            spawn_local(clone!(state, pair_id, phase => async move {
-                if pair_id == state.current.lock_ref().as_ref().unwrap_ji().target.pair_id {
-                    let current = state.current.get_cloned();
-                    if let Some(current) = current {
-                        let card_id = current.others.iter().find(|card_id| card_id.pair_id == pair_id);
-                        if let Some(card_id) = card_id {
-                            let play_feedback = |mixer: &AudioMixer| {
-                                let audio_path: AudioPath<'_> = mixer.get_random_positive().into();
+        if phase.get() != CurrentPhase::Waiting {
+            return;
+        }
 
-                                mixer.play_oneshot(audio_path);
-                            };
+        let Some(current) = state.current.get_cloned() else {
+            return;
+        };
 
-                            // Play the card audio first if it exists and then the feedback effect.
-                            if let Some(audio) = &card_id.card.audio {
-                                AUDIO_MIXER.with(move |mixer| {
-                                    mixer.play_oneshot_on_ended(audio.into(), move || {
-                                        AUDIO_MIXER.with(play_feedback);
-                                    })
-                                });
-                            } else {
-                                AUDIO_MIXER.with(play_feedback);
+        if pair_id == current.target.pair_id {
+            phase.set(CurrentPhase::Correct(pair_id));
+
+            let points = calculate_point_count(
+                state
+                    .base
+                    .play_report
+                    .lock_mut()
+                    .rounds
+                    .last()
+                    .unwrap_ji()
+                    .failed_tries as u32,
+            );
+            let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
+                .try_post_message_to_player();
+
+            let transition_state = state.clone();
+            state.transition.load(async move {
+                let state = transition_state;
+                let audio_sequence = async {
+                    if let Some(card_id) = current
+                        .others
+                        .iter()
+                        .find(|card_id| card_id.pair_id == pair_id)
+                    {
+                        if let Some(audio) = &card_id.card.audio {
+                            let ended = AUDIO_MIXER.with(|mixer| {
+                                let (handle, ended) = mixer.play_until_ended(audio.into());
+                                *state.audio_handle.borrow_mut() = Some(handle);
+                                ended
+                            });
+
+                            if ended.await.is_err() {
+                                return;
                             }
                         }
+
+                        let ended = AUDIO_MIXER.with(|mixer| {
+                            let (handle, ended) =
+                                mixer.play_until_ended(mixer.get_random_positive().into());
+                            *state.audio_handle.borrow_mut() = Some(handle);
+                            ended
+                        });
+
+                        let _ = ended.await;
                     }
+                };
 
-                    phase.set(CurrentPhase::Correct(pair_id));
-                    let points = calculate_point_count(state.base.play_report.lock_mut().rounds.last().unwrap_ji().failed_tries as u32);
-                    let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
-                        .try_post_message_to_player();
+                futures::future::join(
+                    TimeoutFuture::new(crate::config::SUCCESS_TIME),
+                    audio_sequence,
+                )
+                .await;
 
-                    TimeoutFuture::new(crate::config::SUCCESS_TIME).await;
+                if state
+                    .current
+                    .get_cloned()
+                    .is_some_and(|active| Rc::ptr_eq(&active, &current))
+                {
                     Self::next(state);
-                } else {
-                    AUDIO_MIXER.with(|mixer| {
-                        let audio_path: AudioPath<'_> = mixer.get_random_negative().into();
+                }
+            });
+        } else {
+            spawn_local(clone!(state, pair_id, phase => async move {
+                AUDIO_MIXER.with(|mixer| {
+                    let audio_path: AudioPath<'_> = mixer.get_random_negative().into();
 
-                        // Play the negative effect and then the card audio
-                        mixer.play_oneshot_on_ended(audio_path, clone!(state => move || {
-                            let current = state.current.get_cloned();
-                            if let Some(current) = current {
-                                let card_id = current.others.iter().find(|card_id| card_id.pair_id == pair_id);
-                                if let Some(card_id) = card_id {
-                                    if let Some(audio) = &card_id.card.audio {
-                                        AUDIO_MIXER.with(|mixer| {
-                                            mixer.play_oneshot(audio.into())
-                                        });
-                                    }
+                    // Play the negative effect and then the card audio
+                    *state.audio_handle.borrow_mut() = Some(mixer.play_on_ended(audio_path, false, clone!(state => move || {
+                        let current = state.current.get_cloned();
+                        if let Some(current) = current {
+                            let card_id = current.others.iter().find(|card_id| card_id.pair_id == pair_id);
+                            if let Some(card_id) = card_id {
+                                if let Some(audio) = &card_id.card.audio {
+                                    AUDIO_MIXER.with(|mixer| {
+                                        *state.audio_handle.borrow_mut() = Some(mixer.play(audio.into(), false));
+                                    });
                                 }
                             }
-                        }))
-                    });
-                    phase.set(CurrentPhase::Wrong(pair_id));
-                    state.base.play_report.lock_mut().rounds.last_mut().unwrap_ji().failed_tries += 1;
-                    // We should be able to safely assume that current is Some(_), but
-                    // double-check here anyway because assumptions are bad.
-                    if let Some(current) = &*state.current.lock_ref() {
-                        current.incorrect_choices.borrow_mut().push(pair_id);
-                    }
-                    phase.set(CurrentPhase::Waiting);
+                        }
+                    })));
+                });
+                phase.set(CurrentPhase::Wrong(pair_id));
+                state.base.play_report.lock_mut().rounds.last_mut().unwrap_ji().failed_tries += 1;
+                // We should be able to safely assume that current is Some(_), but
+                // double-check here anyway because assumptions are bad.
+                if let Some(current) = &*state.current.lock_ref() {
+                    current.incorrect_choices.borrow_mut().push(pair_id);
                 }
-
+                phase.set(CurrentPhase::Waiting);
             }));
         }
     }

@@ -1,5 +1,6 @@
 use super::actions::*;
 use crate::base::state::Base;
+use components::audio::mixer::AudioHandle;
 use components::module::_groups::cards::lookup::Side;
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
@@ -12,6 +13,7 @@ use utils::prelude::*;
 
 pub struct Game {
     pub base: Rc<Base>,
+    pub audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub rng: RefCell<ThreadRng>,
     pub deck: RefCell<Vec<CardPair>>,
     pub rounds_played: AtomicUsize,
@@ -43,6 +45,7 @@ impl Game {
 
         Self {
             base,
+            audio_handle: Default::default(),
             deck: RefCell::new(deck),
             rounds_played: AtomicUsize::new(0),
             rng: RefCell::new(rng),

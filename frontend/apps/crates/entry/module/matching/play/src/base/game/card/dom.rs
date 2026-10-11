@@ -21,7 +21,7 @@ pub fn render_top(state: Rc<CardTop>, top_text_length: usize, bottom_text_length
             let mut options = CardOptions::new(card, theme_id, mode, side, Size::Matching);
             options.card_text_len = Some(top_text_length);
             options.flipped = true;
-            options.play_audio_on_click = true;
+            options.play_audio_on_click = Some(Rc::clone(&state.game.audio_handle));
             render_card(options)
         })
         .child_signal(state.phase.signal_cloned().map(clone!(state, theme_id => move |phase| {

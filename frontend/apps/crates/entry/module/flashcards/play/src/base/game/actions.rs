@@ -18,6 +18,9 @@ use utils::prelude::*;
 
 impl Game {
     pub fn next(&self) {
+        self.animation_loader.cancel();
+        *self.audio_handle.borrow_mut() = None;
+
         // Update rounds played before anything else happens so that we can
         // be sure that it represent the actual amount of pairs the student
         // has played through.
@@ -38,8 +41,6 @@ impl Game {
         log::info!("{rounds_played} >= {max_rounds}");
 
         if !has_ended {
-            //Cancel flip if it exists
-            self.animation_loader.cancel();
             self.gate.set_neq(Gate::Waiting);
 
             //borrow-checker fails with if/else here
@@ -65,22 +66,47 @@ impl Game {
 
     pub fn flip(state: Rc<Self>) {
         if state.gate.get() == Gate::Waiting {
-            // Play card flipping sound effect
-            AUDIO_MIXER.with(clone!(state => move |mixer| {
-                mixer.play_oneshot_on_ended(
-                    // Then play the cards audio clip
-                    AudioPath::new_cdn(FLIPPED_AUDIO_EFFECT.to_string()),
-                    move || {
-                        if let Some(audio) = &state.current.get_cloned().other.audio {
-                            AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.into()));
-                        }
-                    }
-                )
-            }));
+            state.gate.set(Gate::Flipping);
+            let audio = state.current.get_cloned().other.audio;
 
             state.animation_loader.load(clone!(state => async move {
-                state.gate.set(Gate::Flipping);
-                TimeoutFuture::new(crate::config::SHOW_TIME).await;
+                let narration = async {
+                    let ended = AUDIO_MIXER.with(|mixer| {
+                        let (handle, ended) = mixer.play_until_ended(AudioPath::new_cdn(
+                            FLIPPED_AUDIO_EFFECT.to_string(),
+                        ));
+                        *state.audio_handle.borrow_mut() = Some(handle);
+                        ended
+                    });
+
+                    if ended.await.is_err() {
+                        return false;
+                    }
+
+                    if let Some(audio) = audio {
+                        let ended = AUDIO_MIXER.with(|mixer| {
+                            let (handle, ended) = mixer.play_until_ended(audio.into());
+                            *state.audio_handle.borrow_mut() = Some(handle);
+                            ended
+                        });
+
+                        if ended.await.is_err() {
+                            return false;
+                        }
+                    }
+
+                    true
+                };
+
+                let (audio_finished, _) = futures::join!(
+                    narration,
+                    TimeoutFuture::new(crate::config::SHOW_TIME),
+                );
+
+                if !audio_finished {
+                    return;
+                }
+
                 state.gate.set(Gate::FinishingFlip);
                 TimeoutFuture::new(crate::config::FLIP_TIME).await;
                 state.gate.set(Gate::Waiting);

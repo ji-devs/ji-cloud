@@ -1,4 +1,5 @@
 use dominator::{clone, DomBuilder};
+use futures::channel::oneshot;
 use gloo_timers::callback::Timeout;
 use rand::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -94,6 +95,7 @@ impl AudioMixer {
             handle_id: handle_id.clone(),
             url: path.url(),
             auto_play: true,
+            settle_on_error: false,
             is_loop: false,
         };
         self.stash_callback_and_play(audio_message, move || {
@@ -113,6 +115,7 @@ impl AudioMixer {
             handle_id: handle_id.clone(),
             url: path.url(),
             auto_play: true,
+            settle_on_error: false,
             is_loop: false,
         };
         self.stash_callback_and_play(
@@ -132,6 +135,7 @@ impl AudioMixer {
             handle_id: handle.id().clone(),
             url: path.url(),
             auto_play: true,
+            settle_on_error: false,
             is_loop,
         };
         self.stash_callback_and_play(audio_message, || {});
@@ -152,10 +156,32 @@ impl AudioMixer {
             handle_id: handle.id().clone(),
             url: path.url(),
             auto_play: true,
+            settle_on_error: false,
             is_loop,
         };
         self.stash_callback_and_play(audio_message, on_ended);
         handle
+    }
+
+    pub fn play_until_ended(&self, path: AudioPath<'_>) -> (AudioHandle, oneshot::Receiver<()>) {
+        let handle = AudioHandle::new();
+        let (sender, receiver) = oneshot::channel();
+        let mut sender = Some(sender);
+        let audio_message = PlayAudioMessage {
+            handle_id: handle.id(),
+            url: path.url(),
+            auto_play: true,
+            is_loop: false,
+            settle_on_error: true,
+        };
+
+        self.stash_callback_and_play(audio_message, move || {
+            if let Some(sender) = sender.take() {
+                let _ = sender.send(());
+            }
+        });
+
+        (handle, receiver)
     }
 
     pub fn play_all(&self) {
@@ -211,10 +237,8 @@ impl AudioMixer {
         F: FnMut() + 'static,
     {
         let id = audio_message.handle_id.clone();
+        self.callbacks.borrow_mut().insert(id, Box::new(on_ended));
         self.run_audio_message(AudioMessageToTop::Play(audio_message));
-
-        let mut callbacks = self.callbacks.borrow_mut();
-        callbacks.insert(id.clone(), Box::new(on_ended));
     }
 
     pub(super) fn done_playing(&self, audio_handle_id: AudioHandleId) {
@@ -287,6 +311,11 @@ impl AudioMixer {
 
     // would probably have named this handle_audio_message, but can make it look like it's related to AudioHandle
     pub(super) fn run_audio_message(&self, message: AudioMessageToTop) {
+        if let AudioMessageToTop::HandleDropped(handle_id) = &message {
+            let callback = self.callbacks.borrow_mut().remove(handle_id);
+            drop(callback);
+        }
+
         match &self.kind {
             AudioMixerKind::Top(top) => {
                 top.run_audio_message(message);
@@ -365,6 +394,8 @@ pub(super) struct PlayAudioMessage {
     pub url: String,
     pub auto_play: bool,
     pub is_loop: bool,
+    #[serde(default)]
+    pub settle_on_error: bool,
     pub handle_id: AudioHandleId,
 }
 

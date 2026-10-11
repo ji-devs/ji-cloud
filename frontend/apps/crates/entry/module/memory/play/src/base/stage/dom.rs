@@ -10,6 +10,8 @@ pub fn render(state: Rc<Base>) -> Dom {
     html!("empty-fragment", {
         .future(state.all_cards_ended_signal().dedupe().for_each(clone!(state => move |ended| {
             if ended {
+                *state.audio_handle.borrow_mut() = None;
+
                 if state.feedback.has_content() {
                     state
                         .feedback_signal

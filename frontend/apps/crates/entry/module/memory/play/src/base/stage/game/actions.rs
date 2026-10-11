@@ -6,7 +6,6 @@ use components::{
 };
 use dominator::clone;
 use gloo_timers::future::TimeoutFuture;
-use shared::domain::module::body::_groups::cards::Card;
 use std::rc::Rc;
 use wasm_bindgen_futures::spawn_local;
 
@@ -19,16 +18,21 @@ pub fn card_click(state: Rc<Base>, id: usize) -> Option<(usize, usize)> {
 
             // Play the flipping sound effect
             AUDIO_MIXER.with(clone!(state => move |mixer| {
-                mixer.play_oneshot_on_ended(
+                *state.audio_handle.borrow_mut() = Some(mixer.play_on_ended(
                     // Then play the cards audio clip
                     AudioPath::new_cdn(FLIPPED_AUDIO_EFFECT.to_string()),
-                    move || {
+                    false,
+                    clone!(state => move || {
                         let card_state = state.cards.iter().find(|c| c.id == id);
                         if let Some(card_state) = card_state {
-                            play_card_audio(&card_state.card);
+                            if let Some(audio) = &card_state.card.audio {
+                                AUDIO_MIXER.with(|mixer| {
+                                    *state.audio_handle.borrow_mut() = Some(mixer.play(audio.into(), false));
+                                });
+                            }
                         }
-                    }
-                )
+                    })
+                ));
             }));
             None
         }
@@ -49,25 +53,27 @@ pub fn evaluate(state: Rc<Base>, id_1: usize, id_2: usize) {
         let play_effect = |positive: bool| {
             let card_state = state.cards.iter().find(|c| c.id == id_1);
             if let Some(card_state) = card_state {
-                let play_feedback = move |mixer: &AudioMixer| {
+                let audio_handle = Rc::clone(&state.audio_handle);
+                let play_feedback = clone!(audio_handle => move |mixer: &AudioMixer| {
                     let audio_path: AudioPath<'_> = if positive {
                         mixer.get_random_positive().into()
                     } else {
                         mixer.get_random_negative().into()
                     };
 
-                    mixer.play_oneshot(audio_path);
-                };
+                    *audio_handle.borrow_mut() = Some(mixer.play(audio_path, false));
+                });
 
                 // Play the card audio first if it exists, and then the feedback effect
                 if let Some(audio) = &card_state.card.audio {
                     AUDIO_MIXER.with(|mixer| {
-                        mixer.play_oneshot_on_ended(audio.into(), move || {
-                            AUDIO_MIXER.with(play_feedback);
-                        });
+                        *audio_handle.borrow_mut() =
+                            Some(mixer.play_on_ended(audio.into(), false, move || {
+                                AUDIO_MIXER.with(&play_feedback);
+                            }));
                     });
                 } else {
-                    AUDIO_MIXER.with(play_feedback);
+                    AUDIO_MIXER.with(&play_feedback);
                 }
             }
         };
@@ -84,7 +90,35 @@ pub fn evaluate(state: Rc<Base>, id_1: usize, id_2: usize) {
                 card.found_index.set(Some(found_pairs_index));
             }
 
-            play_effect(true);
+            if state.found_pairs.lock_ref().len() * 2 == state.cards.len() {
+                let play_until_ended = |path: AudioPath<'_>| {
+                    AUDIO_MIXER.with(|mixer| {
+                        let (handle, ended) = mixer.play_until_ended(path);
+                        *state.audio_handle.borrow_mut() = Some(handle);
+                        ended
+                    })
+                };
+
+                if let Some(audio) = state
+                    .cards
+                    .iter()
+                    .find(|card| card.id == id_1)
+                    .and_then(|card| card.card.audio.as_ref())
+                {
+                    if play_until_ended(audio.into()).await.is_err() {
+                        return;
+                    }
+                }
+
+                let feedback_ended =
+                    AUDIO_MIXER.with(|mixer| play_until_ended(mixer.get_random_positive().into()));
+
+                if feedback_ended.await.is_err() {
+                    return;
+                }
+            } else {
+                play_effect(true);
+            }
         } else {
             play_effect(false);
             TimeoutFuture::new(2_000).await;
@@ -92,10 +126,4 @@ pub fn evaluate(state: Rc<Base>, id_1: usize, id_2: usize) {
 
         state.flip_state.set(FlipState::None);
     })
-}
-
-fn play_card_audio(card: &Card) {
-    if let Some(audio) = &card.audio {
-        AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.into()));
-    }
 }

@@ -1,5 +1,7 @@
 use super::card::state::*;
 use crate::base::state::Base;
+use components::audio::mixer::AudioHandle;
+use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
 use itertools::Itertools;
 use rand::prelude::*;
@@ -13,6 +15,8 @@ use utils::prelude::*;
 
 pub struct Game {
     pub base: Rc<Base>,
+    pub audio_handle: Rc<RefCell<Option<AudioHandle>>>,
+    pub transition: AsyncLoader,
     pub rng: RefCell<ThreadRng>,
     pub remaining: RefCell<Vec<CardPairId>>,
     pub used: RefCell<Vec<CardPairId>>,
@@ -23,6 +27,8 @@ impl Game {
     pub fn new(base: Rc<Base>) -> Rc<Self> {
         let _self = Rc::new(Self {
             base,
+            audio_handle: Default::default(),
+            transition: AsyncLoader::new(),
             remaining: RefCell::new(Vec::new()),
             used: RefCell::new(Vec::new()),
             rng: RefCell::new(thread_rng()),

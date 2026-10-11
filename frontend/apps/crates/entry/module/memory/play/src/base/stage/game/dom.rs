@@ -8,6 +8,9 @@ use components::module::_groups::cards::play::card::dom::{render_card_mixin, Car
 
 pub fn render(state: Rc<Base>) -> Dom {
     html!("play-main", {
+        .after_removed(clone!(state => move |_| {
+            *state.audio_handle.borrow_mut() = None;
+        }))
         .prop("nCards", state.cards.len() as f64)
         .children(
             //Always render the cards so they take the grid spots
