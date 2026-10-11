@@ -13,9 +13,6 @@ use utils::prelude::*;
 impl Game {
     pub fn render(state: Rc<Self>) -> Dom {
         html!("card-quiz-main", {
-        .after_removed(clone!(state => move |_| {
-            *state.audio_handle.borrow_mut() = None;
-        }))
             .prop("slot", "main")
             .children_signal_vec(
                 state.current.signal_cloned()
@@ -32,7 +29,7 @@ impl Game {
 
                             options.flipped = true;
                             options.slot = Some("target");
-                            options.play_audio_on_click = Some(Rc::clone(&state.audio_handle));
+                            options.play_audio_on_click = true;
 
                             children.push(render_card(options));
 

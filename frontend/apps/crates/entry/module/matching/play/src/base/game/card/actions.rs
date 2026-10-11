@@ -1,5 +1,5 @@
 use super::{super::state::*, state::*};
-use components::audio::mixer::AUDIO_MIXER;
+use components::audio::mixer::{play_random_negative, play_random_positive, AUDIO_MIXER};
 use components::module::_common::play::scoring::MAX_POINTS_PER_ITEM;
 use std::rc::Rc;
 use utils::{
@@ -42,10 +42,7 @@ impl CardDrag {
 
             if let Some(top) = top {
                 if top.pair_id == self.pair_id {
-                    AUDIO_MIXER.with(|mixer| {
-                        *self.game.audio_handle.borrow_mut() =
-                            Some(mixer.play(mixer.get_random_positive().into(), false));
-                    });
+                    play_random_positive();
 
                     let points = calculate_point_count(*bottom.tried_count.borrow());
                     let _ = IframeAction::new(ModuleToJigPlayerMessage::AddPoints(points))
@@ -53,10 +50,7 @@ impl CardDrag {
 
                     // card_report.succeeded = true;
                 } else {
-                    AUDIO_MIXER.with(|mixer| {
-                        *self.game.audio_handle.borrow_mut() =
-                            Some(mixer.play(mixer.get_random_negative().into(), false));
-                    });
+                    play_random_negative();
 
                     bottom
                         .tried_count
@@ -122,11 +116,7 @@ pub fn start_drag(state: Rc<CardBottom>, elem: HtmlElement, x: i32, y: i32) {
             .set(Some(Rc::new(CardDrag::new((*state).clone(), elem, x, y))));
 
         if let Some(audio) = &state.card.audio {
-            AUDIO_MIXER.with(|mixer| {
-                *state.game.audio_handle.borrow_mut() = Some(mixer.play(audio.into(), false));
-            });
-        } else {
-            *state.game.audio_handle.borrow_mut() = None;
+            AUDIO_MIXER.with(|mixer| mixer.play_oneshot(audio.into()));
         }
     }
 }
