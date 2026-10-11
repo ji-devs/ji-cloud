@@ -265,7 +265,7 @@ pub async fn module_template(
 ) -> actix_web::Result<HttpResponse> {
     let (module_kind, page_kind, asset_path) = path.into_inner();
 
-    if asset_path.starts_with("jig/") && (!is_iframe(&req) || !has_same_host_referrer(&req)) {
+    if asset_path.starts_with("jig/") && is_iframe(&req) && !has_same_host_referrer(&req) {
         return Err(ErrorForbidden(
             "JIG modules must be embedded on the same host",
         ));
