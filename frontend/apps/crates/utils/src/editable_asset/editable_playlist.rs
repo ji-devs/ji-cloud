@@ -43,6 +43,7 @@ pub struct EditablePlaylist {
     pub rating: Mutable<Option<PlaylistRating>>,
     pub blocked: Mutable<bool>,
     pub premium: Mutable<bool>,
+    pub requires_signature: Mutable<bool>,
     pub author_name: Option<String>,
 }
 
@@ -66,6 +67,7 @@ impl From<PlaylistResponse> for EditablePlaylist {
             rating: Mutable::new(playlist.admin_data.rating),
             blocked: Mutable::new(playlist.admin_data.blocked),
             premium: Mutable::new(playlist.admin_data.premium),
+            requires_signature: Mutable::new(playlist.admin_data.requires_signature),
             published_at: Mutable::new(playlist.published_at),
             author_name: playlist.author_name,
         }
@@ -89,6 +91,7 @@ impl From<PlaylistId> for EditablePlaylist {
             rating: Default::default(),
             blocked: Default::default(),
             premium: Default::default(),
+            requires_signature: Mutable::new(true),
             published_at: Default::default(),
             items: Default::default(),
             author_name: Default::default(),
@@ -117,6 +120,8 @@ impl EditablePlaylist {
         self.rating.set(playlist.admin_data.rating);
         self.blocked.set(playlist.admin_data.blocked);
         self.premium.set(playlist.admin_data.premium);
+        self.requires_signature
+            .set(playlist.admin_data.requires_signature);
         self.published_at.set(playlist.published_at);
     }
 
@@ -140,6 +145,7 @@ impl EditablePlaylist {
             rating: Mutable::new(self.rating.get()),
             blocked: Mutable::new(self.blocked.get()),
             premium: Mutable::new(self.premium.get()),
+            requires_signature: Mutable::new(self.requires_signature.get()),
             author_name: self.author_name.clone(),
         }
     }
@@ -166,6 +172,7 @@ impl EditablePlaylist {
             rating: self.rating.get_cloned().into(),
             blocked: UpdateNonNullable::Change(self.blocked.get()),
             premium: UpdateNonNullable::Change(self.premium.get()),
+            requires_signature: UpdateNonNullable::Change(self.requires_signature.get()),
             ..Default::default()
         }
     }

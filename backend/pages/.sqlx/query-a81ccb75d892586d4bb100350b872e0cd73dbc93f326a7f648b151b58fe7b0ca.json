@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                select exists(\n                    select 1\n                    from playlist_admin_data\n                    where playlist_id = $1 and not requires_signature\n                ) as \"allows_unsigned_play!\"\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "allows_unsigned_play!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a81ccb75d892586d4bb100350b872e0cd73dbc93f326a7f648b151b58fe7b0ca"
+}

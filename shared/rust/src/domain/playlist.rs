@@ -141,7 +141,7 @@ impl TryFrom<u8> for PlaylistRating {
 }
 
 /// These fields can be edited by admin and can be viewed by everyone
-#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct PlaylistAdminData {
     /// Rating for jig, weighted for jig search
@@ -156,6 +156,21 @@ pub struct PlaylistAdminData {
 
     /// Whether the resource is a premium resource
     pub premium: bool,
+
+    /// Whether playback requires a signed URL.
+    pub requires_signature: bool,
+}
+
+impl Default for PlaylistAdminData {
+    fn default() -> Self {
+        Self {
+            rating: None,
+            blocked: false,
+            curated: false,
+            premium: false,
+            requires_signature: true,
+        }
+    }
 }
 
 /// The response returned when a request for `GET`ing a Playlist is successful.
@@ -488,6 +503,10 @@ pub struct PlaylistUpdateAdminDataRequest {
     /// Indicates jig is premium content
     #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub premium: UpdateNonNullable<bool>,
+
+    /// Whether playback requires a signed URL.
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub requires_signature: UpdateNonNullable<bool>,
 }
 
 make_path_parts!(PlaylistDeletePath => "/v1/playlist/{}" => PlaylistId);

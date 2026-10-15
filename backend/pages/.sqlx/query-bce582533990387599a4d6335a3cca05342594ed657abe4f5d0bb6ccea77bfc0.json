@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                select exists(\n                    select 1\n                    from jig_admin_data\n                    where jig_id = $1 and not requires_signature\n                ) as \"allows_unsigned_play!\"\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "allows_unsigned_play!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "bce582533990387599a4d6335a3cca05342594ed657abe4f5d0bb6ccea77bfc0"
+}

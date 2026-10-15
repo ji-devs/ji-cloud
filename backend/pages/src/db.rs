@@ -1,5 +1,7 @@
 use ji_core::config::DB_POOL_CONNECTIONS;
-use shared::domain::{course::CourseId, jig::JigId, module::ModuleId, playlist::PlaylistId};
+use shared::domain::{
+    asset::AssetId, course::CourseId, jig::JigId, module::ModuleId, playlist::PlaylistId,
+};
 use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 
 pub async fn get_pool(connect_options: PgConnectOptions) -> anyhow::Result<PgPool> {
@@ -130,4 +132,58 @@ pub async fn get_course_metadata(
         other_keywords: row.other_keywords,
         cover_module_id: row.cover_module_id,
     }))
+}
+
+pub async fn asset_allows_unsigned_play(db: &PgPool, asset_id: AssetId) -> sqlx::Result<bool> {
+    match asset_id {
+        AssetId::JigId(id) => {
+            let row = sqlx::query!(
+                r#"
+                select exists(
+                    select 1
+                    from jig_admin_data
+                    where jig_id = $1 and not requires_signature
+                ) as "allows_unsigned_play!"
+                "#,
+                id.0,
+            )
+            .fetch_one(db)
+            .await?;
+
+            Ok(row.allows_unsigned_play)
+        }
+        AssetId::PlaylistId(id) => {
+            let row = sqlx::query!(
+                r#"
+                select exists(
+                    select 1
+                    from playlist_admin_data
+                    where playlist_id = $1 and not requires_signature
+                ) as "allows_unsigned_play!"
+                "#,
+                id.0,
+            )
+            .fetch_one(db)
+            .await?;
+
+            Ok(row.allows_unsigned_play)
+        }
+        AssetId::CourseId(id) => {
+            let row = sqlx::query!(
+                r#"
+                select exists(
+                    select 1
+                    from course_admin_data
+                    where course_id = $1 and not requires_signature
+                ) as "allows_unsigned_play!"
+                "#,
+                id.0,
+            )
+            .fetch_one(db)
+            .await?;
+
+            Ok(row.allows_unsigned_play)
+        }
+        AssetId::ResourceId(_) => Ok(false),
+    }
 }

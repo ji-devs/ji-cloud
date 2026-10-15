@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            with cte as (\n                select id as \"jig_id\",\n                    creator_id,\n                    author_id,\n                    liked_count,\n                    play_count,\n                    live_up_to_date,\n                    jig.live_id,\n                    published_at,\n                    rating,\n                    blocked,\n                    curated,\n                    is_premium\n                from jig\n                left join jig_play_count on jig_play_count.jig_id = jig.id\n                left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n            )\n            select\n                cte.jig_id                                         as \"jig_id: JigId\",\n                display_name,\n                max(jig_code.created_at) as last_code_created_at,\n                cte.creator_id                                     as \"creator_id: UserId\",\n                cte.author_id                                      as \"author_id: UserId\",\n                (select given_name || ' '::text || family_name\n                from user_profile\n                where user_profile.user_id = author_id)            as \"author_name\",\n                jig_data.created_at,\n                jig_data.updated_at,\n                cte.published_at,\n                jig_data.privacy_level                             as \"privacy_level!: PrivacyLevel\",\n                jig_data.language,\n                jig_data.description,\n                jig_data.translated_description                    as \"translated_description!: Json<HashMap<String, String>>\",\n                jig_data.direction                                 as \"direction: TextDirection\",\n                jig_data.scoring,\n                jig_data.drag_assist,\n                jig_data.theme                                     as \"theme: ThemeId\",\n                jig_data.audio_background                          as \"audio_background: AudioBackground\",\n                cte.liked_count,\n                cte.play_count,\n                cte.live_up_to_date,\n                exists(select 1 from jig_like where user_id = $1)    as \"is_liked!\",\n                jig_data.locked,\n                jig_data.other_keywords,\n                jig_data.translated_keywords,\n                cte.rating                                         as \"rating?: JigRating\",\n                cte.blocked                                        as \"blocked\",\n                cte.curated,\n                cte.is_premium                                     as \"premium\",\n                array(select row (unnest(audio_feedback_positive))) as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n                array(select row (unnest(audio_feedback_negative))) as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n                array(\n                    select row (jig_data_module.id, jig_data_module.stable_id, kind, is_complete)\n                    from jig_data_module\n                    where jig_data_id = jig_data.id\n                    order by \"index\"\n                ) as \"modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>\",\n                (\n                    select coalesce(sum(\n                        case\n                            when kind = 2 then\n                                LEAST(\n                                    coalesce((contents->'content'->'player_settings'->>'n_choices')::int, 0),\n                                    coalesce(jsonb_array_length(contents->'content'->'base'->'pairs'), 0)\n                                ) * coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2\n                            when kind = 9 then\n                                coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2\n                            when kind = 10 then\n                                (select count(*)::int from jsonb_array_elements(\n                                    coalesce(contents->'content'->'items', '[]'::jsonb)\n                                ) as item where item->'kind' ? 'Interactive') * 2\n                            when kind = 13 then\n                                coalesce(jsonb_array_length(contents->'content'->'questions'), 0) * 2\n                            else 0\n                        end\n                    )::int, 0)\n                    from jig_data_module\n                    where jig_data_id = jig_data.id\n                ) as \"max_score!\",\n                array(select row (category_id)\n                    from jig_data_category\n                    where jig_data_id = cte.live_id)     as \"categories!: Vec<(CategoryId,)>\",\n                array(select row (affiliation_id)\n                    from jig_data_affiliation\n                    where jig_data_id = cte.live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n                array(select row (age_range_id)\n                    from jig_data_age_range\n                    where jig_data_id = cte.live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n                array(\n                    select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n                    from jig_data_additional_resource \"jdar\"\n                    where jdar.jig_data_id = cte.live_id\n                ) as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\"\n            from jig_data\n                inner join cte on cte.live_id = jig_data.id\n                inner join jig_code on cte.jig_id = jig_code.jig_id\n            where jig_code.creator_id = $1\n            group by cte.jig_id, display_name, cte.creator_id, cte.author_id, author_id, author_name, updated_at, published_at, privacy_level, language, description, translated_description, theme, audio_background, liked_count, play_count, live_up_to_date, locked, other_keywords, translated_keywords, rating, blocked, curated, premium, audio_feedback_positive, audio_feedback_negative, jig_data.created_at, jig_data.updated_at, jig_data.direction, jig_data.scoring, jig_data.drag_assist, jig_data.id, \"modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>\", \"categories!: Vec<(CategoryId,)>\", \"affiliations!: Vec<(AffiliationId,)>\", \"age_ranges!: Vec<(AgeRangeId,)>\", \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\"\n            order by last_code_created_at desc\n        ",
+  "query": "\nwith cte as (\n    select id      as \"jig_id\",\n           creator_id,\n           author_id,\n           liked_count,\n           play_count,\n           live_up_to_date,\n           case\n               when $2 = 0 then jig.draft_id\n               when $2 = 1 then jig.live_id\n               end as \"draft_or_live_id\",\n           published_at,\n           rating,\n           blocked,\n           curated,\n           is_premium,\n           requires_signature\n    from jig\n    left join jig_play_count on jig_play_count.jig_id = jig.id\n    left join jig_admin_data \"admin\" on admin.jig_id = jig.id\n    where id = $1\n)\nselect cte.jig_id                                          as \"jig_id: JigId\",\n        display_name,\n        creator_id                                          as \"creator_id: UserId\",\n        author_id                                           as \"author_id: UserId\",\n        (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id)            as \"author_name\",\n        created_at,\n        updated_at,\n        published_at,\n        privacy_level                                       as \"privacy_level!: PrivacyLevel\",\n        language,\n        description,\n        translated_description                              as \"translated_description!: Json<HashMap<String, String>>\",\n        direction                                           as \"direction: TextDirection\",\n        scoring,\n        drag_assist,\n        theme                                               as \"theme: ThemeId\",\n        audio_background                                    as \"audio_background: AudioBackground\",\n        liked_count,\n        play_count                                           as \"play_count!\",\n        live_up_to_date,\n        exists(select 1 from jig_like where jig_id = $1 and user_id = $3)    as \"is_liked!\",\n        locked,\n        other_keywords,\n        translated_keywords,\n        rating                                               as \"rating?: JigRating\",\n        blocked                                              as \"blocked!\",\n        curated                                              as \"curated!\",\n        is_premium                                           as \"premium!\",\n        requires_signature as \"requires_signature!\",\n        array(select row (unnest(audio_feedback_positive))) as \"audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>\",\n        array(select row (unnest(audio_feedback_negative))) as \"audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>\",\n        array(\n                select row (jig_data_module.id, jig_data_module.stable_id, kind, is_complete)\n                from jig_data_module\n                where jig_data_id = jig_data.id\n                order by \"index\"\n        )                                               as \"modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>\",\n        (\n            select coalesce(sum(\n                case\n                    when kind = 2 then\n                        LEAST(\n                            coalesce((contents->'content'->'player_settings'->>'n_choices')::int, 0),\n                            coalesce(jsonb_array_length(contents->'content'->'base'->'pairs'), 0)\n                        ) * coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2\n                    when kind = 9 then\n                        coalesce((contents->'content'->'player_settings'->>'n_rounds')::int, 0) * 2\n                    when kind = 10 then\n                        (select count(*)::int from jsonb_array_elements(\n                            coalesce(contents->'content'->'items', '[]'::jsonb)\n                        ) as item where item->'kind' ? 'Interactive') * 2\n                    when kind = 13 then\n                        coalesce(jsonb_array_length(contents->'content'->'questions'), 0) * 2\n                    else 0\n                end\n            )::int, 0)\n            from jig_data_module\n            where jig_data_id = jig_data.id\n        )                                               as \"max_score!\",\n        array(select row (category_id)\n                from jig_data_category\n                where jig_data_id = cte.draft_or_live_id)     as \"categories!: Vec<(CategoryId,)>\",\n        array(select row (affiliation_id)\n                from jig_data_affiliation\n                where jig_data_id = cte.draft_or_live_id)     as \"affiliations!: Vec<(AffiliationId,)>\",\n        array(select row (age_range_id)\n                from jig_data_age_range\n                where jig_data_id = cte.draft_or_live_id)     as \"age_ranges!: Vec<(AgeRangeId,)>\",\n        array(\n                select row (jdar.id, jdar.display_name, resource_type_id, resource_content)\n                from jig_data_additional_resource \"jdar\"\n                where jdar.jig_data_id = cte.draft_or_live_id\n    )                                                    as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\"\nfrom jig_data\n         inner join cte on cte.draft_or_live_id = jig_data.id\n",
   "describe": {
     "columns": [
       {
@@ -27,12 +27,6 @@
       },
       {
         "ordinal": 2,
-        "name": "last_code_created_at",
-        "type_info": "Timestamptz",
-        "origin": "Expression"
-      },
-      {
-        "ordinal": 3,
         "name": "creator_id: UserId",
         "type_info": "Uuid",
         "origin": {
@@ -43,7 +37,7 @@
         }
       },
       {
-        "ordinal": 4,
+        "ordinal": 3,
         "name": "author_id: UserId",
         "type_info": "Uuid",
         "origin": {
@@ -54,13 +48,13 @@
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 4,
         "name": "author_name",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "created_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -71,7 +65,7 @@
         }
       },
       {
-        "ordinal": 7,
+        "ordinal": 6,
         "name": "updated_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -82,7 +76,7 @@
         }
       },
       {
-        "ordinal": 8,
+        "ordinal": 7,
         "name": "published_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -93,7 +87,7 @@
         }
       },
       {
-        "ordinal": 9,
+        "ordinal": 8,
         "name": "privacy_level!: PrivacyLevel",
         "type_info": "Int2",
         "origin": {
@@ -104,7 +98,7 @@
         }
       },
       {
-        "ordinal": 10,
+        "ordinal": 9,
         "name": "language",
         "type_info": "Text",
         "origin": {
@@ -115,7 +109,7 @@
         }
       },
       {
-        "ordinal": 11,
+        "ordinal": 10,
         "name": "description",
         "type_info": "Text",
         "origin": {
@@ -126,7 +120,7 @@
         }
       },
       {
-        "ordinal": 12,
+        "ordinal": 11,
         "name": "translated_description!: Json<HashMap<String, String>>",
         "type_info": "Jsonb",
         "origin": {
@@ -137,7 +131,7 @@
         }
       },
       {
-        "ordinal": 13,
+        "ordinal": 12,
         "name": "direction: TextDirection",
         "type_info": "Int2",
         "origin": {
@@ -148,7 +142,7 @@
         }
       },
       {
-        "ordinal": 14,
+        "ordinal": 13,
         "name": "scoring",
         "type_info": "Bool",
         "origin": {
@@ -159,7 +153,7 @@
         }
       },
       {
-        "ordinal": 15,
+        "ordinal": 14,
         "name": "drag_assist",
         "type_info": "Bool",
         "origin": {
@@ -170,7 +164,7 @@
         }
       },
       {
-        "ordinal": 16,
+        "ordinal": 15,
         "name": "theme: ThemeId",
         "type_info": "Int2",
         "origin": {
@@ -181,7 +175,7 @@
         }
       },
       {
-        "ordinal": 17,
+        "ordinal": 16,
         "name": "audio_background: AudioBackground",
         "type_info": "Int2",
         "origin": {
@@ -192,7 +186,7 @@
         }
       },
       {
-        "ordinal": 18,
+        "ordinal": 17,
         "name": "liked_count",
         "type_info": "Int8",
         "origin": {
@@ -203,8 +197,8 @@
         }
       },
       {
-        "ordinal": 19,
-        "name": "play_count",
+        "ordinal": 18,
+        "name": "play_count!",
         "type_info": "Int8",
         "origin": {
           "Table": {
@@ -214,7 +208,7 @@
         }
       },
       {
-        "ordinal": 20,
+        "ordinal": 19,
         "name": "live_up_to_date",
         "type_info": "Bool",
         "origin": {
@@ -225,13 +219,13 @@
         }
       },
       {
-        "ordinal": 21,
+        "ordinal": 20,
         "name": "is_liked!",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 22,
+        "ordinal": 21,
         "name": "locked",
         "type_info": "Bool",
         "origin": {
@@ -242,7 +236,7 @@
         }
       },
       {
-        "ordinal": 23,
+        "ordinal": 22,
         "name": "other_keywords",
         "type_info": "Text",
         "origin": {
@@ -253,7 +247,7 @@
         }
       },
       {
-        "ordinal": 24,
+        "ordinal": 23,
         "name": "translated_keywords",
         "type_info": "Text",
         "origin": {
@@ -264,7 +258,7 @@
         }
       },
       {
-        "ordinal": 25,
+        "ordinal": 24,
         "name": "rating?: JigRating",
         "type_info": "Int2",
         "origin": {
@@ -275,8 +269,8 @@
         }
       },
       {
-        "ordinal": 26,
-        "name": "blocked",
+        "ordinal": 25,
+        "name": "blocked!",
         "type_info": "Bool",
         "origin": {
           "Table": {
@@ -286,8 +280,8 @@
         }
       },
       {
-        "ordinal": 27,
-        "name": "curated",
+        "ordinal": 26,
+        "name": "curated!",
         "type_info": "Bool",
         "origin": {
           "Table": {
@@ -297,13 +291,24 @@
         }
       },
       {
-        "ordinal": 28,
-        "name": "premium",
+        "ordinal": 27,
+        "name": "premium!",
         "type_info": "Bool",
         "origin": {
           "Table": {
             "table": "jig_admin_data",
             "name": "is_premium"
+          }
+        }
+      },
+      {
+        "ordinal": 28,
+        "name": "requires_signature!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_admin_data",
+            "name": "requires_signature"
           }
         }
       },
@@ -358,13 +363,14 @@
     ],
     "parameters": {
       "Left": [
+        "Uuid",
+        "Int4",
         "Uuid"
       ]
     },
     "nullable": [
       false,
       false,
-      null,
       true,
       true,
       null,
@@ -381,16 +387,17 @@
       false,
       true,
       false,
-      false,
+      true,
       false,
       null,
       false,
       false,
       false,
       true,
-      false,
-      false,
-      false,
+      true,
+      true,
+      true,
+      true,
       null,
       null,
       null,
@@ -401,5 +408,5 @@
       null
     ]
   },
-  "hash": "c8aa7ba73a7d161cdd0aa9f09d98b14aa833756faeefac1ef8d15aa5cd9d3c23"
+  "hash": "6d256ae00e23beb253ef244b8b3c38753afc74f060dd90065b6fb000478a491b"
 }

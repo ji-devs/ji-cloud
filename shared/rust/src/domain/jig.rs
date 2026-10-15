@@ -147,7 +147,7 @@ pub struct JigData {
 }
 
 /// These fields can be edited by admin and can be viewed by everyone
-#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct JigAdminData {
     /// Rating for jig, weighted for jig search
@@ -162,6 +162,21 @@ pub struct JigAdminData {
 
     /// Whether the resource is a premium resource
     pub premium: bool,
+
+    /// Whether playback requires a signed URL.
+    pub requires_signature: bool,
+}
+
+impl Default for JigAdminData {
+    fn default() -> Self {
+        Self {
+            rating: None,
+            blocked: false,
+            curated: false,
+            premium: false,
+            requires_signature: true,
+        }
+    }
 }
 
 /// These fields can be edited by admin and can be viewed by everyone
@@ -183,6 +198,10 @@ pub struct JigUpdateAdminDataRequest {
     /// Indicates jig is premium content
     #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
     pub premium: UpdateNonNullable<bool>,
+
+    /// Whether playback requires a signed URL.
+    #[serde(default, skip_serializing_if = "UpdateNonNullable::is_keep")]
+    pub requires_signature: UpdateNonNullable<bool>,
 }
 
 /// Transfer Jig from one user to another.

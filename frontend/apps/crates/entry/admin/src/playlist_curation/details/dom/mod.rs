@@ -93,6 +93,16 @@ impl PlaylistDetails {
                                 }),
                             ])
                         }),
+                        html!("input-wrapper", {
+                            .prop("label", "Requires signature")
+                            .child(html!("input-checkbox", {
+                                .prop("title", "Requires signature")
+                                .prop_signal("checked", state.playlist.requires_signature.signal())
+                                .event(clone!(state => move |_evt: events::CustomToggle| {
+                                    state.playlist.requires_signature.set(!state.playlist.requires_signature.get());
+                                }))
+                            }))
+                        }),
                         state.render_languages(),
                         state.render_ages(),
                         state.render_affiliations(),

@@ -1,6 +1,6 @@
 use crate::db::{
-    get_course_metadata, get_jig_metadata, get_playlist_metadata, jig_is_not_embeddable,
-    AssetMetadata,
+    asset_allows_unsigned_play, get_course_metadata, get_jig_metadata, get_playlist_metadata,
+    jig_is_not_embeddable, AssetMetadata,
 };
 use actix_web::{
     error::{ErrorForbidden, ErrorInternalServerError},
@@ -303,6 +303,15 @@ async fn can_view_unsigned_play_url(
     req: &HttpRequest,
     asset_path: &str,
 ) -> bool {
+    if let Some(asset_id) = asset_id_from_asset_path(asset_path) {
+        if asset_allows_unsigned_play(db, asset_id)
+            .await
+            .unwrap_or(false)
+        {
+            return true;
+        }
+    }
+
     let Some(user_id) = auth_user_id(settings, db, req).await else {
         return false;
     };

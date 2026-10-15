@@ -21,6 +21,7 @@ pub fn get_jig() -> JigResponse {
             blocked: false,
             curated: true,
             premium: false,
+            requires_signature: true,
         },
         creator_id: None,
         author_id: None,

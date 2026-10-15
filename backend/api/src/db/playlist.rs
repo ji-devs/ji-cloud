@@ -152,7 +152,8 @@ with cte as (
            rating,
            blocked,
            curated,
-           is_premium
+           is_premium,
+           requires_signature
     from playlist
     left join playlist_admin_data "admin" on admin.playlist_id = playlist.id
     where id = $1
@@ -179,6 +180,7 @@ select cte.playlist_id                                          as "playlist_id:
        blocked                                              as "blocked!",
        curated                                              as "curated!",
        is_premium                                           as "premium!",
+       requires_signature as "requires_signature!",
        exists(select 1 from playlist_like where playlist_id = $1 and user_id = $3) as "is_liked!",
        (
             select row(playlist_data_module.id, playlist_data_module.stable_id, kind, is_complete)
@@ -268,6 +270,7 @@ from playlist_data
             blocked: row.blocked,
             curated: row.curated,
             premium: row.premium,
+            requires_signature: row.requires_signature,
         },
         share_url: String::new(),
         student_share_url: String::new(),
@@ -303,7 +306,8 @@ select playlist.id                                       as "id!: PlaylistId",
        rating                                   as "rating?: PlaylistRating",
        blocked                                  as "blocked!",
        curated                                  as "curated!",
-       is_premium                               as "premium!"
+       is_premium                               as "premium!",
+       requires_signature as "requires_signature!"
 from playlist
 inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -441,6 +445,7 @@ order by ord asc
                 blocked: playlist_row.blocked,
                 curated: playlist_row.curated,
                 premium: playlist_row.premium,
+                requires_signature: playlist_row.requires_signature,
             },
             share_url: String::new(),
             student_share_url: String::new(),
@@ -510,6 +515,7 @@ select playlist.id                                                              
     blocked                                    as "blocked!",
     curated                                    as "curated!",
     is_premium                                 as "premium!",
+    requires_signature as "requires_signature!",
     (
         select row(playlist_data_module.id, playlist_data_module.stable_id, kind, is_complete)
         from playlist_data_module
@@ -633,6 +639,7 @@ limit $6
                 blocked: playlist_data_row.blocked,
                 curated: playlist_data_row.curated,
                 premium: playlist_data_row.premium,
+                requires_signature: playlist_data_row.requires_signature,
             },
             share_url: String::new(),
             student_share_url: String::new(),
@@ -1319,7 +1326,8 @@ set
     rating = coalesce($2, rating),
     blocked = coalesce($3, blocked),
     curated = coalesce($4, curated),
-    is_premium = coalesce($5, is_premium)
+    is_premium = coalesce($5, is_premium),
+    requires_signature = coalesce($6, requires_signature)
 where playlist_id = $1
 "#,
         playlist_id.0,
@@ -1327,6 +1335,7 @@ where playlist_id = $1
         blocked,
         admin_data.curated.into_option(),
         admin_data.premium.into_option(),
+        admin_data.requires_signature.into_option(),
     )
     .execute(&mut *txn)
     .await?;

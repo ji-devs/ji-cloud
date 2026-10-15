@@ -239,7 +239,8 @@ with cte as (
            rating,
            blocked,
            curated,
-           is_premium
+           is_premium,
+           requires_signature
     from jig
     left join jig_play_count on jig_play_count.jig_id = jig.id
     left join jig_admin_data "admin" on admin.jig_id = jig.id
@@ -275,6 +276,7 @@ select cte.jig_id                                          as "jig_id: JigId",
         blocked                                              as "blocked!",
         curated                                              as "curated!",
         is_premium                                           as "premium!",
+        requires_signature as "requires_signature!",
         array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
         array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
         array(
@@ -403,6 +405,7 @@ from jig_data
             blocked: row.blocked,
             curated: row.curated,
             premium: row.premium,
+            requires_signature: row.requires_signature,
         },
         max_score: row.max_score as u32,
         share_url: String::new(),
@@ -444,7 +447,8 @@ select jig.id                                       as "id!: JigId",
        rating                                   as "rating?: JigRating",
        blocked                                  as "blocked!",
        curated                                  as "curated!",
-       is_premium                               as "premium!"
+       is_premium                               as "premium!",
+       requires_signature as "requires_signature!"
 from jig
          inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -627,6 +631,7 @@ order by ord asc
                 blocked: jig_row.blocked,
                 curated: jig_row.curated,
                 premium: jig_row.premium,
+                requires_signature: jig_row.requires_signature,
             },
             max_score: jig_data_row.max_score as u32,
             share_url: String::new(),
@@ -758,7 +763,8 @@ select jig.id                                              as "jig_id: JigId",
    rating                                     as "rating!: Option<JigRating>",
    blocked                                    as "blocked!",
    curated                                    as "curated!",
-   is_premium                                 as "premium!"
+   is_premium                                 as "premium!",
+   requires_signature as "requires_signature!"
 from cte1
 inner join jig_data on cte1.id = jig_data.id
 inner join jig on (
@@ -877,6 +883,7 @@ limit $8
                 blocked: jig_data_row.blocked,
                 curated: jig_data_row.curated,
                 premium: jig_data_row.premium,
+                requires_signature: jig_data_row.requires_signature,
             },
             max_score: jig_data_row.max_score as u32,
             share_url: String::new(),
@@ -1647,7 +1654,8 @@ set
     rating = coalesce($2, rating),
     blocked = coalesce($3, blocked),
     curated = coalesce($4, curated),
-    is_premium = coalesce($5, is_premium)
+    is_premium = coalesce($5, is_premium),
+    requires_signature = coalesce($6, requires_signature)
 where jig_id = $1
 "#,
         jig_id.0,
@@ -1655,6 +1663,7 @@ where jig_id = $1
         blocked,
         admin_data.curated.into_option(),
         admin_data.premium.into_option(),
+        admin_data.requires_signature.into_option(),
     )
     .execute(&mut *txn)
     .await?;
@@ -2025,6 +2034,7 @@ select playlist.id                                                              
     blocked                                    as "blocked!",
     curated                                    as "curated!",
     is_premium                                 as "premium!",
+    requires_signature as "requires_signature!",
     (
         select row(playlist_data_module.id, playlist_data_module.stable_id, kind, is_complete)
         from playlist_data_module
@@ -2138,6 +2148,7 @@ order by coalesce(updated_at, created_at) desc
                 blocked: playlist_data_row.blocked,
                 curated: playlist_data_row.curated,
                 premium: playlist_data_row.premium,
+                requires_signature: playlist_data_row.requires_signature,
             },
             share_url: String::new(),
             student_share_url: String::new(),

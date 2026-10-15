@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\nwith cte as (\n    select (array_agg(pdd.id))[1]\n    from course_data \"pdd\"\n          left join course on (draft_id = pdd.id or (live_id = pdd.id and pdd.last_synced_at is not null and published_at is not null))\n          left join course_admin_data \"admin\" on admin.course_id = course.id\n          left join course_data_resource \"resource\" on pdd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (pdd.draft_or_live = $2 or $2 is null)\n        and (blocked = $8 or $8 is null)\n        and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at), plays\n        order by case when $7 = 0 then plays\n        else extract(epoch from coalesce(updated_at, created_at))\n    end desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                                as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    duration,\n    live_up_to_date,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    rating                                     as \"rating?: CourseRating\",\n    blocked                                    as \"blocked!\",\n    curated                                    as \"curated!\",\n    is_premium                                 as \"premium!\",\n    (\n        select row(course_data_module.id, course_data_module.stable_id, kind, is_complete)\n        from course_data_module\n        where course_data_id = course_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, StableModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from course_data_resource\n                where course_data_id = course_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)\n            from course_data_unit \"pddu\"\n            where pddu.course_data_id = course_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(CourseUnitId, String, String, Value)>\"\nfrom cte1\ninner join course_data on cte1.id = course_data.id\ninner join course on (\n    course_data.id = course.draft_id\n    or (\n        course_data.id = course.live_id\n        and last_synced_at is not null\n        and course.published_at is not null\n    )\n)\nleft join course_admin_data \"admin\" on admin.course_id = course.id\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n",
+  "query": "\nwith cte as (\n    select (array_agg(pdd.id))[1]\n    from course_data \"pdd\"\n          left join course on (draft_id = pdd.id or (live_id = pdd.id and pdd.last_synced_at is not null and published_at is not null))\n          left join course_admin_data \"admin\" on admin.course_id = course.id\n          left join course_data_resource \"resource\" on pdd.id = resource.course_data_id\n    where (author_id = $1 or $1 is null)\n        and (pdd.draft_or_live = $2 or $2 is null)\n        and (blocked = $8 or $8 is null)\n        and (pdd.privacy_level = any($3) or $3 = array[]::smallint[])\n        and (resource.resource_type_id = any($4) or $4 = array[]::uuid[])\n    group by coalesce(updated_at, created_at), plays\n        order by case when $7 = 0 then plays\n        else extract(epoch from coalesce(updated_at, created_at))\n    end desc\n),\ncte1 as (\n    select * from unnest(array(select cte.array_agg from cte)) with ordinality t(id\n   , ord) order by ord\n)\nselect course.id                                                                as \"course_id: CourseId\",\n    privacy_level                                                               as \"privacy_level: PrivacyLevel\",\n    creator_id                                                                  as \"creator_id?: UserId\",\n    author_id                                                                   as \"author_id?: UserId\",\n    (select given_name || ' '::text || family_name\n     from user_profile\n     where user_profile.user_id = author_id)                                     as \"author_name\",\n    published_at,\n    likes,\n    plays,\n    duration,\n    live_up_to_date,\n    display_name                                                                  as \"display_name!\",\n    updated_at,\n    language                                                                      as \"language!\",\n    description                                                                   as \"description!\",\n    translated_description                                                        as \"translated_description!: Json<HashMap<String,String>>\",\n    draft_or_live                                                                 as \"draft_or_live!: DraftOrLive\",\n    other_keywords                                                                as \"other_keywords!\",\n    translated_keywords                                                           as \"translated_keywords!\",\n    rating                                     as \"rating?: CourseRating\",\n    blocked                                    as \"blocked!\",\n    curated                                    as \"curated!\",\n    is_premium                                 as \"premium!\",\n    requires_signature as \"requires_signature!\",\n    (\n        select row(course_data_module.id, course_data_module.stable_id, kind, is_complete)\n        from course_data_module\n        where course_data_id = course_data.id and \"index\" = 0\n        order by \"index\"\n    )                                                   as \"cover?: (ModuleId, StableModuleId, ModuleKind, bool)\",\n    array(select row (category_id)\n            from course_data_category\n            where course_data_id = course_data.id)     as \"categories!: Vec<(CategoryId,)>\",\n    array(select row (id, display_name, resource_type_id, resource_content)\n                from course_data_resource\n                where course_data_id = course_data.id\n          )                                          as \"additional_resource!: Vec<(AddId, String, TypeId, Value)>\",\n    array(\n            select row(pddu.unit_id, pddu.display_name, pddu.description, pddu.value)\n            from course_data_unit \"pddu\"\n            where pddu.course_data_id = course_data.id\n            order by \"index\"\n    )                                                     as \"units!: Vec<(CourseUnitId, String, String, Value)>\"\nfrom cte1\ninner join course_data on cte1.id = course_data.id\ninner join course on (\n    course_data.id = course.draft_id\n    or (\n        course_data.id = course.live_id\n        and last_synced_at is not null\n        and course.published_at is not null\n    )\n)\nleft join course_admin_data \"admin\" on admin.course_id = course.id\nwhere ord > (1 * $5 * $6)\norder by ord asc\nlimit $6\n",
   "describe": {
     "columns": [
       {
@@ -242,24 +242,35 @@
       },
       {
         "ordinal": 22,
+        "name": "requires_signature!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "course_admin_data",
+            "name": "requires_signature"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
         "name": "cover?: (ModuleId, StableModuleId, ModuleKind, bool)",
         "type_info": "Record",
         "origin": "Expression"
       },
       {
-        "ordinal": 23,
+        "ordinal": 24,
         "name": "categories!: Vec<(CategoryId,)>",
         "type_info": "RecordArray",
         "origin": "Expression"
       },
       {
-        "ordinal": 24,
+        "ordinal": 25,
         "name": "additional_resource!: Vec<(AddId, String, TypeId, Value)>",
         "type_info": "RecordArray",
         "origin": "Expression"
       },
       {
-        "ordinal": 25,
+        "ordinal": 26,
         "name": "units!: Vec<(CourseUnitId, String, String, Value)>",
         "type_info": "RecordArray",
         "origin": "Expression"
@@ -300,11 +311,12 @@
       false,
       false,
       false,
+      false,
       null,
       null,
       null,
       null
     ]
   },
-  "hash": "80f2e1918ac6d32375020f2c379b309a000840039e6ca0a57cece642fd6ae8ad"
+  "hash": "744a2eb19c1a1d0d37aa3a0e2ee147740197b29f41fe6c9ac037658564dbbe3a"
 }

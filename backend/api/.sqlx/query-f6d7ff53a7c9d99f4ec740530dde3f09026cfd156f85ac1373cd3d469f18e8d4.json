@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\nselect jig.id                                       as \"id!: JigId\",\n       creator_id                               as \"creator_id: UserId\",\n       author_id                                as \"author_id: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       liked_count                              as \"liked_count!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       exists(select 1 from jig_like where jig_id = jig.id and user_id = $2) as \"is_liked!\",\n       (\n           select play_count\n           from jig_play_count\n           where jig_play_count.jig_id = jig.id\n       )                                        as \"play_count!\",\n       rating                                   as \"rating?: JigRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       is_premium                               as \"premium!\"\nfrom jig\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    inner join jig_admin_data \"admin\" on admin.jig_id = jig.id\n    order by ord asc\n    ",
+  "query": "\nselect jig.id                                       as \"id!: JigId\",\n       creator_id                               as \"creator_id: UserId\",\n       author_id                                as \"author_id: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       liked_count                              as \"liked_count!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       exists(select 1 from jig_like where jig_id = jig.id and user_id = $2) as \"is_liked!\",\n       (\n           select play_count\n           from jig_play_count\n           where jig_play_count.jig_id = jig.id\n       )                                        as \"play_count!\",\n       rating                                   as \"rating?: JigRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       is_premium                               as \"premium!\",\n       requires_signature as \"requires_signature!\"\nfrom jig\n         inner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\n    inner join jig_admin_data \"admin\" on admin.jig_id = jig.id\n    order by ord asc\n    ",
   "describe": {
     "columns": [
       {
@@ -152,6 +152,17 @@
             "name": "is_premium"
           }
         }
+      },
+      {
+        "ordinal": 15,
+        "name": "requires_signature!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "jig_admin_data",
+            "name": "requires_signature"
+          }
+        }
       }
     ],
     "parameters": {
@@ -175,8 +186,9 @@
       true,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "d858f011cc789f16deeef69ada3ff99c22a5677d6ce467c7eae56a7b1a3c3ad3"
+  "hash": "f6d7ff53a7c9d99f4ec740530dde3f09026cfd156f85ac1373cd3d469f18e8d4"
 }

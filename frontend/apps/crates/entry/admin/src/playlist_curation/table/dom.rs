@@ -116,6 +116,15 @@ impl PlaylistTable {
                         }),
 
                         html!("input-checkbox", {
+                            .prop("title", "Requires signature")
+                            .prop_signal("checked", playlist.requires_signature.signal())
+                            .event(clone!(state, playlist => move |_evt: events::CustomToggle| {
+                                playlist.requires_signature.set(!playlist.requires_signature.get());
+                                state.curation_state.save_admin_data(&playlist);
+                            }))
+                        }),
+
+                        html!("input-checkbox", {
                             .prop_signal("checked", playlist.premium.signal())
                             .event(clone!(state, playlist => move |_evt: events::CustomToggle| {
                                 playlist.premium.set(!playlist.premium.get());

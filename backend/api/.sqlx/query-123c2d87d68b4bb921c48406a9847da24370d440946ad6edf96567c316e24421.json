@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\nselect course.id                               as \"id!: CourseId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       rating                                   as \"rating?: CourseRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       is_premium                               as \"premium!\"\nfrom course\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\ninner join course_admin_data \"admin\" on admin.course_id = course.id\norder by ord asc\n    ",
+  "query": "\nselect course.id                               as \"id!: CourseId\",\n       creator_id                               as \"creator_id?: UserId\",\n       author_id                                as \"author_id?: UserId\",\n       (select given_name || ' '::text || family_name\n        from user_profile\n        where user_profile.user_id = author_id) as \"author_name\",\n       live_id                                  as \"live_id!\",\n       draft_id                                 as \"draft_id!\",\n       published_at,\n       likes                                    as \"likes!\",\n       plays                                    as \"plays!\",\n       live_up_to_date                          as \"live_up_to_date!\",\n       rating                                   as \"rating?: CourseRating\",\n       blocked                                  as \"blocked!\",\n       curated                                  as \"curated!\",\n       is_premium                               as \"premium!\",\n       requires_signature as \"requires_signature!\"\nfrom course\ninner join unnest($1::uuid[])\n    with ordinality t(id, ord) using (id)\ninner join course_admin_data \"admin\" on admin.course_id = course.id\norder by ord asc\n    ",
   "describe": {
     "columns": [
       {
@@ -151,6 +151,17 @@
             "name": "is_premium"
           }
         }
+      },
+      {
+        "ordinal": 14,
+        "name": "requires_signature!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "course_admin_data",
+            "name": "requires_signature"
+          }
+        }
       }
     ],
     "parameters": {
@@ -172,8 +183,9 @@
       true,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "74aaf68216b82e2866c8d21ff4491b475fc9dae1782412ebc24b43639c89d135"
+  "hash": "123c2d87d68b4bb921c48406a9847da24370d440946ad6edf96567c316e24421"
 }

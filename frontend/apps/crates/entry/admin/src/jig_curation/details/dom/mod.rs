@@ -141,6 +141,16 @@ impl JigDetails {
                                 }),
                             ])
                         }),
+                        html!("input-wrapper", {
+                            .prop("label", "Requires signature")
+                            .child(html!("input-checkbox", {
+                                .prop("title", "Requires signature")
+                                .prop_signal("checked", state.jig.requires_signature.signal())
+                                .event(clone!(state => move |_evt: events::CustomToggle| {
+                                    state.jig.requires_signature.set(!state.jig.requires_signature.get());
+                                }))
+                            }))
+                        }),
                         state.render_languages(),
                         state.render_ages(),
                         state.render_affiliations(),

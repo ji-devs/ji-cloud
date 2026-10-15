@@ -140,7 +140,8 @@ with cte as (
            rating,
            blocked,
            curated,
-           is_premium
+           is_premium,
+           requires_signature
     from course
     left join course_admin_data "admin" on admin.course_id = course.id
     where id = $1
@@ -168,6 +169,7 @@ select cte.course_id                                          as "course_id: Cou
        blocked                                              as "blocked!",
        curated                                              as "curated!",
        is_premium                                           as "premium!",
+       requires_signature as "requires_signature!",
        (
             select row(course_data_module.id, course_data_module.stable_id, kind, is_complete)
             from course_data_module
@@ -256,6 +258,7 @@ from course_data
             blocked: row.blocked,
             curated: row.curated,
             premium: row.premium,
+            requires_signature: row.requires_signature,
         },
         share_url: String::new(),
         student_share_url: String::new(),
@@ -289,7 +292,8 @@ select course.id                               as "id!: CourseId",
        rating                                   as "rating?: CourseRating",
        blocked                                  as "blocked!",
        curated                                  as "curated!",
-       is_premium                               as "premium!"
+       is_premium                               as "premium!",
+       requires_signature as "requires_signature!"
 from course
 inner join unnest($1::uuid[])
     with ordinality t(id, ord) using (id)
@@ -416,6 +420,7 @@ order by ord asc
                 blocked: course_row.blocked,
                 curated: course_row.curated,
                 premium: course_row.premium,
+                requires_signature: course_row.requires_signature,
             },
             share_url: String::new(),
             student_share_url: String::new(),
@@ -490,6 +495,7 @@ select course.id                                                                
     blocked                                    as "blocked!",
     curated                                    as "curated!",
     is_premium                                 as "premium!",
+    requires_signature as "requires_signature!",
     (
         select row(course_data_module.id, course_data_module.stable_id, kind, is_complete)
         from course_data_module
@@ -603,6 +609,7 @@ limit $6
                 blocked: course_data_row.blocked,
                 curated: course_data_row.curated,
                 premium: course_data_row.premium,
+                requires_signature: course_data_row.requires_signature,
             },
             share_url: String::new(),
             student_share_url: String::new(),
@@ -1154,7 +1161,8 @@ set
     rating = coalesce($2, rating),
     blocked = coalesce($3, blocked),
     curated = coalesce($4, curated),
-    is_premium = coalesce($5, is_premium)
+    is_premium = coalesce($5, is_premium),
+    requires_signature = coalesce($6, requires_signature)
 where course_id = $1
 "#,
         course_id.0,
@@ -1162,6 +1170,7 @@ where course_id = $1
         blocked,
         admin_data.curated.into_option(),
         admin_data.premium.into_option(),
+        admin_data.requires_signature.into_option(),
     )
     .execute(&mut *txn)
     .await?;

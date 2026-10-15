@@ -52,6 +52,7 @@ pub struct EditableJig {
     pub rating: Mutable<Option<JigRating>>,
     pub blocked: Mutable<bool>,
     pub premium: Mutable<bool>,
+    pub requires_signature: Mutable<bool>,
     pub likes: Mutable<i64>,
     pub plays: Mutable<i64>,
     pub author_name: Option<String>,
@@ -86,6 +87,7 @@ impl From<JigResponse> for EditableJig {
             rating: Mutable::new(jig.admin_data.rating),
             blocked: Mutable::new(jig.admin_data.blocked),
             premium: Mutable::new(jig.admin_data.premium),
+            requires_signature: Mutable::new(jig.admin_data.requires_signature),
             likes: Mutable::new(jig.likes),
             plays: Mutable::new(jig.plays),
             author_name: jig.author_name,
@@ -120,6 +122,7 @@ impl From<JigId> for EditableJig {
             rating: Default::default(),
             blocked: Default::default(),
             premium: Default::default(),
+            requires_signature: Mutable::new(true),
             likes: Default::default(),
             plays: Default::default(),
             author_name: Default::default(),
@@ -164,6 +167,8 @@ impl EditableJig {
         self.rating.set(jig.admin_data.rating);
         self.blocked.set(jig.admin_data.blocked);
         self.premium.set(jig.admin_data.premium);
+        self.requires_signature
+            .set(jig.admin_data.requires_signature);
     }
 
     pub fn deep_clone(&self) -> Self {
@@ -193,6 +198,7 @@ impl EditableJig {
             rating: Mutable::new(self.rating.get()),
             blocked: Mutable::new(self.blocked.get()),
             premium: Mutable::new(self.premium.get()),
+            requires_signature: Mutable::new(self.requires_signature.get()),
             likes: Mutable::new(self.likes.get()),
             plays: Mutable::new(self.plays.get()),
             author_name: self.author_name.clone(),
@@ -231,6 +237,7 @@ impl EditableJig {
             rating: self.rating.get_cloned().into(),
             blocked: UpdateNonNullable::Change(self.blocked.get()),
             premium: UpdateNonNullable::Change(self.premium.get()),
+            requires_signature: UpdateNonNullable::Change(self.requires_signature.get()),
             ..Default::default()
         }
     }

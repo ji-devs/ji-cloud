@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                select exists(\n                    select 1\n                    from course_admin_data\n                    where course_id = $1 and not requires_signature\n                ) as \"allows_unsigned_play!\"\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "allows_unsigned_play!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2504843f12608f30771ee624b445ff697aab4989f0b527e0069161edda64e011"
+}

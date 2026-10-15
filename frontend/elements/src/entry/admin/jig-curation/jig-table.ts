@@ -47,6 +47,7 @@ export class _ extends LitElement {
     headers: string[] = [
         "Preview",
         "Jig Name",
+        "Requires signature",
         "Premium",
         "Blocked",
         "Author",

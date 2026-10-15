@@ -241,7 +241,8 @@ pub async fn jigs_with_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
                     rating,
                     blocked,
                     curated,
-                    is_premium
+                    is_premium,
+                    requires_signature
                 from jig
                 left join jig_play_count on jig_play_count.jig_id = jig.id
                 left join jig_admin_data "admin" on admin.jig_id = jig.id
@@ -278,6 +279,7 @@ pub async fn jigs_with_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
                 cte.blocked                                        as "blocked",
                 cte.curated,
                 cte.is_premium                                     as "premium",
+                cte.requires_signature as "requires_signature!",
                 array(select row (unnest(audio_feedback_positive))) as "audio_feedback_positive!: Vec<(AudioFeedbackPositive,)>",
                 array(select row (unnest(audio_feedback_negative))) as "audio_feedback_negative!: Vec<(AudioFeedbackNegative,)>",
                 array(
@@ -326,7 +328,7 @@ pub async fn jigs_with_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
                 inner join cte on cte.live_id = jig_data.id
                 inner join jig_code on cte.jig_id = jig_code.jig_id
             where jig_code.creator_id = $1
-            group by cte.jig_id, display_name, cte.creator_id, cte.author_id, author_id, author_name, updated_at, published_at, privacy_level, language, description, translated_description, theme, audio_background, liked_count, play_count, live_up_to_date, locked, other_keywords, translated_keywords, rating, blocked, curated, premium, audio_feedback_positive, audio_feedback_negative, jig_data.created_at, jig_data.updated_at, jig_data.direction, jig_data.scoring, jig_data.drag_assist, jig_data.id, "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>", "categories!: Vec<(CategoryId,)>", "affiliations!: Vec<(AffiliationId,)>", "age_ranges!: Vec<(AgeRangeId,)>", "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
+            group by cte.jig_id, display_name, cte.creator_id, cte.author_id, author_id, author_name, updated_at, published_at, privacy_level, language, description, translated_description, theme, audio_background, liked_count, play_count, live_up_to_date, locked, other_keywords, translated_keywords, rating, blocked, curated, premium, cte.requires_signature, audio_feedback_positive, audio_feedback_negative, jig_data.created_at, jig_data.updated_at, jig_data.direction, jig_data.scoring, jig_data.drag_assist, jig_data.id, "modules!: Vec<(ModuleId, StableModuleId, ModuleKind, bool)>", "categories!: Vec<(CategoryId,)>", "affiliations!: Vec<(AffiliationId,)>", "age_ranges!: Vec<(AgeRangeId,)>", "additional_resource!: Vec<(AddId, String, TypeId, Value)>"
             order by last_code_created_at desc
         "#,
         user_id.0
@@ -447,6 +449,7 @@ pub async fn jigs_with_codes(db: &PgPool, user_id: UserId) -> sqlx::Result<Vec<J
                     blocked: row.blocked,
                     curated: row.curated,
                     premium: row.premium,
+                    requires_signature: row.requires_signature,
                 },
                 max_score: row.max_score as u32,
                 share_url: String::new(),
