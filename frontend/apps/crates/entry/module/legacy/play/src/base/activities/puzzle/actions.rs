@@ -36,6 +36,8 @@ use utils::{
 };
 use wasm_bindgen_futures::spawn_local;
 
+const DRAG_MOVE_THRESHOLD_PX: i32 = 20;
+
 impl Puzzle {
     pub fn on_start(self: Rc<Self>) {
         let state = self;
@@ -261,6 +263,9 @@ impl PuzzleGame {
 
 impl PuzzleItem {
     pub fn start_drag(&self, x: i32, y: i32, game: Rc<PuzzleGame>) {
+        self.drag_moved.set(false);
+        self.drag_movement_px.set((0, 0));
+
         *self.drag.borrow_mut() = Some(Rc::new(Drag::new(x, y, 0.0, 0.0, true, ())));
 
         if let Some(audio_filename) = self.raw.audio_filename.as_ref() {
@@ -278,8 +283,24 @@ impl PuzzleItem {
     pub fn try_move_drag(&self, x: i32, y: i32) {
         if let Some(drag) = self.drag.borrow_mut().as_mut() {
             if let Some((_, diff)) = drag.update(x, y) {
+                let (drag_movement_x_px, drag_movement_y_px) = self.drag_movement_px.get();
+                let drag_movement_px = (drag_movement_x_px + diff.x, drag_movement_y_px + diff.y);
+                self.drag_movement_px.set(drag_movement_px);
+
+                let moved_px = drag_movement_px.0.pow(2) + drag_movement_px.1.pow(2);
+
+                let movement_px = if self.drag_moved.get() {
+                    (diff.x, diff.y)
+                } else if moved_px >= DRAG_MOVE_THRESHOLD_PX.pow(2) {
+                    self.drag_moved.set(true);
+                    drag_movement_px
+                } else {
+                    return;
+                };
+
                 let resize_info = get_resize_info();
-                let (diff_x, diff_y) = resize_info.get_px_normalized(diff.x as f64, diff.y as f64);
+                let (diff_x, diff_y) =
+                    resize_info.get_px_normalized(movement_px.0 as f64, movement_px.1 as f64);
 
                 self.curr_transform_matrix.replace_with(|m| {
                     m.add_translation(&[diff_x * -1.0, diff_y * -1.0, 0.0]);
@@ -290,7 +311,11 @@ impl PuzzleItem {
     }
 
     pub fn try_end_drag(&self, _x: i32, _y: i32) -> bool {
-        self.drag.borrow().is_some()
+        if self.drag.borrow_mut().take().is_some() {
+            self.drag_moved.get()
+        } else {
+            false
+        }
     }
 
     pub fn evaluate(&self, fly_back_to_origin: bool) -> bool {

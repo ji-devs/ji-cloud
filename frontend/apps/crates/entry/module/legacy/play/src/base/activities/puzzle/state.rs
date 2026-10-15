@@ -56,6 +56,8 @@ pub struct PuzzleItem {
     pub orig_transform_matrix: Matrix4,
     pub curr_transform_matrix: RefCell<Matrix4>,
     pub drag: RefCell<Option<Rc<Drag<()>>>>,
+    pub drag_moved: Cell<bool>,
+    pub drag_movement_px: Cell<(i32, i32)>,
 }
 
 #[derive(Clone)]
@@ -168,6 +170,8 @@ impl PuzzleItem {
             orig_transform_matrix: orig_transform_matrix.clone(),
             curr_transform_matrix: RefCell::new(orig_transform_matrix),
             drag: RefCell::new(None),
+            drag_moved: Cell::new(false),
+            drag_movement_px: Cell::new((0, 0)),
         })
     }
 }
