@@ -9,19 +9,16 @@ use futures_signals::{
     signal::{Signal, SignalExt},
     signal_vec::SignalVecExt,
 };
-use shared::domain::{
-    asset::{Asset, DraftOrLive},
-    jig::JigResponse,
-};
+use shared::domain::asset::{Asset, DraftOrLive};
 use std::rc::Rc;
 
 use super::state::*;
 
-use utils::{asset::AssetPlayerOptions, events, toasts, unwrap::UnwrapJiExt};
+use utils::{events, toasts, unwrap::UnwrapJiExt};
 
 const STR_LOAD_MORE: &str = "See more";
 
-impl FeaturedJigs {
+impl FeaturedAssets {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
 
@@ -49,20 +46,28 @@ impl FeaturedJigs {
                 .event(clone!(state => move |e: events::CustomDrop| {
                     state.dragging_over_drop_section.set(false);
                     if let Some(data) = e.detail().as_string() {
-                        let jig: JigResponse = serde_json::from_str(&data).unwrap();
-                        let mut featured_jigs = state.featured_jigs.lock_mut();
-                        if featured_jigs.iter().any(|j| j.id == jig.id) {
-                            toasts::error("Jig already in featured list");
+                        let asset: Asset = match serde_json::from_str(&data) {
+                            Ok(asset) if state.kind.accepts(&asset) => asset,
+                            _ => {
+                                toasts::error(state.kind.invalid_error());
+                                return;
+                            },
+                        };
+
+                        let mut featured_assets = state.featured_assets.lock_mut();
+                        if featured_assets.iter().any(|selected| selected.id() == asset.id()) {
+                            toasts::error(state.kind.duplicate_error());
                         } else {
-                            featured_jigs.push_cloned(jig);
+                            featured_assets.push_cloned(asset);
+                            drop(featured_assets);
                             state.update_featured();
                         }
                     }
                 }))
                 .child(html!("h4", {
-                    .text("Drag in JIGs")
+                    .text(state.kind.instructions())
                 }))
-                .children_signal_vec(state.featured_jigs.signal_vec_cloned().enumerate().map(clone!(state => move |(i, jig)| {
+                .children_signal_vec(state.featured_assets.signal_vec_cloned().enumerate().map(clone!(state => move |(i, asset)| {
                     html!("div", {
                         .style("margin-block", "30px")
                         .style("font-size", "12px")
@@ -82,7 +87,7 @@ impl FeaturedJigs {
                                     .text("up")
                                     .event(clone!(state, i => move |_: events::Click| {
                                         if let Some(i) = i.get() {
-                                            state.featured_jigs.lock_mut().swap(i, i-1);
+                                            state.featured_assets.lock_mut().swap(i, i-1);
                                             state.update_featured();
                                         }
                                     }))
@@ -90,7 +95,7 @@ impl FeaturedJigs {
                                 html!("button", {
                                     .prop_signal("disabled", map_ref! {
                                         let i = i.signal(),
-                                        let len = state.featured_jigs.signal_vec_cloned().len() => match i {
+                                        let len = state.featured_assets.signal_vec_cloned().len() => match i {
                                             Some(i) => *i == len - 1,
                                             None => true,
                                         }
@@ -98,7 +103,7 @@ impl FeaturedJigs {
                                     .text("down")
                                     .event(clone!(state, i => move |_: events::Click| {
                                         if let Some(i) = i.get() {
-                                            state.featured_jigs.lock_mut().swap(i, i+1);
+                                            state.featured_assets.lock_mut().swap(i, i+1);
                                             state.update_featured();
                                         }
                                     }))
@@ -107,15 +112,15 @@ impl FeaturedJigs {
                                     .text("delete")
                                     .event(clone!(state, i => move |_: events::Click| {
                                         if let Some(i) = i.get() {
-                                            state.featured_jigs.lock_mut().remove(i);
+                                            state.featured_assets.lock_mut().remove(i);
                                             state.update_featured();
                                         }
                                     }))
                                 }),
                            ])
                         }))
-                        .child(ModuleThumbnail::new(jig.id.into(), jig.jig_data.modules.get(0).cloned(), ThumbnailFallback::Asset, DraftOrLive::Live).render(None))
-                        .text(&jig.jig_data.display_name)
+                        .child(ModuleThumbnail::new(asset.id(), asset.cover().cloned(), ThumbnailFallback::Asset, DraftOrLive::Live).render(None))
+                        .text(asset.display_name())
                     })
                 })))
             }))
@@ -137,15 +142,15 @@ impl FeaturedJigs {
             .style("background-color", "#d8e7fa")
             .child(state.search_bar.render_bar(Rc::clone(&search_callback)))
             .child(html!("home-search-results", {
-                .prop_signal("jigCount", state.total_jig_count.signal())
+                .prop_signal(state.kind.count_prop(), state.total_count.signal())
                 .prop_signal("query", state.active_query.signal_cloned())
                 .child(html!("home-search-results-section", {
                     .prop("slot", "sections")
-                    .prop("kind", "jig")
+                    .prop("kind", state.kind.search_kind())
                     .prop("dense", true)
-                    .prop_signal("resultsCount", state.total_jig_count.signal())
-                    .children_signal_vec(state.search_results.signal_vec_cloned().map(clone!(state => move |jig| {
-                        state.render_jig(&jig)
+                    .prop_signal("resultsCount", state.total_count.signal())
+                    .children_signal_vec(state.search_results.signal_vec_cloned().map(clone!(state => move |asset| {
+                        state.render_asset(&asset)
                     })))
                     .child_signal(state.all_loaded_signal().map(clone!(state => move |all_loaded| {
                         match all_loaded {
@@ -168,7 +173,7 @@ impl FeaturedJigs {
             }))
             .child_signal(state.drag.signal_ref(clone!(state => move|drag| {
                 drag.as_ref().map(|drag| {
-                    let jig = drag.data.clone();
+                    let asset = drag.data.clone();
                     html!("div", {
                         .style("position", "fixed")
                         .style("top", "0")
@@ -195,7 +200,7 @@ impl FeaturedJigs {
                             }
                         }))
                         .child(render_asset_card(
-                            &Asset::Jig(jig),
+                            &asset,
                             AssetCardConfig {
                                 bottom_indicator: AssetCardBottomIndicator::Author,
                                 dense: true,
@@ -205,16 +210,13 @@ impl FeaturedJigs {
                     })
                 })
             })))
-            .child_signal(state.play_jig.signal_cloned().map(clone!(state => move|play_jig| {
-                play_jig.map(|jig_id| {
+            .child_signal(state.play_asset.signal_cloned().map(clone!(state => move|play_asset| {
+                play_asset.map(|asset_id| {
                     let close = clone!(state => move || {
-                        state.play_jig.set(None);
+                        state.play_asset.set(None);
                     });
-                    PlayerPopup::new(
-                        jig_id.into(),
-                        None,
-                        None,
-                        AssetPlayerOptions::Jig(Default::default()),
+                    PlayerPopup::new_default_player_options(
+                        asset_id,
                         PreviewPopupCallbacks::new(close)
                     ).render(Some("player"))
                 })
@@ -222,32 +224,31 @@ impl FeaturedJigs {
         })
     }
 
-    fn render_jig(self: &Rc<Self>, jig: &Rc<JigResponse>) -> Dom {
+    fn render_asset(self: &Rc<Self>, asset: &Rc<Asset>) -> Dom {
         let state = self;
-        let jig_id = jig.id;
-        let asset: Asset = (**jig).clone().into();
+        let asset_id = asset.id();
         html!("div", {
             .prop("slot", "results")
             .style("cursor", "grab")
             .style("touch-action", "none")
             .style("user-select", "none")
-            .style_signal("filter", state.drag.signal_ref(clone!(jig => move |drag| {
+            .style_signal("filter", state.drag.signal_ref(clone!(asset => move |drag| {
                 match drag {
-                    Some(drag) if drag.data.id == jig.id => "grayscale(100%) opacity(0.5)",
+                    Some(drag) if drag.data.id() == asset.id() => "grayscale(100%) opacity(0.5)",
                     _ => "none",
                 }
             })))
             .event_with_options(
                 &EventOptions::bubbles(),
-                clone!(state, jig => move |evt: events::PointerDown| {
+                clone!(state, asset => move |evt: events::PointerDown| {
                     if evt.is_primary() {
                         let elem = evt.dyn_target().unwrap_ji();
-                        state.on_pointer_down(&elem, evt.x(), evt.y(), &jig);
+                        state.on_pointer_down(&elem, evt.x(), evt.y(), &asset);
                     }
                 })
             )
             .child(render_asset_card(
-                &asset,
+                asset,
                 AssetCardConfig {
                     bottom_indicator: AssetCardBottomIndicator::Author,
                     dense: true,
@@ -258,7 +259,7 @@ impl FeaturedJigs {
                                 html!("menu-line", {
                                     .prop("icon", "jig-play")
                                     .event(clone!(state => move |_: events::Click| {
-                                        state.play_jig.set(Some(jig_id));
+                                        state.play_asset.set(Some(asset_id));
                                     }))
                                 })
                             ])
@@ -273,7 +274,7 @@ impl FeaturedJigs {
     fn all_loaded_signal(self: &Rc<Self>) -> impl Signal<Item = bool> {
         map_ref! {
             let list_len = self.search_results.signal_vec_cloned().len(),
-            let total = self.total_jig_count.signal() => move {
+            let total = self.total_count.signal() => move {
                 *list_len >= *total as usize
             }
         }

@@ -27,6 +27,7 @@ impl Sidebar {
                 None => Vec::new(),
                 Some(profile) => vec![
                     SidebarItem::new(AdminRoute::FeaturedJigs, profile, &curr_route),
+                    SidebarItem::new(AdminRoute::FeaturedPlaylists, profile, &curr_route),
                     SidebarItem::new(AdminRoute::Images, profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageAdd, profile, &curr_route),
                     SidebarItem::new(AdminRoute::ImageSearch(None), profile, &curr_route),
@@ -85,6 +86,7 @@ impl SidebarItem {
     ) -> Rc<Self> {
         let id = match target_route {
             AdminRoute::FeaturedJigs => "featured-jigs",
+            AdminRoute::FeaturedPlaylists => "featured-playlists",
             AdminRoute::Categories => "category",
             AdminRoute::Locale => "locale",
             AdminRoute::ImageAdd => "image-add",

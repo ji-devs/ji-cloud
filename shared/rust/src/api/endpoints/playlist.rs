@@ -4,7 +4,8 @@ use crate::{
         playlist::{
             ListLikedPath, ListLikedRequest, ListLikedResponse, PlaylistAdminDataUpdatePath,
             PlaylistBrowsePath, PlaylistBrowseQuery, PlaylistBrowseResponse, PlaylistClonePath,
-            PlaylistCreatePath, PlaylistCreateRequest, PlaylistDeletePath, PlaylistGetDraftPath,
+            PlaylistCreatePath, PlaylistCreateRequest, PlaylistDeletePath, PlaylistFeaturedPath,
+            PlaylistFeaturedResponse, PlaylistFeaturedUpdateRequest, PlaylistGetDraftPath,
             PlaylistGetLivePath, PlaylistId, PlaylistLikePath, PlaylistLikedPath,
             PlaylistLikedResponse, PlaylistPublishPath, PlaylistResponse, PlaylistSearchPath,
             PlaylistSearchQuery, PlaylistSearchResponse, PlaylistShareUrlPath,
@@ -136,6 +137,26 @@ impl ApiEndpoint for Search {
     type Path = PlaylistSearchPath;
     type Err = EmptyError;
     const METHOD: Method = Method::Get;
+}
+
+/// Featured playlists.
+pub struct Featured;
+impl ApiEndpoint for Featured {
+    type Req = ();
+    type Res = PlaylistFeaturedResponse;
+    type Path = PlaylistFeaturedPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Get;
+}
+
+/// Update featured playlists.
+pub struct FeaturedUpdate;
+impl ApiEndpoint for FeaturedUpdate {
+    type Req = PlaylistFeaturedUpdateRequest;
+    type Res = ();
+    type Path = PlaylistFeaturedPath;
+    type Err = EmptyError;
+    const METHOD: Method = Method::Put;
 }
 
 /// Delete a Playlist.

@@ -1,6 +1,6 @@
 use dominator::{class, clone, html, pseudo, Dom};
 use futures_signals::signal::{ReadOnlyMutable, SignalExt};
-use shared::domain::jig::JigResponse;
+use shared::domain::asset::Asset;
 use utils::init::user::{get_user_id, is_user_set};
 
 use std::rc::Rc;
@@ -56,8 +56,8 @@ impl Home {
                     HomePageMode::Home => {
                         let mut divs = vec![];
                         if is_user_set() {
-                            divs.push(state.render_strip("Trending JIGs", "trending", state.trending.read_only()));
-                            divs.push(state.render_strip("Top picks", "featured", state.featured.read_only()));
+                            divs.push(state.render_strip("Top Playlists", "trending", state.featured_playlists.read_only()));
+                            divs.push(state.render_strip("Top JIGs", "featured", state.featured.read_only()));
                             divs.push(state.render_strip("My likes", "liked", state.liked.read_only()));
                             divs.push(state.render_strip("Recently played", "played", state.played.read_only()));
                         }
@@ -95,18 +95,18 @@ impl Home {
         })
     }
 
-    pub fn render_strip(
+    pub fn render_strip<T: Clone + Into<Asset> + 'static>(
         self: &Rc<Self>,
         heading: &str,
         icon: &str,
-        jigs: ReadOnlyMutable<Option<Vec<JigResponse>>>,
+        assets: ReadOnlyMutable<Option<Vec<T>>>,
     ) -> Dom {
         let state = self;
         let user_id = get_user_id();
         html!("div", {
-            .visible_signal(jigs.signal_ref(|trending| {
-                match trending {
-                    Some(jigs) if jigs.is_empty() => false,
+            .visible_signal(assets.signal_ref(|assets| {
+                match assets {
+                    Some(assets) if assets.is_empty() => false,
                     _ => true,
                 }
             }))
@@ -144,14 +144,15 @@ impl Home {
                         .style("scrollbar-color", "var(--light-gray-1) transparent")
                     })
                 })
-                .children_signal_vec(jigs.signal_cloned().map(clone!(state => move |trending| {
-                    match trending {
+                .children_signal_vec(assets.signal_cloned().map(clone!(state => move |assets| {
+                    match assets {
                         None => vec![html!("progress")],
-                        Some(trending) => {
-                            trending.into_iter().map(|jig| {
-                                let jig_id = jig.id;
-                                render_flippable_asset_card(Rc::new(jig.into()), user_id, Box::new(clone!(state => move || {
-                                    state.play_asset.set(Some(jig_id.into()));
+                        Some(assets) => {
+                            assets.into_iter().map(|asset| {
+                                let asset: Asset = asset.into();
+                                let asset_id = asset.id();
+                                render_flippable_asset_card(Rc::new(asset), user_id, Box::new(clone!(state => move || {
+                                    state.play_asset.set(Some(asset_id));
                                 })))
                             }).collect()
                         },

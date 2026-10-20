@@ -6,7 +6,10 @@ use futures::join;
 
 use shared::{
     api::endpoints,
-    domain::jig::{JigFeaturedPath, JigSearchPath, JigTrendingPath, ListLikedPath, ListPlayedPath},
+    domain::{
+        jig::{JigFeaturedPath, JigSearchPath, ListLikedPath, ListPlayedPath},
+        playlist::PlaylistFeaturedPath,
+    },
 };
 use std::{collections::HashMap, rc::Rc};
 use utils::{bail_on_err, init::analytics, metadata::get_age_ranges, prelude::*};
@@ -37,7 +40,7 @@ pub fn fetch_data(state: Rc<Home>, is_search: bool) {
                 join!(
                     fetch_total_jigs_count(Rc::clone(&state)),
                     fetch_profile(Rc::clone(&state)),
-                    fetch_trending(Rc::clone(&state)),
+                    fetch_featured_playlists(Rc::clone(&state)),
                     fetch_featured(Rc::clone(&state)),
                 );
                 if is_user_set() {
@@ -70,12 +73,12 @@ async fn fetch_profile(state: Rc<Home>) {
     }
 }
 
-async fn fetch_trending(state: Rc<Home>) {
-    let res = endpoints::jig::Trending::api_with_auth(JigTrendingPath(), None)
+async fn fetch_featured_playlists(state: Rc<Home>) {
+    let res = endpoints::playlist::Featured::api_with_auth(PlaylistFeaturedPath(), None)
         .await
         .toast_on_err();
     let res = bail_on_err!(res);
-    state.trending.set(Some(res.jigs));
+    state.featured_playlists.set(Some(res.playlists));
 }
 
 async fn fetch_featured(state: Rc<Home>) {

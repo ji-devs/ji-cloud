@@ -32,7 +32,10 @@ use crate::{
     sidebar::Sidebar,
     users::Users,
 };
-use crate::{course_curation::CourseCuration, featured_jigs::FeaturedJigs};
+use crate::{
+    course_curation::CourseCuration,
+    featured_assets::{FeaturedAssets, FeaturedKind},
+};
 use std::cell::RefCell;
 
 pub struct Router {
@@ -106,7 +109,8 @@ impl Router {
                                         } else {
                                             match route.clone() {
                                                 AdminRoute::Landing => Some(state.with_child(route, html!("empty-fragment"))),
-                                                AdminRoute::FeaturedJigs => Some(state.with_child(route, FeaturedJigs::new().render())),
+                                                AdminRoute::FeaturedJigs => Some(state.with_child(route, FeaturedAssets::new(FeaturedKind::Jigs).render())),
+                                                AdminRoute::FeaturedPlaylists => Some(state.with_child(route, FeaturedAssets::new(FeaturedKind::Playlists).render())),
                                                 AdminRoute::Categories=> Some(state.with_child(route, CategoriesPage::render())),
                                                 AdminRoute::Locale => {
                                                     let app_state = Rc::new(LocaleLoaderState::new());

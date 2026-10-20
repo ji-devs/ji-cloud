@@ -2,7 +2,7 @@ use std::{iter, rc::Rc};
 
 use dominator_helpers::futures::AsyncLoader;
 use futures_signals::signal::Mutable;
-use shared::domain::{asset::AssetId, jig::JigResponse};
+use shared::domain::{asset::AssetId, jig::JigResponse, playlist::PlaylistResponse};
 
 use components::{
     asset_search_bar::{AssetSearchBar, SearchSelected},
@@ -24,7 +24,7 @@ pub struct Home {
     pub teachers_testimonials: Vec<Testimonial>,
     pub total_assets_count: Mutable<u64>,
     pub play_asset: Mutable<Option<AssetId>>,
-    pub trending: Mutable<Option<Vec<JigResponse>>>,
+    pub featured_playlists: Mutable<Option<Vec<PlaylistResponse>>>,
     pub featured: Mutable<Option<Vec<JigResponse>>>,
     pub liked: Mutable<Option<Vec<JigResponse>>>,
     pub played: Mutable<Option<Vec<JigResponse>>>,
@@ -53,7 +53,7 @@ impl Home {
             teachers_testimonials: Self::get_teachers_testimonials(),
             total_assets_count: Mutable::new(0),
             play_asset: Mutable::new(None),
-            trending: Mutable::new(None),
+            featured_playlists: Mutable::new(None),
             featured: Mutable::new(None),
             liked: Mutable::new(None),
             played: Mutable::new(None),

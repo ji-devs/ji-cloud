@@ -15,6 +15,7 @@ export type ID =
     | "category"
     | "image-tags"
     | "featured-jigs"
+    | "featured-playlists"
     | "export";
 
 const STR_LABEL_LOOKUP: { [key in ID]: string } = {
@@ -31,6 +32,7 @@ const STR_LABEL_LOOKUP: { [key in ID]: string } = {
     "category": "Edit categories",
     "locale": "Localization",
     "featured-jigs": "Featured jigs",
+    "featured-playlists": "Featured playlists",
     "export": "Export",
 };
 

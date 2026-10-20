@@ -5,7 +5,7 @@ use actix_web::{
 use futures::try_join;
 use ji_core::settings::RuntimeSettings;
 use shared::domain::{
-    playlist::{ListLikedResponse, PlaylistShareUrlResponse},
+    playlist::{ListLikedResponse, PlaylistFeaturedResponse, PlaylistShareUrlResponse},
     user::UserScope,
 };
 use shared::{
@@ -537,10 +537,51 @@ async fn get_share_url(
     })
 }
 
+async fn featured(
+    db: Data<PgPool>,
+    settings: Data<RuntimeSettings>,
+    claims: Option<TokenUser>,
+) -> Result<Json<<playlist::Featured as ApiEndpoint>::Res>, error::Server> {
+    let user_id = claims.map(|c| c.user_id());
+    let ids = db::playlist::featured(&*db).await?;
+
+    let mut playlists = db::playlist::get_by_ids(&db, &ids, DraftOrLive::Live, user_id)
+        .await
+        .into_anyhow()?;
+
+    for playlist in &mut playlists {
+        share_url::add_share_url_to_playlist(&settings, playlist);
+    }
+
+    Ok(Json(PlaylistFeaturedResponse { playlists }))
+}
+
+async fn update_featured(
+    db: Data<PgPool>,
+    _auth: TokenUserWithScope<ScopeAdmin>,
+    req: Json<<playlist::FeaturedUpdate as ApiEndpoint>::Req>,
+) -> Result<HttpResponse, error::NotFound> {
+    let req = req.into_inner();
+
+    db::playlist::update_featured(&*db, req.playlists)
+        .await
+        .map_err(|_| error::NotFound::ResourceNotFound)?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 pub fn configure(cfg: &mut ServiceConfig) {
     cfg.route(
         <playlist::Create as ApiEndpoint>::Path::PATH,
         playlist::Create::METHOD.route().to(create),
+    )
+    .route(
+        <playlist::Featured as ApiEndpoint>::Path::PATH,
+        playlist::Featured::METHOD.route().to(featured),
+    )
+    .route(
+        <playlist::FeaturedUpdate as ApiEndpoint>::Path::PATH,
+        playlist::FeaturedUpdate::METHOD.route().to(update_featured),
     )
     .route(
         <playlist::GetLive as ApiEndpoint>::Path::PATH,

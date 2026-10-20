@@ -519,6 +519,24 @@ make_path_parts!(PlaylistUnlikePath => "/v1/playlist/{}/unlike" => PlaylistId);
 
 make_path_parts!(PlaylistLikedPath => "/v1/playlist/{}/like" => PlaylistId);
 
+make_path_parts!(PlaylistFeaturedPath => "/v1/playlist/featured");
+
+/// Response for featured playlists.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct PlaylistFeaturedResponse {
+    /// The playlists returned.
+    pub playlists: Vec<PlaylistResponse>,
+}
+
+/// Update the ordered featured playlists.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct PlaylistFeaturedUpdateRequest {
+    /// The playlists to feature.
+    pub playlists: Vec<PlaylistId>,
+}
+
 make_path_parts!(ListLikedPath => "/v1/playlist/likes");
 
 /// Response for request for list of liked playlists.

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            insert into featured_playlists\n                (playlist_id, index)\n            values\n                ($1, $2)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4188d8bce14b6cea99388bdbe52ea3293bcb046b7e7e9b404fc60357a3265b9e"
+}

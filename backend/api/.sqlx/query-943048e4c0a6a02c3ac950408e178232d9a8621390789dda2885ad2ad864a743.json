@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        truncate table featured_playlists\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "943048e4c0a6a02c3ac950408e178232d9a8621390789dda2885ad2ad864a743"
+}

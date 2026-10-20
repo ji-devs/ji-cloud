@@ -1432,3 +1432,51 @@ pub async fn playlists_export(db: &sqlx::PgPool) -> anyhow::Result<Vec<AdminPlay
         })
         .collect())
 }
+
+pub async fn featured(db: &PgPool) -> sqlx::Result<Vec<PlaylistId>> {
+    let rows = sqlx::query!(
+        r#"
+        select playlist_id
+        from featured_playlists
+        order by index
+    "#
+    )
+    .fetch_all(db)
+    .await?;
+
+    Ok(rows
+        .into_iter()
+        .map(|row| PlaylistId(row.playlist_id))
+        .collect())
+}
+
+pub async fn update_featured(db: &PgPool, playlists: Vec<PlaylistId>) -> sqlx::Result<()> {
+    let mut txn = db.begin().await?;
+
+    sqlx::query!(
+        r#"
+        truncate table featured_playlists
+    "#
+    )
+    .execute(&mut *txn)
+    .await?;
+
+    for (i, playlist) in playlists.into_iter().enumerate() {
+        sqlx::query!(
+            r#"
+            insert into featured_playlists
+                (playlist_id, index)
+            values
+                ($1, $2)
+        "#,
+            playlist.0,
+            i as i32
+        )
+        .execute(&mut *txn)
+        .await?;
+    }
+
+    txn.commit().await?;
+
+    Ok(())
+}
