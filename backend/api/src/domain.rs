@@ -15,7 +15,7 @@ use shared::domain::billing::AccountId;
 use shared::domain::user::{UserId, UserScope};
 use shared::domain::{
     category::{Category, CategoryId},
-    session::AUTH_COOKIE_NAME,
+    session::auth_cookie_name,
 };
 use shared::error::{AccountError, IntoAnyhow};
 use sqlx::PgPool;
@@ -169,18 +169,18 @@ impl Responder for NoContentClearAuth {
         let mut response = actix_web::HttpResponse::build(StatusCode::NO_CONTENT);
 
         if let Some(domain) = auth_cookie_domain(self.0) {
-            response.cookie(clear_auth_cookie(Some(domain)));
+            response.cookie(clear_auth_cookie(self.0, Some(domain)));
         }
 
         response
             .content_type("application/octet-stream")
-            .cookie(clear_auth_cookie(None))
+            .cookie(clear_auth_cookie(self.0, None))
             .finish()
     }
 }
 
-fn clear_auth_cookie(domain: Option<&'static str>) -> Cookie<'static> {
-    let mut builder = CookieBuilder::new(AUTH_COOKIE_NAME, "")
+fn clear_auth_cookie(remote_target: RemoteTarget, domain: Option<&'static str>) -> Cookie<'static> {
+    let mut builder = CookieBuilder::new(auth_cookie_name(remote_target), "")
         .http_only(true)
         .same_site(SameSite::Strict)
         .path("/");

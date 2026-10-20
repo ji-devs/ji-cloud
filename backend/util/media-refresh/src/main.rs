@@ -133,10 +133,10 @@ fn create_http_client(token: &str, csrf: &str) -> anyhow::Result<reqwest::Client
 
     default_headers.append("X-CSRF", csrf);
 
-    let mut cookie = HeaderValue::from_str(&format!("X-AUTH={}", token))?;
-    cookie.set_sensitive(true);
+    let mut authorization = HeaderValue::from_str(&format!("Bearer {}", token))?;
+    authorization.set_sensitive(true);
 
-    default_headers.append(header::COOKIE, cookie);
+    default_headers.append(header::AUTHORIZATION, authorization);
 
     let client = reqwest::Client::builder()
         .default_headers(default_headers)

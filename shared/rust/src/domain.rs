@@ -102,7 +102,7 @@ pub mod user;
 pub mod auth {
 
     #[deprecated]
-    pub use super::session::AUTH_COOKIE_NAME;
+    pub use super::session::{AUTH_COOKIE_NAME_RELEASE, AUTH_COOKIE_NAME_SANDBOX};
 
     #[deprecated]
     pub use super::session::CSRF_HEADER_NAME;

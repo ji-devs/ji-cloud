@@ -18,7 +18,7 @@ use shared::{
         course::CourseId,
         jig::JigId,
         playlist::PlaylistId,
-        session::AUTH_COOKIE_NAME,
+        session::auth_cookie_name,
         user::{UserId, UserScope},
     },
 };
@@ -338,7 +338,10 @@ async fn auth_user_id(
     db: &PgPool,
     req: &HttpRequest,
 ) -> Option<UserId> {
-    let token_string = req.cookie(AUTH_COOKIE_NAME)?.value().to_owned();
+    let token_string = req
+        .cookie(auth_cookie_name(settings.remote_target()))?
+        .value()
+        .to_owned();
     let token = paseto::validate_local_token(
         &token_string,
         Some(AUTHORIZED_FOOTER),

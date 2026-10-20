@@ -22,7 +22,7 @@ use http::StatusCode;
 use ji_core::settings::RuntimeSettings;
 use rand::thread_rng;
 use shared::domain::{
-    session::{SessionTokenQuery, AUTH_COOKIE_NAME, CSRF_HEADER_NAME},
+    session::{auth_cookie_name, SessionTokenQuery, CSRF_HEADER_NAME},
     user::{UserId, UserScope},
 };
 use sqlx::postgres::PgPool;
@@ -165,7 +165,7 @@ impl FromRequest for TokenUser {
         let (token_string, csrf) = match token {
             Some(token_string) => (token_string, None),
             None => {
-                let cookie = req.cookie(AUTH_COOKIE_NAME);
+                let cookie = req.cookie(auth_cookie_name(settings.remote_target()));
                 let csrf = csrf_header(req.headers());
 
                 match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
@@ -278,7 +278,7 @@ impl<S: Scope> FromRequest for TokenUserWithScope<S> {
         let (token_string, csrf) = match token {
             Some(token_string) => (token_string, None),
             None => {
-                let cookie = req.cookie(AUTH_COOKIE_NAME);
+                let cookie = req.cookie(auth_cookie_name(settings.remote_target()));
                 let csrf = csrf_header(req.headers());
 
                 match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {
@@ -325,7 +325,7 @@ impl<S: Scope> FromRequest for TokenUserNoCsrfWithScope<S> {
         let db: &Data<PgPool> = req.app_data().expect("Missing `Data` for db?");
         let db = db.as_ref().clone();
 
-        let cookie = req.cookie(AUTH_COOKIE_NAME);
+        let cookie = req.cookie(auth_cookie_name(settings.remote_target()));
 
         let token_string = match cookie {
             Some(cookie) => cookie.value().to_owned(),
@@ -408,7 +408,7 @@ impl<S: SessionMaskRequirement> FromRequest for TokenSessionOf<S> {
         let (token_string, csrf) = match token {
             Some(token_string) => (token_string, None),
             None => {
-                let cookie = req.cookie(AUTH_COOKIE_NAME);
+                let cookie = req.cookie(auth_cookie_name(settings.remote_target()));
                 let csrf = csrf_header(req.headers());
 
                 match check_cookie_csrf(cookie, csrf.map(Cow::Owned)) {

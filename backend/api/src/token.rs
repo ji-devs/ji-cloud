@@ -7,7 +7,7 @@ use serde_json::json;
 use shared::{
     config::RemoteTarget,
     domain::{
-        session::AUTH_COOKIE_NAME,
+        session::auth_cookie_name,
         user::{UserId, UserScope},
     },
 };
@@ -218,7 +218,7 @@ fn create_cookie(
     remote_target: RemoteTarget,
     ttl: time::Duration,
 ) -> Cookie<'static> {
-    let mut builder = CookieBuilder::new(AUTH_COOKIE_NAME, token)
+    let mut builder = CookieBuilder::new(auth_cookie_name(remote_target), token)
         .http_only(true)
         .secure(!local_insecure)
         .same_site(SameSite::Lax)
@@ -244,7 +244,7 @@ pub fn auth_cookie_domain(remote_target: RemoteTarget) -> Option<&'static str> {
 #[must_use]
 pub fn clear_host_auth_cookie(remote_target: RemoteTarget) -> Option<Cookie<'static>> {
     auth_cookie_domain(remote_target).map(|_| {
-        let mut cookie = CookieBuilder::new(AUTH_COOKIE_NAME, "")
+        let mut cookie = CookieBuilder::new(auth_cookie_name(remote_target), "")
             .http_only(true)
             .secure(true)
             .same_site(SameSite::Strict)

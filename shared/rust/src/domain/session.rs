@@ -3,15 +3,26 @@
 use std::fmt;
 
 use super::user::UserId;
-use crate::api::endpoints::PathPart;
+use crate::{api::endpoints::PathPart, config::RemoteTarget};
 use macros::make_path_parts;
 use serde::{Deserialize, Serialize};
 
 /// The query key for
 pub const AUTH_QUERY_NAME: &str = "access_token";
 
-/// The name to use for auth cookies.
-pub const AUTH_COOKIE_NAME: &str = "X-AUTH";
+/// The auth cookie name for local and release environments.
+pub const AUTH_COOKIE_NAME_RELEASE: &str = "X-AUTH";
+
+/// The auth cookie name for the sandbox environment.
+pub const AUTH_COOKIE_NAME_SANDBOX: &str = "X-AUTH-SANDBOX";
+
+/// The auth cookie name for the selected environment.
+pub fn auth_cookie_name(remote_target: RemoteTarget) -> &'static str {
+    match remote_target {
+        RemoteTarget::Sandbox => AUTH_COOKIE_NAME_SANDBOX,
+        RemoteTarget::Local | RemoteTarget::Release => AUTH_COOKIE_NAME_RELEASE,
+    }
+}
 
 /// The name of the CSRF header.
 pub const CSRF_HEADER_NAME: &str = "X-CSRF";
@@ -35,8 +46,8 @@ make_path_parts!(CreateSessionPath => "/v1/session");
 ///
 /// 1. Passed as a query  `<uri-to-resource>?access_token=<token>`.
 /// 2. Passed in the request header as `Authorization: Bearer <token>`.
-/// 3. As a cookie, `X-AUTH=<token>`. This token will also be authenticated against the CSRF-prevention
-/// header.
+/// 3. As a cookie, `X-AUTH=<token>` or `X-AUTH-SANDBOX=<token>` in sandbox. This token will also be
+/// authenticated against the CSRF-prevention header.
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub enum CreateSessionResponse {

@@ -52,7 +52,7 @@ async fn _init(remote_target: RemoteTarget) -> Settings {
                     .document()
                     .unwrap_ji()
                     .unchecked_into::<web_sys::HtmlDocument>()
-                    .set_cookie(&format!("{}={}; Path=/", AUTH_COOKIE_NAME, token));
+                    .set_cookie(&format!("{}={}; Path=/", AUTH_COOKIE_NAME_RELEASE, token));
             } else {
                 log::info!("skipping auth for dev mode");
             }
