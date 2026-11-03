@@ -83,24 +83,22 @@ impl Base {
     }
 
     pub fn move_question(&self, old_index: usize, direction: Direction) {
-        let mut questions = self.questions.lock_mut();
-
-        let new_index = match direction {
-            Direction::Up => {
-                if old_index == 0 {
-                    return;
-                }
-                old_index - 1
-            }
-            Direction::Down => {
-                if old_index >= questions.len() - 1 {
-                    return;
-                }
-                old_index + 1
-            }
+        let target = match direction {
+            Direction::Up => old_index.checked_sub(1),
+            Direction::Down => old_index.checked_add(1),
         };
+        if let Some(target) = target {
+            self.move_question_to(old_index, target);
+        }
+    }
 
+    pub fn move_question_to(&self, old_index: usize, new_index: usize) {
+        let mut questions = self.questions.lock_mut();
+        if old_index == new_index || old_index >= questions.len() || new_index >= questions.len() {
+            return;
+        }
         questions.move_from_to(old_index, new_index);
+        drop(questions);
 
         self.history.push_modify(move |raw| {
             if let Some(content) = &mut raw.content {

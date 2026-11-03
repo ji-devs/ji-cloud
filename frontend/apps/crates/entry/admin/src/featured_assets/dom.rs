@@ -24,11 +24,15 @@ impl FeaturedAssets {
 
         state.search();
         state.load_featured();
+        let reorder = utils::reorder::Reorder::new(clone!(state => move |from, to| {
+            state.move_featured(from, to);
+        }));
 
         html!("div", {
             .style("display", "grid")
             .style("grid-template-columns", "180px 1fr")
             .child(html!("div", {
+                .apply(reorder.list())
                 .style("margin", "10px")
                 .style("padding", "10px")
                 .style("border-radius", "10px")
@@ -67,8 +71,13 @@ impl FeaturedAssets {
                 .child(html!("h4", {
                     .text(state.kind.instructions())
                 }))
-                .children_signal_vec(state.featured_assets.signal_vec_cloned().enumerate().map(clone!(state => move |(i, asset)| {
+                .children_signal_vec(state.featured_assets.signal_vec_cloned().enumerate().map(clone!(state, reorder => move |(i, asset)| {
+                    let id = asset.id();
+                    let row = reorder.row(clone!(state => move || {
+                        state.featured_assets.lock_ref().iter().position(|asset| asset.id() == id)
+                    }), || true);
                     html!("div", {
+                        .apply(row.item())
                         .style("margin-block", "30px")
                         .style("font-size", "12px")
                         .style("display", "-webkit-box")
@@ -78,6 +87,7 @@ impl FeaturedAssets {
                         .style("text-overflow", "ellipsis")
                         .child(html!("div", {
                            .style("display", "flex")
+                           .child(row.grip(None))
                            .children(&mut [
                                 html!("button", {
                                     .prop_signal("disabled", i.signal().map(|i| match i {
@@ -87,8 +97,9 @@ impl FeaturedAssets {
                                     .text("up")
                                     .event(clone!(state, i => move |_: events::Click| {
                                         if let Some(i) = i.get() {
-                                            state.featured_assets.lock_mut().swap(i, i-1);
-                                            state.update_featured();
+                                            if let Some(to) = i.checked_sub(1) {
+                                                state.move_featured(i, to);
+                                            }
                                         }
                                     }))
                                 }),
@@ -103,8 +114,7 @@ impl FeaturedAssets {
                                     .text("down")
                                     .event(clone!(state, i => move |_: events::Click| {
                                         if let Some(i) = i.get() {
-                                            state.featured_assets.lock_mut().swap(i, i+1);
-                                            state.update_featured();
+                                            state.move_featured(i, i + 1);
                                         }
                                     }))
                                 }),

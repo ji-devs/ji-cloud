@@ -317,7 +317,9 @@ export class _ extends LitElement {
                 <div class="grid-container">
                     <div class="left">
                         <div class="title-container">
-                            <div class="title">${title}</div>
+                            <div class="title">
+                                ${title}<slot name="reorder"></slot>
+                            </div>
                                 ${subtitle === ""
                                     ? nothing
                                     : html`<div class="subtitle">${subtitle}</div>`  

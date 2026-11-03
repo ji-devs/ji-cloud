@@ -26,10 +26,19 @@ const STR_DELETE_CONFIRM: &str = "Yes, delete";
 const STR_DELETE_CANCEL: &str = "Don't delete";
 
 impl SpotState {
-    pub fn render(self: &Rc<Self>) -> Dom {
+    pub fn render(self: &Rc<Self>, reorder: &Rc<utils::reorder::Reorder>) -> Dom {
         let state = self;
 
-        let is_filler = Some(state.index) == state.drag_target_index;
+        let row = reorder.row(clone!(state => move || {
+            let spots = state.sidebar.asset_edit_state.sidebar_spots.lock_ref();
+            let index = spots.iter().position(|spot| Rc::ptr_eq(spot, &state.spot))?;
+            let end = spots.len() - usize::from(spots.last().map_or(false, |spot| spot.item.is_none()));
+            if index > 0 && index < end {
+                Some(index)
+            } else {
+                None
+            }
+        }), clone!(state => move || state.spot.item.is_some()));
 
         let is_incomplete_signal = map_ref! {
             let is_complete = not(state.spot.is_incomplete.signal()),
@@ -60,24 +69,11 @@ impl SpotState {
                     None
                 }
             })))
-            .child(html!("jig-edit-sidebar-filler", {
-                .style("display", {
-                    if is_filler { "block" } else {"none"}
-                })
-            }))
             .child(html!("jig-sidebar-module", {
-                .future(SpotState::drag_overlap_signal(state.clone()).for_each(clone!(state => move |overlap| {
-                    if overlap {
-                        state.sidebar.drag_target_index.set(Some(state.index));
-                    }
-                    // Doing this here instead of immediately on mousemove
-                    // gives us a nice separation of concerns
-                    // e.g. to throttle
-                    // actions::update_index(state.clone(), pos.x, pos.y);
-                    async {}
-                })))
-                .style("display", {
-                    if is_filler { "none" } else {"block"}
+                .style("display", "block")
+                .apply(row.item())
+                .apply_if(state.index > 0 && state.spot.item.is_some(), |dom| {
+                    dom.child(row.grip(Some("reorder")))
                 })
                 .prop("assetType", state.asset_type())
                 .prop("module", state.kind_str())
@@ -85,10 +81,6 @@ impl SpotState {
                 .prop("index", state.index as u32)
                 .prop_signal("collapsed", state.sidebar.collapsed.signal())
                 .prop_signal("selected", state.is_selected_signal())
-                // TODO:
-                // .event(|_evt:events::MouseDown| {
-                //     actions::mouse_down(state.clone(), evt.x(), evt.y());
-                // })
                 .event_with_options(
                     &EventOptions::bubbles(),
                     clone!(state => move |_evt:events::Click| {
@@ -338,13 +330,6 @@ impl SpotState {
                             })
                         })))
                     })
-                }))
-                .after_inserted(clone!(state => move |dom| {
-                    *state.elem.borrow_mut() = Some(dom);
-                    //*state.sidebar.drag_targets.borrow_mut().
-                }))
-                .after_removed(clone!(state => move |_dom| {
-                    *state.elem.borrow_mut() = None;
                 }))
                 // Add the menu only if the current module is not a placeholder or if it is, it is
                 // not the _last_ placeholder.

@@ -1,14 +1,14 @@
 use super::{
-    course::settings::CourseSettings, dragging::state::State as DragState,
-    jig::settings::JigSettings, playlist::settings::PlaylistSettings,
+    course::settings::CourseSettings, jig::settings::JigSettings,
+    playlist::settings::PlaylistSettings,
 };
-use dominator_helpers::{futures::AsyncLoader, signals::OptionSignal};
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use dominator_helpers::futures::AsyncLoader;
+use futures_signals::signal::Mutable;
 use shared::domain::{
     asset::AssetId, course::unit::CourseUnit, jig::JigResponse, module::LiteModule,
 };
 use std::rc::Rc;
-use utils::{editable_asset::EditableAsset, math::PointI32};
+use utils::editable_asset::EditableAsset;
 
 use super::super::state::AssetEditState;
 
@@ -26,8 +26,6 @@ pub struct Sidebar {
     pub asset_edit_state: Rc<AssetEditState>,
     // pub spots: MutableVec<Rc<SidebarSpot>>,
     pub collapsed: Mutable<bool>,
-    pub drag: Mutable<Option<Rc<DragState>>>,
-    pub drag_target_index: Mutable<Option<usize>>,
     /// Whether to highlight incomplete modules. This is useful so that we can _only_ highlight
     /// modules once the teacher performs a specific action, such as clicking "Publish".
     /// Holds the index of the first module in the list which is incomplete
@@ -52,21 +50,9 @@ impl Sidebar {
             // spots: MutableVec::new_with_values(modules),
             collapsed: Mutable::new(false),
             settings: settings_state,
-            drag: Mutable::new(None),
-            drag_target_index: Mutable::new(None),
             highlight_modules: Mutable::new(None), // By default we don't want modules highlighted yet.
             loader: AsyncLoader::new(),
         })
-    }
-
-    //There's probably a way of making this simpler
-    //But in any case, the signature is what matters :P
-    pub fn drag_target_pos_signal(&self) -> impl Signal<Item = Option<PointI32>> {
-        self.drag
-            .signal_cloned()
-            .map(|drag| OptionSignal::new(drag.map(|drag| drag.inner.pos_signal())))
-            .flatten()
-            .map(|x| x.and_then(|x| x))
     }
 
     /// Returns whether this JIG is publishable
@@ -82,23 +68,6 @@ impl Sidebar {
 
         modules_len > 0 && modules_valid
     }
-
-    /*
-    pub fn bounding_boxes(&self) -> Vec<(usize, DomRect)> {
-        self.drag_targets
-            .borrow()
-            .iter()
-            .map(|(index, module)| {
-                //This must exist since it's added before the module
-                //is added to drag_targets
-                let elem = module.elem.borrow();
-                let elem = elem.as_ref().unwrap_ji();
-                let rect = elem.get_bounding_client_rect();
-                (*index, rect)
-            })
-            .collect()
-    }
-    */
 }
 
 #[derive(Clone, Debug)]

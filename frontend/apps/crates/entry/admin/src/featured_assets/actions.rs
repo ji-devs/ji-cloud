@@ -17,6 +17,17 @@ use wasm_bindgen_futures::spawn_local;
 use super::{FeaturedAssets, FeaturedKind};
 
 impl FeaturedAssets {
+    pub(super) fn move_featured(self: &Rc<Self>, from: usize, to: usize) {
+        let mut assets = self.featured_assets.lock_mut();
+        if from == to || from >= assets.len() || to >= assets.len() {
+            return;
+        }
+
+        assets.move_from_to(from, to);
+        drop(assets);
+        self.update_featured();
+    }
+
     pub(super) fn search(self: &Rc<Self>) {
         let state = Rc::clone(self);
         state.loader.load(clone!(state => async move {

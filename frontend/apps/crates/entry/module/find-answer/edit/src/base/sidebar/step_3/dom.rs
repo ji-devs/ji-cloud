@@ -115,6 +115,9 @@ fn check_is_valid(state: &Rc<Step3>) -> bool {
 }
 
 pub fn render(state: Rc<Step3>) -> Dom {
+    let reorder = utils::reorder::Reorder::new(clone!(state => move |from, to| {
+        state.sidebar.base.move_question_to(from, to);
+    }));
     state
         .sidebar
         .base
@@ -148,7 +151,7 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 None
             }
         })))
-        .child_signal(empty_signal(state.clone()).map(clone!(state => move |is_empty| {
+        .child_signal(empty_signal(state.clone()).map(clone!(state, reorder => move |is_empty| {
             if is_empty {
                 // Make sure that the tab_kind is reset so that we can display the correct Jiggling text.
                 state.sidebar.tab_kind.set(None);
@@ -209,12 +212,13 @@ pub fn render(state: Rc<Step3>) -> Dom {
                 }))
             } else {
                 Some(html!("question-container", {
+                    .apply(reorder.list())
                     .style_signal("display", state.advanced_visible.signal().map(|visible| {
                         if visible { Some("none") } else { None }
                     }))
                     .children_signal_vec(
-                        state.sidebar.base.questions.signal_vec_cloned().enumerate().map(clone!(state => move |(index, question)| {
-                            render_question(state.clone(), index, question.clone())
+                        state.sidebar.base.questions.signal_vec_cloned().enumerate().map(clone!(state, reorder => move |(index, question)| {
+                            render_question(state.clone(), index, question.clone(), &reorder)
                         }))
                     )
                 }))
@@ -498,8 +502,14 @@ pub fn render_question(
     state: Rc<Step3>,
     index: ReadOnlyMutable<Option<usize>>,
     question: Rc<Question>,
+    reorder: &Rc<utils::reorder::Reorder>,
 ) -> Dom {
+    let row = reorder.row(clone!(state, question => move || {
+        state.sidebar.base.questions.lock_ref().iter().position(|item| Rc::ptr_eq(item, &question))
+    }), clone!(question => move || !question.is_editing_title.get()));
     html!("question-item", {
+        .apply(row.item())
+        .child(row.grip(Some("reorder")))
         .with_node!(elem => {
             .child_signal(state.sidebar.base.is_valid.signal_cloned().map(clone!(state, index, elem => move |is_valid| {
                 match is_valid {

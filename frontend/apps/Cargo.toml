@@ -113,6 +113,8 @@ web-sys = { version = "0.3.55", features = [
     'Window',
     'Document',
     'Element',
+    'ShadowRoot',
+    'HtmlSlotElement',
     'Location',
     'Storage',
     'UrlSearchParams',

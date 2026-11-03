@@ -64,6 +64,7 @@ export class _ extends LitElement {
         return html`
             <slot name="toggle"></slot>
             <div class="header">
+                <slot name="reorder"></slot>
                 <div class="title">
                     <slot name="title"></slot>
                 </div>

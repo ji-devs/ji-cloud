@@ -5,24 +5,13 @@ use super::{
     course::actions as course_actions, jig::actions as jig_actions,
     playlist::actions as playlist_actions,
 };
-use crate::edit::sidebar::{
-    dragging::state::State as DragState,
-    state::{SidebarSpot, SidebarSpotItem},
-};
+use crate::edit::sidebar::state::{SidebarSpot, SidebarSpotItem};
 use dominator::clone;
 use shared::domain::asset::Asset;
 use shared::domain::module::ModuleKind;
 use std::rc::Rc;
 use std::str::FromStr;
 use utils::prelude::*;
-
-#[allow(dead_code)] // this should be removed eventually
-pub fn mouse_down(state: Rc<SpotState>, x: i32, y: i32) {
-    state
-        .sidebar
-        .drag
-        .set(Some(Rc::new(DragState::new(state.clone(), x, y))));
-}
 
 pub fn add_empty_module_after(state: Rc<SpotState>) {
     state
@@ -70,39 +59,51 @@ pub enum MoveTarget {
 }
 
 pub fn move_index(state: Rc<SpotState>, move_target: MoveTarget) {
-    state.sidebar.loader.load(clone!(state => async move {
-        if let Some(target) = {
-            match move_target {
-                MoveTarget::Up if state.index > 1 => {
-                    Some(state.index-1)
-                },
-                MoveTarget::Down if state.index < state.total_len-1 => {
-                    Some(state.index+1)
-                },
-                _ => None
-            }
-        } {
-            state.sidebar.asset_edit_state.sidebar_spots.lock_mut().move_from_to(state.index, target);
+    let index = state
+        .sidebar
+        .asset_edit_state
+        .sidebar_spots
+        .lock_ref()
+        .iter()
+        .position(|spot| Rc::ptr_eq(spot, &state.spot));
+    let target = index.and_then(|index| match move_target {
+        MoveTarget::Up => index.checked_sub(1),
+        MoveTarget::Down => index.checked_add(1),
+    });
+    if let Some(target) = target {
+        move_to(state, target);
+    }
+}
 
-            match &state.spot.item {
-                SidebarSpotItem::Jig(module) => {
-                    jig_actions::update_module_index(
-                        Rc::clone(&state),
-                        module.as_ref().unwrap_ji(),
-                        target as u16
-                    ).await;
-                },
-                SidebarSpotItem::Playlist(_) => {
-                    playlist_actions::save_playlist(&state).await;
-                },
-                SidebarSpotItem::Course(unit) => {
-                    course_actions::update_unit_index(
-                        Rc::clone(&state),
-                        unit.as_ref(),
-                        (target - 1) as u16
-                    ).await;
-                },
+pub fn move_to(state: Rc<SpotState>, target: usize) {
+    state.sidebar.loader.load(clone!(state => async move {
+        {
+            let mut spots = state.sidebar.asset_edit_state.sidebar_spots.lock_mut();
+            let Some(index) = spots.iter().position(|spot| Rc::ptr_eq(spot, &state.spot)) else {
+                return;
+            };
+            let end = spots.len() - usize::from(spots.last().map_or(false, |spot| spot.item.is_none()));
+            if index == 0 || index >= end || target == 0 || target >= end || index == target {
+                return;
             }
+            spots.move_from_to(index, target);
+        }
+
+        if state.spot.item.is_none() {
+            return;
+        }
+
+        match &state.spot.item {
+            SidebarSpotItem::Jig(Some(module)) => {
+                jig_actions::update_module_index(Rc::clone(&state), module, target as u16).await;
+            },
+            SidebarSpotItem::Playlist(_) => {
+                playlist_actions::save_playlist(&state).await;
+            },
+            SidebarSpotItem::Course(Some(unit)) => {
+                course_actions::update_unit_index(Rc::clone(&state), Some(unit), (target - 1) as u16).await;
+            },
+            _ => {},
         }
     }));
 }

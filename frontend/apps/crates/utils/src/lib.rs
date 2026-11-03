@@ -38,6 +38,7 @@ pub mod path;
 pub mod paywall;
 pub mod prelude;
 pub mod quick_elements;
+pub mod reorder;
 pub mod request_animation_frame;
 pub mod resize;
 pub mod routes;

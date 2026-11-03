@@ -5,12 +5,7 @@ use futures::future::ready;
 use web_sys::{ScrollBehavior, ScrollIntoViewOptions};
 
 use super::{
-    actions,
-    dragging::{actions as drag_actions, dom::DraggingDom},
-    header::dom::HeaderDom,
-    jig::actions as jig_actions,
-    spot::state::SpotState,
-    state::*,
+    actions, header::dom::HeaderDom, jig::actions as jig_actions, spot::state::SpotState, state::*,
 };
 use futures_signals::{map_ref, signal::SignalExt, signal_vec::SignalVecExt};
 use shared::domain::asset::AssetType;
@@ -24,6 +19,15 @@ use utils::{
 impl Sidebar {
     pub fn render(self: &Rc<Self>) -> Dom {
         let state = self;
+        let reorder = utils::reorder::Reorder::new(clone!(state => move |from, to| {
+            let spots = state.asset_edit_state.sidebar_spots.lock_ref();
+            let Some(spot) = spots.get(from).cloned() else {
+                return;
+            };
+            let len = spots.len();
+            drop(spots);
+            super::spot::actions::move_to(SpotState::new(state.clone(), from, len, spot), to);
+        }));
         html!("empty-fragment", {
             .prop("slot", "sidebar")
             .global_event(clone!(state => move |evt: Message| {
@@ -37,6 +41,11 @@ impl Sidebar {
                 };
             }))
             .child(html!("jig-edit-sidebar", {
+                .apply(reorder.list())
+                .future(state.loader.is_loading().for_each(clone!(reorder => move |loading| {
+                    reorder.set_disabled(loading);
+                    ready(())
+                })))
                 .prop("assetType",  AssetType::from(&state.asset_edit_state.asset_id).as_str())
                 .future(clone!(state => async move {
                     state.asset_edit_state.route.signal_cloned().for_each(clone!(state => move |route| {
@@ -133,36 +142,26 @@ impl Sidebar {
                     .map_signal(clone!(state => move |(index, module)| {
                         map_ref! {
                             let len = state.asset_edit_state.sidebar_spots.signal_vec_cloned().len(),
-                            let index = index.signal(),
-                            let drag_target_index = state.drag_target_index.signal()
+                            let index = index.signal()
                                 => move {
                                 (
                                     index.unwrap_or_default(),
                                     *len,
-                                    *drag_target_index,
                                     module.clone()
                                 )
                             }
                         }
                     }))
-                    .map(clone!(state => move |(index, len, drag_target_index, module)| {
+                    .map(clone!(state, reorder => move |(index, len, module)| {
                         SpotState::new(
                             state.clone(),
                             index,
-                            drag_target_index,
                             len,
                             module
-                        ).render()
+                        ).render(&reorder)
                     }))
                 )
-                .global_event(clone!(state => move |evt:events::MouseUp| {
-                    drag_actions::mouse_up(state.clone(), evt.x(), evt.y());
-                }))
-                .global_event(clone!(state => move |evt:events::MouseMove| {
-                    drag_actions::mouse_move(state.clone(), evt.x(), evt.y());
-                }))
             }))
-            .child(DraggingDom::render(Rc::clone(&state)))
         })
     }
 }
