@@ -12,6 +12,7 @@ use web_sys::{HtmlElement, HtmlVideoElement};
 
 pub struct Video {
     pub base: Rc<Base>,
+    pub playback: utils::iframe::VideoPlaybackReporter,
     pub raw: RawEmbed,
     pub start_gates: Mutable<StartGates>,
     pub video_size: Mutable<Option<(f64, f64)>>,
@@ -29,6 +30,7 @@ impl Video {
     pub fn new(base: Rc<Base>, raw: RawEmbed) -> Rc<Self> {
         let _self = Rc::new(Self {
             base,
+            playback: utils::iframe::VideoPlaybackReporter::new(),
             raw,
             video_size: Mutable::new(None),
             start_gates: Mutable::new(StartGates::default()),

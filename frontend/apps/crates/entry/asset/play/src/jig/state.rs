@@ -1,4 +1,8 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 use awsm_web::loaders::helpers::AsyncLoader;
 use components::audio::mixer::AudioHandle;
@@ -44,6 +48,8 @@ pub struct JigPlayer {
     pub done: Mutable<bool>,
     pub bg_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub bg_audio_playing: Mutable<bool>,
+    pub video_session: RefCell<String>,
+    pub playing_videos: RefCell<HashSet<utils::iframe::VideoPlaybackId>>,
     pub module_assist_audio_handle: Rc<RefCell<Option<AudioHandle>>>,
     pub resource_types: Mutable<Vec<ResourceType>>,
     pub categories: Mutable<Vec<Category>>,
@@ -101,6 +107,8 @@ impl JigPlayer {
             done: Mutable::new(false),
             bg_audio_handle: Rc::new(RefCell::new(None)),
             bg_audio_playing: Mutable::new(true),
+            video_session: RefCell::new(String::new()),
+            playing_videos: RefCell::new(HashSet::new()),
             module_assist_audio_handle: Rc::new(RefCell::new(None)),
             resource_types: Default::default(),
             categories: Default::default(),

@@ -28,10 +28,10 @@ use shared::domain::module::body::_groups::design::{
     GoogleSheetId, GoogleSlideId, QuizletId, SutoriId, ThinglinkId, VimeoUrl,
 };
 use std::rc::Rc;
-use utils::{math::transform_signals, prelude::*};
+use utils::{iframe::VideoPlaybackReporter, math::transform_signals, prelude::*};
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::spawn_local;
-use web_sys::HtmlElement;
+use web_sys::{HtmlElement, HtmlIFrameElement};
 
 #[derive(Default)]
 pub struct EmbedRenderOptions {
@@ -462,6 +462,8 @@ pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOpt
         .child({
             match &embed.host {
                 RawEmbedHost::Youtube(youtube) => {
+                    let playback = Rc::new(VideoPlaybackReporter::new());
+                    let looping = matches!(youtube.done_action, Some(DoneAction::Loop));
                     html!("video-youtube-player" => HtmlElement, {
                         .prop("videoId", youtube.url.get_id())
                         .prop("autoplay", youtube.autoplay)
@@ -480,7 +482,13 @@ pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOpt
                         .style("display", "block")
                         .style("width", "100%")
                         .style("height", "100%")
-                        .event(clone!(on_ended => move |_: events::YoutubeEnded| {
+                        .event(clone!(playback => move |_: events::YoutubePlaying| playback.set_playing(true)))
+                        .event(clone!(playback => move |_: events::YoutubePaused| playback.set_playing(false)))
+                        .after_removed(clone!(playback => move |_| playback.set_playing(false)))
+                        .event(clone!(on_ended, playback => move |_: events::YoutubeEnded| {
+                            if !looping {
+                                playback.set_playing(false);
+                            }
                             if let Some(on_ended) = on_ended.as_ref() {
                                 (on_ended) ();
                             }
@@ -488,13 +496,7 @@ pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOpt
                     })
                 }
                 RawEmbedHost::Vimeo(vimeo) => {
-                    html!("iframe", {
-                        .prop("src", get_vimeo_url(&vimeo.url))
-                        .style("display", "block")
-                        .style("width", "100%")
-                        .style("height", "100%")
-                        // frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
-                    })
+                    render_vimeo(&vimeo.url)
                 }
                 RawEmbedHost::GoogleDoc(google_doc) => {
                     html!("iframe", {
@@ -603,4 +605,83 @@ fn get_sutori_url(sutori: &SutoriId) -> String {
 
 fn get_vimeo_url(vimeo: &VimeoUrl) -> String {
     format!("https://player.vimeo.com/video/{}", vimeo.get_id())
+}
+
+fn render_vimeo(url: &VimeoUrl) -> Dom {
+    let playback = Rc::new(VideoPlaybackReporter::new());
+    let subscribed = Rc::new(std::cell::Cell::new(false));
+
+    html!("iframe" => HtmlIFrameElement, {
+        .prop("src", get_vimeo_url(url))
+        .style("display", "block")
+        .style("width", "100%")
+        .style("height", "100%")
+        .with_node!(iframe => {
+            .event(clone!(iframe => move |_: events::Load| {
+                vimeo_command(&iframe, "ping", None);
+            }))
+            .global_event(clone!(iframe, playback, subscribed => move |evt: events::WindowMessage| {
+                let evt = evt.raw_event();
+                if evt.origin() != "https://player.vimeo.com" {
+                    return;
+                }
+
+                let Some(window) = iframe.content_window() else { return; };
+                let Some(source) = evt.source() else { return; };
+                if !source.loose_eq(window.as_ref()) {
+                    return;
+                }
+
+                let data = evt.data();
+                let data = if let Some(json) = data.as_string() {
+                    match js_sys::JSON::parse(&json) {
+                        Ok(data) => data,
+                        Err(_) => return,
+                    }
+                } else {
+                    data
+                };
+                let field = |name: &str| Reflect::get(&data, &JsValue::from_str(name)).ok();
+                let event = field("event").and_then(|value| value.as_string());
+                let method = field("method").and_then(|value| value.as_string());
+
+                if event.as_deref() == Some("ready") || method.as_deref() == Some("ping") {
+                    if !subscribed.replace(true) {
+                        for event in ["play", "pause", "ended", "error"] {
+                            vimeo_command(&iframe, "addEventListener", Some(event));
+                        }
+                        vimeo_command(&iframe, "getPaused", None);
+                    }
+                }
+
+                match event.as_deref() {
+                    Some("play") => playback.set_playing(true),
+                    Some("pause") | Some("error") => playback.set_playing(false),
+                    Some("ended") => {
+                        playback.set_playing(false);
+                    }
+                    _ => {}
+                }
+
+                if method.as_deref() == Some("getPaused") {
+                    if let Some(paused) = field("value").and_then(|value| value.as_bool()) {
+                        playback.set_playing(!paused);
+                    }
+                }
+            }))
+        })
+        .after_inserted(|iframe| vimeo_command(&iframe, "ping", None))
+        .after_removed(move |_| playback.set_playing(false))
+    })
+}
+
+fn vimeo_command(iframe: &HtmlIFrameElement, method: &str, value: Option<&str>) {
+    if let Some(window) = iframe.content_window() {
+        let command = js_sys::Object::new();
+        let _ = Reflect::set(&command, &"method".into(), &method.into());
+        if let Some(value) = value {
+            let _ = Reflect::set(&command, &"value".into(), &value.into());
+        }
+        let _ = window.post_message(&command, "https://player.vimeo.com");
+    }
 }

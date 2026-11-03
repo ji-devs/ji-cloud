@@ -3,7 +3,7 @@ use components::audio::mixer::audio_iframe_messenger;
 use components::overlay::handle::OverlayHandle;
 use components::share_asset::ShareAsset;
 use dominator::{clone, html, with_node, Dom};
-use dominator_helpers::{events::Message, signals::DefaultSignal};
+use dominator_helpers::signals::DefaultSignal;
 use futures_signals::map_ref;
 use futures_signals::signal::{Mutable, Signal, SignalExt};
 use gloo::utils::{body, document};
@@ -146,10 +146,19 @@ impl JigPlayer {
                 false
             }))
             .prop("inIframe", is_in_iframe())
-            .global_event(clone!(state => move |evt:Message| {
-                match evt.try_serde_data::<IframeAction<ModuleToJigPlayerMessage>>() {
+            .global_event(clone!(state => move |evt: events::WindowMessage| {
+                let evt = evt.raw_event();
+                match serde_wasm_bindgen::from_value::<IframeAction<ModuleToJigPlayerMessage>>(evt.data()) {
                     Err(_) => {},
                     Ok(m) => {
+                        if matches!(&m.data, ModuleToJigPlayerMessage::VideoPlaybackChanged { .. }) {
+                            let source = evt.source();
+                            let window = state.iframe.borrow().as_ref().and_then(|iframe| iframe.content_window());
+                            match (source, window) {
+                                (Some(source), Some(window)) if source.loose_eq(window.as_ref()) => {},
+                                _ => return,
+                            }
+                        }
                         state.on_iframe_message(m.data)
                     },
                 };
@@ -227,6 +236,7 @@ impl JigPlayer {
                         .prop("allow", "autoplay; fullscreen")
                         .prop("slot", "iframe")
                         .prop_signal("src", state.jig_and_active_module_signal().map(clone!(state => move|(jig, active_module_index)| {
+                            state.reset_video_playback();
                             match (jig, active_module_index) {
                                 (Some(jig), Some(active_module_index)) => {
                                     let active_module = &jig.jig_data.modules.get(active_module_index);
@@ -249,7 +259,9 @@ impl JigPlayer {
                                                 .unwrap_ji()
                                                 .remote_target
                                                 .spa_iframe(&route);
-                                            url
+                                            let url = web_sys::Url::new(&url).unwrap_ji();
+                                            url.search_params().set(utils::iframe::VIDEO_PLAYBACK_SESSION_PARAM, &state.video_session.borrow());
+                                            url.href()
                                         },
                                     }
                                 },
@@ -261,6 +273,12 @@ impl JigPlayer {
                         })))
                         .after_inserted(clone!(state => move|element| {
                             *state.iframe.borrow_mut() = Some(element);
+                        }))
+                        .after_removed(clone!(state => move |element| {
+                            if state.iframe.borrow().as_ref() == Some(&element) {
+                                *state.iframe.borrow_mut() = None;
+                                state.reset_video_playback();
+                            }
                         }))
                         .apply(audio_iframe_messenger)
                     }))

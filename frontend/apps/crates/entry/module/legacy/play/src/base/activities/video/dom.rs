@@ -63,6 +63,10 @@ impl Video {
                 ));
 
             }))
+            .event(clone!(state => move |_: events::Playing| state.playback.set_playing(true)))
+            .event(clone!(state => move |_: events::Pause| state.playback.set_playing(false)))
+            .event(clone!(state => move |_: events::Error| state.playback.set_playing(false)))
+            .after_removed(clone!(state => move |_| state.playback.set_playing(false)))
             .event(clone!(state => move |_: events::Ended| {
                 state.on_ended();
             }))
@@ -144,6 +148,9 @@ impl Video {
                     }).await;
                 }))
             })
+            .event(clone!(state => move |_: events::YoutubePlaying| state.playback.set_playing(true)))
+            .event(clone!(state => move |_: events::YoutubePaused| state.playback.set_playing(false)))
+            .after_removed(clone!(state => move |_| state.playback.set_playing(false)))
             .event(clone!(state => move |_: events::YoutubeEnded| {
                 state.on_ended();
             }))

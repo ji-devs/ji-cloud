@@ -16,6 +16,8 @@ impl Video {
     }
 
     pub fn on_ended(&self) {
+        self.playback.set_playing(false);
+
         if let Some(api) = self.yt_api.borrow().as_ref() {
             api.pause();
         }

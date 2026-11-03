@@ -8,7 +8,16 @@ use wasm_bindgen::JsCast;
 pub use dominator::events::*;
 pub use dominator_helpers::events::{Load, Message};
 
+temp_make_event!(WindowMessage, "message" => web_sys::MessageEvent);
+impl WindowMessage {
+    pub fn raw_event(&self) -> &web_sys::MessageEvent {
+        &self.event
+    }
+}
+
 temp_make_event!(TimeUpdate, "timeupdate" => web_sys::Event);
+temp_make_event!(Playing, "playing" => web_sys::Event);
+temp_make_event!(Pause, "pause" => web_sys::Event);
 temp_make_event!(Ended, "ended" => web_sys::Event);
 temp_make_event!(Ready, "ready" => web_sys::Event);
 

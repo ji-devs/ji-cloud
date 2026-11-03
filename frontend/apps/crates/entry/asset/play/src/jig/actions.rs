@@ -5,7 +5,7 @@ use super::{
     state::{can_load_liked_status, JigPlayer, PlayModuleAssist},
     timer::Timer,
 };
-use components::audio::mixer::{AudioHandle, AUDIO_MIXER};
+use components::audio::mixer::AUDIO_MIXER;
 use dominator::clone;
 use futures_signals::signal::SignalExt;
 use shared::domain::{
@@ -48,28 +48,24 @@ use wasm_bindgen_futures::spawn_local;
 
 impl JigPlayer {
     pub fn toggle_background_audio(self: &Rc<Self>) {
-        let bg_audio_handle = self.bg_audio_handle.borrow();
+        self.bg_audio_playing.set(!self.bg_audio_playing.get());
+        self.sync_background_audio();
+    }
 
-        match &*bg_audio_handle {
-            Some(bg_audio_handle) => {
-                if self.bg_audio_playing.get() {
-                    self.pause_background_audio(bg_audio_handle);
-                } else {
-                    self.play_background_audio(bg_audio_handle);
-                };
+    fn sync_background_audio(&self) {
+        if let Some(handle) = &*self.bg_audio_handle.borrow() {
+            if self.bg_audio_playing.get() && self.playing_videos.borrow().is_empty() {
+                handle.play();
+            } else {
+                handle.pause();
             }
-            None => {}
-        };
+        }
     }
 
-    pub fn play_background_audio(self: &Rc<Self>, audio_handle: &AudioHandle) {
-        audio_handle.play();
-        self.bg_audio_playing.set(true);
-    }
-
-    pub fn pause_background_audio(self: &Rc<Self>, audio_handle: &AudioHandle) {
-        audio_handle.pause();
-        self.bg_audio_playing.set(false);
+    pub fn reset_video_playback(&self) {
+        *self.video_session.borrow_mut() = js_sys::Math::random().to_string();
+        self.playing_videos.borrow_mut().clear();
+        self.sync_background_audio();
     }
 
     pub fn navigate_forward_or_handle(self: &Rc<Self>) {
@@ -102,6 +98,7 @@ impl JigPlayer {
 
     pub fn finish(self: &Rc<Self>) {
         let state = self;
+        state.reset_video_playback();
         state.done.set(true);
         algolia_events::finished_jig(self.jig_id);
         if let Some(token) = state.play_token.clone() {
@@ -408,9 +405,8 @@ impl JigPlayer {
     fn init_audio(self: &Rc<Self>, background_audio: AudioBackground) {
         let handle = AUDIO_MIXER.with(move |mixer| mixer.play(background_audio.into(), true));
 
-        let mut bg_audio_handle = self.bg_audio_handle.borrow_mut();
-        *bg_audio_handle = Some(handle);
-        self.bg_audio_playing.set(true);
+        *self.bg_audio_handle.borrow_mut() = Some(handle);
+        self.sync_background_audio();
     }
 
     pub fn start_timer(self: &Rc<Self>, time: Seconds) {
@@ -484,6 +480,25 @@ impl JigPlayer {
 
     pub fn on_iframe_message(self: &Rc<Self>, message: ModuleToJigPlayerMessage) {
         match message {
+            ModuleToJigPlayerMessage::VideoPlaybackChanged {
+                session,
+                video,
+                playing,
+            } => {
+                if session != *self.video_session.borrow() {
+                    return;
+                }
+
+                let changed = if playing {
+                    self.playing_videos.borrow_mut().insert(video)
+                } else {
+                    self.playing_videos.borrow_mut().remove(&video)
+                };
+
+                if changed {
+                    self.sync_background_audio();
+                }
+            }
             ModuleToJigPlayerMessage::AddPoints(earned) => {
                 *self.points.lock_mut() += earned;
             }
@@ -546,12 +561,7 @@ impl JigPlayer {
             }
         }
 
-        // If the background audio is set to play, then start the audio
-        if self.bg_audio_playing.get() {
-            if let Some(bg_audio_handle) = &*self.bg_audio_handle.borrow() {
-                self.play_background_audio(bg_audio_handle);
-            }
-        }
+        self.sync_background_audio();
 
         if let Some(time) = config.timer {
             self.start_timer(time);
@@ -601,7 +611,13 @@ impl JigPlayer {
         match &*self.iframe.borrow() {
             None => {}
             Some(iframe) => {
-                iframe.set_src(&iframe.src());
+                self.reset_video_playback();
+                let url = web_sys::Url::new(&iframe.src()).unwrap_ji();
+                url.search_params().set(
+                    utils::iframe::VIDEO_PLAYBACK_SESSION_PARAM,
+                    &self.video_session.borrow(),
+                );
+                iframe.set_src(&url.href());
                 self.timer.set(None);
             }
         };

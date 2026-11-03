@@ -13,6 +13,8 @@ use shared::domain::{
 use std::cell::Cell;
 use wasm_bindgen::prelude::*;
 
+pub const VIDEO_PLAYBACK_SESSION_PARAM: &str = "video_playback_session";
+
 pub const IFRAME_DATA_PARAM: &str = "iframe_data";
 
 #[derive(Clone, Debug, Copy, Eq, PartialEq)]
@@ -206,6 +208,11 @@ pub enum JigToModulePlayerMessage {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ModuleToJigPlayerMessage {
+    VideoPlaybackChanged {
+        session: String,
+        video: VideoPlaybackId,
+        playing: bool,
+    },
     AddPoints(u32),
     Start(ModuleConfig, StableModuleId),
     Previous,
@@ -241,4 +248,38 @@ pub enum AssetPlayerToPlayerPopup {
     Close,
     // used for playlist player to hide close button when jig is playing since the jig has it's own button
     CloseButtonShown(bool),
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct VideoPlaybackId(String);
+
+pub struct VideoPlaybackReporter {
+    session: Option<String>,
+    video: VideoPlaybackId,
+    playing: Cell<bool>,
+}
+
+impl VideoPlaybackReporter {
+    pub fn new() -> Self {
+        Self {
+            session: crate::routes::get_param(VIDEO_PLAYBACK_SESSION_PARAM),
+            video: VideoPlaybackId(js_sys::Math::random().to_string()),
+            playing: Cell::new(false),
+        }
+    }
+
+    pub fn set_playing(&self, playing: bool) {
+        if self.playing.replace(playing) == playing {
+            return;
+        }
+
+        if let Some(session) = &self.session {
+            let _ = IframeAction::new(ModuleToJigPlayerMessage::VideoPlaybackChanged {
+                session: session.clone(),
+                video: self.video.clone(),
+                playing,
+            })
+            .try_post_message_to_player();
+        }
+    }
 }

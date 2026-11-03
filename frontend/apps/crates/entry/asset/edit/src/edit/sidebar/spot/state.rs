@@ -1,7 +1,7 @@
 use crate::edit::sidebar::state::{Sidebar as SidebarState, SidebarSpot, SidebarSpotItem};
 use crate::edit::sidebar::CourseSpot;
 use dominator::clone;
-use futures_signals::signal::{Mutable, Signal, SignalExt};
+use futures_signals::signal::{Mutable, Signal};
 use std::rc::Rc;
 use utils::routes::{AssetEditRoute, CourseEditRoute, JigEditRoute};
 
