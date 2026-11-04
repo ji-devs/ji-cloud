@@ -3,7 +3,7 @@ use components::{
     module::_common::thumbnail::{ModuleThumbnail, ThumbnailFallback},
     player_popup::{PlayerPopup, PreviewPopupCallbacks},
 };
-use dominator::{clone, html, Dom, EventOptions};
+use dominator::{class, clone, html, pseudo, Dom, EventOptions};
 use futures_signals::{
     map_ref,
     signal::{Signal, SignalExt},
@@ -27,6 +27,26 @@ impl FeaturedAssets {
         let reorder = utils::reorder::Reorder::new(clone!(state => move |from, to| {
             state.move_featured(from, to);
         }));
+
+        let action_class = class! {
+            .style("display", "inline-grid")
+            .style("place-items", "center")
+            .style("width", "24px")
+            .style("height", "24px")
+            .style("padding", "0")
+            .style("border", "0")
+            .style("border-radius", "4px")
+            .style("background", "transparent")
+            .style("color", "var(--main-blue)")
+            .style("cursor", "pointer")
+            .pseudo!(":disabled", {
+                .style("opacity", "0.35")
+                .style("cursor", "default")
+            })
+            .pseudo!(":hover:not(:disabled)", {
+                .style("background", "var(--light-blue-1)")
+            })
+        };
 
         html!("div", {
             .style("display", "grid")
@@ -71,7 +91,7 @@ impl FeaturedAssets {
                 .child(html!("h4", {
                     .text(state.kind.instructions())
                 }))
-                .children_signal_vec(state.featured_assets.signal_vec_cloned().enumerate().map(clone!(state, reorder => move |(i, asset)| {
+                .children_signal_vec(state.featured_assets.signal_vec_cloned().enumerate().map(clone!(state, reorder, action_class => move |(i, asset)| {
                     let id = asset.id();
                     let row = reorder.row(clone!(state => move || {
                         state.featured_assets.lock_ref().iter().position(|asset| asset.id() == id)
@@ -87,6 +107,8 @@ impl FeaturedAssets {
                         .style("text-overflow", "ellipsis")
                         .child(html!("div", {
                            .style("display", "flex")
+                           .style("align-items", "center")
+                           .style("gap", "2px")
                            .child(row.grip(None))
                            .children(&mut [
                                 html!("button", {
@@ -94,7 +116,14 @@ impl FeaturedAssets {
                                         Some(i) => i == 0,
                                         None => true,
                                     }))
-                                    .text("up")
+                                    .attr("type", "button")
+                                    .attr("aria-label", "Move up")
+                                    .attr("title", "Move up")
+                                    .class(&action_class)
+                                    .child(html!("fa-icon", {
+                                        .attr("aria-hidden", "true")
+                                        .prop("icon", "fa-solid fa-arrow-up")
+                                    }))
                                     .event(clone!(state, i => move |_: events::Click| {
                                         if let Some(i) = i.get() {
                                             if let Some(to) = i.checked_sub(1) {
@@ -111,7 +140,14 @@ impl FeaturedAssets {
                                             None => true,
                                         }
                                     })
-                                    .text("down")
+                                    .attr("type", "button")
+                                    .attr("aria-label", "Move down")
+                                    .attr("title", "Move down")
+                                    .class(&action_class)
+                                    .child(html!("fa-icon", {
+                                        .attr("aria-hidden", "true")
+                                        .prop("icon", "fa-solid fa-arrow-down")
+                                    }))
                                     .event(clone!(state, i => move |_: events::Click| {
                                         if let Some(i) = i.get() {
                                             state.move_featured(i, i + 1);
@@ -119,7 +155,14 @@ impl FeaturedAssets {
                                     }))
                                 }),
                                 html!("button", {
-                                    .text("delete")
+                                    .attr("type", "button")
+                                    .attr("aria-label", "Delete")
+                                    .attr("title", "Delete")
+                                    .class(&action_class)
+                                    .child(html!("fa-icon", {
+                                        .attr("aria-hidden", "true")
+                                        .prop("icon", "fa-solid fa-trash-can")
+                                    }))
                                     .event(clone!(state, i => move |_: events::Click| {
                                         if let Some(i) = i.get() {
                                             state.featured_assets.lock_mut().remove(i);

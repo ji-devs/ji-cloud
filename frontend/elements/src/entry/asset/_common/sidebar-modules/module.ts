@@ -95,7 +95,21 @@ export class _ extends LitElement {
                 .right {
                     margin-left: 5px;
                     display: flex;
+                    flex-direction: column;
+                    align-items: center;
                     z-index: 1;
+                }
+
+                .reorder {
+                    line-height: 0;
+                }
+
+                .reorder ::slotted([slot="reorder"]) {
+                    margin-bottom: 4px;
+                }
+
+                :host([collapsed]) .reorder {
+                    display: none;
                 }
 
                 .title-container .title {
@@ -318,7 +332,7 @@ export class _ extends LitElement {
                     <div class="left">
                         <div class="title-container">
                             <div class="title">
-                                ${title}<slot name="reorder"></slot>
+                                ${title}
                             </div>
                                 ${subtitle === ""
                                     ? nothing
@@ -336,6 +350,9 @@ export class _ extends LitElement {
                         </div>
                     </div>
                     <div class="right open-only">
+                        <div class="reorder">
+                            <slot name="reorder"></slot>
+                        </div>
                         <div class="menu">
                             <slot name="menu"></slot>
                         </div>

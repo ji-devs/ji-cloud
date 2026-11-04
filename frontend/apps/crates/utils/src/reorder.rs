@@ -40,7 +40,59 @@ struct Gesture {
 
 enum Phase {
     Pending,
-    Dragging(HtmlElement),
+    Dragging(Preview),
+}
+
+struct Preview {
+    marker: HtmlElement,
+    rows: Vec<PreviewRow>,
+    source_opacity: SavedStyle,
+    target: Option<usize>,
+}
+
+struct PreviewRow {
+    translate: SavedStyle,
+    offset: f64,
+}
+
+struct SavedStyle {
+    element: HtmlElement,
+    property: &'static str,
+    value: String,
+    priority: String,
+}
+
+struct Destination {
+    from: usize,
+    to: usize,
+    source_position: usize,
+    target_position: usize,
+    shift: f64,
+    left: f64,
+    top: f64,
+    width: f64,
+    height: f64,
+}
+
+impl SavedStyle {
+    fn new(element: HtmlElement, property: &'static str) -> Self {
+        let style = element.style();
+        Self {
+            value: style.get_property_value(property).unwrap_or_default(),
+            priority: style.get_property_priority(property),
+            element,
+            property,
+        }
+    }
+
+    fn restore(&self) {
+        let style = self.element.style();
+        if self.value.is_empty() {
+            let _ = style.remove_property(self.property);
+        } else {
+            let _ = style.set_property_with_priority(self.property, &self.value, &self.priority);
+        }
+    }
 }
 
 impl Reorder {
@@ -120,7 +172,9 @@ impl Reorder {
                             state.update(event.client_x() as f64, event.client_y() as f64);
                             let destination = state.gesture.borrow().as_ref().and_then(|g| {
                                 if matches!(g.phase, Phase::Dragging(_)) {
-                                    state.destination(g).map(|(from, to, _, _, _)| (from, to))
+                                    state
+                                        .destination(g)
+                                        .map(|destination| (destination.from, destination.to))
                                 } else {
                                     None
                                 }
@@ -223,12 +277,13 @@ impl Reorder {
         self.frame.borrow_mut().take();
         let gesture = self.gesture.borrow_mut().take();
         if let Some(gesture) = gesture {
-            if let Phase::Dragging(marker) = gesture.phase {
-                marker.remove();
-                self.suppress_click.set(true);
-                if let Some(element) = gesture.source.element.borrow().as_ref() {
-                    let _ = element.style().remove_property("opacity");
+            if let Phase::Dragging(preview) = gesture.phase {
+                preview.marker.remove();
+                preview.source_opacity.restore();
+                for row in preview.rows {
+                    row.translate.restore();
                 }
+                self.suppress_click.set(true);
             }
             let _ = gesture.capture.release_pointer_capture(gesture.pointer);
         }
@@ -277,16 +332,70 @@ impl Reorder {
             if matches!(g.phase, Phase::Pending) && (x - g.origin.0).hypot(y - g.origin.1) >= 6.0 {
                 let document = web_sys::window().unwrap().document().unwrap();
                 let marker: HtmlElement = document.create_element("div").unwrap().unchecked_into();
-                marker.style().set_css_text("position:fixed;height:3px;background:var(--main-blue, #2469d8);pointer-events:none;z-index:2147483647;border-radius:2px");
+                marker.style().set_css_text("position:fixed;box-sizing:border-box;background:var(--light-blue-1, #f3f7fd);border:2px dashed var(--light-blue-5, #c4d9f5);pointer-events:none;z-index:2147483647;border-radius:12px");
+                let _ = marker.set_attribute("aria-hidden", "true");
                 let _ = document.body().unwrap().append_child(&marker);
-                if let Some(element) = g.source.element.borrow().as_ref() {
-                    let _ = element.style().set_property("opacity", "0.45");
-                }
-                g.phase = Phase::Dragging(marker);
+                let source = g.source.element.borrow().clone().unwrap();
+                let source_opacity = SavedStyle::new(source.clone(), "opacity");
+                let _ = source.style().set_property("opacity", "0");
+                g.phase = Phase::Dragging(Preview {
+                    marker,
+                    rows: self
+                        .registered()
+                        .into_iter()
+                        .map(|(_, _, element)| PreviewRow {
+                            translate: SavedStyle::new(element, "translate"),
+                            offset: 0.0,
+                        })
+                        .collect(),
+                    source_opacity,
+                    target: None,
+                });
             }
-            if let Phase::Dragging(marker) = &g.phase {
-                let destination = self.destination(g);
-                let _ = marker.style().set_property(
+            let destination = self.destination(g);
+            if let Phase::Dragging(preview) = &mut g.phase {
+                preview.target = destination
+                    .as_ref()
+                    .map(|destination| destination.target_position);
+                if destination.is_some() {
+                    let _ = preview
+                        .source_opacity
+                        .element
+                        .style()
+                        .set_property("opacity", "0");
+                } else {
+                    preview.source_opacity.restore();
+                }
+                for (position, row) in preview.rows.iter_mut().enumerate() {
+                    let offset = destination.as_ref().map_or(0.0, |destination| {
+                        if position > destination.source_position
+                            && position <= destination.target_position
+                        {
+                            -destination.shift
+                        } else if position >= destination.target_position
+                            && position < destination.source_position
+                        {
+                            destination.shift
+                        } else {
+                            0.0
+                        }
+                    });
+                    if row.offset == offset {
+                        continue;
+                    }
+                    row.offset = offset;
+                    if offset == 0.0 {
+                        row.translate.restore();
+                    } else {
+                        let _ = row
+                            .translate
+                            .element
+                            .style()
+                            .set_property("translate", &format!("0 {}px", row.offset));
+                    }
+                }
+                let style = preview.marker.style();
+                let _ = style.set_property(
                     "display",
                     if destination.is_some() {
                         "block"
@@ -294,54 +403,100 @@ impl Reorder {
                         "none"
                     },
                 );
-                if let Some((_, _, left, top, width)) = destination {
-                    let _ = marker.style().set_property("left", &format!("{}px", left));
-                    let _ = marker.style().set_property("top", &format!("{}px", top));
-                    let _ = marker
-                        .style()
-                        .set_property("width", &format!("{}px", width));
+                if let Some(destination) = destination {
+                    let (top, bottom) = viewport(&g.scrollport);
+                    let _ = style.set_property("left", &format!("{}px", destination.left));
+                    let _ = style.set_property("top", &format!("{}px", destination.top));
+                    let _ = style.set_property("width", &format!("{}px", destination.width));
+                    let _ = style.set_property("height", &format!("{}px", destination.height));
+                    let _ = style.set_property(
+                        "clip-path",
+                        &format!(
+                            "inset({}px 0 {}px 0)",
+                            (top - destination.top).max(0.0),
+                            (destination.top + destination.height - bottom).max(0.0)
+                        ),
+                    );
                 }
             }
         }
+
         self.schedule_frame();
     }
 
-    fn destination(&self, g: &Gesture) -> Option<(usize, usize, f64, f64, f64)> {
+    fn destination(&self, g: &Gesture) -> Option<Destination> {
         if g.order != self.order() || !(g.source.can_drag)() {
             return None;
         }
+        let Phase::Dragging(preview) = &g.phase else {
+            return None;
+        };
         let rows = self.registered();
         let from = (g.source.current_index)()?;
-        let first = rows.first()?.2.get_bounding_client_rect();
-        let last = rows.last()?.2.get_bounding_client_rect();
+        let bounds: Vec<_> = rows
+            .iter()
+            .zip(&preview.rows)
+            .map(|((_, _, element), row)| {
+                let rect = element.get_bounding_client_rect();
+                (
+                    rect.left(),
+                    rect.top() - row.offset,
+                    rect.width(),
+                    rect.height(),
+                )
+            })
+            .collect();
+        let first = bounds.first()?;
+        let last = bounds.last()?;
         let (top, bottom) = viewport(&g.scrollport);
-        let left = first.left();
-        let right = first.right();
-        if g.point.0 < left
-            || g.point.0 > right
-            || g.point.1 < top.max(first.top())
-            || g.point.1 > bottom.min(last.bottom())
+        if g.point.0 < first.0
+            || g.point.0 > first.0 + first.2
+            || g.point.1 < top.max(first.1)
+            || g.point.1 > bottom.min(last.1 + last.3)
         {
             return None;
         }
-        let boundary = rows
-            .iter()
-            .position(|(_, _, element)| {
-                let rect = element.get_bounding_client_rect();
-                g.point.1 < rect.top() + rect.height() / 2.0
-            })
-            .unwrap_or(rows.len());
         let source_position = rows.iter().position(|(index, _, _)| *index == from)?;
-        let target_position = boundary
-            .saturating_sub(usize::from(boundary > source_position))
-            .min(rows.len() - 1);
-        let to = rows[target_position].0;
-        let line = if boundary == rows.len() {
-            last.bottom()
-        } else {
-            rows[boundary].2.get_bounding_client_rect().top()
+        let source = bounds[source_position];
+        let gap = |target_position: usize| {
+            let target = bounds[target_position];
+            if target_position > source_position {
+                let shift = bounds[source_position + 1].1 - source.1;
+                (target.1 + target.3 - source.3, shift)
+            } else if target_position < source_position {
+                let previous = bounds[source_position - 1];
+                let shift = source.1 + source.3 - previous.1 - previous.3;
+                (target.1, shift)
+            } else {
+                (source.1, 0.0)
+            }
         };
-        Some((from, to, left, line.clamp(top, bottom), right - left))
+        let sticky_target = preview.target.filter(|target| {
+            let (gap_top, _) = gap(*target);
+            g.point.1 >= gap_top && g.point.1 <= gap_top + source.3
+        });
+        let target_position = sticky_target.unwrap_or_else(|| {
+            bounds
+                .iter()
+                .zip(&preview.rows)
+                .enumerate()
+                .filter(|(position, (rect, row))| {
+                    *position != source_position && g.point.1 >= rect.1 + row.offset + rect.3 / 2.0
+                })
+                .count()
+        });
+        let (gap_top, shift) = gap(target_position);
+        Some(Destination {
+            from,
+            to: rows[target_position].0,
+            source_position,
+            target_position,
+            shift,
+            left: source.0,
+            top: gap_top,
+            width: source.2,
+            height: source.3,
+        })
     }
 
     fn schedule_frame(self: &Rc<Self>) {

@@ -42,8 +42,11 @@ impl Sidebar {
             }))
             .child(html!("jig-edit-sidebar", {
                 .apply(reorder.list())
-                .future(state.loader.is_loading().for_each(clone!(reorder => move |loading| {
-                    reorder.set_disabled(loading);
+                .future((map_ref! {
+                    let loading = state.loader.is_loading(),
+                    let collapsed = state.collapsed.signal() => *loading || *collapsed
+                }).for_each(clone!(reorder => move |disabled| {
+                    reorder.set_disabled(disabled);
                     ready(())
                 })))
                 .prop("assetType",  AssetType::from(&state.asset_edit_state.asset_id).as_str())

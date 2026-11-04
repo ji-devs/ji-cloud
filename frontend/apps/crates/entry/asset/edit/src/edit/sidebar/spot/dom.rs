@@ -38,7 +38,7 @@ impl SpotState {
             } else {
                 None
             }
-        }), clone!(state => move || state.spot.item.is_some()));
+        }), clone!(state => move || state.spot.item.is_some() && !state.sidebar.collapsed.get()));
 
         let is_incomplete_signal = map_ref! {
             let is_complete = not(state.spot.is_incomplete.signal()),
