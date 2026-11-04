@@ -105,7 +105,7 @@ export class _ extends LitElement {
                 }
 
                 .reorder ::slotted([slot="reorder"]) {
-                    margin-bottom: 4px;
+                    margin-block: 4px;
                 }
 
                 :host([collapsed]) .reorder {

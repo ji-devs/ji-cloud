@@ -39,15 +39,22 @@ struct Gesture {
 }
 
 enum Phase {
-    Pending,
+    Pending { grab_offset: (f64, f64) },
     Dragging(Preview),
 }
 
 struct Preview {
     marker: HtmlElement,
     rows: Vec<PreviewRow>,
-    source_opacity: SavedStyle,
+    dragged: DraggedRow,
     target: Option<usize>,
+}
+
+struct DraggedRow {
+    source: HtmlElement,
+    placeholder: HtmlElement,
+    grab_offset: (f64, f64),
+    styles: Vec<SavedStyle>,
 }
 
 struct PreviewRow {
@@ -92,6 +99,90 @@ impl SavedStyle {
         } else {
             let _ = style.set_property_with_priority(self.property, &self.value, &self.priority);
         }
+    }
+}
+
+impl DraggedRow {
+    fn new(source: HtmlElement, grab_offset: (f64, f64)) -> Self {
+        let window = web_sys::window().unwrap();
+        let document = window.document().unwrap();
+        let rect = source.get_bounding_client_rect();
+        let computed = window.get_computed_style(&source).unwrap().unwrap();
+        let placeholder: HtmlElement = document.create_element("div").unwrap().unchecked_into();
+        placeholder.style().set_css_text("display:block;box-sizing:border-box;visibility:hidden;pointer-events:none;flex-shrink:0");
+        let _ = placeholder.set_attribute("aria-hidden", "true");
+        let _ = placeholder.set_attribute("inert", "");
+        if let Some(slot) = source.get_attribute("slot") {
+            let _ = placeholder.set_attribute("slot", &slot);
+        }
+
+        for property in ["margin-top", "margin-right", "margin-bottom", "margin-left"] {
+            let value = computed.get_property_value(property).unwrap_or_default();
+            let _ = placeholder.style().set_property(property, &value);
+        }
+        let width = format!("{}px", rect.width());
+        let height = format!("{}px", rect.height());
+        let _ = placeholder.style().set_property("width", &width);
+        let _ = placeholder.style().set_property("height", &height);
+        source
+            .parent_node()
+            .unwrap()
+            .insert_before(&placeholder, Some(&source))
+            .unwrap();
+
+        let properties = [
+            ("position", "fixed"),
+            ("box-sizing", "border-box"),
+            ("width", width.as_str()),
+            ("height", height.as_str()),
+            ("min-width", "0"),
+            ("min-height", "0"),
+            ("max-width", "none"),
+            ("max-height", "none"),
+            ("margin-top", "0"),
+            ("margin-right", "0"),
+            ("margin-bottom", "0"),
+            ("margin-left", "0"),
+            ("left", "0"),
+            ("top", "0"),
+            ("right", "auto"),
+            ("bottom", "auto"),
+            ("translate", "none"),
+            ("transform", "none"),
+            ("transition", "none"),
+            ("pointer-events", "none"),
+            ("opacity", "0.5"),
+            ("z-index", "2147483647"),
+        ];
+        let styles = properties
+            .iter()
+            .map(|(property, _)| SavedStyle::new(source.clone(), property))
+            .collect();
+        for (property, value) in properties {
+            let _ = source.style().set_property(property, value);
+        }
+
+        Self {
+            source,
+            placeholder,
+            grab_offset,
+            styles,
+        }
+    }
+
+    fn update(&self, point: (f64, f64)) {
+        let style = self.source.style();
+        let _ = style.set_property("left", &format!("{}px", point.0 - self.grab_offset.0));
+        let _ = style.set_property("top", &format!("{}px", point.1 - self.grab_offset.1));
+    }
+}
+
+impl Drop for DraggedRow {
+    fn drop(&mut self) {
+        for style in &self.styles {
+            style.restore();
+        }
+        self.placeholder.remove();
     }
 }
 
@@ -279,10 +370,10 @@ impl Reorder {
         if let Some(gesture) = gesture {
             if let Phase::Dragging(preview) = gesture.phase {
                 preview.marker.remove();
-                preview.source_opacity.restore();
                 for row in preview.rows {
                     row.translate.restore();
                 }
+                drop(preview.dragged);
                 self.suppress_click.set(true);
             }
             let _ = gesture.capture.release_pointer_capture(gesture.pointer);
@@ -301,6 +392,7 @@ impl Reorder {
             return;
         }
         let point = (event.client_x() as f64, event.client_y() as f64);
+        let rect = element.get_bounding_client_rect();
         let scrollport = scrollport(&element);
         let _ = capture.set_pointer_capture(event.pointer_id());
         *self.gesture.borrow_mut() = Some(Gesture {
@@ -310,7 +402,9 @@ impl Reorder {
             origin: point,
             point,
             order: self.order(),
-            phase: Phase::Pending,
+            phase: Phase::Pending {
+                grab_offset: (point.0 - rect.left(), point.1 - rect.top()),
+            },
             scrollport,
         });
     }
@@ -329,43 +423,44 @@ impl Reorder {
             let mut gesture = self.gesture.borrow_mut();
             let Some(g) = gesture.as_mut() else { return };
             g.point = (x, y);
-            if matches!(g.phase, Phase::Pending) && (x - g.origin.0).hypot(y - g.origin.1) >= 6.0 {
-                let document = web_sys::window().unwrap().document().unwrap();
-                let marker: HtmlElement = document.create_element("div").unwrap().unchecked_into();
-                marker.style().set_css_text("position:fixed;box-sizing:border-box;background:var(--light-blue-1, #f3f7fd);border:2px dashed var(--light-blue-5, #c4d9f5);pointer-events:none;z-index:2147483647;border-radius:12px");
-                let _ = marker.set_attribute("aria-hidden", "true");
-                let _ = document.body().unwrap().append_child(&marker);
-                let source = g.source.element.borrow().clone().unwrap();
-                let source_opacity = SavedStyle::new(source.clone(), "opacity");
-                let _ = source.style().set_property("opacity", "0");
-                g.phase = Phase::Dragging(Preview {
-                    marker,
-                    rows: self
+            if let Phase::Pending { grab_offset } = g.phase {
+                if (x - g.origin.0).hypot(y - g.origin.1) >= 6.0 {
+                    let document = web_sys::window().unwrap().document().unwrap();
+                    let source = g.source.element.borrow().clone().unwrap();
+                    let marker: HtmlElement =
+                        document.create_element("div").unwrap().unchecked_into();
+                    marker.style().set_css_text("position:fixed;box-sizing:border-box;margin:0;background:var(--light-blue-1, #f3f7fd);border:2px dashed var(--light-blue-5, #c4d9f5);pointer-events:none;z-index:2147483646;border-radius:12px");
+                    let _ = marker.set_attribute("aria-hidden", "true");
+                    if let Some(slot) = source.get_attribute("slot") {
+                        let _ = marker.set_attribute("slot", &slot);
+                    }
+                    source
+                        .parent_node()
+                        .unwrap()
+                        .insert_before(&marker, Some(&source))
+                        .unwrap();
+                    let rows = self
                         .registered()
                         .into_iter()
                         .map(|(_, _, element)| PreviewRow {
                             translate: SavedStyle::new(element, "translate"),
                             offset: 0.0,
                         })
-                        .collect(),
-                    source_opacity,
-                    target: None,
-                });
+                        .collect();
+                    g.phase = Phase::Dragging(Preview {
+                        marker,
+                        rows,
+                        dragged: DraggedRow::new(source, grab_offset),
+                        target: None,
+                    });
+                }
             }
             let destination = self.destination(g);
             if let Phase::Dragging(preview) = &mut g.phase {
                 preview.target = destination
                     .as_ref()
                     .map(|destination| destination.target_position);
-                if destination.is_some() {
-                    let _ = preview
-                        .source_opacity
-                        .element
-                        .style()
-                        .set_property("opacity", "0");
-                } else {
-                    preview.source_opacity.restore();
-                }
+                preview.dragged.update(g.point);
                 for (position, row) in preview.rows.iter_mut().enumerate() {
                     let offset = destination.as_ref().map_or(0.0, |destination| {
                         if position > destination.source_position
@@ -437,6 +532,11 @@ impl Reorder {
             .iter()
             .zip(&preview.rows)
             .map(|((_, _, element), row)| {
+                let element = if element == &preview.dragged.source {
+                    &preview.dragged.placeholder
+                } else {
+                    element
+                };
                 let rect = element.get_bounding_client_rect();
                 (
                     rect.left(),
@@ -515,12 +615,12 @@ impl Reorder {
             state.frame.borrow_mut().take();
             let point = state.gesture.borrow().as_ref().map(|g| {
                 let (top, bottom) = viewport(&g.scrollport);
-                let rect = g
-                    .source
-                    .element
-                    .borrow()
-                    .as_ref()
-                    .map(|element| element.get_bounding_client_rect());
+                let rect = match &g.phase {
+                    Phase::Dragging(preview) => {
+                        Some(preview.dragged.placeholder.get_bounding_client_rect())
+                    }
+                    Phase::Pending { .. } => None,
+                };
                 if rect.map_or(false, |rect| {
                     g.point.0 >= rect.left() && g.point.0 <= rect.right()
                 }) && g.point.1 >= top
