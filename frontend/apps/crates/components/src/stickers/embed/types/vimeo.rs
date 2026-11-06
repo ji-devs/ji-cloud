@@ -117,7 +117,6 @@ const REGULAR_URL_BASE: &str = "https://vimeo.com/";
 const REGULAR_URL_WWW_BASE: &str = "https://www.vimeo.com/";
 const EMBED_IFRAME_BASE: &str = "<iframe ";
 const EMBED_URL_BASE: &str = "https://player.vimeo.com/video/";
-const ID_LENGTH: usize = 9;
 
 fn get_id_from_url(url: &str) -> Option<&str> {
     let id;
@@ -129,10 +128,9 @@ fn get_id_from_url(url: &str) -> Option<&str> {
         id = extract_id_regular(url)?;
     } else if url.starts_with(REGULAR_URL_WWW_BASE) {
         id = extract_id_www(url)?;
-    } else if url.starts_with(EMBED_IFRAME_BASE) && url.len() >= EMBED_IFRAME_BASE.len() + ID_LENGTH
-    {
+    } else if url.starts_with(EMBED_IFRAME_BASE) {
         id = extract_id_iframe(url)?;
-    } else if url.starts_with(EMBED_URL_BASE) && url.len() >= EMBED_URL_BASE.len() + ID_LENGTH {
+    } else if url.starts_with(EMBED_URL_BASE) {
         id = extract_id_iframe(url)?;
     } else if url.contains(ANY_VIMEO_DOMAIN) {
         let url = match url.find("http") {
@@ -169,22 +167,25 @@ fn extract_any_v(url: &str) -> Option<&str> {
 }
 
 fn extract_id_regular(url: &str) -> Option<&str> {
-    let base_length = REGULAR_URL_BASE.len();
-    url.get(base_length..(base_length + ID_LENGTH))
+    extract_numeric_id(url.strip_prefix(REGULAR_URL_BASE)?)
 }
 
 fn extract_id_www(url: &str) -> Option<&str> {
-    let base_length = REGULAR_URL_WWW_BASE.len();
-    url.get(base_length..(base_length + ID_LENGTH))
+    extract_numeric_id(url.strip_prefix(REGULAR_URL_WWW_BASE)?)
 }
 
 fn extract_id_iframe(code: &str) -> Option<&str> {
     let id_index = code.find(EMBED_URL_BASE)? + EMBED_URL_BASE.len();
-    code.get(id_index..(id_index + ID_LENGTH))
+    extract_numeric_id(code.get(id_index..)?)
+}
+
+fn extract_numeric_id(rest: &str) -> Option<&str> {
+    let regex = Regex::new(r"^[0-9]+").unwrap_ji();
+    regex.find(rest).map(|matched| matched.as_str())
 }
 
 fn is_id(id: &str) -> bool {
-    let regex = Regex::new(&format!("^[0-9]{{{ID_LENGTH}}}$")).unwrap_ji();
+    let regex = Regex::new(r"^[0-9]+$").unwrap_ji();
     regex.is_match(id)
 }
 
