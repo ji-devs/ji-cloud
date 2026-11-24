@@ -387,7 +387,7 @@ export class _ extends LitElement {
                         </div>
                         <div class="collapsibles">
                             <slot name="categories"></slot>
-                            <home-search-result-details>
+                            <home-search-result-details open>
                                 <h4>${STR_DESCRIPTION}</h4>
                                 <p class="description" dir="auto">${this.description}</p>
                             </home-search-result-details>

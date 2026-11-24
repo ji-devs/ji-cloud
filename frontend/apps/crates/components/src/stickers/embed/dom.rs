@@ -461,6 +461,13 @@ pub fn render_sticker_embed_raw(embed: &RawEmbed, opts: Option<EmbedRawRenderOpt
         .style_signal("height", height_signal.map(|x| format!("{}px", x)))
         .child({
             match &embed.host {
+                RawEmbedHost::Youtube(youtube) if utils::screenshot::is_screenshot_url() => {
+                    html!("video-youtube-thumbnail", {
+                        .prop("videoId", youtube.url.get_id())
+                        .style("width", "100%")
+                        .style("height", "100%")
+                    })
+                }
                 RawEmbedHost::Youtube(youtube) => {
                     let playback = Rc::new(VideoPlaybackReporter::new());
                     let looping = matches!(youtube.done_action, Some(DoneAction::Loop));

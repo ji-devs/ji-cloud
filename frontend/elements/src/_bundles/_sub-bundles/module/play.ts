@@ -8,5 +8,6 @@ import "@elements/core/buttons/icon-label";
 import "@elements/module/_common/edit/instructions-banner";
 import "@elements/module/_common/play/play-button";
 import "@elements/module/_common/play/preload";
+import "@elements/module/video/youtube-thumbnail";
 
 import "@elements/core/images/composed/module-screenshot";
